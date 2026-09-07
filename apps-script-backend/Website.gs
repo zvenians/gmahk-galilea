@@ -42,8 +42,8 @@ const GW = Object.freeze({
       'https://ibadahadvent.wordpress.com/wp-json/wp/v2',
       'https://public-api.wordpress.com/wp/v2/sites/ibadahadvent.wordpress.com'
     ]),
-    bible: 'https://raw.githubusercontent.com/sabdacode/ayt/main/sfm/per-books/',
-    bibleProject: 'https://github.com/sabdacode/ayt/',
+    bible: 'https://raw.githubusercontent.com/neocarles/alkitab-tb/master/Alkitab/',
+    bibleProject: 'https://bible-api.alkitab.or.id/',
     hymnal: 'https://raw.githubusercontent.com/PaulTitto/LaguSion-indo/main/sda-hymnal-db-in.json',
     hymnalProject: 'https://github.com/PaulTitto/LaguSion-indo',
     adventTheme: 'https://news.adventist.asia/all/ssd-launches-mission-reaps',
@@ -2336,17 +2336,19 @@ function getBibleChapter(bookId, chapter) {
   if (!book) throw new Error('Kitab tidak dikenali.');
   const selectedChapter = Math.max(1, Math.min(book.chapters, Number(chapter) || 1));
   const cache = CacheService.getScriptCache();
-  const cacheKey = gwCacheKey_('bible-' + book.id + '-' + selectedChapter);
+  const cacheKey = gwCacheKey_('bible-tb-' + book.id + '-' + selectedChapter);
   const cached = cache.get(cacheKey);
   if (cached) return JSON.parse(cached);
 
-  const response = UrlFetchApp.fetch(GW.SOURCES.bible + book.file, {
+  const folder = book.folder || book.name;
+  const url = GW.SOURCES.bible + folder + '/' + folder + '_' + selectedChapter + '.txt';
+  const response = UrlFetchApp.fetch(url, {
     muteHttpExceptions: true, followRedirects: true, headers: { Accept: 'text/plain' }
   });
   if (response.getResponseCode() < 200 || response.getResponseCode() >= 300) {
     throw new Error('Sumber Alkitab sedang tidak dapat dihubungi.');
   }
-  const verses = gwParseUsfm_(response.getContentText('UTF-8'), selectedChapter).map(function (verse, index) {
+  const verses = gwParseTb_(response.getContentText('UTF-8')).map(function (verse, index) {
     return {
       number: gwClean_(verse && verse.number) || String(index + 1),
       text: gwClean_(verse && verse.text)
@@ -2355,7 +2357,7 @@ function getBibleChapter(bookId, chapter) {
   if (!verses.length) throw new Error('Pasal yang dipilih belum tersedia.');
   const result = {
     book: book.name, bookId: book.id, chapter: selectedChapter, chapters: book.chapters,
-    verses: verses, source: 'Alkitab Yang Terbuka (AYT) — SABDA', sourceUrl: GW.SOURCES.bibleProject
+    verses: verses, source: 'Alkitab Terjemahan Baru (TB) — Lembaga Alkitab Indonesia (LAI)', sourceUrl: GW.SOURCES.bibleProject
   };
   gwCachePut_(cache, cacheKey, result, 21600);
   return result;
@@ -2365,24 +2367,27 @@ function getBibleChapter(bookId, chapter) {
 function getBibleBook(bookId) {
   const book = gwBibleBooks_().filter(function (item) { return item.id === String(bookId || '').toUpperCase(); })[0];
   if (!book) throw new Error('Kitab tidak dikenali.');
-  const response = UrlFetchApp.fetch(GW.SOURCES.bible + book.file, {
-    muteHttpExceptions: true, followRedirects: true, headers: { Accept: 'text/plain' }
-  });
-  if (response.getResponseCode() < 200 || response.getResponseCode() >= 300) throw new Error('Sumber Alkitab sedang tidak dapat dihubungi.');
-  const source = response.getContentText('UTF-8');
-  return {
-    book: book.name, bookId: book.id, chapters: Array.from({ length: book.chapters }, function (_, index) {
-      return {
-        number: index + 1,
-        verses: gwParseUsfm_(source, index + 1).map(function (verse, verseIndex) {
+  const folder = book.folder || book.name;
+  const chapters = Array.from({ length: book.chapters }, function (_, index) {
+    const chapterNum = index + 1;
+    let verses = [];
+    try {
+      const url = GW.SOURCES.bible + folder + '/' + folder + '_' + chapterNum + '.txt';
+      const res = UrlFetchApp.fetch(url, { muteHttpExceptions: true, followRedirects: true, headers: { Accept: 'text/plain' } });
+      if (res.getResponseCode() >= 200 && res.getResponseCode() < 300) {
+        verses = gwParseTb_(res.getContentText('UTF-8')).map(function (verse, verseIndex) {
           return {
             number: gwClean_(verse && verse.number) || String(verseIndex + 1),
             text: gwClean_(verse && verse.text)
           };
-        }).filter(function (verse) { return Boolean(verse.text); })
-      };
-    }),
-    source: 'Alkitab Yang Terbuka (AYT) — SABDA', sourceUrl: GW.SOURCES.bibleProject,
+        }).filter(function (verse) { return Boolean(verse.text); });
+      }
+    } catch (ignore) {}
+    return { number: chapterNum, verses: verses };
+  });
+  return {
+    book: book.name, bookId: book.id, chapters: chapters,
+    source: 'Alkitab Terjemahan Baru (TB) — Lembaga Alkitab Indonesia (LAI)', sourceUrl: GW.SOURCES.bibleProject,
     watermark: 'Diunduh melalui Website Galilea', copyright: '© Sekretaris Galilea 2026'
   };
 }
@@ -3003,29 +3008,47 @@ function gwPersonalActions_(dayNumber, readingTitle) {
 }
 
 /* -------------------------------------------------------------------------- */
-/* Alkitab AYT                                                                 */
+/* Alkitab Terjemahan Baru (TB)                                               */
 /* -------------------------------------------------------------------------- */
 
 function gwBibleBooks_() {
   const rows = [
-    ['GEN','Kejadian','01GEN.SFM',50,'PL'],['EXO','Keluaran','02EXO.SFM',40,'PL'],['LEV','Imamat','03LEV.SFM',27,'PL'],['NUM','Bilangan','04NUM.SFM',36,'PL'],['DEU','Ulangan','05DEU.SFM',34,'PL'],
-    ['JOS','Yosua','06JOS.SFM',24,'PL'],['JDG','Hakim-hakim','07JDG.SFM',21,'PL'],['RUT','Rut','08RUT.SFM',4,'PL'],['1SA','1 Samuel','091SA.SFM',31,'PL'],['2SA','2 Samuel','102SA.SFM',24,'PL'],
-    ['1KI','1 Raja-raja','111KI.SFM',22,'PL'],['2KI','2 Raja-raja','122KI.SFM',25,'PL'],['1CH','1 Tawarikh','131CH.SFM',29,'PL'],['2CH','2 Tawarikh','142CH.SFM',36,'PL'],['EZR','Ezra','15EZR.SFM',10,'PL'],
-    ['NEH','Nehemia','16NEH.SFM',13,'PL'],['EST','Ester','17EST.SFM',10,'PL'],['JOB','Ayub','18JOB.SFM',42,'PL'],['PSA','Mazmur','19PSA.SFM',150,'PL'],['PRO','Amsal','20PRO.SFM',31,'PL'],
-    ['ECC','Pengkhotbah','21ECC.SFM',12,'PL'],['SNG','Kidung Agung','22SNG.SFM',8,'PL'],['ISA','Yesaya','23ISA.SFM',66,'PL'],['JER','Yeremia','24JER.SFM',52,'PL'],['LAM','Ratapan','25LAM.SFM',5,'PL'],
-    ['EZK','Yehezkiel','26EZK.SFM',48,'PL'],['DAN','Daniel','27DAN.SFM',12,'PL'],['HOS','Hosea','28HOS.SFM',14,'PL'],['JOL','Yoel','29JOL.SFM',3,'PL'],['AMO','Amos','30AMO.SFM',9,'PL'],
-    ['OBA','Obaja','31OBA.SFM',1,'PL'],['JON','Yunus','32JON.SFM',4,'PL'],['MIC','Mikha','33MIC.SFM',7,'PL'],['NAM','Nahum','34NAM.SFM',3,'PL'],['HAB','Habakuk','35HAB.SFM',3,'PL'],
-    ['ZEP','Zefanya','36ZEP.SFM',3,'PL'],['HAG','Hagai','37HAG.SFM',2,'PL'],['ZEC','Zakharia','38ZEC.SFM',14,'PL'],['MAL','Maleakhi','39MAL.SFM',4,'PL'],
-    ['MAT','Matius','41MAT.SFM',28,'PB'],['MRK','Markus','42MRK.SFM',16,'PB'],['LUK','Lukas','43LUK.SFM',24,'PB'],['JHN','Yohanes','44JHN.SFM',21,'PB'],['ACT','Kisah Para Rasul','45ACT.SFM',28,'PB'],
-    ['ROM','Roma','46ROM.SFM',16,'PB'],['1CO','1 Korintus','471CO.SFM',16,'PB'],['2CO','2 Korintus','482CO.SFM',13,'PB'],['GAL','Galatia','49GAL.SFM',6,'PB'],['EPH','Efesus','50EPH.SFM',6,'PB'],
-    ['PHP','Filipi','51PHP.SFM',4,'PB'],['COL','Kolose','52COL.SFM',4,'PB'],['1TH','1 Tesalonika','531TH.SFM',5,'PB'],['2TH','2 Tesalonika','542TH.SFM',3,'PB'],['1TI','1 Timotius','551TI.SFM',6,'PB'],
-    ['2TI','2 Timotius','562TI.SFM',4,'PB'],['TIT','Titus','57TIT.SFM',3,'PB'],['PHM','Filemon','58PHM.SFM',1,'PB'],['HEB','Ibrani','59HEB.SFM',13,'PB'],['JAS','Yakobus','60JAS.SFM',5,'PB'],
-    ['1PE','1 Petrus','611PE.SFM',5,'PB'],['2PE','2 Petrus','622PE.SFM',3,'PB'],['1JN','1 Yohanes','631JN.SFM',5,'PB'],['2JN','2 Yohanes','642JN.SFM',1,'PB'],['3JN','3 Yohanes','653JN.SFM',1,'PB'],
-    ['JUD','Yudas','66JUD.SFM',1,'PB'],['REV','Wahyu','67REV.SFM',22,'PB']
+    ['GEN','Kejadian','Kejadian',50,'PL'],['EXO','Keluaran','Keluaran',40,'PL'],['LEV','Imamat','Imamat',27,'PL'],['NUM','Bilangan','Bilangan',36,'PL'],['DEU','Ulangan','Ulangan',34,'PL'],
+    ['JOS','Yosua','Yosua',24,'PL'],['JDG','Hakim-hakim','Hakim_Hakim',21,'PL'],['RUT','Rut','Rut',4,'PL'],['1SA','1 Samuel','1_Samuel',31,'PL'],['2SA','2 Samuel','2_Samuel',24,'PL'],
+    ['1KI','1 Raja-raja','1_Raja_Raja',22,'PL'],['2KI','2 Raja-raja','2_Raja_Raja',25,'PL'],['1CH','1 Tawarikh','1_Tawarikh',29,'PL'],['2CH','2 Tawarikh','2_Tawarikh',36,'PL'],['EZR','Ezra','Ezra',10,'PL'],
+    ['NEH','Nehemia','Nehemia',13,'PL'],['EST','Ester','Ester',10,'PL'],['JOB','Ayub','Ayub',42,'PL'],['PSA','Mazmur','Mazmur',150,'PL'],['PRO','Amsal','Amsal',31,'PL'],
+    ['ECC','Pengkhotbah','Pengkhotbah',12,'PL'],['SNG','Kidung Agung','Kidung_Agung',8,'PL'],['ISA','Yesaya','Yesaya',66,'PL'],['JER','Yeremia','Yeremia',52,'PL'],['LAM','Ratapan','Ratapan',5,'PL'],
+    ['EZK','Yehezkiel','Yehezkiel',48,'PL'],['DAN','Daniel','Daniel',12,'PL'],['HOS','Hosea','Hosea',14,'PL'],['JOL','Yoel','Yoel',3,'PL'],['AMO','Amos','Amos',9,'PL'],
+    ['OBA','Obaja','Obaja',1,'PL'],['JON','Yunus','Yunus',4,'PL'],['MIC','Mikha','Mikha',7,'PL'],['NAM','Nahum','Nahum',3,'PL'],['HAB','Habakuk','Habakuk',3,'PL'],
+    ['ZEP','Zefanya','Zafanya',3,'PL'],['HAG','Hagai','Hagai',2,'PL'],['ZEC','Zakharia','Zakharia',14,'PL'],['MAL','Maleakhi','Maleakhi',4,'PL'],
+    ['MAT','Matius','Matius',28,'PB'],['MRK','Markus','Markus',16,'PB'],['LUK','Lukas','Lukas',24,'PB'],['JHN','Yohanes','Yohanes',21,'PB'],['ACT','Kisah Para Rasul','Kisah_Para_Rasul',28,'PB'],
+    ['ROM','Roma','Roma',16,'PB'],['1CO','1 Korintus','1_Korintus',16,'PB'],['2CO','2 Korintus','2_Korintus',13,'PB'],['GAL','Galatia','Galatia',6,'PB'],['EPH','Efesus','Efesus',6,'PB'],
+    ['PHP','Filipi','Filipi',4,'PB'],['COL','Kolose','Kolose',4,'PB'],['1TH','1 Tesalonika','1_Tesalonika',5,'PB'],['2TH','2 Tesalonika','2_Tesalonika',3,'PB'],['1TI','1 Timotius','1_Timotius',6,'PB'],
+    ['2TI','2 Timotius','2_Timotius',4,'PB'],['TIT','Titus','Titus',3,'PB'],['PHM','Filemon','Filemon',1,'PB'],['HEB','Ibrani','Ibrani',13,'PB'],['JAS','Yakobus','Yakobus',5,'PB'],
+    ['1PE','1 Petrus','1_Petrus',5,'PB'],['2PE','2 Petrus','2_Petrus',3,'PB'],['1JN','1 Yohanes','1_Yohanes',5,'PB'],['2JN','2 Yohanes','2_Yohanes',1,'PB'],['3JN','3 Yohanes','3_Yohanes',1,'PB'],
+    ['JUD','Yudas','Yudas',1,'PB'],['REV','Wahyu','Wahyu',22,'PB']
   ];
   return rows.map(function (row) {
-    return { id: row[0], name: row[1], file: row[2], chapters: row[3], testament: row[4] };
+    return { id: row[0], name: row[1], folder: row[2], file: row[2], chapters: row[3], testament: row[4] };
   });
+}
+
+function gwParseTb_(source) {
+  const lines = String(source || '').replace(/\r/g, '').split('\n');
+  const verses = [];
+  let current = null;
+  lines.forEach(function (line) {
+    const trimmed = line.trim();
+    if (!trimmed) return;
+    const match = trimmed.match(/^\((\d+[a-z]?)\)\s*(.*)$/i);
+    if (match) {
+      current = { number: match[1], text: match[2].trim() };
+      verses.push(current);
+    } else if (current) {
+      current.text = (current.text + ' ' + trimmed).trim();
+    }
+  });
+  return verses.filter(function (v) { return Boolean(v.text); });
 }
 
 function gwParseUsfm_(source, selectedChapter) {

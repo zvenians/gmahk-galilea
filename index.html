@@ -1320,8 +1320,10 @@
     .bible-controls{display:grid;gap:14px}.bible-testaments{display:grid;grid-template-columns:1fr 1fr;gap:7px}.bible-testaments button{min-height:40px;border:1px solid var(--line);border-radius:11px;background:var(--surface-soft);color:var(--text-soft);font-weight:760}.bible-testaments button.active{color:#fff;background:var(--brand-strong)}
     .verse.is-target{margin-inline:-10px;padding-inline:10px;border-radius:12px;background:var(--gold-soft);box-shadow:inset 3px 0 0 var(--gold)}
     .archive-panel{display:grid;gap:12px;margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}.archive-panel .btn{width:100%}
-    .song-reader-shell{display:grid;gap:24px}.song-stage{position:relative;min-height:320px;padding:clamp(28px,6vw,64px);border:1px solid var(--line);border-radius:28px;background:radial-gradient(30rem 20rem at 85% 0,color-mix(in srgb,var(--brand) 16%,transparent),transparent),var(--surface)}
-    .song-stage h2{margin-bottom:34px}.song-verse{font-size:clamp(1.2rem,2.25vw,1.75rem);line-height:1.8}.song-chorus{padding:26px;border-left:3px solid var(--gold);border-radius:0 18px 18px 0;background:var(--gold-soft);font-size:clamp(1.05rem,1.8vw,1.35rem)}
+    .song-reader-shell{display:grid;gap:20px;width:100%;max-width:960px;margin-inline:auto}.song-reader-shell .v18-reader-tools{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:0 0 4px}.v18-reader-tools-main{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.song-size-group{display:inline-flex;align-items:center;gap:3px;padding:3px;border:1px solid var(--line);border-radius:12px;background:var(--surface-soft)}.font-size-btn{min-width:34px;height:32px;padding:0 8px;font-size:.82rem;font-weight:750;border-radius:8px;border:1px solid transparent;color:var(--text-soft);background:transparent;cursor:pointer;transition:all .15s ease}.font-size-btn.active,.font-size-btn:hover{color:var(--text);background:var(--surface);border-color:var(--line);box-shadow:0 1px 3px rgba(0,0,0,.06)}
+    .song-stage{position:relative;min-height:280px;padding:clamp(22px,4.5vw,46px);border:1px solid var(--line);border-radius:24px;background:radial-gradient(30rem 20rem at 85% 0,color-mix(in srgb,var(--brand) 16%,transparent),transparent),var(--surface)}.song-stage-grid{display:grid;width:100%;gap:26px}.song-stage-grid.has-chorus{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:start}.song-stage-grid.single-col{grid-template-columns:1fr;max-width:680px;margin-inline:auto;text-align:center}.song-stage-grid.single-col .song-verse-card{align-items:center}.song-verse-col,.song-chorus-col{min-width:0;display:flex;flex-direction:column;gap:14px}.song-verse-card,.song-chorus-card{display:flex;flex-direction:column;gap:14px}.song-chorus-card{padding:clamp(16px,2.4vw,24px);border:1px solid color-mix(in srgb,var(--gold) 35%,transparent);border-left:4px solid var(--gold);border-radius:16px;background:var(--gold-soft)}.song-verse{color:var(--text);font-weight:520;letter-spacing:-.01em}.song-chorus{color:var(--text);font-weight:520;line-height:1.75}
+    .song-reader-shell.font-small .song-verse{font-size:clamp(1.05rem,1.8vw,1.35rem);line-height:1.72}.song-reader-shell.font-small .song-chorus{font-size:clamp(.95rem,1.5vw,1.18rem);line-height:1.65}.song-reader-shell.font-normal .song-verse{font-size:clamp(1.22rem,2.2vw,1.65rem);line-height:1.8}.song-reader-shell.font-normal .song-chorus{font-size:clamp(1.05rem,1.8vw,1.32rem);line-height:1.75}.song-reader-shell.font-large .song-verse{font-size:clamp(1.4rem,2.6vw,1.95rem);line-height:1.85}.song-reader-shell.font-large .song-chorus{font-size:clamp(1.2rem,2.1vw,1.55rem);line-height:1.8}
+    @media(max-width:768px){.song-stage-grid.has-chorus{grid-template-columns:1fr;gap:20px}.song-stage{padding:20px 16px;border-radius:18px}}
     .song-reader-nav{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:15px}.song-reader-nav strong{text-align:center}
     .faq-tools{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;margin-bottom:30px}.faq-category-tabs{display:flex;gap:8px;overflow:auto}.faq-category-tabs .tab{white-space:nowrap}.faq-category[hidden]{display:none}.faq details{background:var(--surface)}
     .loader{background:radial-gradient(42rem 34rem at 50% 48%,#234830,#06110b 72%)}.sanctuary-loader{text-align:center}.loader-mark{width:130px;height:130px}.loader-cross{display:none!important}.loader-ring{border-color:rgba(226,237,218,.23);box-shadow:0 0 80px rgba(130,177,122,.2);animation:sanctuary-orbit 4s linear infinite}.loader-ring::after{border-color:rgba(220,184,117,.4);animation:sanctuary-pulse 2s ease-in-out infinite}.loader-advent{width:62px;height:70px;fill:none;stroke:#f2f6ed;stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;filter:drop-shadow(0 0 18px rgba(197,224,184,.32));animation:sanctuary-float 2.2s ease-in-out infinite}.loader-caption{display:block;margin-top:7px;color:rgba(243,248,239,.48);font-size:.64rem;letter-spacing:.18em;text-transform:uppercase}
@@ -2996,10 +2998,13 @@
     var(--surface)!important;
 }
 #reader-dialog .song-verse{color:var(--text)!important}
+#reader-dialog .song-chorus-card{
+  background:var(--gold-soft)!important;
+  border-color:color-mix(in srgb,var(--gold) 40%,transparent)!important;
+  border-left-color:var(--gold)!important;
+}
 #reader-dialog .song-chorus{
   color:var(--text)!important;
-  border-left-color:var(--gold)!important;
-  background:var(--gold-soft)!important;
 }
 #reader-dialog .song-reader-nav strong{color:var(--text)!important}
 #reader-dialog :is(.btn,.icon-button){
@@ -4442,7 +4447,7 @@
 
       async function loadBibleBooks() {
         try {
-          const rawBooks = await cachedResource('v1700-bible-books',()=>server('getBibleBooks',[]),86400000);
+          const rawBooks = await cachedResource('v1710-bible-books',()=>server('getBibleBooks',[]),86400000);
           state.bibleBooks = (Array.isArray(rawBooks) ? rawBooks : []).map((book,index) => ({
             id: String(book && book.id || '').toUpperCase(),
             name: String(book && book.name || 'Kitab ' + (index + 1)),
@@ -4451,7 +4456,7 @@
             order: Number(book && book.order) || index + 1
           })).filter(book => book.id);
           if (!state.bibleBooks.length) throw new Error('Daftar kitab belum tersedia. Silakan muat ulang.');
-          cacheSet('v1700-bible-books',state.bibleBooks,86400000);
+          cacheSet('v1710-bible-books',state.bibleBooks,86400000);
           populateBibleBooks();
           state.bibleTestament='';state.bibleTargetVerse=null;state.bibleReader=null;syncBibleTestament();
           if ($('#bible-book')) $('#bible-book').value='';
@@ -4510,13 +4515,13 @@
         state.bibleTargetVerse = verse;
         content.innerHTML = loadingBox('Membuka firman…','Menyiapkan pasal yang dipilih.');
         try {
-          const key = 'v1700-bible-' + book + '-' + chapter;
+          const key = 'v1710-bible-' + book + '-' + chapter;
           const data = await cachedResource(key,()=>server('getBibleChapter',[book,chapter]),21600000);
           if (!$('#bible-content')) return;
           const safeChapter = Math.max(1, Number(data && data.chapter) || chapter);
           const selected = state.bibleBooks.find(item=>item.id===book);
           const safeBook = String(data && data.book || selected && selected.name || 'Kitab');
-          const safeSource = String(data && data.source || 'Alkitab Yang Terbuka (AYT) — SABDA');
+          const safeSource = String(data && data.source || 'Alkitab Terjemahan Baru (TB) — LAI');
           const verses = (Array.isArray(data && data.verses) ? data.verses : []).map((item,index) => ({
             number: String(item && (item.number != null ? item.number : item.verse != null ? item.verse : index + 1) || index + 1),
             text: String(item && (item.text != null ? item.text : item.content != null ? item.content : '') || '').trim()
@@ -4541,7 +4546,7 @@
           const chapters = Array.isArray(data && data.chapters) ? data.chapters : [];
           if (!chapters.length) throw new Error('Isi kitab belum tersedia untuk diunduh.');
           const body = chapters.map((chapter,index)=>'<section class="day"><h2>' + esc(safeBook) + ' ' + esc(chapter && chapter.number != null ? chapter.number : index + 1) + '</h2><p>' + (Array.isArray(chapter && chapter.verses) ? chapter.verses : []).map((verse,verseIndex)=>'<sup>' + esc(verse && verse.number != null ? verse.number : verseIndex + 1) + '</sup> ' + esc(verse && verse.text != null ? verse.text : '')).join(' ') + '</p></section>').join('') + '<p class="source">Diunduh melalui Website Galilea · © Sekretaris Galilea 2026</p>';
-          downloadHtmlReading(safeBook + ' · Alkitab AYT','Seluruh pasal',body,String(data && data.source || 'Alkitab Yang Terbuka (AYT) — SABDA'));
+          downloadHtmlReading(safeBook + ' · Alkitab Terjemahan Baru (TB)','Seluruh pasal',body,String(data && data.source || 'Alkitab Terjemahan Baru (TB) — LAI'));
         } catch(error) { toast(error.message); }
       }
 
@@ -4599,7 +4604,9 @@
         $('#reader-title').textContent=isTheme?'Lagu Tema · '+song.title:'Lagu Sion No. ' + song.number;
         const savedItem={type:'hymnal',id:isTheme?'theme':song.number,title:(isTheme?'Lagu Tema':'Lagu Sion No. '+song.number)+' · '+song.title,subtitle:isTheme?'Lagu Tema Jemaat':'Lagu Sion',route:'hymnal'};
         rememberItem(savedItem);
-        $('#reader-body').innerHTML='<div class="song-reader-shell"><div class="v18-reader-tools">'+favoriteButton(savedItem)+'<button class="btn primary present-button" type="button" data-present-song>'+icon('external')+'Mode layar</button></div><header class="song-reader-hero"><span class="song-reader-number">' + (isTheme?'Lagu Tema Jemaat':'Lagu Sion · Nomor '+esc(song.number)) + '</span><h2>' + esc(song.title) + '</h2></header><section class="song-stage"><span class="chip brand">AYAT ' + esc(verse.index || index+1) + '</span><div class="song-verse">' + verse.lines.map(esc).join('<br>') + '</div>' + (chorus?'<div class="song-chorus"><strong>REFF</strong><br>' + chorus.lines.map(esc).join('<br>') + '</div>':'') + '</section><nav class="song-reader-nav" aria-label="Pilih ayat"><button class="icon-button" type="button" data-song-prev aria-label="Ayat sebelumnya" ' + (index===0?'disabled':'') + '>' + icon('arrow-left') + '</button><strong>Ayat ' + (index+1) + ' dari ' + Math.max(1,verses.length) + '</strong><button class="icon-button" type="button" data-song-next aria-label="Ayat berikutnya" ' + (index>=verses.length-1?'disabled':'') + '>' + icon('arrow') + '</button></nav><p class="small faint">Gunakan Mode Layar agar teks terlihat jelas dari jarak jauh.</p></div>';
+        const fontSize=safeStorage.get('galilea:song-font-size','normal');
+        const chorusCard=chorus?'<div class="song-chorus-col"><div class="song-chorus-card"><span class="chip gold">REFF / KOOR</span><div class="song-chorus">' + chorus.lines.map(esc).join('<br>') + '</div></div></div>':'';
+        $('#reader-body').innerHTML='<div class="song-reader-shell font-' + esc(fontSize) + '"><div class="v18-reader-tools"><div class="v18-reader-tools-main">'+favoriteButton(savedItem)+'<button class="btn primary present-button" type="button" data-present-song>'+icon('external')+'Mode layar</button></div><div class="song-size-group" role="group" aria-label="Ukuran font lagu"><button class="btn soft font-size-btn '+(fontSize==='small'?'active':'')+'" type="button" data-song-size="small" title="Ukuran teks kecil" aria-label="Ukuran teks kecil">A−</button><button class="btn soft font-size-btn '+(fontSize==='normal'?'active':'')+'" type="button" data-song-size="normal" title="Ukuran teks sedang" aria-label="Ukuran teks sedang">A</button><button class="btn soft font-size-btn '+(fontSize==='large'?'active':'')+'" type="button" data-song-size="large" title="Ukuran teks besar" aria-label="Ukuran teks besar">A+</button></div></div><header class="song-reader-hero"><span class="song-reader-number">' + (isTheme?'Lagu Tema Jemaat':'Lagu Sion · Nomor '+esc(song.number)) + '</span><h2>' + esc(song.title) + '</h2></header><section class="song-stage"><div class="song-stage-grid ' + (chorus?'has-chorus':'single-col') + '"><div class="song-verse-col"><div class="song-verse-card"><span class="chip brand">AYAT ' + esc(verse.index || index+1) + '</span><div class="song-verse">' + verse.lines.map(esc).join('<br>') + '</div></div></div>' + chorusCard + '</div></section><nav class="song-reader-nav" aria-label="Pilih ayat"><button class="icon-button" type="button" data-song-prev aria-label="Ayat sebelumnya" ' + (index===0?'disabled':'') + '>' + icon('arrow-left') + '</button><strong>Ayat ' + (index+1) + ' dari ' + Math.max(1,verses.length) + '</strong><button class="icon-button" type="button" data-song-next aria-label="Ayat berikutnya" ' + (index>=verses.length-1?'disabled':'') + '>' + icon('arrow') + '</button></nav><p class="small faint">Gunakan Mode Layar agar teks terlihat jelas dari jarak jauh.</p></div>';
       }
 
       function clampPresentationScale(value){return Math.max(.7,Math.min(1.35,Number(value)||1));}
@@ -4941,12 +4948,12 @@
         const match=String(reference||'').trim().match(/^(.+?)\s+(\d+)(?::(\d+)(?:\s*[-–]\s*(\d+))?)?$/);if(!match)return[];
         let books=state.bibleBooks||[];
         if(!books.length){
-          const raw=await cachedResource('v1700-bible-books',()=>server('getBibleBooks',[]),86400000);
+          const raw=await cachedResource('v1710-bible-books',()=>server('getBibleBooks',[]),86400000);
           books=(Array.isArray(raw)?raw:[]).map((book,index)=>({id:String(book&&book.id||'').toUpperCase(),name:String(book&&book.name||'Kitab '+(index+1)),chapters:Math.max(1,Number(book&&book.chapters)||1),testament:book&&book.testament==='PL'?'PL':'PB',order:Number(book&&book.order)||index+1})).filter(book=>book.id);state.bibleBooks=books;
         }
         const wanted=normalizeBibleName(match[1]),book=books.find(item=>normalizeBibleName(item.name)===wanted)||books.find(item=>normalizeBibleName(item.id)===wanted);if(!book)return[];
         const chapter=Number(match[2]),start=Math.max(1,Number(match[3])||1),end=Math.max(start,Number(match[4])||start);
-        const data=await cachedResource('v1700-bible-'+book.id+'-'+chapter,()=>server('getBibleChapter',[book.id,chapter]),21600000);
+        const data=await cachedResource('v1710-bible-'+book.id+'-'+chapter,()=>server('getBibleChapter',[book.id,chapter]),21600000);
         return(Array.isArray(data&&data.verses)?data.verses:[]).filter(item=>Number(item.number||item.verse)>=start&&Number(item.number||item.verse)<=end).map(item=>({kind:'bible',title:book.name+' '+chapter+':'+String(item.number||item.verse),label:'AYAT '+String(item.number||item.verse),text:String(item.text||item.content||''),source:String(data&&data.source||'Alkitab Bahasa Indonesia')})).filter(item=>item.text);
       }
       function operatorAnnouncementTime(item){
@@ -5602,6 +5609,14 @@
         if (archive) return downloadArchive(archive.dataset.downloadArchive);
         if (event.target.closest('[data-song-prev]')) { state.hymnalReader.verseIndex--; return renderSongReader(); }
         if (event.target.closest('[data-song-next]')) { state.hymnalReader.verseIndex++; return renderSongReader(); }
+        const songSizeBtn = event.target.closest('[data-song-size]');
+        if (songSizeBtn) {
+          const sz = songSizeBtn.dataset.songSize;
+          if (['small','normal','large'].includes(sz)) {
+            safeStorage.set('galilea:song-font-size', sz);
+            return renderSongReader();
+          }
+        }
         const searchResult = event.target.closest('[data-search-route]');
         if (searchResult) { $('#search-dialog').close(); if (searchResult.dataset.searchRoute === 'schedule' && searchResult.dataset.searchAction) state.scheduleTab = searchResult.dataset.searchAction; if (searchResult.dataset.searchRoute === 'hymnal' && searchResult.dataset.searchAction) setTimeout(() => openSong(searchResult.dataset.searchAction),350); return navigate(searchResult.dataset.searchRoute); }
         if (event.target.closest('[data-share-summary]')) return shareText('Jadwal Ibadah Galilea',scheduleSummaryText(),location.href.split('#')[0] + '#schedule');

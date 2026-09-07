@@ -219,6 +219,177 @@ async function getOfficialDailyDevotional(dateValue) {
   };
 }
 
+const BIBLE_BOOKS = [
+  { id: 'GEN', name: 'Kejadian', folder: 'Kejadian', chapters: 50, testament: 'PL' },
+  { id: 'EXO', name: 'Keluaran', folder: 'Keluaran', chapters: 40, testament: 'PL' },
+  { id: 'LEV', name: 'Imamat', folder: 'Imamat', chapters: 27, testament: 'PL' },
+  { id: 'NUM', name: 'Bilangan', folder: 'Bilangan', chapters: 36, testament: 'PL' },
+  { id: 'DEU', name: 'Ulangan', folder: 'Ulangan', chapters: 34, testament: 'PL' },
+  { id: 'JOS', name: 'Yosua', folder: 'Yosua', chapters: 24, testament: 'PL' },
+  { id: 'JDG', name: 'Hakim-hakim', folder: 'Hakim_Hakim', chapters: 21, testament: 'PL' },
+  { id: 'RUT', name: 'Rut', folder: 'Rut', chapters: 4, testament: 'PL' },
+  { id: '1SA', name: '1 Samuel', folder: '1_Samuel', chapters: 31, testament: 'PL' },
+  { id: '2SA', name: '2 Samuel', folder: '2_Samuel', chapters: 24, testament: 'PL' },
+  { id: '1KI', name: '1 Raja-raja', folder: '1_Raja_Raja', chapters: 22, testament: 'PL' },
+  { id: '2KI', name: '2 Raja-raja', folder: '2_Raja_Raja', chapters: 25, testament: 'PL' },
+  { id: '1CH', name: '1 Tawarikh', folder: '1_Tawarikh', chapters: 29, testament: 'PL' },
+  { id: '2CH', name: '2 Tawarikh', folder: '2_Tawarikh', chapters: 36, testament: 'PL' },
+  { id: 'EZR', name: 'Ezra', folder: 'Ezra', chapters: 10, testament: 'PL' },
+  { id: 'NEH', name: 'Nehemia', folder: 'Nehemia', chapters: 13, testament: 'PL' },
+  { id: 'EST', name: 'Ester', folder: 'Ester', chapters: 10, testament: 'PL' },
+  { id: 'JOB', name: 'Ayub', folder: 'Ayub', chapters: 42, testament: 'PL' },
+  { id: 'PSA', name: 'Mazmur', folder: 'Mazmur', chapters: 150, testament: 'PL' },
+  { id: 'PRO', name: 'Amsal', folder: 'Amsal', chapters: 31, testament: 'PL' },
+  { id: 'ECC', name: 'Pengkhotbah', folder: 'Pengkhotbah', chapters: 12, testament: 'PL' },
+  { id: 'SNG', name: 'Kidung Agung', folder: 'Kidung_Agung', chapters: 8, testament: 'PL' },
+  { id: 'ISA', name: 'Yesaya', folder: 'Yesaya', chapters: 66, testament: 'PL' },
+  { id: 'JER', name: 'Yeremia', folder: 'Yeremia', chapters: 52, testament: 'PL' },
+  { id: 'LAM', name: 'Ratapan', folder: 'Ratapan', chapters: 5, testament: 'PL' },
+  { id: 'EZK', name: 'Yehezkiel', folder: 'Yehezkiel', chapters: 48, testament: 'PL' },
+  { id: 'DAN', name: 'Daniel', folder: 'Daniel', chapters: 12, testament: 'PL' },
+  { id: 'HOS', name: 'Hosea', folder: 'Hosea', chapters: 14, testament: 'PL' },
+  { id: 'JOL', name: 'Yoel', folder: 'Yoel', chapters: 3, testament: 'PL' },
+  { id: 'AMO', name: 'Amos', folder: 'Amos', chapters: 9, testament: 'PL' },
+  { id: 'OBA', name: 'Obaja', folder: 'Obaja', chapters: 1, testament: 'PL' },
+  { id: 'JON', name: 'Yunus', folder: 'Yunus', chapters: 4, testament: 'PL' },
+  { id: 'MIC', name: 'Mikha', folder: 'Mikha', chapters: 7, testament: 'PL' },
+  { id: 'NAM', name: 'Nahum', folder: 'Nahum', chapters: 3, testament: 'PL' },
+  { id: 'HAB', name: 'Habakuk', folder: 'Habakuk', chapters: 3, testament: 'PL' },
+  { id: 'ZEP', name: 'Zefanya', folder: 'Zafanya', chapters: 3, testament: 'PL' },
+  { id: 'HAG', name: 'Hagai', folder: 'Hagai', chapters: 2, testament: 'PL' },
+  { id: 'ZEC', name: 'Zakharia', folder: 'Zakharia', chapters: 14, testament: 'PL' },
+  { id: 'MAL', name: 'Maleakhi', folder: 'Maleakhi', chapters: 4, testament: 'PL' },
+  { id: 'MAT', name: 'Matius', folder: 'Matius', chapters: 28, testament: 'PB' },
+  { id: 'MRK', name: 'Markus', folder: 'Markus', chapters: 16, testament: 'PB' },
+  { id: 'LUK', name: 'Lukas', folder: 'Lukas', chapters: 24, testament: 'PB' },
+  { id: 'JHN', name: 'Yohanes', folder: 'Yohanes', chapters: 21, testament: 'PB' },
+  { id: 'ACT', name: 'Kisah Para Rasul', folder: 'Kisah_Para_Rasul', chapters: 28, testament: 'PB' },
+  { id: 'ROM', name: 'Roma', folder: 'Roma', chapters: 16, testament: 'PB' },
+  { id: '1CO', name: '1 Korintus', folder: '1_Korintus', chapters: 16, testament: 'PB' },
+  { id: '2CO', name: '2 Korintus', folder: '2_Korintus', chapters: 13, testament: 'PB' },
+  { id: 'GAL', name: 'Galatia', folder: 'Galatia', chapters: 6, testament: 'PB' },
+  { id: 'EPH', name: 'Efesus', folder: 'Efesus', chapters: 6, testament: 'PB' },
+  { id: 'PHP', name: 'Filipi', folder: 'Filipi', chapters: 4, testament: 'PB' },
+  { id: 'COL', name: 'Kolose', folder: 'Kolose', chapters: 4, testament: 'PB' },
+  { id: '1TH', name: '1 Tesalonika', folder: '1_Tesalonika', chapters: 5, testament: 'PB' },
+  { id: '2TH', name: '2 Tesalonika', folder: '2_Tesalonika', chapters: 3, testament: 'PB' },
+  { id: '1TI', name: '1 Timotius', folder: '1_Timotius', chapters: 6, testament: 'PB' },
+  { id: '2TI', name: '2 Timotius', folder: '2_Timotius', chapters: 4, testament: 'PB' },
+  { id: 'TIT', name: 'Titus', folder: 'Titus', chapters: 3, testament: 'PB' },
+  { id: 'PHM', name: 'Filemon', folder: 'Filemon', chapters: 1, testament: 'PB' },
+  { id: 'HEB', name: 'Ibrani', folder: 'Ibrani', chapters: 13, testament: 'PB' },
+  { id: 'JAS', name: 'Yakobus', folder: 'Yakobus', chapters: 5, testament: 'PB' },
+  { id: '1PE', name: '1 Petrus', folder: '1_Petrus', chapters: 5, testament: 'PB' },
+  { id: '2PE', name: '2 Petrus', folder: '2_Petrus', chapters: 3, testament: 'PB' },
+  { id: '1JN', name: '1 Yohanes', folder: '1_Yohanes', chapters: 5, testament: 'PB' },
+  { id: '2JN', name: '2 Yohanes', folder: '2_Yohanes', chapters: 1, testament: 'PB' },
+  { id: '3JN', name: '3 Yohanes', folder: '3_Yohanes', chapters: 1, testament: 'PB' },
+  { id: 'JUD', name: 'Yudas', folder: 'Yudas', chapters: 1, testament: 'PB' },
+  { id: 'REV', name: 'Wahyu', folder: 'Wahyu', chapters: 22, testament: 'PB' }
+];
+
+function parseTbChapter(text) {
+  const lines = String(text || '').replace(/\r/g, '').split('\n');
+  const verses = [];
+  let currentVerse = null;
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    const match = trimmed.match(/^\((\d+[a-z]?)\)\s*(.*)$/i);
+    if (match) {
+      currentVerse = { number: match[1], text: match[2].trim() };
+      verses.push(currentVerse);
+    } else if (currentVerse) {
+      currentVerse.text = (currentVerse.text + ' ' + trimmed).trim();
+    }
+  }
+  return verses.filter(v => v.text);
+}
+
+function getBibleBooksDirect() {
+  return BIBLE_BOOKS.map((b, i) => ({
+    id: b.id,
+    name: b.name,
+    chapters: b.chapters,
+    testament: b.testament,
+    testamentLabel: b.testament === 'PL' ? 'Perjanjian Lama' : 'Perjanjian Baru',
+    order: i + 1
+  }));
+}
+
+async function getBibleChapterDirect(bookId, chapter) {
+  const idStr = String(bookId || '').toUpperCase();
+  const book = BIBLE_BOOKS.find(b => b.id === idStr || b.name.toUpperCase() === idStr);
+  if (!book) throw new Error('Kitab tidak dikenali.');
+  const ch = Math.max(1, Math.min(book.chapters, Number(chapter) || 1));
+
+  const laiKey = String(process.env.LAI_BIBLE_API_KEY || '').trim();
+  if (laiKey) {
+    try {
+      const laiUrl = `https://bible-api.alkitab.or.id/bible-api/api/v1/bible/tb/${encodeURIComponent(book.folder.toLowerCase())}/${ch}`;
+      const res = await fetch(laiUrl, {
+        headers: { 'Authorization': `Bearer ${laiKey}`, 'Accept': 'application/json' }
+      });
+      if (res.ok) {
+        const json = await res.json();
+        if (json && Array.isArray(json.verses) && json.verses.length) {
+          return {
+            book: book.name,
+            bookId: book.id,
+            chapter: ch,
+            chapters: book.chapters,
+            verses: json.verses.map(v => ({ number: String(v.number || v.verse), text: String(v.text || '').trim() })),
+            source: 'Alkitab Terjemahan Baru (TB) — Lembaga Alkitab Indonesia (LAI)',
+            sourceUrl: 'https://bible-api.alkitab.or.id/'
+          };
+        }
+      }
+    } catch (_) {}
+  }
+
+  const url = `https://raw.githubusercontent.com/neocarles/alkitab-tb/master/Alkitab/${book.folder}/${book.folder}_${ch}.txt`;
+  const res = await fetch(url);
+  if (!res.ok) throw new Error('Sumber Alkitab TB sedang tidak dapat dihubungi.');
+  const text = await res.text();
+  const verses = parseTbChapter(text);
+  if (!verses.length) throw new Error('Pasal yang dipilih belum tersedia.');
+  return {
+    book: book.name,
+    bookId: book.id,
+    chapter: ch,
+    chapters: book.chapters,
+    verses,
+    source: 'Alkitab Terjemahan Baru (TB) — Lembaga Alkitab Indonesia (LAI)',
+    sourceUrl: 'https://bible-api.alkitab.or.id/'
+  };
+}
+
+async function getBibleBookDirect(bookId) {
+  const idStr = String(bookId || '').toUpperCase();
+  const book = BIBLE_BOOKS.find(b => b.id === idStr || b.name.toUpperCase() === idStr);
+  if (!book) throw new Error('Kitab tidak dikenali.');
+
+  const chapterPromises = Array.from({ length: book.chapters }, async (_, idx) => {
+    const ch = idx + 1;
+    const url = `https://raw.githubusercontent.com/neocarles/alkitab-tb/master/Alkitab/${book.folder}/${book.folder}_${ch}.txt`;
+    const res = await fetch(url);
+    if (!res.ok) return { number: ch, verses: [] };
+    const text = await res.text();
+    return { number: ch, verses: parseTbChapter(text) };
+  });
+
+  const chapters = await Promise.all(chapterPromises);
+  return {
+    book: book.name,
+    bookId: book.id,
+    chapters,
+    source: 'Alkitab Terjemahan Baru (TB) — Lembaga Alkitab Indonesia (LAI)',
+    sourceUrl: 'https://bible-api.alkitab.or.id/',
+    watermark: 'Diunduh melalui Website Galilea',
+    copyright: '© Sekretaris Galilea 2026'
+  };
+}
+
 export default async function handler(request, response) {
   if (request.method === 'GET') {
     return reply(response, 200, {
@@ -256,6 +427,33 @@ export default async function handler(request, response) {
           error: 'Renungan Pagi teks hari ini belum dapat dimuat dari sumber resmi. ' +
             String(devotionalError && devotionalError.message ? devotionalError.message : devotionalError || '')
         });
+      }
+    }
+
+    if (method === 'getBibleBooks') {
+      try {
+        const books = getBibleBooksDirect();
+        return reply(response, 200, {ok: true, data: books, meta: {source: 'tb-lai', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
+      } catch (booksError) {
+        return reply(response, 502, {ok: false, error: 'Daftar kitab Alkitab belum dapat dimuat: ' + String(booksError?.message || booksError)});
+      }
+    }
+
+    if (method === 'getBibleChapter') {
+      try {
+        const chapter = await getBibleChapterDirect(args[0], args[1]);
+        return reply(response, 200, {ok: true, data: chapter, meta: {source: 'tb-lai', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
+      } catch (chapterError) {
+        return reply(response, 502, {ok: false, error: 'Pasal Alkitab belum dapat dimuat: ' + String(chapterError?.message || chapterError)});
+      }
+    }
+
+    if (method === 'getBibleBook') {
+      try {
+        const bookData = await getBibleBookDirect(args[0]);
+        return reply(response, 200, {ok: true, data: bookData, meta: {source: 'tb-lai', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
+      } catch (bookError) {
+        return reply(response, 502, {ok: false, error: 'Isi kitab Alkitab belum dapat dimuat: ' + String(bookError?.message || bookError)});
       }
     }
 
