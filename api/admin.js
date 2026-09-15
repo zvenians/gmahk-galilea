@@ -6,14 +6,19 @@ import { appsScriptApiUrl } from './_apps-script.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-const DEFAULT_ADMIN_URL =
-  'https://script.google.com/macros/s/AKfycbxOkCVxWcipB8IY6Y9ToTuWfJ-XQAM5VBJLx33qeuuUU8jmaVJjCitgimo50Mq15n_68Q/exec';
-
 const BUILD = 'GALILEA-VERCEL-ADMIN-21.0.0';
 
 function resolveAdminUrl() {
-  const raw = process.env.GALILEA_APPS_SCRIPT_ADMIN_URL || DEFAULT_ADMIN_URL;
-  const target = new URL(String(raw || ''));
+  const raw = (process.env.GALILEA_APPS_SCRIPT_ADMIN_URL || '').trim();
+  if (!raw) {
+    throw new Error('URL backend admin belum dikonfigurasi.');
+  }
+  let target;
+  try {
+    target = new URL(raw);
+  } catch (_) {
+    throw new Error('URL backend admin belum dikonfigurasi.');
+  }
   const validHost = target.protocol === 'https:' && target.hostname === 'script.google.com';
   const validPath = /^\/macros\/s\/[^/]+\/exec$/.test(target.pathname);
   if (!validHost || !validPath) throw new Error('URL backend admin belum dikonfigurasi.');
