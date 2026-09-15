@@ -44,8 +44,12 @@ Deployment Apps Script API berjalan sebagai pemilik spreadsheet. Deployment admi
 - `apps-script-backend/Admin.gs` — workflow admin multi-role.
 - `apps-script-backend/Admins.html` — antarmuka portal admin cinematic.
 - `apps-script-backend/VercelApi.gs` — dispatcher aman untuk Vercel.
-- `PANDUAN_UPDATE_V17.md` — urutan update viewer V17.
-- `HASIL_PENGUJIAN.md` — pemeriksaan build.
+- `docs/` — folder dokumentasi dan panduan:
+  - `docs/PANDUAN_UPDATE_V17.md` — urutan update viewer V17.
+  - `docs/HASIL_PENGUJIAN.md` — pemeriksaan build dan integritas.
+  - `docs/PANDUAN_PASANG_VERCEL.md` — panduan deployment Vercel.
+  - `docs/CATATAN_RELEASE_V17.md` — catatan rilis versi V17.
+  - `docs/GALILEA_PROJECT_HANDOFF.md` — dokumen serah terima proyek.
 
 ## Pengujian
 
