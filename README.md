@@ -3,6 +3,7 @@
 > A production church web portal and liturgy companion engineered with cinematic chapter navigation, offline PWA caching, and serverless Google Apps Script integration.
 
 [![Status](https://img.shields.io/badge/Status-Production-brightgreen?style=flat-square)](#)
+[![CI](https://github.com/zvenians/gmahk-galilea/actions/workflows/ci.yml/badge.svg)](https://github.com/zvenians/gmahk-galilea/actions/workflows/ci.yml)
 [![Live Demo](https://img.shields.io/badge/Live_Portal-gmahk--galilea.vercel.app-blue?style=flat-square&logo=vercel)](https://gmahk-galilea.vercel.app)
 [![PWA](https://img.shields.io/badge/PWA-Offline_Ready-orange?style=flat-square&logo=pwa)](https://developer.mozilla.org/en-US/docs/Web/Progressive_web_apps)
 [![Serverless](https://img.shields.io/badge/Serverless-Vercel_Functions-black?style=flat-square&logo=vercel)](https://vercel.com/)
@@ -200,4 +201,19 @@ Detailed release notes and operational guides are maintained in [`docs/`](./docs
 - [Vercel Deployment Manual](./docs/PANDUAN_PASANG_VERCEL.md)
 - [Viewer Update Guide](./docs/PANDUAN_UPDATE_V17.md)
 - [Project Handoff Manual](./docs/GALILEA_PROJECT_HANDOFF.md)
+
+---
+
+## 12. Development & CI Workflow
+
+The project uses GitHub Actions to enforce strict build integrity, proxy allowlist coverage, and accessibility compliance:
+
+```text
+Local Branch ──► Pull Request ──► GitHub Actions CI (npm run check) ──► Merge to main ──► Vercel Production
+```
+
+- **Local Verification:** Run `npm run check` locally to validate viewer syntax, API proxy routing, Open Graph tags, and WCAG 2.1 AA color contrast.
+- **Automated Gating:** Every push and pull request to `main` triggers automated execution of the validation suite.
+- **Production Delivery:** Merges to `main` automatically deploy to production on Vercel.
+
 
