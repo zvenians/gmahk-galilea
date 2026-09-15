@@ -12,7 +12,7 @@ This repository contains the GMAHK Galilea website. Do not confuse it with the s
 
 Use the actual repository, Git history, and production behavior as the source of truth. Validate this document against the code before making changes.
 
-Repository: https://github.com/roulanx/gmahk-galilea
+Repository: https://github.com/zvenians/gmahk-galilea
 Production: https://gmahk-galilea.vercel.app/
 
 ## Current architecture
