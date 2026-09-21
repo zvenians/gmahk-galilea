@@ -13,6 +13,10 @@
     {
       "source": "/admin",
       "destination": "/api/admin"
+    },
+    {
+      "source": "/berita/:id",
+      "destination": "/api/berita?id=:id"
     }
   ],
   "headers": [

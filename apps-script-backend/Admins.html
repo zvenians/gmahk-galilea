@@ -1633,6 +1633,15 @@
       .loader-mark::before, .loader-mark::after { animation: none !important }
       .theme-logo-pair > img { transition: none }
     }
+    .upload-preview-list { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-direction: column; gap: 8px; }
+    .upload-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 8px; background: var(--surface-2); font-size: 13px; border: 1px solid var(--border); }
+    .upload-info { display: flex; flex-direction: column; gap: 2px; }
+    .upload-name { font-weight: 500; color: var(--text-1); word-break: break-all; }
+    .upload-size { color: var(--text-2); font-size: 12px; }
+    .upload-status { font-weight: 500; }
+    .upload-item.pending .upload-status { color: var(--text-2); }
+    .upload-item.success .upload-status { color: var(--success); }
+    .upload-item.error .upload-status { color: var(--danger); }
   </style>
 </head>
 <body>
@@ -1838,10 +1847,10 @@
     function fieldHtml(field,value){
       const full=['textarea','image','images','url'].includes(field.type)?' full':'';
       let control;
-      if(field.type==='textarea') control='<textarea name="'+attr(field.key)+'" placeholder="'+attr(field.help||'Ketik isi di sini…')+'" '+(field.required?'required':'')+'>'+esc(value)+'</textarea>';
-      else if(field.type==='images') control='<textarea name="'+attr(field.key)+'" class="image-collection" rows="5" placeholder="URL foto akan tampil di sini, satu URL per baris">'+esc(value)+'</textarea><div class="image-upload-panel"><div><strong>Galeri kegiatan</strong><span>Pilih beberapa foto sekaligus. Maksimal 12 foto, masing-masing 4 MB.</span></div><label class="btn soft">'+icon('upload')+'Pilih beberapa foto<input class="image-file sr-only" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" data-image-mode="append" data-image-target="'+attr(field.key)+'"></label></div>';
+      if(field.type==='textarea') control='<textarea name="'+attr(field.key)+'" placeholder="'+attr(field.help||'Ketik isi di sini.')+'" '+(field.required?'required':'')+'>'+esc(value)+'</textarea>';
+      else if(field.type==='images') control='<textarea name="'+attr(field.key)+'" class="image-collection" rows="5" placeholder="URL foto akan tampil di sini, satu URL per baris">'+esc(value)+'</textarea><ul class="upload-preview-list" id="upload-preview-'+attr(field.key)+'"></ul><div class="image-upload-panel"><div><strong>Galeri kegiatan</strong><span>Pilih beberapa foto sekaligus. Maksimal 12 foto, masing-masing 4 MB.</span></div><label class="btn soft">'+icon('upload')+'Pilih beberapa foto<input class="image-file sr-only" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" data-image-mode="append" data-image-target="'+attr(field.key)+'"></label></div>';
       else if(field.type==='select') control='<select name="'+attr(field.key)+'" '+(field.required?'required':'')+'>'+field.options.map(o=>'<option '+(String(value)===o?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
-      else control='<input name="'+attr(field.key)+'" type="'+(field.type==='image'?'url':attr(field.type))+'" value="'+attr(value)+'" '+(field.required?'required':'')+'>'+(field.type==='image'?'<div class="button-row"><label class="btn soft">'+icon('upload')+'Unggah gambar<input class="image-file sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-image-target="'+attr(field.key)+'"></label></div>':'');
+      else control='<input name="'+attr(field.key)+'" type="'+(field.type==='image'?'url':attr(field.type))+'" value="'+attr(value)+'" '+(field.required?'required':'')+'>'+(field.type==='image'?'<ul class="upload-preview-list" id="upload-preview-'+attr(field.key)+'"></ul><div class="button-row"><label class="btn soft">'+icon('upload')+'Unggah gambar<input class="image-file sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-image-target="'+attr(field.key)+'"></label></div>':'');
       return '<div class="field'+full+'"><label>'+esc(field.label)+(field.required?' *':'')+'</label>'+control+(field.help?'<span class="help">'+esc(field.help)+'</span>':'')+'</div>';
     }
     function openScheduleEditor(record,workflow){const data=state.entityData;if(!data.sections||!data.sections.length)return toast('Bagian jadwal belum ditemukan pada spreadsheet.');const sectionId=record&&((record.values&&record.values.sectionId)||record.sectionId)||data.sections[0].id||'';const section=data.sections.find(s=>s.id===sectionId)||data.sections[0];const values=record&&record.values||record||{};const fields=values.fields||{};const locked=Boolean(record&&record.id&&!/^NEW-/i.test(record.id));state.currentEdit={entity:'schedule',entityId:record&&record.id||'',workflowId:workflow&&workflow.id||'',action:workflow&&workflow.action||'UPSERT'};$('#editor-title').textContent=record?'Edit Jadwal':'Tambah Jadwal';$('#editor-subtitle').textContent=data.sheetName+(locked?' · Jenis ibadah dikunci untuk menjaga struktur sheet':'');$('#editor-workflow').innerHTML=workflowGuide(workflow&&workflow.state||'DRAFT');const sectionControl='<select '+(locked?'disabled':'name="sectionId"')+' id="schedule-section">'+data.sections.map(s=>'<option value="'+s.id+'" '+(s.id===section.id?'selected':'')+'>'+esc(s.title)+'</option>').join('')+'</select>'+(locked?'<input type="hidden" name="sectionId" value="'+attr(section.id)+'">':'');$('#editor-fields').innerHTML='<div class="field"><label>Jenis Ibadah *</label>'+sectionControl+'</div><div class="field"><label>Tanggal *</label><input type="date" name="isoDate" value="'+attr(values.isoDate||'')+'" required></div><div class="field full" id="schedule-fields">'+scheduleFieldsHtml(section,fields)+'</div>';$('#editor-preview').classList.remove('show');$('#editor-preview').innerHTML='';$('#editor-dialog').showModal()}
@@ -1863,22 +1872,51 @@
       if(files.some(file=>file.size>4*1024*1024))return toast('Setiap gambar maksimal 4 MB.');
       const target=input.dataset.imageTarget,append=input.dataset.imageMode==='append';
       const field=$('[name="'+CSS.escape(target)+'"]',$('#editor-form'));
+      const previewList=$('#upload-preview-'+CSS.escape(target));
       const uploaded=[];
       $$('dialog[open] button[type="submit"], dialog[open] button[value="draft"], dialog[open] button[value="submit"]').forEach(b => { b.disabled = true; b.dataset.uploading = '1'; });
-      try{
+      
+      try {
+        if(previewList && !append) previewList.innerHTML = '';
+        
         for(let index=0;index<files.length;index++){
-          const file=files[index];toast('Mengunggah foto '+(index+1)+' dari '+files.length+'…');
-          const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(file)});
-          const result=await server('adminUploadImage',[{name:file.name,mimeType:file.type,base64:base64}],30000);
-          if(result&&result.url)uploaded.push(normalizeDriveUrl(result.url));
+          const file=files[index];
+          const kb = Math.round(file.size/1024);
+          const liId = 'up-' + Date.now() + '-' + index;
+          if(previewList) {
+            previewList.insertAdjacentHTML('beforeend', '<li id="'+liId+'" class="upload-item pending"><div class="upload-info"><span class="upload-name">'+esc(file.name)+'</span><span class="upload-size">'+kb+' KB</span></div><div class="upload-status">Mengunggah...</div></li>');
+          }
+          
+          try {
+            const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(file)});
+            const result=await server('adminUploadImage',[{name:file.name,mimeType:file.type,base64:base64}],30000);
+            if(result&&result.url) {
+              uploaded.push(normalizeDriveUrl(result.url));
+              if(previewList) {
+                const li = $('#'+liId);
+                if(li) { li.className = 'upload-item success'; li.querySelector('.upload-status').textContent = 'Berhasil'; }
+              }
+            }
+          } catch(err) {
+            if(previewList) {
+              const li = $('#'+liId);
+              if(li) { li.className = 'upload-item error'; li.querySelector('.upload-status').textContent = 'Gagal: ' + cleanError(err.message); }
+            }
+          }
         }
+        
         if(field&&uploaded.length){
           const existing=append?String(field.value||'').split(/\n+/).map(value=>value.trim()).filter(Boolean):[];
           field.value=existing.concat(uploaded).slice(0,12).join('\n');
           field.dispatchEvent(new Event('change',{bubbles:true}));
         }
-        toast(uploaded.length+' foto berhasil ditambahkan.');
-      }catch(error){toast(cleanError(error.message))}finally{input.value='';$$('dialog[open] button[data-uploading]').forEach(b => { b.disabled = false; delete b.dataset.uploading; });}
+        if(uploaded.length) toast(uploaded.length+' foto berhasil ditambahkan.');
+      } catch(error){
+        toast(cleanError(error.message));
+      } finally {
+        input.value='';
+        $$('dialog[open] button[data-uploading]').forEach(b => { b.disabled = false; delete b.dataset.uploading; });
+      }
     }
 
     async function loadApprovals(filter,force){if(filter)state.approvalStatus=filter;const cached=state.approvalCache[state.approvalStatus];state.approvals=!force&&cached&&Date.now()-cached.time<60000?cached.items:await server('adminListApprovals',[state.approvalStatus],10000);state.approvalCache[state.approvalStatus]={time:Date.now(),items:state.approvals};const items=state.approvals,labels={PENDING:'Menunggu',APPROVED:'Diterbitkan',REJECTED:'Perlu revisi'};$('#content').innerHTML='<div class="page-head"><div><span class="eyebrow">ALUR PUBLIKASI</span><h1>Persetujuan Konten</h1><p>Tinjau perubahan dengan cepat. Alasan revisi akan dikirim kembali kepada editor.</p></div><span class="status '+state.approvalStatus.toLowerCase()+'">'+esc(items.length)+' '+esc(labels[state.approvalStatus]||state.approvalStatus)+'</span></div><div class="approval-tabs">'+['PENDING','APPROVED','REJECTED'].map(key=>'<button class="approval-tab '+(state.approvalStatus===key?'active':'')+'" data-approval-status="'+key+'">'+esc(labels[key])+'</button>').join('')+'</div><div class="approval-list">'+(items.length?items.map(approvalHtml).join(''):emptyHtml('Belum ada item pada status ini.'))+'</div>'}
