@@ -1319,6 +1319,20 @@
     .bible-layout{grid-template-columns:minmax(250px,320px) minmax(0,1fr);align-items:start}.bible-sidebar{position:sticky;top:116px;padding:26px}
     .bible-controls{display:grid;gap:14px}.bible-testaments{display:grid;grid-template-columns:1fr 1fr;gap:7px}.bible-testaments button{min-height:40px;border:1px solid var(--line);border-radius:11px;background:var(--surface-soft);color:var(--text-soft);font-weight:760}.bible-testaments button.active{color:#fff;background:var(--brand-strong)}
     .verse.is-target{margin-inline:-10px;padding-inline:10px;border-radius:12px;background:var(--gold-soft);box-shadow:inset 3px 0 0 var(--gold)}
+    /* GALILEA-BIBLE-SEARCH · hanya area pencarian, tidak menyentuh gaya pembaca ayat */
+    .bible-search{display:grid;gap:9px;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+    .bible-search-box{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px}
+    .bible-search-box input{width:100%;min-width:0}
+    .bible-search-box .btn{padding-inline:14px;white-space:nowrap}
+    .bible-search-scope{width:100%;min-width:0}
+    .bible-search-status{margin:0;color:var(--text-faint);font-size:.76rem;line-height:1.45}
+    .bible-search-results{display:grid;gap:6px;margin-top:10px;max-height:340px;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch}
+    .bible-search-hit{display:grid;gap:3px;width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:11px;background:var(--surface-soft);color:var(--text);text-align:left;cursor:pointer;transition:border-color .15s ease,background .15s ease}
+    .bible-search-hit:hover,.bible-search-hit:focus-visible{border-color:color-mix(in srgb,var(--brand) 45%,var(--line));background:var(--surface)}
+    .bible-search-ref{color:var(--brand-strong);font-size:.74rem;font-weight:800;letter-spacing:.02em}
+    .bible-search-snippet{display:-webkit-box;overflow:hidden;color:var(--text-soft);font-size:.82rem;line-height:1.5;-webkit-box-orient:vertical;-webkit-line-clamp:2}
+    .bible-search-hit mark{padding:0 1px;border-radius:3px;color:inherit;background:var(--gold-soft);font-weight:700}
+    @media(max-width:820px){.bible-search-results{max-height:none}.bible-search-box .btn{padding-inline:12px}}
     .archive-panel{display:grid;gap:12px;margin-top:22px;padding-top:20px;border-top:1px solid var(--line)}.archive-panel .btn{width:100%}
     .song-reader-shell{display:grid;gap:20px;width:100%;max-width:960px;margin-inline:auto}.song-reader-shell .v18-reader-tools{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin:0 0 4px}.v18-reader-tools-main{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.song-size-group{display:inline-flex;align-items:center;gap:3px;padding:3px;border:1px solid var(--line);border-radius:12px;background:var(--surface-soft)}.font-size-btn{min-width:34px;height:32px;padding:0 8px;font-size:.82rem;font-weight:750;border-radius:8px;border:1px solid transparent;color:var(--text-soft);background:transparent;cursor:pointer;transition:all .15s ease}.font-size-btn.active,.font-size-btn:hover{color:var(--text);background:var(--surface);border-color:var(--line);box-shadow:0 1px 3px rgba(0,0,0,.06)}
     .song-stage{position:relative;min-height:280px;padding:clamp(22px,4.5vw,46px);border:1px solid var(--line);border-radius:24px;background:radial-gradient(30rem 20rem at 85% 0,color-mix(in srgb,var(--brand) 16%,transparent),transparent),var(--surface)}.song-stage-grid{display:grid;width:100%;gap:26px}.song-stage-grid.has-chorus{grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr);align-items:start}.song-stage-grid.single-col{grid-template-columns:1fr;max-width:680px;margin-inline:auto;text-align:center}.song-stage-grid.single-col .song-verse-card{align-items:center}.song-verse-col,.song-chorus-col{min-width:0;display:flex;flex-direction:column;gap:14px}.song-verse-card,.song-chorus-card{display:flex;flex-direction:column;gap:14px}.song-chorus-card{padding:clamp(16px,2.4vw,24px);border:1px solid color-mix(in srgb,var(--gold) 35%,transparent);border-left:4px solid var(--gold);border-radius:16px;background:var(--gold-soft)}.song-verse{color:var(--text);font-weight:520;letter-spacing:-.01em}.song-chorus{color:var(--text);font-weight:520;line-height:1.75}
@@ -2346,7 +2360,49 @@
     .theme-song-feature{position:relative;display:grid;grid-template-columns:minmax(0,1fr);gap:28px;margin-bottom:28px;padding:clamp(26px,5vw,54px);overflow:hidden;border:1px solid color-mix(in srgb,var(--gold) 36%,var(--line));border-radius:32px;color:#fff;background:linear-gradient(135deg,#071b10 0%,#123d24 54%,#57735a 100%);box-shadow:0 28px 80px rgba(7,31,17,.18);isolation:isolate}
     .theme-song-feature::before,.theme-song-feature::after{position:absolute;border:1px solid rgba(239,217,157,.22);border-radius:50%;content:"";pointer-events:none}.theme-song-feature::before{right:-120px;top:-190px;width:440px;height:440px}.theme-song-feature::after{right:25px;top:-52px;width:245px;height:245px}.theme-song-feature>*{position:relative;z-index:1}.theme-song-feature h2{max-width:760px;margin:16px 0 12px;color:#fff;font-size:clamp(2.6rem,6vw,5.8rem);line-height:.94}.theme-song-feature p{max-width:660px;color:rgba(255,255,255,.75)}
     .hymnal-toolbar{display:grid;grid-template-columns:minmax(300px,1.1fr) minmax(340px,.9fr) auto;align-items:end;gap:16px;padding:20px}.hymnal-toolbar .field-control{min-width:0}.hymnal-toolbar .hymnal-search-box{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px}.hymnal-toolbar .hymnal-search-box input{width:100%;min-width:0}.hymnal-toolbar .hymnal-actions{display:flex;align-items:center;justify-content:flex-end;gap:10px}.hymnal-toolbar .hymnal-actions .btn{white-space:nowrap}.hymnal-toolbar .hymnal-count{white-space:nowrap}
-    .presentation-dialog{width:100%;max-width:none;height:100%;max-height:none;margin:0;padding:0;border:0;background:#06140c;color:#fff}.presentation-dialog[open]{display:block}.presentation-dialog::backdrop{background:#06140c}.presentation-shell{--present-scale:1;position:relative;width:100%;height:100dvh;min-height:480px;overflow:hidden;color:#fff;background:radial-gradient(circle at 12% 8%,rgba(187,211,179,.2),transparent 30%),radial-gradient(circle at 88% 82%,rgba(215,189,115,.15),transparent 28%),linear-gradient(135deg,#041209 0%,#0a2c19 48%,#183f28 100%);isolation:isolate}.presentation-shell::before{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:72px 72px;content:"";mask-image:linear-gradient(to bottom,rgba(0,0,0,.65),transparent 86%);pointer-events:none}.presentation-shell::after{position:absolute;right:-14vw;top:-28vw;width:min(68vw,920px);height:min(68vw,920px);border:1px solid rgba(230,207,145,.2);border-radius:50%;box-shadow:0 0 0 7vw rgba(255,255,255,.018),0 0 0 14vw rgba(255,255,255,.012);content:"";pointer-events:none}.presentation-brand{position:absolute;z-index:4;right:clamp(22px,4vw,64px);top:clamp(20px,4vw,52px);display:flex;align-items:center;gap:14px}.presentation-brand span{max-width:190px;color:#f0d994;font-size:clamp(.68rem,1vw,.9rem);font-weight:850;letter-spacing:.14em;line-height:1.35;text-align:right;text-transform:uppercase}.presentation-logo{width:clamp(54px,7vw,96px);height:clamp(60px,8vw,108px);object-fit:contain;filter:brightness(0) invert(1);opacity:.94}.presentation-main{position:relative;z-index:2;display:grid;grid-template-rows:auto minmax(0,1fr);height:100%;padding:clamp(26px,5vw,72px) clamp(24px,6.5vw,110px) clamp(94px,12vh,132px)}.presentation-head{min-width:0;padding-right:clamp(220px,25vw,360px)}.presentation-kicker{display:flex;align-items:center;gap:10px;overflow:hidden;color:#ead597;font-size:clamp(.62rem,.8vw,.78rem);font-weight:850;letter-spacing:.16em;white-space:nowrap;text-overflow:ellipsis;text-transform:uppercase}.presentation-kicker::before{flex:0 0 28px;width:28px;height:2px;background:#d8bd72;content:""}.presentation-title{max-width:900px;margin:7px 0 0;overflow:hidden;color:rgba(255,255,255,.84);font-size:clamp(1.15rem,2vw,2.15rem);font-weight:720;line-height:1.08;letter-spacing:-.025em;white-space:nowrap;text-overflow:ellipsis}.presentation-stage{display:grid;align-content:center;min-height:0;padding:clamp(14px,2.4vh,34px) 0;overflow:auto;scrollbar-width:none}.presentation-verse-label{display:inline-flex;width:max-content;margin-bottom:clamp(12px,2vh,24px);padding:8px 13px;border:1px solid rgba(234,213,151,.42);border-radius:999px;color:#f1d993;background:rgba(4,20,11,.55);font-size:clamp(.74rem,1vw,.95rem);font-weight:850;letter-spacing:.15em;text-transform:uppercase}.presentation-copy{max-width:1500px;color:#fff;font-size:calc(clamp(2.05rem,4.65vw,5.7rem) * var(--present-scale));font-weight:680;line-height:1.18;letter-spacing:-.025em;text-wrap:balance;text-shadow:0 5px 24px rgba(0,0,0,.24)}.presentation-copy.bible{max-width:1400px;font-family:Georgia,"Times New Roman",serif;font-size:calc(clamp(2.05rem,4.4vw,5.35rem) * var(--present-scale));font-weight:500;line-height:1.32}.presentation-refrain{max-width:1400px;margin-top:clamp(20px,3.8vh,42px);padding:clamp(18px,2.6vw,32px) clamp(22px,3.2vw,42px);border-left:5px solid #d9bd71;border-radius:0 22px 22px 0;color:#fff;background:rgba(3,19,10,.48);font-size:calc(clamp(1.8rem,3.6vw,4.8rem) * var(--present-scale));font-weight:650;line-height:1.22}.presentation-refrain strong{display:block;margin-bottom:10px;color:#efd994;font-size:.36em;letter-spacing:.18em;text-transform:uppercase}.presentation-footer{position:absolute;z-index:4;left:clamp(22px,4vw,64px);bottom:clamp(20px,3.4vw,48px);display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.72);font-size:clamp(.72rem,1vw,.9rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase}.presentation-footer .copyright-mark{display:grid;width:27px;height:27px;place-items:center;border:1px solid rgba(255,255,255,.35);border-radius:50%;font-size:.78rem}.presentation-controls{position:absolute;z-index:5;right:clamp(18px,3vw,48px);bottom:clamp(16px,3vw,42px);display:flex;align-items:center;gap:8px;padding:8px;border:1px solid rgba(255,255,255,.2);border-radius:999px;background:rgba(3,16,9,.7);box-shadow:0 18px 60px rgba(0,0,0,.28);backdrop-filter:blur(18px)}.presentation-controls button{display:grid;width:46px;height:46px;place-items:center;border:0;border-radius:50%;color:#fff;background:transparent;cursor:pointer}.presentation-controls button:hover{background:rgba(255,255,255,.12)}.presentation-controls button:disabled{opacity:.28;cursor:not-allowed}.presentation-controls .presentation-close{color:#102016;background:#f4f3e9}.presentation-controls .icon{width:20px;height:20px}.presentation-counter{min-width:94px;color:rgba(255,255,255,.8);font-size:.8rem;font-weight:800;text-align:center}.present-button{gap:10px}.present-button .icon{width:19px;height:19px}
+    dialog.presentation-dialog,
+    #presentation-dialog {
+      position: fixed !important;
+      inset: 0 !important;
+      top: 0 !important;
+      left: 0 !important;
+      right: 0 !important;
+      bottom: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      height: 100dvh !important;
+      max-width: none !important;
+      max-height: none !important;
+      margin: 0 !important;
+      padding: 0 !important;
+      border: 0 !important;
+      background: #041209 !important;
+      color: #fff !important;
+      z-index: 100000 !important;
+      overflow: hidden !important;
+    }
+    dialog.presentation-dialog[open],
+    #presentation-dialog[open] {
+      display: block !important;
+    }
+    dialog.presentation-dialog::backdrop,
+    #presentation-dialog::backdrop {
+      background: #041209 !important;
+      backdrop-filter: blur(8px) !important;
+    }
+    html.is-presenting,
+    body.is-presenting {
+      overflow: hidden !important;
+      height: 100% !important;
+      touch-action: none !important;
+    }
+    body.is-presenting .site-header,
+    body.is-presenting .mobile-nav,
+    body.is-presenting .floating-actions,
+    body.is-presenting #reader-dialog {
+      display: none !important;
+    }
+    .presentation-dialog{width:100%;max-width:none;height:100%;max-height:none;margin:0;padding:0;border:0;background:#06140c;color:#fff}.presentation-dialog[open]{display:block}.presentation-dialog::backdrop{background:#06140c}.presentation-shell{--present-scale:1;position:relative;width:100%;height:100dvh;min-height:480px;overflow:hidden;color:#fff;background:radial-gradient(circle at 12% 8%,rgba(187,211,179,.2),transparent 30%),radial-gradient(circle at 88% 82%,rgba(215,189,115,.15),transparent 28%),linear-gradient(135deg,#041209 0%,#0a2c19 48%,#183f28 100%);isolation:isolate}.presentation-shell::before{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:72px 72px;content:"";mask-image:linear-gradient(to bottom,rgba(0,0,0,.65),transparent 86%);pointer-events:none}.presentation-shell::after{position:absolute;right:-14vw;top:-28vw;width:min(68vw,920px);height:min(68vw,920px);border:1px solid rgba(230,207,145,.2);border-radius:50%;box-shadow:0 0 0 7vw rgba(255,255,255,.018),0 0 0 14vw rgba(255,255,255,.012);content:"";pointer-events:none}.presentation-brand{position:absolute;z-index:4;right:clamp(22px,4vw,64px);top:clamp(20px,4vw,52px);display:flex;align-items:center;gap:14px}.presentation-brand span{max-width:190px;color:#f0d994;font-size:clamp(.68rem,1vw,.9rem);font-weight:850;letter-spacing:.14em;line-height:1.35;text-align:right;text-transform:uppercase}.presentation-logo{width:clamp(54px,7vw,96px);height:clamp(60px,8vw,108px);object-fit:contain;filter:brightness(0) invert(1);opacity:.94}.presentation-main{position:relative;z-index:2;display:grid;grid-template-rows:auto minmax(0,1fr);height:100%;padding:clamp(26px,5vw,72px) clamp(24px,6.5vw,110px) clamp(94px,12vh,132px)}.presentation-head{min-width:0;padding-right:clamp(220px,25vw,360px)}.presentation-kicker{display:flex;align-items:center;gap:10px;overflow:hidden;color:#ead597;font-size:clamp(.62rem,.8vw,.78rem);font-weight:850;letter-spacing:.16em;white-space:nowrap;text-overflow:ellipsis;text-transform:uppercase}.presentation-kicker::before{flex:0 0 28px;width:28px;height:2px;background:#d8bd72;content:""}.presentation-title{max-width:900px;margin:7px 0 0;overflow:hidden;color:rgba(255,255,255,.84);font-size:clamp(1.15rem,2vw,2.15rem);font-weight:720;line-height:1.08;letter-spacing:-.025em;white-space:nowrap;text-overflow:ellipsis}.presentation-stage{display:grid;align-content:center;min-height:0;padding:clamp(14px,2.4vh,34px) 0;overflow:auto;scrollbar-width:none}.presentation-verse-label{display:inline-flex;width:max-content;margin-bottom:clamp(12px,2vh,24px);padding:8px 13px;border:1px solid rgba(234,213,151,.42);border-radius:999px;color:#f1d993;background:rgba(4,20,11,.55);font-size:clamp(.74rem,1vw,.95rem);font-weight:850;letter-spacing:.15em;text-transform:uppercase}.presentation-copy{max-width:1500px;color:#fff;font-size:calc(clamp(2.05rem,4.65vw,5.7rem) * var(--present-scale));font-weight:680;line-height:1.18;letter-spacing:-.025em;text-wrap:balance;text-shadow:0 5px 24px rgba(0,0,0,.24)}.presentation-copy.bible{max-width:1400px;font-family:Georgia,"Times New Roman",serif;font-size:calc(clamp(2.05rem,4.4vw,5.35rem) * var(--present-scale));font-weight:500;line-height:1.32}.presentation-refrain{max-width:1400px;margin-top:clamp(20px,3.8vh,42px);padding:clamp(18px,2.6vw,32px) clamp(22px,3.2vw,42px);border-left:5px solid #d9bd71;border-radius:0 22px 22px 0;color:#fff;background:rgba(3,19,10,.48);font-size:calc(clamp(1.8rem,3.6vw,4.8rem) * var(--present-scale));font-weight:650;line-height:1.22}.presentation-refrain strong{display:block;margin-bottom:10px;color:#efd994;font-size:.36em;letter-spacing:.18em;text-transform:uppercase}.presentation-song-layout{display:flex;flex-direction:column;justify-content:center;width:100%;min-height:0}.presentation-song-layout.single-verse{max-width:1300px}.presentation-song-verse{min-width:0}.presentation-song-refrain{min-width:0}@media(min-width:960px) and (min-aspect-ratio:1.15){.presentation-song-layout.has-refrain{display:grid;grid-template-columns:minmax(0,1.18fr) minmax(0,.82fr);gap:clamp(28px,4.5vw,64px);align-items:center;width:100%;max-width:1680px}.presentation-song-layout.has-refrain .presentation-refrain{margin-top:0}}.presentation-refrain-tag{display:inline-flex;margin-bottom:12px;padding:4px 10px;border:1px solid rgba(239,217,148,.4);border-radius:999px;color:#efd994;background:rgba(239,217,148,.12);font-size:clamp(.65rem,.85vw,.82rem);font-weight:850;letter-spacing:.14em;text-transform:uppercase}.presentation-shell.is-light .presentation-refrain-tag{color:#6d520e;background:rgba(154,123,36,.14);border-color:rgba(154,123,36,.35)}.presentation-footer{position:absolute;z-index:4;left:clamp(22px,4vw,64px);bottom:clamp(20px,3.4vw,48px);display:flex;align-items:center;gap:10px;color:rgba(255,255,255,.72);font-size:clamp(.72rem,1vw,.9rem);font-weight:700;letter-spacing:.08em;text-transform:uppercase}.presentation-footer .copyright-mark{display:grid;width:27px;height:27px;place-items:center;border:1px solid rgba(255,255,255,.35);border-radius:50%;font-size:.78rem}.presentation-controls{position:absolute;z-index:5;right:clamp(18px,3vw,48px);bottom:clamp(16px,3vw,42px);display:flex;align-items:center;gap:8px;padding:8px;border:1px solid rgba(255,255,255,.2);border-radius:999px;background:rgba(3,16,9,.7);box-shadow:0 18px 60px rgba(0,0,0,.28);backdrop-filter:blur(18px)}.presentation-controls button{display:grid;width:46px;height:46px;place-items:center;border:0;border-radius:50%;color:#fff;background:transparent;cursor:pointer}.presentation-controls button:hover{background:rgba(255,255,255,.12)}.presentation-controls button:disabled{opacity:.28;cursor:not-allowed}.presentation-controls .presentation-close{color:#102016;background:#f4f3e9}.presentation-controls .icon{width:20px;height:20px}.presentation-counter{min-width:94px;color:rgba(255,255,255,.8);font-size:.8rem;font-weight:800;text-align:center}.present-button{gap:10px}.present-button .icon{width:19px;height:19px}
     .presentation-dialog{overflow:hidden}.presentation-stage{-ms-overflow-style:none;padding-right:clamp(8px,1.5vw,24px);overscroll-behavior:contain;scroll-padding-block:24px;-webkit-overflow-scrolling:touch}.presentation-stage::-webkit-scrollbar{display:none;width:0;height:0}
     @media(max-width:1080px){.hymnal-toolbar{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}.hymnal-toolbar .hymnal-actions{grid-column:1/-1;justify-content:flex-start}}
     @media(max-width:820px){.theme-song-feature{grid-template-columns:1fr;border-radius:25px}.hymnal-toolbar{grid-template-columns:1fr;padding:16px}.hymnal-toolbar .hymnal-actions{grid-column:auto;display:grid;grid-template-columns:auto minmax(0,1fr)}.hymnal-toolbar .hymnal-actions .btn{width:100%}.presentation-brand{right:18px;top:14px;gap:10px}.presentation-brand span{max-width:130px;font-size:.62rem}.presentation-logo{width:50px;height:58px}.presentation-main{padding:94px 24px 108px}.presentation-head{padding-right:0}.presentation-title{max-width:100%;font-size:clamp(.95rem,4.6vw,1.35rem)}.presentation-copy{font-size:calc(clamp(1.9rem,9vw,4.2rem) * var(--present-scale));line-height:1.2}.presentation-copy.bible{font-size:calc(clamp(1.8rem,8.2vw,3.8rem) * var(--present-scale))}.presentation-refrain{font-size:calc(clamp(1.55rem,7vw,3.1rem) * var(--present-scale));line-height:1.22}.presentation-footer{left:22px;bottom:76px;max-width:44%;font-size:.62rem}.presentation-controls{right:14px;bottom:14px;gap:3px;padding:6px}.presentation-controls button{width:40px;height:40px}.presentation-counter{min-width:72px;font-size:.7rem}}
@@ -2355,7 +2411,7 @@
     .presentation-head{display:flex;align-items:center;gap:10px;overflow:hidden}.presentation-kicker{flex:0 1 auto;max-width:58%;text-overflow:ellipsis}.presentation-title{flex:1 1 auto;min-width:0;max-width:none;margin:0;font-size:clamp(.78rem,1vw,.95rem);font-weight:800;line-height:1.2;letter-spacing:.025em}.presentation-title::before{margin-right:10px;color:#d8bd72;content:"—"}.presentation-controls{gap:3px;padding:5px}.presentation-controls button{width:clamp(34px,2.5vw,40px);height:clamp(34px,2.5vw,40px);font-size:.78rem}.presentation-controls .icon{width:17px;height:17px}.presentation-counter{min-width:76px;font-size:.68rem}
     @media(max-width:520px){.presentation-head{gap:7px}.presentation-kicker{max-width:54%;font-size:.56rem}.presentation-title{font-size:.7rem}.presentation-title::before{margin-right:7px}.presentation-controls{right:8px;bottom:8px}.presentation-counter{min-width:62px}}
     /* GALILEA-PRESENTATION-SUITE-22-0-0 · satu controller untuk Lagu Sion dan Alkitab */
-    .presentation-shell{background:#020704;touch-action:pan-y pinch-zoom}.presentation-shell::before,.presentation-shell::after{display:none}.presentation-frame{position:absolute;inset:0;overflow:hidden;color:#fff;background:radial-gradient(circle at 12% 8%,rgba(187,211,179,.2),transparent 30%),radial-gradient(circle at 88% 82%,rgba(215,189,115,.15),transparent 28%),linear-gradient(135deg,#041209 0%,#0a2c19 48%,#183f28 100%);isolation:isolate;transition:width .28s ease,height .28s ease,opacity .2s ease}.presentation-frame::before{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:72px 72px;content:"";mask-image:linear-gradient(to bottom,rgba(0,0,0,.65),transparent 86%);pointer-events:none}.presentation-frame::after{position:absolute;right:-14vw;top:-28vw;width:min(68vw,920px);height:min(68vw,920px);border:1px solid rgba(230,207,145,.2);border-radius:50%;box-shadow:0 0 0 7vw rgba(255,255,255,.018),0 0 0 14vw rgba(255,255,255,.012);content:"";pointer-events:none}.presentation-shell.is-projector .presentation-frame{inset:50% auto auto 50%;width:min(100vw,177.7778vh);height:min(100vh,56.25vw);transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(255,255,255,.08),0 30px 100px rgba(0,0,0,.55)}.presentation-shell.is-projector .presentation-main{padding:clamp(16px,3vw,48px) clamp(18px,5vw,72px) clamp(70px,10vh,104px)}.presentation-shell.is-projector .presentation-brand{right:clamp(14px,3vw,38px);top:clamp(10px,2vw,24px)}.presentation-shell.is-projector .presentation-brand span{max-width:140px;font-size:clamp(.5rem,.75vw,.7rem)}.presentation-shell.is-projector .presentation-logo{width:clamp(34px,5vw,72px);height:clamp(38px,5.5vw,78px)}.presentation-shell.is-projector .presentation-footer{left:clamp(14px,3vw,38px);bottom:clamp(12px,2vw,26px);font-size:clamp(.52rem,.75vw,.7rem)}.presentation-main,.presentation-brand,.presentation-footer{transition:opacity .18s ease}.presentation-shell.is-blackout .presentation-frame{background:#000}.presentation-shell.is-blackout .presentation-frame::before,.presentation-shell.is-blackout .presentation-frame::after{display:none}.presentation-shell.is-blackout :is(.presentation-main,.presentation-brand,.presentation-footer){opacity:0;pointer-events:none}.presentation-shell.is-blackout .presentation-offline{opacity:0}.presentation-controls{transition:opacity .22s ease,transform .22s ease}.presentation-shell.presentation-controls-hidden .presentation-controls:not(:focus-within){opacity:0;transform:translateY(14px);pointer-events:none}.presentation-controls button[aria-pressed="true"]{color:#102016;background:#ead597}.presentation-controls .presentation-ratio{width:auto;min-width:44px;padding:0 8px;border-radius:999px;font-size:.62rem;font-weight:850;letter-spacing:.04em}.presentation-offline{position:absolute;z-index:7;left:50%;top:14px;display:flex;align-items:center;gap:7px;max-width:calc(100% - 32px);padding:7px 11px;border:1px solid rgba(255,255,255,.24);border-radius:999px;color:#102016;background:#f0d994;box-shadow:0 10px 32px rgba(0,0,0,.25);font-size:.68rem;font-weight:850;letter-spacing:.06em;line-height:1;opacity:0;pointer-events:none;transform:translate(-50%,-12px);transition:opacity .2s ease,transform .2s ease;white-space:nowrap}.presentation-offline.show{opacity:1;transform:translate(-50%,0)}.presentation-offline .icon{width:15px;height:15px}.presentation-stage{touch-action:pan-y pinch-zoom}.presentation-stage.is-fitting{overflow:hidden}.presentation-a11y-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);clip-path:inset(50%);white-space:nowrap}
+    .presentation-shell{background:#020704;touch-action:pan-y pinch-zoom}.presentation-shell::before,.presentation-shell::after{display:none}.presentation-frame{position:absolute;inset:0;overflow:hidden;color:#fff;background:radial-gradient(circle at 12% 8%,rgba(187,211,179,.2),transparent 30%),radial-gradient(circle at 88% 82%,rgba(215,189,115,.15),transparent 28%),linear-gradient(135deg,#041209 0%,#0a2c19 48%,#183f28 100%);isolation:isolate;transition:width .28s ease,height .28s ease,opacity .2s ease}.presentation-frame::before{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.022) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.022) 1px,transparent 1px);background-size:72px 72px;content:"";mask-image:linear-gradient(to bottom,rgba(0,0,0,.65),transparent 86%);pointer-events:none}.presentation-frame::after{position:absolute;right:-14vw;top:-28vw;width:min(68vw,920px);height:min(68vw,920px);border:1px solid rgba(230,207,145,.2);border-radius:50%;box-shadow:0 0 0 7vw rgba(255,255,255,.018),0 0 0 14vw rgba(255,255,255,.012);content:"";pointer-events:none}.presentation-shell.is-projector .presentation-frame{inset:50% auto auto 50%;width:min(100vw,177.7778vh);height:min(100vh,56.25vw);transform:translate(-50%,-50%);box-shadow:0 0 0 1px rgba(255,255,255,.08),0 30px 100px rgba(0,0,0,.55)}.presentation-shell.is-projector .presentation-main{padding:clamp(16px,3vw,48px) clamp(18px,5vw,72px) clamp(70px,10vh,104px)}.presentation-shell.is-projector .presentation-brand{right:clamp(14px,3vw,38px);top:clamp(10px,2vw,24px)}.presentation-shell.is-projector .presentation-brand span{max-width:140px;font-size:clamp(.5rem,.75vw,.7rem)}.presentation-shell.is-projector .presentation-logo{width:clamp(34px,5vw,72px);height:clamp(38px,5.5vw,78px)}.presentation-shell.is-projector .presentation-footer{left:clamp(14px,3vw,38px);bottom:clamp(12px,2vw,26px);font-size:clamp(.52rem,.75vw,.7rem)}.presentation-main,.presentation-brand,.presentation-footer{transition:opacity .18s ease}.presentation-shell.is-blackout .presentation-frame{background:#000}.presentation-shell.is-blackout .presentation-frame::before,.presentation-shell.is-blackout .presentation-frame::after{display:none}.presentation-shell.is-blackout :is(.presentation-main,.presentation-brand,.presentation-footer){opacity:0;pointer-events:none}.presentation-shell.is-blackout .presentation-offline{opacity:0}.presentation-controls{transition:opacity .22s ease,transform .22s ease}.presentation-shell.presentation-controls-hidden .presentation-controls:not(:hover):not(:focus-within){opacity:0;transform:translateY(14px);pointer-events:none}.presentation-controls button[aria-pressed="true"]{color:#102016;background:#ead597}.presentation-controls .presentation-ratio{width:auto;min-width:44px;padding:0 8px;border-radius:999px;font-size:.62rem;font-weight:850;letter-spacing:.04em}.presentation-offline{position:absolute;z-index:7;left:50%;top:14px;display:flex;align-items:center;gap:7px;max-width:calc(100% - 32px);padding:7px 11px;border:1px solid rgba(255,255,255,.24);border-radius:999px;color:#102016;background:#f0d994;box-shadow:0 10px 32px rgba(0,0,0,.25);font-size:.68rem;font-weight:850;letter-spacing:.06em;line-height:1;opacity:0;pointer-events:none;transform:translate(-50%,-12px);transition:opacity .2s ease,transform .2s ease;white-space:nowrap}.presentation-offline.show{opacity:1;transform:translate(-50%,0)}.presentation-offline .icon{width:15px;height:15px}.presentation-stage{touch-action:pan-y pinch-zoom}.presentation-stage.is-fitting{overflow:hidden}.presentation-a11y-status{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);clip-path:inset(50%);white-space:nowrap}
     .presentation-shell.is-light{background:#dbe6d9;color:#07140b}
     .presentation-shell.is-light .presentation-frame{color:#07140b;background:radial-gradient(circle at 12% 8%,rgba(95,126,91,.16),transparent 30%),radial-gradient(circle at 88% 82%,rgba(160,128,51,.12),transparent 28%),linear-gradient(135deg,#f8faf4 0%,#e5eee1 48%,#cadcc9 100%)}
     .presentation-shell.is-light .presentation-frame::before{background-image:linear-gradient(rgba(25,63,39,.055) 1px,transparent 1px),linear-gradient(90deg,rgba(25,63,39,.055) 1px,transparent 1px)}
@@ -3294,6 +3350,59 @@
   .presentation-shell:not(.is-light):is([data-presentation-type="schedule"],[data-presentation-type="bible"],[data-presentation-type="song"]) .presentation-frame::before{filter:brightness(.72)!important}
   .presentation-shell.is-light:is([data-presentation-type="schedule"],[data-presentation-type="bible"],[data-presentation-type="song"]) .presentation-frame::before{filter:brightness(1.08) contrast(.9)!important}
 }
+/* ====================================================================== */
+/* BIBLE BOOK PICKER · Searchable, bottom-sheet mobile, modal desktop     */
+/* ====================================================================== */
+.book-picker-trigger{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:10px;width:100%;min-height:46px;padding:10px 13px;border:1px solid var(--line);border-radius:12px;color:var(--text);background:var(--surface);text-align:left;cursor:pointer;transition:border-color .22s var(--ease),box-shadow .22s var(--ease)}
+.book-picker-trigger:hover{border-color:var(--line-strong);box-shadow:var(--shadow-sm)}
+.book-picker-trigger:focus-visible{outline:3px solid color-mix(in srgb,var(--brand) 54%,transparent);outline-offset:3px}
+.book-picker-trigger-text{overflow:hidden;color:inherit;font-size:.9rem;text-overflow:ellipsis;white-space:nowrap}
+.book-picker-trigger-text.placeholder{color:var(--text-faint)}
+.book-picker-trigger-caret{flex:0 0 auto;color:var(--text-faint);width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.book-picker-backdrop{position:fixed;inset:0;z-index:210;background:rgba(3,10,6,.62);backdrop-filter:blur(10px) saturate(72%);opacity:0;pointer-events:none;transition:opacity .28s var(--ease)}
+.book-picker-backdrop.open{opacity:1;pointer-events:auto}
+.book-picker-panel{position:fixed;z-index:220;display:flex;flex-direction:column;background:var(--surface);overflow:hidden;box-shadow:var(--shadow);opacity:0;pointer-events:none;transition:opacity .3s var(--ease),transform .38s var(--ease)}
+.book-picker-panel.open{opacity:1;pointer-events:auto}
+@media(min-width:641px){
+  .book-picker-panel{top:50%;left:50%;width:min(520px,calc(100vw - 32px));max-height:min(84vh,760px);border:1px solid var(--line);border-radius:26px;transform:translate(-50%,-50%) scale(.97)}
+  .book-picker-panel.open{transform:translate(-50%,-50%) scale(1)}
+}
+@media(max-width:640px){
+  .book-picker-panel{left:0;right:0;bottom:0;max-height:90svh;border-radius:26px 26px 0 0;transform:translateY(100%)}
+  .book-picker-panel.open{transform:translateY(0)}
+  .book-picker-handle{flex:0 0 auto;display:grid;place-items:center;padding:12px 0 0}
+  .book-picker-handle::before{width:42px;height:4px;content:"";background:var(--line-strong);border-radius:99px}
+}
+@media(min-width:641px){.book-picker-handle{display:none}}
+.book-picker-header{flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:18px 18px 14px;border-bottom:1px solid color-mix(in srgb,var(--line) 70%,transparent);background:var(--surface)}
+.book-picker-header strong{font-size:1rem;letter-spacing:-.03em}
+.book-picker-close{width:36px;height:36px;flex:0 0 auto;display:grid;place-items:center;border:1px solid var(--line);border-radius:50%;color:var(--text-soft);background:transparent;cursor:pointer;transition:background .18s,color .18s}
+.book-picker-close:hover{background:var(--surface-soft);color:var(--text)}
+.book-picker-search-wrap{flex:0 0 auto;padding:12px 14px 10px}
+.book-picker-search{display:flex;align-items:center;gap:10px;padding:0 14px;border:1px solid var(--line);border-radius:12px;background:var(--surface-soft);transition:border-color .18s,box-shadow .18s}
+.book-picker-search:focus-within{border-color:var(--brand);box-shadow:0 0 0 3px color-mix(in srgb,var(--brand) 18%,transparent)}
+.book-picker-search svg{flex:0 0 auto;width:16px;height:16px;color:var(--text-faint);fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.book-picker-input{flex:1;min-width:0;min-height:44px;padding:0;border:0;border-radius:0;background:transparent;color:var(--text);font-size:.93rem}
+.book-picker-input:focus{outline:none}
+.book-picker-input::placeholder{color:var(--text-faint)}
+.book-picker-body{flex:1 1 auto;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding:6px 10px 16px}
+.book-picker-section-label{display:flex;align-items:center;gap:9px;padding:8px 6px 4px;color:var(--text-faint);font-size:.62rem;font-weight:850;letter-spacing:.14em;text-transform:uppercase}
+.book-picker-section-label::before{width:16px;height:1px;content:"";background:var(--brand);flex:0 0 auto}
+.book-picker-recents-row{display:flex;flex-wrap:wrap;gap:6px;padding:2px 4px 10px}
+.book-picker-recent-btn{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border:1px solid var(--line);border-radius:99px;color:var(--text-soft);background:var(--surface-soft);font-size:.76rem;font-weight:760;cursor:pointer;transition:border-color .18s,background .18s,color .18s}
+.book-picker-recent-btn:hover{border-color:var(--brand);background:var(--brand-soft);color:var(--brand-strong)}
+.book-picker-recent-btn .abr{color:var(--brand-strong);font-weight:850}
+.book-picker-group{margin-bottom:4px}
+.book-picker-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px;padding:2px 2px 8px}
+@media(min-width:420px){.book-picker-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.book-picker-item{display:flex;flex-direction:column;align-items:flex-start;padding:9px 10px 8px;gap:1px;border:1px solid var(--line);border-radius:12px;background:transparent;color:var(--text);cursor:pointer;text-align:left;transition:border-color .18s var(--ease),background .18s var(--ease),transform .18s var(--ease)}
+.book-picker-item:hover{border-color:color-mix(in srgb,var(--brand) 55%,var(--line));background:var(--brand-soft);transform:translateY(-1px)}
+.book-picker-item.selected{border-color:var(--brand-strong);background:var(--brand-soft)}
+.book-picker-item-abr{color:var(--brand-strong);font-size:.65rem;font-weight:850;letter-spacing:.04em;text-transform:uppercase;line-height:1.2}
+.book-picker-item-name{overflow:hidden;color:var(--text);font-size:.72rem;font-weight:680;line-height:1.3;text-overflow:ellipsis;white-space:nowrap;max-width:100%}
+.book-picker-empty{padding:38px 18px;text-align:center;color:var(--text-faint);font-size:.88rem}
+.book-picker-empty strong{display:block;margin-bottom:4px;color:var(--text-soft);font-size:1.05rem}
+@media(prefers-reduced-motion:reduce){.book-picker-panel,.book-picker-backdrop{transition:none!important}}
 </style>
 </head>
 <body>
@@ -3488,6 +3597,9 @@
         bibleTestament: '',
         bibleTargetVerse: null,
         bibleReader: null,
+        bibleSearchResults: [],
+        bibleSearchToken: 0,
+        bibleSearchBusy: false,
         hymnal: null,
         hymnalReader: {song:null,verseIndex:0},
         presentation: {type:'',index:0,scale:1,fittedScale:1,item:null,blackout:false,projector:false,theme:'dark'},
@@ -4442,7 +4554,7 @@
 
       function renderBible() {
         return pageHead('Baca Alkitab', 'Firman, tersusun dengan jernih.', 'Pilihan awal sengaja dikosongkan. Pilih Perjanjian, kitab, pasal, dan ayat yang akan dibaca atau ditampilkan.') +
-          '<section class="section" style="padding-top:10px"><div class="shell"><div class="bible-layout"><aside class="card bible-sidebar"><div class="bible-controls"><div><span class="field-label">Kelompok kitab</span><div class="bible-testaments"><button type="button" data-bible-testament="PL">Perjanjian Lama</button><button type="button" data-bible-testament="PB">Perjanjian Baru</button></div></div><div class="field-control"><label for="bible-book">Kitab</label><select id="bible-book"><option value="">Memuat daftar kitab…</option></select></div><div class="grid grid-2"><div class="field-control"><label for="bible-chapter">Pasal</label><select id="bible-chapter"><option value="">Pilih pasal</option></select></div><div class="field-control"><label for="bible-verse">Ayat</label><input id="bible-verse" type="number" min="1" value="" placeholder="Pilih ayat" inputmode="numeric"></div></div><button class="btn primary" id="bible-open" type="button">Buka bacaan' + icon('arrow') + '</button></div><div class="archive-panel"><button class="btn" type="button" data-download-bible-book>' + icon('download') + 'Unduh kitab ini</button><button class="btn soft" type="button" data-download-archive="bible">' + icon('download') + 'PDF Alkitab lengkap</button><small class="faint">Sumber teks dicantumkan pada pembaca dan hasil unduhan.</small></div></aside><article class="card"><div class="card-pad" id="bible-heading"><p class="eyebrow">Alkitab Bahasa Indonesia</p><h2>Pilih kitab, pasal, dan ayat.</h2></div><div id="bible-content"><div class="v18-empty">Belum ada ayat yang dipilih.</div></div></article></div></div></section>';
+          '<section class="section" style="padding-top:10px"><div class="shell"><div class="bible-layout"><aside class="card bible-sidebar"><div class="bible-controls"><div><span class="field-label">Kelompok kitab</span><div class="bible-testaments"><button type="button" data-bible-testament="PL">Perjanjian Lama</button><button type="button" data-bible-testament="PB">Perjanjian Baru</button></div></div><div class="field-control"><label for="bible-book-trigger">Kitab</label><button type="button" id="bible-book-trigger" class="book-picker-trigger" aria-haspopup="dialog" aria-label="Pilih kitab"><span class="book-picker-trigger-text placeholder" id="bible-book-label">Pilih kitab\u2026</span><svg class="book-picker-trigger-caret" viewBox="0 0 16 16" aria-hidden="true"><polyline points="4,6 8,10 12,6"></polyline></svg></button><input type="hidden" id="bible-book" value=""></div><div class="grid grid-2"><div class="field-control"><label for="bible-chapter">Pasal</label><select id="bible-chapter"><option value="">Pilih pasal</option></select></div><div class="field-control"><label for="bible-verse">Ayat</label><input id="bible-verse" type="number" min="1" value="" placeholder="Pilih ayat" inputmode="numeric"></div></div><button class="btn primary" id="bible-open" type="button">Buka bacaan' + icon('arrow') + '</button></div><div class="bible-search"><div class="field-control"><label for="bible-search-input">Cari ayat</label><div class="bible-search-box"><input id="bible-search-input" type="search" placeholder="Cari ayat atau kata..." autocomplete="off" enterkeyhint="search"><button class="btn" id="bible-search-submit" type="button" aria-label="Cari ayat">' + icon('search') + '</button></div></div><div class="field-control"><label for="bible-search-scope">Cakupan pencarian</label><select id="bible-search-scope" class="bible-search-scope"><option value="all">Seluruh Alkitab</option><option value="PL">Perjanjian Lama</option><option value="PB">Perjanjian Baru</option><option value="book">Kitab terpilih</option></select></div><p class="bible-search-status" id="bible-search-status">Tekan Enter untuk mencari. Minimal 2 karakter.</p><div id="bible-search-results"></div></div><div class="archive-panel"><button class="btn" type="button" data-download-bible-book>' + icon('download') + 'Unduh kitab ini</button><button class="btn soft" type="button" data-download-archive="bible">' + icon('download') + 'PDF Alkitab lengkap</button><small class="faint">Sumber teks dicantumkan pada pembaca dan hasil unduhan.</small></div></aside><article class="card"><div class="card-pad" id="bible-heading"><p class="eyebrow">Alkitab Bahasa Indonesia</p><h2>Pilih kitab, pasal, dan ayat.</h2></div><div id="bible-content"><div class="v18-empty">Belum ada ayat yang dipilih.</div></div></article></div></div></section>';
       }
 
       async function loadBibleBooks() {
@@ -4457,20 +4569,18 @@
           })).filter(book => book.id);
           if (!state.bibleBooks.length) throw new Error('Daftar kitab belum tersedia. Silakan muat ulang.');
           cacheSet('v1710-bible-books',state.bibleBooks,86400000);
-          populateBibleBooks();
           state.bibleTestament='';state.bibleTargetVerse=null;state.bibleReader=null;syncBibleTestament();
           if ($('#bible-book')) $('#bible-book').value='';
+          const labelEl = $('#bible-book-label');
+          if (labelEl) { labelEl.textContent = 'Pilih kitab\u2026'; labelEl.classList.add('placeholder'); }
           if ($('#bible-chapter')) $('#bible-chapter').innerHTML='<option value="">Pilih pasal</option>';
           if ($('#bible-verse')) $('#bible-verse').value='';
           loadDownloadArchives();
         } catch (error) { if ($('#bible-content')) $('#bible-content').innerHTML = errorBox(error.message); }
       }
       function populateBibleBooks(testament) {
-        const select = $('#bible-book'); if (!select) return;
-        const groups = [['PL','Perjanjian Lama'],['PB','Perjanjian Baru']];
-        const active = ['PL','PB'].includes(testament) ? testament : '';
-        const visibleGroups = active ? groups.filter(group => group[0] === active) : groups;
-        select.innerHTML = '<option value="">Pilih kitab</option>' + visibleGroups.map(group => '<optgroup label="' + group[1] + '">' + state.bibleBooks.filter(book=>book.testament===group[0]).sort((a,b)=>a.order-b.order).map(book=>'<option value="' + attr(book.id) + '">' + esc(book.name || 'Kitab') + '</option>').join('') + '</optgroup>').join('');
+        // Picker handles book display — no-op kept for call compatibility
+        void testament;
       }
       function syncBibleTestament() {
         $$('[data-bible-testament]').forEach(button => {
@@ -4483,12 +4593,9 @@
         const next = testament === 'PB' ? 'PB' : 'PL';
         state.bibleTestament = next;
         syncBibleTestament();
-        populateBibleBooks(next);
-        const bookSelect = $('#bible-book');
         const firstBook = state.bibleBooks.filter(book=>book.testament===next).sort((a,b)=>a.order-b.order)[0];
-        if (!bookSelect || !firstBook) return toast('Daftar kitab belum tersedia.');
-        bookSelect.value = firstBook.id;
-        fillBibleChapters();
+        if (!firstBook) return toast('Daftar kitab belum tersedia.');
+        selectBookFromPicker(firstBook.id);
         const chapterSelect = $('#bible-chapter');
         const verseInput = $('#bible-verse');
         if (chapterSelect) chapterSelect.value = '1';
@@ -4535,6 +4642,274 @@
           content.innerHTML = '<div class="v18-reader-tools">'+favoriteButton(savedItem)+'<button class="btn primary present-button" type="button" data-present-bible>'+icon('external')+'Mode layar</button></div><div class="verse-list">' + verses.map(item => '<div class="verse ' + (Number(item.number)===verse?'is-target':'') + '" id="verse-' + attr(item.number) + '"><span class="verse-number">' + esc(item.number) + '</span><span class="verse-text">' + esc(item.text) + '</span></div>').join('') + '</div><footer class="card-pad small faint">' + esc(safeSource) + ' · Mode layar menampilkan satu ayat besar dan jelas.</footer>';
           requestAnimationFrame(()=>document.getElementById('verse-' + String(verse))?.scrollIntoView({behavior:document.documentElement.dataset.motion==='reduced'?'auto':'smooth',block:'center'}));
         } catch (error) { if ($('#bible-content')) $('#bible-content').innerHTML = errorBox(error.message); }
+      }
+
+      // GALILEA-BIBLE-SEARCH · memakai sumber tunggal yang sama dengan pembaca ayat.
+      function bibleSearchStatus(message) {
+        const node = $('#bible-search-status');
+        if (node) node.textContent = message;
+      }
+      function bibleSearchSnippet(text, query) {
+        const raw = String(text || '');
+        const needle = String(query || '').toLowerCase().replace(/\s+/g, ' ').trim();
+        const at = needle ? raw.toLowerCase().indexOf(needle) : -1;
+        if (at < 0) return esc(raw.slice(0, 150));
+        const from = Math.max(0, at - 42);
+        const lead = from > 0 ? '…' : '';
+        return lead + esc(raw.slice(from, at)) + '<mark>' + esc(raw.substr(at, needle.length)) + '</mark>' + esc(raw.slice(at + needle.length, at + needle.length + 96));
+      }
+      async function runBibleSearch() {
+        const input = $('#bible-search-input'), box = $('#bible-search-results');
+        if (!input || !box) return;
+        const query = String(input.value || '').replace(/\s+/g, ' ').trim();
+        if (query.length < 2) { box.innerHTML = ''; bibleSearchStatus('Ketik minimal 2 karakter untuk mencari.'); return; }
+
+        const scopeSelect = $('#bible-search-scope');
+        let scope = scopeSelect ? scopeSelect.value : 'all';
+        if (scope === 'book') {
+          const selected = $('#bible-book')?.value;
+          if (!selected) { box.innerHTML = ''; bibleSearchStatus('Pilih kitab terlebih dahulu untuk cakupan "Kitab terpilih".'); return; }
+          scope = selected;
+        }
+
+        const token = (state.bibleSearchToken = (state.bibleSearchToken || 0) + 1);
+        if (state.bibleSearchBusy) return;
+        state.bibleSearchBusy = true;
+        const button = $('#bible-search-submit');
+        if (button) button.disabled = true;
+        bibleSearchStatus('Mencari “' + query + '”…');
+        box.innerHTML = loadingBox('Mencari ayat…', 'Menelusuri teks Alkitab pada cakupan yang dipilih.');
+
+        try {
+          const key = 'v1710-bible-search-' + scope + '-' + query.toLowerCase();
+          const data = await cachedResource(key, () => server('searchBible', [query, scope], 45000), 86400000);
+          if (token !== state.bibleSearchToken || !$('#bible-search-results')) return;
+          const results = Array.isArray(data && data.results) ? data.results : [];
+          state.bibleSearchResults = results;
+          if (!results.length) {
+            box.innerHTML = '<div class="v18-empty">Tidak ada ayat yang cocok dengan “' + esc(query) + '”.</div>';
+            bibleSearchStatus(data && data.partial ? 'Pencarian belum mencakup seluruh cakupan. Persempit cakupan lalu coba lagi.' : 'Tidak ada hasil. Coba kata lain atau ubah cakupan.');
+            return;
+          }
+          box.innerHTML = results.map((item, index) => '<button class="bible-search-hit" type="button" data-bible-hit="' + index + '"><span class="bible-search-ref">' + esc(item.book) + ' ' + esc(item.chapter) + ':' + esc(item.verse) + '</span><span class="bible-search-snippet">' + bibleSearchSnippet(item.text, query) + '</span></button>').join('');
+          let note = results.length + ' ayat ditemukan';
+          if (data && data.limited) note += ' (ditampilkan sebagian)';
+          if (data && data.timedOut) note += ' · pencarian dihentikan karena batas waktu, persempit cakupan';
+          else if (data && data.partial) note += ' · cakupan belum tuntas dipindai';
+          bibleSearchStatus(note + '.');
+        } catch (error) {
+          if (token !== state.bibleSearchToken || !$('#bible-search-results')) return;
+          box.innerHTML = errorBox(error.message);
+          bibleSearchStatus('Pencarian gagal. Periksa koneksi lalu coba lagi.');
+        } finally {
+          state.bibleSearchBusy = false;
+          const submit = $('#bible-search-submit');
+          if (submit) submit.disabled = false;
+        }
+      }
+      async function openBibleSearchHit(index) {
+        const hit = (state.bibleSearchResults || [])[Number(index)];
+        if (!hit) return;
+        const bookSelect = $('#bible-book'), chapterSelect = $('#bible-chapter'), verseInput = $('#bible-verse');
+        if (!bookSelect || !chapterSelect || !verseInput) return;
+        const book = state.bibleBooks.find(item => item.id === hit.bookId);
+        if (book) {
+          state.bibleTestament = book.testament;
+          syncBibleTestament();
+          bookSelect.value = hit.bookId;
+          const labelEl = $('#bible-book-label');
+          if (labelEl) { labelEl.textContent = book.name; labelEl.classList.remove('placeholder'); }
+          saveBookRecent(hit.bookId, book.name);
+        } else {
+          bookSelect.value = hit.bookId;
+        }
+        fillBibleChapters();
+        chapterSelect.value = String(hit.chapter);
+        verseInput.value = String(hit.verse);
+        await openBibleChapter();
+      }
+
+      // =====================================================================
+      // BIBLE BOOK PICKER · Searchable, keyboard-friendly, accessible
+      // =====================================================================
+      const BOOK_ABBR_ID = {
+        GEN:'Kej',EXO:'Kel',LEV:'Im',NUM:'Bil',DEU:'Ul',
+        JOS:'Yos',JDG:'Hak',RUT:'Rut',SA1:'1Sam',SA2:'2Sam',
+        KI1:'1Raj',KI2:'2Raj',CH1:'1Taw',CH2:'2Taw',EZR:'Ezr',
+        NEH:'Neh',EST:'Est',JOB:'Ayb',PSA:'Mzm',PRO:'Ams',
+        ECC:'Pkh',SON:'Kid',ISA:'Yes',JER:'Yer',LAM:'Rat',
+        EZK:'Yeh',DAN:'Dan',HOS:'Hos',JOL:'Yl',AMO:'Am',
+        OBA:'Ob',JNA:'Yun',MIC:'Mi',NAH:'Nah',HAB:'Hab',
+        ZEP:'Zef',HAG:'Hag',ZEC:'Za',MAL:'Mal',
+        MAT:'Mat',MRK:'Mrk',LUK:'Luk',JHN:'Yoh',ACT:'Kis',
+        ROM:'Rm',CO1:'1Kor',CO2:'2Kor',GAL:'Gal',EPH:'Ef',
+        PHP:'Flp',COL:'Kol',TH1:'1Tes',TH2:'2Tes',TI1:'1Tim',
+        TI2:'2Tim',TIT:'Tit',PHM:'Flm',HEB:'Ibr',JAM:'Yak',
+        PE1:'1Pet',PE2:'2Pet',JN1:'1Yoh',JN2:'2Yoh',JN3:'3Yoh',
+        JUD:'Yud',REV:'Why'
+      };
+      // Alias tambahan untuk pencarian (singkatan alternatif umum)
+      const BOOK_ABBR_SEARCH_EXTRA = {
+        '1sam':'SA1','2sam':'SA2','1raj':'KI1','2raj':'KI2','1taw':'CH1','2taw':'CH2',
+        'mzm':'PSA','ams':'PRO','pkh':'ECC','kid':'SON','yes':'ISA','yer':'JER','rat':'LAM',
+        'yeh':'EZK','yl':'JOL','yun':'JNA','za':'ZEC',
+        'mat':'MAT','mrk':'MRK','luk':'LUK','yoh':'JHN','kis':'ACT','rm':'ROM',
+        '1kor':'CO1','2kor':'CO2','gal':'GAL','ef':'EPH','flp':'PHP','kol':'COL',
+        '1tes':'TH1','2tes':'TH2','1tim':'TI1','2tim':'TI2','tit':'TIT','flm':'PHM',
+        'ibr':'HEB','yak':'JAM','1pet':'PE1','2pet':'PE2',
+        '1yoh':'JN1','2yoh':'JN2','3yoh':'JN3','yud':'JUD','why':'REV',
+        'kej':'GEN','kel':'EXO','im':'LEV','bil':'NUM','ul':'DEU',
+        'yos':'JOS','hak':'JDG','rut':'RUT','ezr':'EZR','neh':'NEH','est':'EST',
+        'ayb':'JOB','hos':'HOS','am':'AMO','ob':'OBA','mi':'MIC','nah':'NAH','hab':'HAB',
+        'zef':'ZEP','hag':'HAG','mal':'MAL','dan':'DAN'
+      };
+      const BOOK_PICKER_RECENTS_KEY = 'galilea-book-recents-v1';
+      const BOOK_PICKER_RECENTS_MAX = 3;
+
+      function getBookAbbr(id) {
+        return BOOK_ABBR_ID[id.toUpperCase()] || id;
+      }
+      function getBookRecents() {
+        try { return JSON.parse(localStorage.getItem(BOOK_PICKER_RECENTS_KEY) || '[]'); }
+        catch(e) { return []; }
+      }
+      function saveBookRecent(id, name) {
+        try {
+          const prev = getBookRecents().filter(r => r.id !== id);
+          const next = [{ id, name, abbr: getBookAbbr(id) }, ...prev].slice(0, BOOK_PICKER_RECENTS_MAX);
+          localStorage.setItem(BOOK_PICKER_RECENTS_KEY, JSON.stringify(next));
+        } catch(e) {}
+      }
+
+      function filterBibleBooks(query, testament) {
+        const books = state.bibleBooks || [];
+        let pool = testament ? books.filter(b => b.testament === testament) : books;
+        if (!query) return pool.sort((a,b) => a.order-b.order);
+        const q = query.toLowerCase().replace(/\s+/g,'');
+        const matchId = BOOK_ABBR_SEARCH_EXTRA[q];
+        return pool.filter(b => {
+          if (matchId && b.id === matchId) return true;
+          const abbr = (getBookAbbr(b.id) || '').toLowerCase().replace(/\s+/g,'');
+          const name = (b.name || '').toLowerCase().replace(/\s+/g,'');
+          return name.includes(q) || abbr.includes(q) || b.id.toLowerCase().includes(q);
+        }).sort((a,b) => a.order-b.order);
+      }
+
+      function renderBookPickerBody(query) {
+        const selectedId = $('#bible-book') ? $('#bible-book').value : '';
+        const filtered = filterBibleBooks(query, '');
+        if (!filtered.length) {
+          return '<div class="book-picker-empty"><strong>Kitab tidak ditemukan</strong>Coba variasi lain, misal "yoh", "1kor", "mzm"</div>';
+        }
+        const recents = (!query) ? getBookRecents() : [];
+        const recentsHtml = recents.length ? `
+          <div class="book-picker-recents">
+            <div class="book-picker-section-label">Terakhir dibaca</div>
+            <div class="book-picker-recents-row">
+              ${recents.map(r => `<button type="button" class="book-picker-recent-btn" data-pick-book="${esc(r.id)}"><span class="abr">${esc(r.abbr)}</span>${esc(r.name)}</button>`).join('')}
+            </div>
+          </div>` : '';
+        const groups = [['PL','Perjanjian Lama'],['PB','Perjanjian Baru']];
+        const groupsHtml = groups.map(([code, label]) => {
+          const books = filtered.filter(b => b.testament === code);
+          if (!books.length) return '';
+          return `<div class="book-picker-group">
+            <div class="book-picker-section-label">${label}</div>
+            <div class="book-picker-grid">
+              ${books.map(b => `<button type="button" class="book-picker-item${b.id===selectedId?' selected':''}" data-pick-book="${esc(b.id)}"><span class="book-picker-item-abr">${esc(getBookAbbr(b.id))}</span><span class="book-picker-item-name">${esc(b.name)}</span></button>`).join('')}
+            </div>
+          </div>`;
+        }).join('');
+        return recentsHtml + groupsHtml;
+      }
+
+      function openBookPicker() {
+        if (!state.bibleBooks || !state.bibleBooks.length) { toast('Daftar kitab belum tersedia, tunggu sebentar.'); return; }
+        // Inject DOM if not present
+        if (!$('#book-picker-panel')) {
+          const backdrop = document.createElement('div');
+          backdrop.id = 'book-picker-backdrop';
+          backdrop.className = 'book-picker-backdrop';
+          backdrop.setAttribute('aria-hidden','true');
+          document.body.appendChild(backdrop);
+          const panel = document.createElement('div');
+          panel.id = 'book-picker-panel';
+          panel.className = 'book-picker-panel';
+          panel.setAttribute('role','dialog');
+          panel.setAttribute('aria-modal','true');
+          panel.setAttribute('aria-label','Pilih kitab Alkitab');
+          panel.innerHTML = `
+            <div class="book-picker-handle" aria-hidden="true"></div>
+            <div class="book-picker-header">
+              <strong>Pilih Kitab</strong>
+              <button type="button" class="book-picker-close" id="book-picker-close" aria-label="Tutup">
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><line x1="1" y1="1" x2="13" y2="13"/><line x1="13" y1="1" x2="1" y2="13"/></svg>
+              </button>
+            </div>
+            <div class="book-picker-search-wrap">
+              <div class="book-picker-search">
+                <svg viewBox="0 0 16 16" aria-hidden="true"><circle cx="6.5" cy="6.5" r="4.5"/><line x1="10" y1="10" x2="14" y2="14"/></svg>
+                <input type="search" id="book-picker-input" class="book-picker-input" placeholder="Cari kitab atau singkatan…" autocomplete="off" enterkeyhint="search" autocorrect="off" autocapitalize="off" spellcheck="false">
+              </div>
+            </div>
+            <div class="book-picker-body" id="book-picker-body"></div>`;
+          document.body.appendChild(panel);
+          // Bind close and search
+          backdrop.addEventListener('click', closeBookPicker);
+          $('#book-picker-close').addEventListener('click', closeBookPicker);
+          $('#book-picker-input').addEventListener('input', e => {
+            const q = e.target.value.replace(/\s+/g,' ').trim();
+            $('#book-picker-body').innerHTML = renderBookPickerBody(q);
+          });
+          panel.addEventListener('keydown', e => {
+            if (e.key === 'Escape') closeBookPicker();
+          });
+          panel.addEventListener('click', e => {
+            const btn = e.target.closest('[data-pick-book]');
+            if (btn) selectBookFromPicker(btn.dataset.pickBook);
+          });
+        }
+        // Render body
+        $('#book-picker-body').innerHTML = renderBookPickerBody('');
+        // Open
+        requestAnimationFrame(() => {
+          $('#book-picker-backdrop').classList.add('open');
+          $('#book-picker-panel').classList.add('open');
+          setTimeout(() => { const inp = $('#book-picker-input'); if(inp){inp.value='';inp.focus();} }, 80);
+        });
+        document.body.style.overflow = 'hidden';
+      }
+
+      function closeBookPicker() {
+        const panel = $('#book-picker-panel'), backdrop = $('#book-picker-backdrop');
+        if (panel) panel.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('open');
+        document.body.style.overflow = '';
+        // Return focus to trigger
+        const trigger = $('#bible-book-trigger');
+        if (trigger) trigger.focus();
+      }
+
+      function selectBookFromPicker(bookId) {
+        const book = (state.bibleBooks || []).find(b => b.id === bookId);
+        if (!book) return;
+        // Update hidden input
+        const hiddenInput = $('#bible-book');
+        if (hiddenInput) hiddenInput.value = bookId;
+        // Update trigger label
+        const labelEl = $('#bible-book-label');
+        if (labelEl) {
+          labelEl.textContent = book.name;
+          labelEl.classList.remove('placeholder');
+        }
+        // Sync testament
+        state.bibleTestament = book.testament;
+        syncBibleTestament();
+        // Fill chapters
+        fillBibleChapters();
+        // Save to recents
+        saveBookRecent(bookId, book.name);
+        closeBookPicker();
       }
 
       async function downloadBibleBook() {
@@ -4650,8 +5025,8 @@
         for(let attempt=0;attempt<8;attempt++){
           const available=Math.max(1,stage.clientHeight),needed=Math.max(1,stage.scrollHeight);
           if(needed<=available+2)break;
-          const ratio=Math.max(.55,Math.min(.96,(available/needed)*.96));
-          const next=Math.max(.52,fitted*ratio);
+          const ratio=Math.max(.85,Math.min(.96,(available/needed)*.96));
+          const next=Math.max(.82,fitted*ratio);
           if(Math.abs(next-fitted)<.006)break;
           fitted=next;shell.style.setProperty('--present-scale',String(fitted));
         }
@@ -4720,6 +5095,13 @@
       function launchPresentation(view){
         const dialog=$('#presentation-dialog'),shell=$('#presentation-shell');if(!dialog||!shell||!view)return;
         state.presentation=view;shell.dataset.presentationType=view.type;
+        const readerDialog=$('#reader-dialog');
+        state.presentationPreviousDialog=Boolean(readerDialog&&readerDialog.open);
+        state.presentationScrollPos=window.scrollY||window.pageYOffset||0;
+        if(state.presentationPreviousDialog){try{readerDialog.close();}catch(_){}}
+        document.documentElement.classList.add('is-presenting');
+        document.body.classList.add('is-presenting');
+        document.body.style.overflow='hidden';
         renderPresentation();if(!dialog.open)dialog.showModal();shell.tabIndex=-1;shell.focus({preventScroll:true});syncPresentationState();showPresentationControls(true);schedulePresentationFit();requestPresentationWakeLock();
         if(shell.requestFullscreen&&!document.fullscreenElement)shell.requestFullscreen().then(schedulePresentationFit).catch(()=>{});
       }
@@ -4762,7 +5144,7 @@
           else if(slide.kind==='agenda')stage.innerHTML='<article class="presentation-operator-panel"><span class="presentation-verse-label">URUTAN IBADAH'+(slide.part>1?' · BAGIAN '+esc(slide.part):'')+'</span><h2>'+esc(slide.title)+'</h2><ol class="presentation-operator-agenda">'+(slide.items||[]).map(item=>'<li>'+esc(item)+'</li>').join('')+'</ol></article>';
           else if(slide.kind==='bible')stage.innerHTML='<span class="presentation-verse-label">'+esc(slide.label)+'</span><div class="presentation-copy bible">'+esc(slide.text)+'</div>';
           else if(slide.kind==='scripture')stage.innerHTML='<article class="presentation-operator-panel"><span class="presentation-verse-label">AYAT UTAMA</span><h2>'+esc(slide.reference)+'</h2><p class="presentation-announcement-copy">Buka teks Alkitab melalui menu Alkitab apabila ayat lengkap belum tersimpan.</p></article>';
-          else if(slide.kind==='song')stage.innerHTML='<span class="presentation-verse-label">'+esc(slide.verseLabel)+'</span><div class="presentation-copy">'+(slide.lines||[]).map(esc).join('<br>')+'</div>'+((slide.chorus||[]).length?'<div class="presentation-refrain"><strong>REFF</strong>'+(slide.chorus||[]).map(esc).join('<br>')+'</div>':'');
+          else if(slide.kind==='song')stage.innerHTML='<div class="presentation-song-layout'+((slide.chorus||[]).length?' has-refrain':' single-verse')+'"><div class="presentation-song-verse"><span class="presentation-verse-label">'+esc(slide.verseLabel)+'</span><div class="presentation-copy">'+(slide.lines||[]).map(esc).join('<br>')+'</div></div>'+((slide.chorus||[]).length?'<div class="presentation-song-refrain"><div class="presentation-refrain"><span class="presentation-refrain-tag">REFF / KOOR</span>'+(slide.chorus||[]).map(esc).join('<br>')+'</div></div>':'')+'</div>';
           else if(slide.kind==='song-reference')stage.innerHTML='<article class="presentation-operator-panel"><span class="presentation-verse-label">LAGU PUJIAN</span><h2>'+esc(slide.title)+'</h2></article>';
           else if(slide.kind==='service')stage.innerHTML='<article class="presentation-operator-service"><aside class="presentation-operator-service-title"><span class="presentation-verse-label">PELAYANAN</span><h2>'+esc(slide.title)+'</h2><p>'+esc(slide.dateLabel)+' · '+esc(slide.time)+'</p></aside><dl class="presentation-operator-fields">'+(slide.fields||[]).map(field=>'<div class="presentation-operator-field"><dt>'+esc(field.label)+'</dt><dd>'+esc(field.value||'—')+'</dd></div>').join('')+'</dl></article>';
           else if(slide.kind==='announcement')stage.innerHTML='<article class="presentation-announcement"><div class="presentation-announcement-meta"><span class="presentation-verse-label">'+esc(slide.dateLabel)+'</span><span class="presentation-announcement-priority">'+esc(slide.priority)+'</span></div><h2 class="presentation-announcement-title">'+esc(slide.title)+'</h2><p class="presentation-announcement-copy">'+esc(slide.summary||'Informasi selengkapnya tersedia pada website.')+'</p></article>';
@@ -4826,7 +5208,7 @@
         view.index=Math.max(0,Math.min(verses.length-1,Number(view.index)||0));const verse=verses[view.index],isTheme=Boolean(state.hymnalReader.isTheme||song.isTheme);
         setPresentationOrnament('song',song,view.index);
         kicker.textContent=isTheme?'LAGU TEMA · GMAHK GALILEA BALIKPAPAN':'LAGU SION · NOMOR '+song.number;title.textContent=song.title;setPresentationNavigationLabels('Ayat');
-        stage.innerHTML='<span class="presentation-verse-label">AYAT '+esc(verse.index||view.index+1)+'</span><div class="presentation-copy">'+verse.lines.map(esc).join('<br>')+'</div>'+(chorus?'<div class="presentation-refrain"><strong>REFF</strong>'+chorus.lines.map(esc).join('<br>')+'</div>':'');
+        stage.innerHTML='<div class="presentation-song-layout'+(chorus?' has-refrain':' single-verse')+'"><div class="presentation-song-verse"><span class="presentation-verse-label">AYAT '+esc(verse.index||view.index+1)+'</span><div class="presentation-copy">'+verse.lines.map(esc).join('<br>')+'</div></div>'+(chorus?'<div class="presentation-song-refrain"><div class="presentation-refrain"><span class="presentation-refrain-tag">REFF / KOOR</span>'+chorus.lines.map(esc).join('<br>')+'</div></div>':'')+'</div>';
         counter.textContent='Ayat '+(view.index+1)+' / '+verses.length;counter.setAttribute('aria-label','Ayat '+(view.index+1)+' dari '+verses.length);
         $('[data-presentation-prev]').disabled=view.index===0;$('[data-presentation-next]').disabled=view.index>=verses.length-1;
         finishPresentationRender();
@@ -4871,6 +5253,15 @@
         window.clearTimeout(presentationControlsTimer);window.clearTimeout(presentationFitTimer);window.clearTimeout(presentationTransitionTimer);window.cancelAnimationFrame(presentationFitFrame);presentationPointer=null;
         const shell=$('#presentation-shell');if(shell){shell.classList.remove('presentation-controls-hidden','presentation-enter-next','presentation-enter-prev','is-blackout','is-light');delete shell.dataset.fit;delete shell.dataset.presentationType;delete shell.dataset.presentationKind;}
         releasePresentationWakeLock();
+        document.documentElement.classList.remove('is-presenting');
+        document.body.classList.remove('is-presenting');
+        document.body.style.overflow='';
+        if(typeof state.presentationScrollPos==='number'){window.scrollTo(0,state.presentationScrollPos);}
+        if(state.presentationPreviousDialog){
+          state.presentationPreviousDialog=false;
+          const readerDialog=$('#reader-dialog');
+          if(readerDialog&&!readerDialog.open){try{readerDialog.showModal();}catch(_){}}
+        }
       }
       function closePresentation(){
         const dialog=$('#presentation-dialog');if(dialog&&dialog.open)dialog.close();cleanupPresentation();
@@ -5189,9 +5580,12 @@
         });
         $('#sabbath-year')?.addEventListener('change', event => { state.sabbathYear = Number(event.target.value); loadSabbath(); });
         $('#sabbath-quarter')?.addEventListener('change', event => { state.sabbathQuarter = Number(event.target.value); loadSabbath(); });
-        $('#bible-book')?.addEventListener('change', event => {const book=state.bibleBooks.find(item=>item.id===event.target.value);state.bibleTestament=book?book.testament:'';syncBibleTestament();fillBibleChapters();});
+        $('#bible-book-trigger')?.addEventListener('click', openBookPicker);
         $('#bible-open')?.addEventListener('click', openBibleChapter);
         $('#bible-verse')?.addEventListener('keydown', event => { if(event.key==='Enter') openBibleChapter(); });
+        $('#bible-search-submit')?.addEventListener('click', runBibleSearch);
+        $('#bible-search-input')?.addEventListener('keydown', event => { if(event.key==='Enter'){ event.preventDefault(); runBibleSearch(); } });
+        $('#bible-search-results')?.addEventListener('click', event => { const hit=event.target.closest('[data-bible-hit]'); if(hit) openBibleSearchHit(hit.dataset.bibleHit); });
         $('#hymnal-search')?.addEventListener('input', event => renderSongList(event.target.value));
         $('#hymnal-select')?.addEventListener('change', event => {if(event.target.value)openSong(event.target.value);});
         $('#faq-search')?.addEventListener('input', event => { state.faqQuery=event.target.value; const box=$('#faq-results'); if(box) box.innerHTML=faqResultsHtml(); scheduleTranslation(350); });
@@ -5762,6 +6156,8 @@
         presentationShellElement.addEventListener('pointerup',handlePresentationPointerUp,{passive:true});
         presentationShellElement.addEventListener('pointercancel',()=>{presentationPointer=null;},{passive:true});
         presentationShellElement.addEventListener('pointermove',()=>showPresentationControls(true),{passive:true});
+        presentationShellElement.addEventListener('mousemove',()=>showPresentationControls(true),{passive:true});
+        presentationShellElement.addEventListener('touchmove',()=>showPresentationControls(true),{passive:true});
       }
       $('#presentation-dialog')?.addEventListener('close',cleanupPresentation);
       if('ResizeObserver' in window){presentationResizeObserver=new ResizeObserver(()=>{if($('#presentation-dialog')?.open)schedulePresentationFit();});const frame=$('#presentation-frame');if(frame)presentationResizeObserver.observe(frame);}

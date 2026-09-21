@@ -144,7 +144,7 @@ assert.match(index, /\.slice\(0,3\)/);
 assert.match(index, /SATU VIDEO TERBARU/);
 assert.match(index, /data-present-bible/);
 assert.match(index, /data-present-song/);
-assert.match(index, /<option value="">Pilih kitab<\/option>/);
+assert.match(index, /book-picker-trigger/);
 assert.match(index, /Pilih Lagu Tema atau Lagu Sion/);
 assert.doesNotMatch(index, /footer-updated'\)\.textContent = 'V/);
 
@@ -226,9 +226,22 @@ assert.doesNotMatch(quarterlyPdf, /WEBSITE GALILEA\) Tj|Diunduh melalui Website 
 assert.match(quarterlyPdf, /JADWAL PELAYANAN JEMAAT/);
 const calls = [...index.matchAll(/server\('([^']+)'/g)].map(match => match[1]);
 assert.ok(calls.length >= 20, 'Jumlah integrasi viewer lebih sedikit dari yang diharapkan.');
+// These Bible methods are deliberately terminated in api/gas.js. The Vercel
+// proxy reads the single Bible source directly, so they must not be forwarded
+// to Apps Script and do not need handlers in apps-script-backend/VercelApi.gs.
+// Keep this list explicit: a newly added viewer method must still be present
+// in the Apps Script bridge unless it is intentionally added here.
+const VERCEL_ONLY_BIBLE_METHODS = new Set([
+  'getBibleBook',
+  'getBibleBooks',
+  'getBibleChapter',
+  'searchBible'
+]);
 for (const method of new Set(calls)) {
   assert.ok(proxy.includes(`'${method}'`), `Method ${method} belum diizinkan oleh proxy Vercel.`);
-  assert.ok(bridge.includes(`${method}: function`), `Method ${method} belum tersedia pada bridge Apps Script.`);
+  if (!VERCEL_ONLY_BIBLE_METHODS.has(method)) {
+    assert.ok(bridge.includes(`${method}: function`), `Method ${method} belum tersedia pada bridge Apps Script.`);
+  }
 }
 
 const vercel = JSON.parse(read('vercel.json'));

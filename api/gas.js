@@ -19,6 +19,7 @@ const PUBLIC_METHODS = new Set([
   'getSabbathResources',
   'getSabbathSchoolLibrary',
   'getWebsiteData',
+  'searchBible',
   'searchWebsite',
   'submitServiceRequest',
   'translateViewerTexts'
@@ -288,6 +289,26 @@ const BIBLE_BOOKS = [
   { id: 'REV', name: 'Wahyu', folder: 'Wahyu', chapters: 22, testament: 'PB' }
 ];
 
+// Satu-satunya sumber runtime Alkitab. Metadata di bawah harus selalu menunjuk
+// ke repositori yang benar-benar di-fetch, bukan penyedia lain.
+const BIBLE_SOURCE_BASE = 'https://raw.githubusercontent.com/neocarles/alkitab-tb/master/Alkitab/';
+const BIBLE_SOURCE_URL = 'https://github.com/neocarles/alkitab-tb';
+const BIBLE_SOURCE_LABEL = 'Alkitab Terjemahan Baru (TB) · dataset neocarles/alkitab-tb';
+const BIBLE_FETCH_TIMEOUT_MS = 12000;
+const BIBLE_SEARCH_CONCURRENCY = 12;
+const BIBLE_SEARCH_MAX_RESULTS = 60;
+const BIBLE_SEARCH_DEADLINE_MS = 40000;
+const BIBLE_SEARCH_MIN_QUERY = 2;
+
+function bibleChapterUrl(book, chapter) {
+  return `${BIBLE_SOURCE_BASE}${book.folder}/${book.folder}_${chapter}.txt`;
+}
+
+function resolveBibleBook(bookId) {
+  const idStr = String(bookId || '').toUpperCase();
+  return BIBLE_BOOKS.find(b => b.id === idStr || b.name.toUpperCase() === idStr) || null;
+}
+
 function parseTbChapter(text) {
   const lines = String(text || '').replace(/\r/g, '').split('\n');
   const verses = [];
@@ -317,41 +338,26 @@ function getBibleBooksDirect() {
   }));
 }
 
+async function fetchTbChapterVerses(book, ch) {
+  const url = bibleChapterUrl(book, ch);
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), BIBLE_FETCH_TIMEOUT_MS);
+  try {
+    const res = await fetch(url, { signal: controller.signal, headers: { Accept: 'text/plain' } });
+    if (!res.ok) throw new Error('Sumber Alkitab TB sedang tidak dapat dihubungi.');
+    const text = await res.text();
+    return parseTbChapter(text);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 async function getBibleChapterDirect(bookId, chapter) {
-  const idStr = String(bookId || '').toUpperCase();
-  const book = BIBLE_BOOKS.find(b => b.id === idStr || b.name.toUpperCase() === idStr);
+  const book = resolveBibleBook(bookId);
   if (!book) throw new Error('Kitab tidak dikenali.');
   const ch = Math.max(1, Math.min(book.chapters, Number(chapter) || 1));
 
-  const laiKey = String(process.env.LAI_BIBLE_API_KEY || '').trim();
-  if (laiKey) {
-    try {
-      const laiUrl = `https://bible-api.alkitab.or.id/bible-api/api/v1/bible/tb/${encodeURIComponent(book.folder.toLowerCase())}/${ch}`;
-      const res = await fetch(laiUrl, {
-        headers: { 'Authorization': `Bearer ${laiKey}`, 'Accept': 'application/json' }
-      });
-      if (res.ok) {
-        const json = await res.json();
-        if (json && Array.isArray(json.verses) && json.verses.length) {
-          return {
-            book: book.name,
-            bookId: book.id,
-            chapter: ch,
-            chapters: book.chapters,
-            verses: json.verses.map(v => ({ number: String(v.number || v.verse), text: String(v.text || '').trim() })),
-            source: 'Alkitab Terjemahan Baru (TB) — Lembaga Alkitab Indonesia (LAI)',
-            sourceUrl: 'https://bible-api.alkitab.or.id/'
-          };
-        }
-      }
-    } catch (_) {}
-  }
-
-  const url = `https://raw.githubusercontent.com/neocarles/alkitab-tb/master/Alkitab/${book.folder}/${book.folder}_${ch}.txt`;
-  const res = await fetch(url);
-  if (!res.ok) throw new Error('Sumber Alkitab TB sedang tidak dapat dihubungi.');
-  const text = await res.text();
-  const verses = parseTbChapter(text);
+  const verses = await fetchTbChapterVerses(book, ch);
   if (!verses.length) throw new Error('Pasal yang dipilih belum tersedia.');
   return {
     book: book.name,
@@ -359,8 +365,8 @@ async function getBibleChapterDirect(bookId, chapter) {
     chapter: ch,
     chapters: book.chapters,
     verses,
-    source: 'Alkitab Terjemahan Baru (TB) — Lembaga Alkitab Indonesia (LAI)',
-    sourceUrl: 'https://bible-api.alkitab.or.id/'
+    source: BIBLE_SOURCE_LABEL,
+    sourceUrl: BIBLE_SOURCE_URL
   };
 }
 
@@ -371,11 +377,11 @@ async function getBibleBookDirect(bookId) {
 
   const chapterPromises = Array.from({ length: book.chapters }, async (_, idx) => {
     const ch = idx + 1;
-    const url = `https://raw.githubusercontent.com/neocarles/alkitab-tb/master/Alkitab/${book.folder}/${book.folder}_${ch}.txt`;
-    const res = await fetch(url);
-    if (!res.ok) return { number: ch, verses: [] };
-    const text = await res.text();
-    return { number: ch, verses: parseTbChapter(text) };
+    try {
+      return { number: ch, verses: await fetchTbChapterVerses(book, ch) };
+    } catch (_) {
+      return { number: ch, verses: [] };
+    }
   });
 
   const chapters = await Promise.all(chapterPromises);
@@ -383,10 +389,128 @@ async function getBibleBookDirect(bookId) {
     book: book.name,
     bookId: book.id,
     chapters,
-    source: 'Alkitab Terjemahan Baru (TB) — Lembaga Alkitab Indonesia (LAI)',
-    sourceUrl: 'https://bible-api.alkitab.or.id/',
+    source: BIBLE_SOURCE_LABEL,
+    sourceUrl: BIBLE_SOURCE_URL,
     watermark: 'Diunduh melalui Website Galilea',
     copyright: '© Sekretaris Galilea 2026'
+  };
+}
+
+// Cache chapter lintas-invocation (hangat selama serverless instance hidup),
+// supaya pencarian berulang tidak menembak GitHub raw lagi.
+const bibleChapterCache = new Map();
+const BIBLE_CACHE_TTL_MS = 86400000;
+const BIBLE_CACHE_MAX_ENTRIES = 1200;
+
+async function getCachedChapterVerses(book, chapter) {
+  const key = `${book.id}-${chapter}`;
+  const hit = bibleChapterCache.get(key);
+  if (hit && (Date.now() - hit.at) < BIBLE_CACHE_TTL_MS) return hit.verses;
+  const verses = await fetchTbChapterVerses(book, chapter);
+  if (bibleChapterCache.size >= BIBLE_CACHE_MAX_ENTRIES) {
+    const oldest = bibleChapterCache.keys().next().value;
+    if (oldest !== undefined) bibleChapterCache.delete(oldest);
+  }
+  bibleChapterCache.set(key, { at: Date.now(), verses });
+  return verses;
+}
+
+function normalizeSearchQuery(value) {
+  return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+}
+
+function resolveSearchScope(scope) {
+  const raw = String(scope || 'all').trim();
+  const upper = raw.toUpperCase();
+  if (upper === 'PL' || upper === 'PB') {
+    return { books: BIBLE_BOOKS.filter(b => b.testament === upper), scope: upper };
+  }
+  if (!raw || upper === 'ALL') return { books: BIBLE_BOOKS.slice(), scope: 'all' };
+  const book = resolveBibleBook(raw);
+  if (!book) throw new Error('Kitab tidak dikenali.');
+  return { books: [book], scope: book.id };
+}
+
+// Menjalankan task dengan batas konkurensi agar GitHub raw tidak dibanjiri.
+async function runWithConcurrency(tasks, limit, shouldStop) {
+  let cursor = 0;
+  const workers = Array.from({ length: Math.min(limit, tasks.length) }, async () => {
+    while (cursor < tasks.length) {
+      if (shouldStop && shouldStop()) return;
+      const index = cursor++;
+      await tasks[index]();
+    }
+  });
+  await Promise.all(workers);
+}
+
+async function searchBibleDirect(query, scope) {
+  const normalized = normalizeSearchQuery(query);
+  if (normalized.length < BIBLE_SEARCH_MIN_QUERY) {
+    throw new Error('Ketik minimal 2 karakter untuk mencari ayat.');
+  }
+  const { books, scope: resolvedScope } = resolveSearchScope(scope);
+
+  const targets = [];
+  for (const book of books) {
+    for (let ch = 1; ch <= book.chapters; ch += 1) targets.push({ book, chapter: ch });
+  }
+
+  const results = [];
+  let scanned = 0;
+  let hitLimit = false;
+  let hitDeadline = false;
+  const startedAt = Date.now();
+  const stop = () => {
+    if (results.length >= BIBLE_SEARCH_MAX_RESULTS) { hitLimit = true; return true; }
+    if ((Date.now() - startedAt) > BIBLE_SEARCH_DEADLINE_MS) { hitDeadline = true; return true; }
+    return false;
+  };
+
+  const tasks = targets.map(({ book, chapter }) => async () => {
+    if (stop()) return;
+    let verses;
+    try {
+      verses = await getCachedChapterVerses(book, chapter);
+    } catch (_) {
+      return;
+    }
+    scanned += 1;
+    for (const verse of verses) {
+      if (results.length >= BIBLE_SEARCH_MAX_RESULTS) { hitLimit = true; return; }
+      if (!verse.text.toLowerCase().includes(normalized)) continue;
+      results.push({
+        book: book.name,
+        bookId: book.id,
+        chapter,
+        verse: String(verse.number),
+        text: verse.text
+      });
+    }
+  });
+
+  await runWithConcurrency(tasks, BIBLE_SEARCH_CONCURRENCY, stop);
+
+  results.sort((a, b) => {
+    const orderA = BIBLE_BOOKS.findIndex(x => x.id === a.bookId);
+    const orderB = BIBLE_BOOKS.findIndex(x => x.id === b.bookId);
+    if (orderA !== orderB) return orderA - orderB;
+    if (a.chapter !== b.chapter) return a.chapter - b.chapter;
+    return Number(a.verse) - Number(b.verse);
+  });
+
+  return {
+    query: String(query || '').trim(),
+    scope: resolvedScope,
+    results,
+    total: results.length,
+    scanned,
+    chapterCount: targets.length,
+    partial: scanned < targets.length,
+    limited: hitLimit,
+    timedOut: hitDeadline,
+    source: BIBLE_SOURCE_LABEL,
+    sourceUrl: BIBLE_SOURCE_URL
   };
 }
 
@@ -433,7 +557,7 @@ export default async function handler(request, response) {
     if (method === 'getBibleBooks') {
       try {
         const books = getBibleBooksDirect();
-        return reply(response, 200, {ok: true, data: books, meta: {source: 'tb-lai', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
+        return reply(response, 200, {ok: true, data: books, meta: {source: 'tb-neocarles', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
       } catch (booksError) {
         return reply(response, 502, {ok: false, error: 'Daftar kitab Alkitab belum dapat dimuat: ' + String(booksError?.message || booksError)});
       }
@@ -442,7 +566,7 @@ export default async function handler(request, response) {
     if (method === 'getBibleChapter') {
       try {
         const chapter = await getBibleChapterDirect(args[0], args[1]);
-        return reply(response, 200, {ok: true, data: chapter, meta: {source: 'tb-lai', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
+        return reply(response, 200, {ok: true, data: chapter, meta: {source: 'tb-neocarles', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
       } catch (chapterError) {
         return reply(response, 502, {ok: false, error: 'Pasal Alkitab belum dapat dimuat: ' + String(chapterError?.message || chapterError)});
       }
@@ -451,9 +575,22 @@ export default async function handler(request, response) {
     if (method === 'getBibleBook') {
       try {
         const bookData = await getBibleBookDirect(args[0]);
-        return reply(response, 200, {ok: true, data: bookData, meta: {source: 'tb-lai', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
+        return reply(response, 200, {ok: true, data: bookData, meta: {source: 'tb-neocarles', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
       } catch (bookError) {
         return reply(response, 502, {ok: false, error: 'Isi kitab Alkitab belum dapat dimuat: ' + String(bookError?.message || bookError)});
+      }
+    }
+
+    if (method === 'searchBible') {
+      const rawQuery = String(args[0] || '');
+      if (normalizeSearchQuery(rawQuery).length < BIBLE_SEARCH_MIN_QUERY) {
+        return reply(response, 400, {ok: false, error: 'Ketik minimal 2 karakter untuk mencari ayat.'});
+      }
+      try {
+        const found = await searchBibleDirect(rawQuery, args[1]);
+        return reply(response, 200, {ok: true, data: found, meta: {source: 'tb-neocarles', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
+      } catch (searchError) {
+        return reply(response, 502, {ok: false, error: 'Pencarian Alkitab belum dapat dijalankan: ' + String(searchError?.message || searchError)});
       }
     }
 
