@@ -771,7 +771,7 @@ export default async function handler(request, response) {
 
       return reply(response, 502, {
         ok: false,
-        error: 'Operasi ' + method + ' belum dapat diselesaikan oleh backend Apps Script.'
+        error: (upstreamResult && upstreamResult.error) ? 'Apps Script Error: ' + upstreamResult.error : 'Operasi ' + method + ' belum dapat diselesaikan oleh backend Apps Script.'
       });
     } catch (err) {
       console.error('[api/admin] Error processing method ' + method + ':', err);
