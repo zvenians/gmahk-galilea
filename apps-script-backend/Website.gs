@@ -43,7 +43,7 @@ const GW = Object.freeze({
       'https://public-api.wordpress.com/wp/v2/sites/ibadahadvent.wordpress.com'
     ]),
     bible: 'https://raw.githubusercontent.com/neocarles/alkitab-tb/master/Alkitab/',
-    bibleProject: 'https://bible-api.alkitab.or.id/',
+    
     hymnal: 'https://raw.githubusercontent.com/PaulTitto/LaguSion-indo/main/sda-hymnal-db-in.json',
     hymnalProject: 'https://github.com/PaulTitto/LaguSion-indo',
     adventTheme: 'https://news.adventist.asia/all/ssd-launches-mission-reaps',
@@ -2357,7 +2357,7 @@ function getBibleChapter(bookId, chapter) {
   if (!verses.length) throw new Error('Pasal yang dipilih belum tersedia.');
   const result = {
     book: book.name, bookId: book.id, chapter: selectedChapter, chapters: book.chapters,
-    verses: verses, source: 'Alkitab Terjemahan Baru (TB) — Lembaga Alkitab Indonesia (LAI)', sourceUrl: GW.SOURCES.bibleProject
+    verses: verses, source: 'Alkitab Terjemahan Baru (TB) · dataset neocarles/alkitab-tb', sourceUrl: GW.SOURCES.bible
   };
   gwCachePut_(cache, cacheKey, result, 21600);
   return result;
@@ -2387,7 +2387,7 @@ function getBibleBook(bookId) {
   });
   return {
     book: book.name, bookId: book.id, chapters: chapters,
-    source: 'Alkitab Terjemahan Baru (TB) — Lembaga Alkitab Indonesia (LAI)', sourceUrl: GW.SOURCES.bibleProject,
+    source: 'Alkitab Terjemahan Baru (TB) · dataset neocarles/alkitab-tb', sourceUrl: GW.SOURCES.bible,
     watermark: 'Diunduh melalui Website Galilea', copyright: '© Sekretaris Galilea 2026'
   };
 }

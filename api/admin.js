@@ -84,6 +84,7 @@ async function callGoogleAppsScript(method, args) {
       signal: controller.signal
     });
     const text = await upstream.text();
+    console.log('[APPS_SCRIPT_RES]', method, text);
     try {
       return JSON.parse(text);
     } catch (_) {
@@ -271,8 +272,8 @@ const ENTITY_SCHEMAS = {
 };
 
 // Internal active store for administrative state
-const localWorkflows = [];
-const localServices = [];
+
+
 
 export default async function handler(request, response) {
   response.setHeader('Cache-Control', 'no-store, max-age=0');
@@ -377,10 +378,10 @@ export default async function handler(request, response) {
             entities,
             dashboard: {
               loading: false,
-              pendingApprovals: localWorkflows.filter(w => w.state === 'PENDING').length,
-              myDrafts: localWorkflows.filter(w => w.state === 'DRAFT').length,
+              pendingApprovals: 0,
+              myDrafts: 0,
               activeAnnouncements,
-              serviceRequests: localServices.length,
+              serviceRequests: 0,
               updatedAt: siteData.updatedAt || 'Terhubung ke Google Sheets',
               scheduleSheet: siteData.scheduleSheet || 'Triwulan III 2026',
               systemStatus: 'ONLINE'
@@ -400,10 +401,10 @@ export default async function handler(request, response) {
           data: {
             dashboard: {
               loading: false,
-              pendingApprovals: localWorkflows.filter(w => w.state === 'PENDING').length,
-              myDrafts: localWorkflows.filter(w => w.state === 'DRAFT').length,
+              pendingApprovals: 0,
+              myDrafts: 0,
               activeAnnouncements,
-              serviceRequests: localServices.length,
+              serviceRequests: 0,
               updatedAt: siteData.updatedAt || 'Terhubung ke Google Sheets',
               scheduleSheet: siteData.scheduleSheet || 'Triwulan III 2026',
               systemStatus: 'ONLINE'
@@ -589,7 +590,7 @@ export default async function handler(request, response) {
           }
         }
 
-        const workflows = localWorkflows.filter(w => w.entity === entityKey);
+        const workflows = [];
 
         return reply(response, 200, {
           ok: true,
@@ -602,157 +603,6 @@ export default async function handler(request, response) {
             workflows,
             sections: siteData.sections || []
           }
-        });
-      }
-
-      // Method 4: adminListServices (Layanan Jemaat) - ZERO DUMMY DATA
-      if (method === 'adminListServices') {
-        return reply(response, 200, {
-          ok: true,
-          data: [...localServices].reverse()
-        });
-      }
-
-      // Method 5: adminDeleteService
-      if (method === 'adminDeleteService') {
-        const [id] = args;
-        const targetId = String(id || '');
-        const index = localServices.findIndex(item => item.id === targetId);
-        if (index >= 0) {
-          localServices.splice(index, 1);
-        }
-        return reply(response, 200, {
-          ok: true,
-          id: targetId,
-          message: 'Permohonan layanan (' + targetId + ') berhasil dihapus secara permanen.'
-        });
-      }
-
-      // Method 6: adminUpdateServiceStatus
-      if (method === 'adminUpdateServiceStatus') {
-        const [id, statusVal, noteVal] = args;
-        const targetId = String(id || '');
-        const target = localServices.find(item => item.id === targetId);
-        if (target) {
-          target.status = String(statusVal || 'DIPROSES');
-          target.adminNote = String(noteVal || '');
-          target.updatedAt = new Date().toLocaleDateString('id-ID', { dateStyle: 'medium', timeStyle: 'short' });
-        }
-        return reply(response, 200, {
-          ok: true,
-          id: targetId,
-          status: statusVal || 'DIPROSES',
-          message: 'Status permohonan layanan berhasil diperbarui.'
-        });
-      }
-
-      // Method 7: adminSaveWorkflow
-      if (method === 'adminSaveWorkflow') {
-        const [wfPayload] = args;
-        const wf = wfPayload && typeof wfPayload === 'object' ? wfPayload : {};
-        const entity = wf.entity || 'announcements';
-        const action = wf.action || 'UPSERT';
-        const stateVal = wf.submit ? 'PENDING' : 'DRAFT';
-        const id = wf.workflowId || ('WF-' + Date.now());
-
-        const entry = {
-          id,
-          entity,
-          entityId: wf.entityId || '',
-          action,
-          state: stateVal,
-          payload: wf.payload || {},
-          ownerName: 'Sekretariat Galilea',
-          ownerEmail: churchEmail,
-          updatedAt: 'Baru saja',
-          note: ''
-        };
-
-        const existingIdx = localWorkflows.findIndex(w => w.id === id);
-        if (existingIdx >= 0) {
-          localWorkflows[existingIdx] = entry;
-        } else {
-          localWorkflows.unshift(entry);
-        }
-
-        return reply(response, 200, {
-          ok: true,
-          id,
-          state: stateVal,
-          message: wf.submit
-            ? 'Perubahan diajukan untuk persetujuan warta.'
-            : 'Draf berhasil disimpan.'
-        });
-      }
-
-      // Method 8: adminCancelWorkflow
-      if (method === 'adminCancelWorkflow') {
-        const [id] = args;
-        const target = localWorkflows.find(w => w.id === id);
-        if (target) {
-          target.state = 'DRAFT';
-          target.updatedAt = 'Baru saja';
-        }
-        return reply(response, 200, {
-          ok: true,
-          id: id || '',
-          message: 'Pengajuan warta berhasil ditarik kembali menjadi draf.'
-        });
-      }
-
-      // Method 9: adminDeleteWorkflow
-      if (method === 'adminDeleteWorkflow') {
-        const [id] = args;
-        const index = localWorkflows.findIndex(w => w.id === id);
-        if (index >= 0) localWorkflows.splice(index, 1);
-        return reply(response, 200, {
-          ok: true,
-          id: id || '',
-          message: 'Draf berhasil dihapus.'
-        });
-      }
-
-      // Method 10: adminListApprovals
-      if (method === 'adminListApprovals') {
-        const [statusFilter] = args;
-        const targetState = String(statusFilter || 'PENDING').toUpperCase();
-        const items = localWorkflows.filter(w => w.state === targetState);
-        return reply(response, 200, {
-          ok: true,
-          data: items
-        });
-      }
-
-      // Method 11: adminReviewWorkflow
-      if (method === 'adminReviewWorkflow') {
-        const [id, decision, note] = args;
-        const target = localWorkflows.find(w => w.id === id);
-        const nextState = decision === 'APPROVE' ? 'APPROVED' : 'REJECTED';
-        if (target) {
-          target.state = nextState;
-          target.note = String(note || '');
-          target.reviewedAt = 'Baru saja';
-          target.reviewerEmail = churchEmail;
-        }
-        return reply(response, 200, {
-          ok: true,
-          id: id || '',
-          state: nextState,
-          message: decision === 'APPROVE'
-            ? 'Konten berhasil disetujui dan diterbitkan.'
-            : 'Catatan revisi berhasil dikirim kepada editor.'
-        });
-      }
-
-      // Method 12: adminDeleteApproval
-      if (method === 'adminDeleteApproval') {
-        const [id] = args;
-        const index = localWorkflows.findIndex(w => w.id === id);
-        if (index >= 0) localWorkflows.splice(index, 1);
-        return reply(response, 200, {
-          ok: true,
-          id: id || '',
-          message: 'Catatan persetujuan berhasil dihapus.'
         });
       }
 
