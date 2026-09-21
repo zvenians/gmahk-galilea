@@ -94,6 +94,10 @@ flowchart TD
 - **Role Isolation:** Public viewer requests execute via a shared proxy identity (`/api/gas`) with a strict method allowlist. The administration workflow executes under the authenticated Google identity to enforce draft, review, and approval permissions.
 - **Fail-Safe Resilience:** Client-side fallback handling ensures that cached hymn and schedule records remain readable even if upstream cloud sheets experience intermittent latency.
 
+> [!WARNING]  
+> **RBAC & Security Limitation:**  
+> The Vercel `/api/admin` endpoint proxies POST operations directly to Apps Script using a shared `GALILEA_API_SECRET`. Since Apps Script processes these proxied requests as the deployment owner, any request reaching Vercel with valid parameters bypasses per-user role verification. The Vercel `/api/admin` endpoint itself does not enforce user sessions. Full per-user RBAC is strictly enforced only when administrators navigate to the native Google Apps Script deployment URL.
+
 ---
 
 ## 5. Key Features
