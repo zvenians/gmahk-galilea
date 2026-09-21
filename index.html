@@ -4734,33 +4734,33 @@
       // =====================================================================
       const BOOK_ABBR_ID = {
         GEN:'Kej',EXO:'Kel',LEV:'Im',NUM:'Bil',DEU:'Ul',
-        JOS:'Yos',JDG:'Hak',RUT:'Rut',SA1:'1Sam',SA2:'2Sam',
-        KI1:'1Raj',KI2:'2Raj',CH1:'1Taw',CH2:'2Taw',EZR:'Ezr',
+        JOS:'Yos',JDG:'Hak',RUT:'Rut','1SA':'1Sam','2SA':'2Sam',
+        '1KI':'1Raj','2KI':'2Raj','1CH':'1Taw','2CH':'2Taw',EZR:'Ezr',
         NEH:'Neh',EST:'Est',JOB:'Ayb',PSA:'Mzm',PRO:'Ams',
-        ECC:'Pkh',SON:'Kid',ISA:'Yes',JER:'Yer',LAM:'Rat',
+        ECC:'Pkh',SNG:'Kid',ISA:'Yes',JER:'Yer',LAM:'Rat',
         EZK:'Yeh',DAN:'Dan',HOS:'Hos',JOL:'Yl',AMO:'Am',
-        OBA:'Ob',JNA:'Yun',MIC:'Mi',NAH:'Nah',HAB:'Hab',
+        OBA:'Ob',JON:'Yun',MIC:'Mi',NAM:'Nah',HAB:'Hab',
         ZEP:'Zef',HAG:'Hag',ZEC:'Za',MAL:'Mal',
         MAT:'Mat',MRK:'Mrk',LUK:'Luk',JHN:'Yoh',ACT:'Kis',
-        ROM:'Rm',CO1:'1Kor',CO2:'2Kor',GAL:'Gal',EPH:'Ef',
-        PHP:'Flp',COL:'Kol',TH1:'1Tes',TH2:'2Tes',TI1:'1Tim',
-        TI2:'2Tim',TIT:'Tit',PHM:'Flm',HEB:'Ibr',JAM:'Yak',
-        PE1:'1Pet',PE2:'2Pet',JN1:'1Yoh',JN2:'2Yoh',JN3:'3Yoh',
+        ROM:'Rm','1CO':'1Kor','2CO':'2Kor',GAL:'Gal',EPH:'Ef',
+        PHP:'Flp',COL:'Kol','1TH':'1Tes','2TH':'2Tes','1TI':'1Tim',
+        '2TI':'2Tim',TIT:'Tit',PHM:'Flm',HEB:'Ibr',JAS:'Yak',
+        '1PE':'1Pet','2PE':'2Pet','1JN':'1Yoh','2JN':'2Yoh','3JN':'3Yoh',
         JUD:'Yud',REV:'Why'
       };
       // Alias tambahan untuk pencarian (singkatan alternatif umum)
       const BOOK_ABBR_SEARCH_EXTRA = {
-        '1sam':'SA1','2sam':'SA2','1raj':'KI1','2raj':'KI2','1taw':'CH1','2taw':'CH2',
-        'mzm':'PSA','ams':'PRO','pkh':'ECC','kid':'SON','yes':'ISA','yer':'JER','rat':'LAM',
-        'yeh':'EZK','yl':'JOL','yun':'JNA','za':'ZEC',
+        '1sam':'1SA','2sam':'2SA','1raj':'1KI','2raj':'2KI','1taw':'1CH','2taw':'2CH',
+        'mzm':'PSA','ams':'PRO','pkh':'ECC','kid':'SNG','yes':'ISA','yer':'JER','rat':'LAM',
+        'yeh':'EZK','yl':'JOL','yun':'JON','za':'ZEC',
         'mat':'MAT','mrk':'MRK','luk':'LUK','yoh':'JHN','kis':'ACT','rm':'ROM',
-        '1kor':'CO1','2kor':'CO2','gal':'GAL','ef':'EPH','flp':'PHP','kol':'COL',
-        '1tes':'TH1','2tes':'TH2','1tim':'TI1','2tim':'TI2','tit':'TIT','flm':'PHM',
-        'ibr':'HEB','yak':'JAM','1pet':'PE1','2pet':'PE2',
-        '1yoh':'JN1','2yoh':'JN2','3yoh':'JN3','yud':'JUD','why':'REV',
+        '1kor':'1CO','2kor':'2CO','gal':'GAL','ef':'EPH','flp':'PHP','kol':'COL',
+        '1tes':'1TH','2tes':'2TH','1tim':'1TI','2tim':'2TI','tit':'TIT','flm':'PHM',
+        'ibr':'HEB','yak':'JAS','1pet':'1PE','2pet':'2PE',
+        '1yoh':'1JN','2yoh':'2JN','3yoh':'3JN','yud':'JUD','why':'REV',
         'kej':'GEN','kel':'EXO','im':'LEV','bil':'NUM','ul':'DEU',
         'yos':'JOS','hak':'JDG','rut':'RUT','ezr':'EZR','neh':'NEH','est':'EST',
-        'ayb':'JOB','hos':'HOS','am':'AMO','ob':'OBA','mi':'MIC','nah':'NAH','hab':'HAB',
+        'ayb':'JOB','hos':'HOS','am':'AMO','ob':'OBA','mi':'MIC','nah':'NAM','hab':'HAB',
         'zef':'ZEP','hag':'HAG','mal':'MAL','dan':'DAN'
       };
       const BOOK_PICKER_RECENTS_KEY = 'galilea-book-recents-v1';
@@ -5490,6 +5490,12 @@
       function openActivity(id) {
         const item=(state.data.activities||[]).find(activity=>String(activity.id)===String(id));
         if(!item)return toast('Berita Jemaat belum ditemukan.');
+        history.pushState({route:'activities',beritaId:id},'','#berita/' + encodeURIComponent(id));
+        const cover = safeUrl(item.coverUrl || (item.photos||[])[0]);
+        if(cover){const ogImg=document.querySelector('meta[property="og:image"]');if(ogImg)ogImg.content=cover;}
+        const ogTitle=document.querySelector('meta[property="og:title"]');if(ogTitle)ogTitle.content=item.title+' — Berita Jemaat Galilea';
+        const ogDesc=document.querySelector('meta[property="og:description"]');if(ogDesc)ogDesc.content=(item.description||'').slice(0,160);
+        document.title=item.title+' — GMAHK Galilea';
         const photos=(item.photos||[]).filter(Boolean);
         const gallery=photos.length?'<div class="activity-story-gallery">'+photos.map((url,index)=>'<button type="button" class="story-photo ' + (index===0?'story-photo-main':'') + '" data-story-photo="' + attr(url) + '"><img src="' + attr(url) + '" alt="' + attr(item.title) + ' · foto ' + (index+1) + '" loading="lazy" decoding="async"><span>Foto ' + (index+1) + '</span></button>').join('')+'</div>':'<div class="activity-story-empty">'+icon('image')+'<span>Dokumentasi foto belum ditambahkan.</span></div>';
         const actions='<div class="button-row">'+(item.url?'<a class="btn primary" href="'+attr(item.url)+'" target="_blank" rel="noopener">Sumber berita'+icon('external')+'</a>':'')+'<button class="btn whatsapp" type="button" data-share-activity="'+attr(item.id)+'">'+brandIcon('whatsapp')+'Bagikan</button></div>';
@@ -5886,7 +5892,13 @@
         return whatsappTemplate('WARTA JEMAAT DIGITAL','Informasi Mingguan',data.updatedAt||'',sections);
       }
       function activityShareText(item){
-        return whatsappTemplate('BERITA JEMAAT',item.title,item.dateLabel||'',[{title:'Lokasi',lines:[item.location||'GMAHK Galilea Balikpapan']},{title:'Berita',lines:[item.description||'']}]);
+        const lines = ['*BERITA JEMAAT*','','*' + (item.title||'') + '*'];
+        if(item.dateLabel) lines.push('📅 ' + item.dateLabel);
+        if(item.location) lines.push('📍 ' + item.location);
+        lines.push('');
+        if(item.description) lines.push(item.description);
+        lines.push('','_Dibagikan melalui Website Resmi GMAHK Galilea Balikpapan_');
+        return lines.join('\n');
       }
       function announcementShareText(item){
         const meta=announcementGroupMeta(announcementCategory(item));
@@ -5947,7 +5959,7 @@
         const storyPhoto=event.target.closest('[data-story-photo]');
         if(storyPhoto){const image=$('#photo-dialog-image');image.src=storyPhoto.dataset.storyPhoto;$('#photo-dialog').showModal();return;}
         const activityShare=event.target.closest('[data-share-activity]');
-        if(activityShare){const item=(state.data.activities||[]).find(activity=>String(activity.id)===String(activityShare.dataset.shareActivity));if(item)return shareWhatsApp(activityShareText(item),location.href.split('#')[0]+'#activities');}
+        if(activityShare){const item=(state.data.activities||[]).find(activity=>String(activity.id)===String(activityShare.dataset.shareActivity));if(item)return shareWhatsApp(activityShareText(item),location.href.split('#')[0]+'#berita/'+encodeURIComponent(item.id));}
         const announcementPresentation=event.target.closest('[data-present-announcements]');
         if(announcementPresentation)return openAnnouncementPresentation(announcementPresentation.dataset.presentAnnouncements);
         if(event.target.closest('[data-present-schedule-summary]'))return openScheduleSummaryPresentation();
@@ -6055,8 +6067,14 @@
           state.witaDayKey = witaDateKey();
           startDayRolloverWatcher();
           const initialRoute = location.hash.replace('#','');
-          state.route = ROUTES.includes(initialRoute) ? initialRoute : 'home';
-          history.replaceState({route:state.route},'','#' + state.route);
+          const beritaMatch = initialRoute.match(/^berita\/(.+)$/);
+          if (beritaMatch) {
+            state.route = 'activities';
+            state._pendingBeritaId = decodeURIComponent(beritaMatch[1]);
+          } else {
+            state.route = ROUTES.includes(initialRoute) ? initialRoute : 'home';
+          }
+          history.replaceState({route:state.route},'','#' + (beritaMatch ? 'berita/' + beritaMatch[1] : state.route));
           const cached = cacheGet('v1800-bootstrap') || cacheGet('v1700-bootstrap') || cachePeek('v1800-bootstrap') || cachePeek('v1700-bootstrap');
           if (cached) { state.data = cached; setShellData(); render(); releaseStartupLoader(); }
           const fresh = await server('getWebsiteData',[]);
@@ -6066,6 +6084,7 @@
             state.translationObserver.observe(document.body,{subtree:true,childList:true});
           }
           setLanguage(state.language);
+          if (state._pendingBeritaId) { openActivity(state._pendingBeritaId); delete state._pendingBeritaId; }
         } catch (error) {
           if (!state.data) {
             $('#app').innerHTML = startupFailureHtml(error);
@@ -6168,6 +6187,8 @@
       window.addEventListener('offline',updateNetworkStatus);
       window.addEventListener('popstate',() => {
         const route = location.hash.replace('#','');
+        const beritaMatch = route.match(/^berita\/(.+)$/);
+        if (beritaMatch) { navigate('activities',{history:false}); setTimeout(() => openActivity(decodeURIComponent(beritaMatch[1])),100); return; }
         navigate(ROUTES.includes(route) ? route : 'home',{history:false});
       });
       window.addEventListener('scroll',updateCinemaHeader,{passive:true});

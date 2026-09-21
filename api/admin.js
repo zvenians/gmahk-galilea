@@ -340,6 +340,11 @@ export default async function handler(request, response) {
             }];
           }
         }
+        // Invalidate cache after successful write operations
+        const WRITE_METHODS = ['adminSaveWorkflow','adminReviewWorkflow','adminCancelWorkflow','adminDeleteWorkflow','adminDeleteApproval','adminSaveUser','adminDeleteUser','adminUploadImage','adminUpdateServiceStatus','adminDeleteService','adminRunSystemAction'];
+        if (WRITE_METHODS.includes(method)) {
+          cachedLiveSiteData = null;
+        }
         return reply(response, 200, upstreamResult);
       }
 
@@ -606,133 +611,12 @@ export default async function handler(request, response) {
         });
       }
 
-      // Method 13: adminListUsers
-      if (method === 'adminListUsers') {
-        // Real church officers from Google Sheets
-        const users = [
-          {
-            id: 'USR-001',
-            name: 'Pdt. Febri Sihotang',
-            email: 'pastor@gmahk-galilea.org',
-            role: 'APPROVER',
-            status: 'AKTIF'
-          },
-          {
-            id: 'USR-002',
-            name: 'Hengky Rompas',
-            email: 'ketua@gmahk-galilea.org',
-            role: 'APPROVER',
-            status: 'AKTIF'
-          },
-          {
-            id: 'USR-003',
-            name: 'Kevin Simatupang',
-            email: churchEmail,
-            role: 'SUPERADMIN',
-            status: 'AKTIF'
-          },
-          {
-            id: 'USR-004',
-            name: 'Verna Runturambi',
-            email: 'bendahara@gmahk-galilea.org',
-            role: 'EDITOR',
-            status: 'AKTIF'
-          },
-          {
-            id: 'USR-005',
-            name: 'Charlyne Warouw',
-            email: 'bwa@gmahk-galilea.org',
-            role: 'EDITOR',
-            status: 'AKTIF'
-          },
-          {
-            id: 'USR-006',
-            name: 'Miclend Jacob',
-            email: 'pa@gmahk-galilea.org',
-            role: 'EDITOR',
-            status: 'AKTIF'
-          }
-        ];
-        return reply(response, 200, {
-          ok: true,
-          data: users
-        });
-      }
 
-      // Method 14: adminSaveUser
-      if (method === 'adminSaveUser') {
-        const [userData] = args;
-        return reply(response, 200, {
-          ok: true,
-          data: userData,
-          message: 'Data pengelola portal berhasil disimpan.'
-        });
-      }
 
-      // Method 15: adminDeleteUser
-      if (method === 'adminDeleteUser') {
-        const [id] = args;
-        return reply(response, 200, {
-          ok: true,
-          id: id || '',
-          message: 'Pengelola berhasil dihapus.'
-        });
-      }
 
-      // Method 16: adminGetDashboardActivity
-      if (method === 'adminGetDashboardActivity') {
-        return reply(response, 200, {
-          ok: true,
-          data: {
-            audit: [
-              {
-                time: new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' }) + ' WITA',
-                action: 'Sinkronisasi Spreadsheet',
-                name: 'Sekretariat Galilea',
-                email: churchEmail,
-                entity: 'system',
-                detail: 'Data Google Sheets (' + (siteData.scheduleSheet || 'Triwulan III 2026') + ') aktif dan tersambung.'
-              }
-            ],
-            health: [
-              {
-                source: 'Google Sheets (Jadwal & Konten)',
-                status: 'PUBLISH',
-                note: 'Sheet ' + (siteData.scheduleSheet || 'Triwulan III 2026') + ' terhubung.'
-              },
-              {
-                source: 'Google Drive (Penyimpanan Media)',
-                status: 'PUBLISH',
-                note: 'Folder media siap menerima unggahan foto.'
-              },
-              {
-                source: 'Adventech Sabbath School API',
-                status: 'PUBLISH',
-                note: 'Renungan Pagi teks terhubung langsung.'
-              },
-              {
-                source: 'AWR Borneo & Media Digital',
-                status: 'PUBLISH',
-                note: 'Kanal YouTube dan video pembahasan aktif.'
-              }
-            ]
-          }
-        });
-      }
 
-      // Method 17: adminUploadImage
-      if (method === 'adminUploadImage') {
-        const [payload] = args;
-        const name = (payload && (payload.name || payload.filename)) || 'foto-galilea.jpg';
-        return reply(response, 200, {
-          ok: true,
-          url: 'https://gmahk-galilea.vercel.app/assets/logo-galilea-icon-192.png',
-          filename: name,
-          message: 'Foto berhasil disimpan.'
-        });
-      }
 
-      // Method 18: adminRunSystemAction
+      // Method 18: adminRunSystemAction — only Vercel-side cache clear is handled locally
       if (method === 'adminRunSystemAction') {
         const [action] = args;
         if (action === 'refresh' || action === 'purgeCache') {
@@ -743,30 +627,7 @@ export default async function handler(request, response) {
             message: 'Cache berhasil diperbarui. Data terbaru dari Google Sheets siap ditampilkan.'
           });
         }
-        if (action === 'health') {
-          return reply(response, 200, {
-            ok: true,
-            status: 'ONLINE',
-            sheet: siteData.scheduleSheet || 'Triwulan III 2026',
-            message: 'Seluruh sistem Google Sheets, API, dan Viewer berfungsi normal.'
-          });
-        }
-        if (action === 'archives') {
-          return reply(response, 200, {
-            ok: true,
-            message: 'Arsip PDF Publik (Alkitab dan Lagu Sion) siap digunakan di viewer.'
-          });
-        }
-        if (action === 'backup') {
-          return reply(response, 200, {
-            ok: true,
-            message: 'Pencadangan snapshot data spreadsheet Galilea berhasil.'
-          });
-        }
-        return reply(response, 200, {
-          ok: true,
-          message: 'Aksi sistem selesai.'
-        });
+        // health, archives, backup, etc. must go through Apps Script
       }
 
       return reply(response, 502, {

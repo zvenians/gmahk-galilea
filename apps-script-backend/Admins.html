@@ -138,6 +138,8 @@
       outline-offset: 2px;
     }
 
+
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
     /* ── Icons ─────────────────────────────────────────────────────── */
     .icon {
       width: 18px;
@@ -1837,9 +1839,9 @@
       const full=['textarea','image','images','url'].includes(field.type)?' full':'';
       let control;
       if(field.type==='textarea') control='<textarea name="'+attr(field.key)+'" placeholder="'+attr(field.help||'Ketik isi di sini…')+'" '+(field.required?'required':'')+'>'+esc(value)+'</textarea>';
-      else if(field.type==='images') control='<textarea name="'+attr(field.key)+'" class="image-collection" rows="5" placeholder="URL foto akan tampil di sini, satu URL per baris">'+esc(value)+'</textarea><div class="image-upload-panel"><div><strong>Galeri kegiatan</strong><span>Pilih beberapa foto sekaligus. Maksimal 12 foto, masing-masing 4 MB.</span></div><label class="btn soft">'+icon('upload')+'Pilih beberapa foto<input class="image-file" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" data-image-mode="append" data-image-target="'+attr(field.key)+'" hidden></label></div>';
+      else if(field.type==='images') control='<textarea name="'+attr(field.key)+'" class="image-collection" rows="5" placeholder="URL foto akan tampil di sini, satu URL per baris">'+esc(value)+'</textarea><div class="image-upload-panel"><div><strong>Galeri kegiatan</strong><span>Pilih beberapa foto sekaligus. Maksimal 12 foto, masing-masing 4 MB.</span></div><label class="btn soft">'+icon('upload')+'Pilih beberapa foto<input class="image-file sr-only" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" data-image-mode="append" data-image-target="'+attr(field.key)+'"></label></div>';
       else if(field.type==='select') control='<select name="'+attr(field.key)+'" '+(field.required?'required':'')+'>'+field.options.map(o=>'<option '+(String(value)===o?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
-      else control='<input name="'+attr(field.key)+'" type="'+(field.type==='image'?'url':attr(field.type))+'" value="'+attr(value)+'" '+(field.required?'required':'')+'>'+(field.type==='image'?'<div class="button-row"><label class="btn soft">'+icon('upload')+'Unggah gambar<input class="image-file" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-image-target="'+attr(field.key)+'" hidden></label></div>':'');
+      else control='<input name="'+attr(field.key)+'" type="'+(field.type==='image'?'url':attr(field.type))+'" value="'+attr(value)+'" '+(field.required?'required':'')+'>'+(field.type==='image'?'<div class="button-row"><label class="btn soft">'+icon('upload')+'Unggah gambar<input class="image-file sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-image-target="'+attr(field.key)+'"></label></div>':'');
       return '<div class="field'+full+'"><label>'+esc(field.label)+(field.required?' *':'')+'</label>'+control+(field.help?'<span class="help">'+esc(field.help)+'</span>':'')+'</div>';
     }
     function openScheduleEditor(record,workflow){const data=state.entityData;if(!data.sections||!data.sections.length)return toast('Bagian jadwal belum ditemukan pada spreadsheet.');const sectionId=record&&((record.values&&record.values.sectionId)||record.sectionId)||data.sections[0].id||'';const section=data.sections.find(s=>s.id===sectionId)||data.sections[0];const values=record&&record.values||record||{};const fields=values.fields||{};const locked=Boolean(record&&record.id&&!/^NEW-/i.test(record.id));state.currentEdit={entity:'schedule',entityId:record&&record.id||'',workflowId:workflow&&workflow.id||'',action:workflow&&workflow.action||'UPSERT'};$('#editor-title').textContent=record?'Edit Jadwal':'Tambah Jadwal';$('#editor-subtitle').textContent=data.sheetName+(locked?' · Jenis ibadah dikunci untuk menjaga struktur sheet':'');$('#editor-workflow').innerHTML=workflowGuide(workflow&&workflow.state||'DRAFT');const sectionControl='<select '+(locked?'disabled':'name="sectionId"')+' id="schedule-section">'+data.sections.map(s=>'<option value="'+s.id+'" '+(s.id===section.id?'selected':'')+'>'+esc(s.title)+'</option>').join('')+'</select>'+(locked?'<input type="hidden" name="sectionId" value="'+attr(section.id)+'">':'');$('#editor-fields').innerHTML='<div class="field"><label>Jenis Ibadah *</label>'+sectionControl+'</div><div class="field"><label>Tanggal *</label><input type="date" name="isoDate" value="'+attr(values.isoDate||'')+'" required></div><div class="field full" id="schedule-fields">'+scheduleFieldsHtml(section,fields)+'</div>';$('#editor-preview').classList.remove('show');$('#editor-preview').innerHTML='';$('#editor-dialog').showModal()}
@@ -1849,6 +1851,12 @@
     async function resubmitWorkflow(id){const workflow=(state.entityData.workflows||[]).find(w=>w.id===id);if(!workflow)return;if(!confirm('Ajukan kembali permintaan '+(workflow.action==='DELETE'?'penghapusan':'perubahan')+' ini?'))return;try{const result=await server('adminSaveWorkflow',[{entity:workflow.entity,entityId:workflow.entityId,workflowId:workflow.id,action:workflow.action,payload:workflow.payload||{},submit:true}]);toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}}
     async function cancelWorkflow(id){if(!confirm('Tarik pengajuan ini kembali menjadi draft?'))return;try{const result=await server('adminCancelWorkflow',[id]);toast(result.message);if(state.boot&&state.boot.dashboard)state.boot.dashboard.myDrafts=Number(state.boot.dashboard.myDrafts||0)+1;await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}}
 
+        function normalizeDriveUrl(url) {
+      const match = url.match(/drive\.google\.com\/uc\?export=view&id=([^&]+)/);
+      if (match) return 'https://lh3.googleusercontent.com/d/' + match[1] + '=w800';
+      return url;
+    }
+
     async function uploadImage(input){
       const files=Array.from(input.files||[]);if(!files.length)return;
       if(files.length>12)return toast('Maksimal 12 foto dalam satu unggahan.');
@@ -1856,12 +1864,13 @@
       const target=input.dataset.imageTarget,append=input.dataset.imageMode==='append';
       const field=$('[name="'+CSS.escape(target)+'"]',$('#editor-form'));
       const uploaded=[];
+      $$('dialog[open] button[type="submit"], dialog[open] button[value="draft"], dialog[open] button[value="submit"]').forEach(b => { b.disabled = true; b.dataset.uploading = '1'; });
       try{
         for(let index=0;index<files.length;index++){
           const file=files[index];toast('Mengunggah foto '+(index+1)+' dari '+files.length+'…');
           const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(file)});
           const result=await server('adminUploadImage',[{name:file.name,mimeType:file.type,base64:base64}],30000);
-          if(result&&result.url)uploaded.push(result.url);
+          if(result&&result.url)uploaded.push(normalizeDriveUrl(result.url));
         }
         if(field&&uploaded.length){
           const existing=append?String(field.value||'').split(/\n+/).map(value=>value.trim()).filter(Boolean):[];
@@ -1869,7 +1878,7 @@
           field.dispatchEvent(new Event('change',{bubbles:true}));
         }
         toast(uploaded.length+' foto berhasil ditambahkan.');
-      }catch(error){toast(cleanError(error.message))}finally{input.value=''}
+      }catch(error){toast(cleanError(error.message))}finally{input.value='';$$('dialog[open] button[data-uploading]').forEach(b => { b.disabled = false; delete b.dataset.uploading; });}
     }
 
     async function loadApprovals(filter,force){if(filter)state.approvalStatus=filter;const cached=state.approvalCache[state.approvalStatus];state.approvals=!force&&cached&&Date.now()-cached.time<60000?cached.items:await server('adminListApprovals',[state.approvalStatus],10000);state.approvalCache[state.approvalStatus]={time:Date.now(),items:state.approvals};const items=state.approvals,labels={PENDING:'Menunggu',APPROVED:'Diterbitkan',REJECTED:'Perlu revisi'};$('#content').innerHTML='<div class="page-head"><div><span class="eyebrow">ALUR PUBLIKASI</span><h1>Persetujuan Konten</h1><p>Tinjau perubahan dengan cepat. Alasan revisi akan dikirim kembali kepada editor.</p></div><span class="status '+state.approvalStatus.toLowerCase()+'">'+esc(items.length)+' '+esc(labels[state.approvalStatus]||state.approvalStatus)+'</span></div><div class="approval-tabs">'+['PENDING','APPROVED','REJECTED'].map(key=>'<button class="approval-tab '+(state.approvalStatus===key?'active':'')+'" data-approval-status="'+key+'">'+esc(labels[key])+'</button>').join('')+'</div><div class="approval-list">'+(items.length?items.map(approvalHtml).join(''):emptyHtml('Belum ada item pada status ini.'))+'</div>'}
