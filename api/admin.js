@@ -312,14 +312,7 @@ export default async function handler(request, response) {
       return reply(response, 400, { ok: false, error: 'Nama method tidak boleh kosong.' });
     }
 
-    const PRIVILEGED_METHODS = [
-      'adminGetBootstrap', 'adminGetDashboardSummary', 'adminGetDashboardActivity',
-      'adminSaveWorkflow', 'adminReviewWorkflow', 'adminDeleteWorkflow', 'adminCancelWorkflow',
-      'adminDeleteApproval', 'adminSaveUser', 'adminDeleteUser', 'adminUploadImage',
-      'adminUpdateServiceStatus', 'adminDeleteService', 'adminRunSystemAction'
-    ];
-
-    if (PRIVILEGED_METHODS.includes(method)) {
+    if (method.startsWith('admin')) {
       return reply(response, 403, { ok: false, error: 'FORBIDDEN: Endpoint ini telah dikunci untuk mencegah akses anonim. Silakan akses portal dari environment yang terautentikasi (Apps Script).' });
     }
 
