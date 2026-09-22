@@ -17,11 +17,11 @@ function resolveAdminUrl() {
   try {
     target = new URL(raw);
   } catch (_) {
-    throw new Error('URL backend admin belum dikonfigurasi.');
+    throw new Error('URL backend admin tidak valid.');
   }
   const validHost = target.protocol === 'https:' && target.hostname === 'script.google.com';
   const validPath = /^\/macros\/s\/[^/]+\/exec$/.test(target.pathname);
-  if (!validHost || !validPath) throw new Error('URL backend admin belum dikonfigurasi.');
+  if (!validHost || !validPath) throw new Error('URL backend admin belum dikonfigurasi dengan benar.');
   target.searchParams.set('page', 'admin');
   return target;
 }
