@@ -53,29 +53,53 @@ jobs:
       - name: Configure Clasp Target
         run: |
           if [ -z "${{ secrets.CLASP_JSON }}" ]; then
-            echo "Error: CLASP_JSON secret is missing. Cannot target Apps Script project."
+            echo "Error: CLASP_JSON secret is missing."
             exit 1
           fi
-          echo '${{ secrets.CLASP_JSON }}' > .clasp.json
           
-          # Force rootDir to apps-script-backend to prevent pushing unintended files (security)
-          sudo apt-get install -y jq
-          jq '.rootDir = "apps-script-backend"' .clasp.json > tmp.json && mv tmp.json .clasp.json
+          # Safely extract scriptId to handle PowerShell quote-stripping corruption
+          RAW_SECRET='${{ secrets.CLASP_JSON }}'
+          SCRIPT_ID=$(echo "$RAW_SECRET" | grep -o -E '[a-zA-Z0-9_-]{30,}')
+          
+          if [ -z "$SCRIPT_ID" ]; then
+            echo "Error: Could not extract valid Script ID from secret."
+            exit 1
+          fi
+          
+          echo "{\"scriptId\":\"$SCRIPT_ID\", \"rootDir\":\"apps-script-backend\"}" > .clasp.json
           
           cat << 'EOF' > .claspignore
           **/**
           !apps-script-backend/**/*.gs
           !apps-script-backend/**/*.html
+          !apps-script-backend/appsscript.json
           EOF
 
       - name: Validate Apps Script Source
         run: |
-          clasp status
           # Ensure critical files exist before pushing
           if [ ! -f apps-script-backend/Admin.gs ] || [ ! -f apps-script-backend/VercelApi.gs ]; then
             echo "Error: Critical backend files are missing from apps-script-backend/"
             exit 1
           fi
+          
+          # Generate appsscript.json if missing (clasp requires it to push)
+          if [ ! -f apps-script-backend/appsscript.json ]; then
+            cat << 'EOF' > apps-script-backend/appsscript.json
+          {
+            "timeZone": "Asia/Jakarta",
+            "dependencies": {},
+            "exceptionLogging": "STACKDRIVER",
+            "runtimeVersion": "V8",
+            "webapp": {
+              "executeAs": "USER_ACCESSING",
+              "access": "MY_DOMAIN"
+            }
+          }
+          EOF
+          fi
+          
+          clasp status
 
       - name: Push to Apps Script
         run: clasp push --force
