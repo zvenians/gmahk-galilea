@@ -57,9 +57,9 @@ jobs:
             exit 1
           fi
           
-          # Safely extract scriptId to handle PowerShell quote-stripping corruption
+          # Safely extract scriptId to handle PowerShell quote-stripping and UTF-16 null bytes corruption
           RAW_SECRET='${{ secrets.CLASP_JSON }}'
-          SCRIPT_ID=$(echo "$RAW_SECRET" | grep -o -E '[a-zA-Z0-9_-]{30,}')
+          SCRIPT_ID=$(echo "$RAW_SECRET" | tr -d '\000' | grep -o -E '[a-zA-Z0-9_-]{30,}' | head -1 || true)
           
           if [ -z "$SCRIPT_ID" ]; then
             echo "Error: Could not extract valid Script ID from secret."
