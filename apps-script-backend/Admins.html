@@ -12,91 +12,91 @@
        ═══════════════════════════════════════════════════════════════════════ */
 
     :root {
-      /* Sanctuary Canvas & Warm Linen Palette */
-      --bg: #f5f7f4;
+      /* PURE WHITE - Editorial & Minimal Foundation */
+      --bg: #ffffff;
       --surface: #ffffff;
-      --surface-2: #edf2eb;
-      --surface-3: #dfe7dc;
-      --surface-translucent: rgba(255, 255, 255, 0.88);
+      --surface-2: #fcfcfc;
+      --surface-3: #f5f5f5;
+      --surface-translucent: rgba(255, 255, 255, 0.94);
 
-      /* Typography Hierarchy */
-      --text: #0f1a13;
-      --soft: #425547;
-      --faint: #6c8071;
+      /* High-contrast Typography */
+      --text: #111111;
+      --soft: #555555;
+      --faint: #888888;
 
-      /* Structural Dividers & Outlines */
-      --line: #dbe4d7;
-      --line-subtle: rgba(219, 228, 215, 0.5);
+      /* Ultra-thin structural lines */
+      --line: #efefef;
+      --line-subtle: rgba(239, 239, 239, 0.5);
 
-      /* Brand Palette — Galilea Deep Pine & Forest Sanctuary */
-      --brand: #1a422b;
-      --brand-hover: #133321;
-      --brand-2: #2e6644;
-      --brand-soft: #dbe9dd;
-      --gold: #967326;
-      --gold-soft: #f5eedb;
+      /* Monochromatic Brand accent with slight editorial tint */
+      --brand: #000000;
+      --brand-hover: #333333;
+      --brand-2: #111111;
+      --brand-soft: #f4f4f4;
+      --gold: #737373;
+      --gold-soft: #fcfcfc;
 
-      /* Semantic Status Colors */
-      --danger: #b3323a;
-      --danger-soft: #fcebee;
-      --warning: #916010;
-      --warning-soft: #fdf3df;
-      --success: #21693d;
-      --success-soft: #d7edd8;
+      /* Semantic Status Colors (Desaturated/Minimal) */
+      --danger: #d93025;
+      --danger-soft: #fce8e6;
+      --warning: #f29900;
+      --warning-soft: #fef0d9;
+      --success: #1e8e3e;
+      --success-soft: #e6f4ea;
 
-      /* Restrained Apple-Style Ambient Elevation */
-      --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.03);
-      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04), 0 1px 2px rgba(0, 0, 0, 0.02);
-      --shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 2px 6px rgba(0, 0, 0, 0.02);
-      --shadow-lg: 0 20px 56px rgba(0, 0, 0, 0.1), 0 4px 14px rgba(0, 0, 0, 0.03);
+      /* Clean Elevations - mostly flat except for modals */
+      --shadow-xs: none;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
+      --shadow: 0 4px 12px rgba(0,0,0,0.05);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
 
       /* Layout Dimensions */
-      --sidebar: 260px;
+      --sidebar: 270px;
       --topbar: 66px;
-      --radius-sm: 8px;
-      --radius: 12px;
-      --radius-lg: 18px;
-      --radius-xl: 24px;
-      --admin-radius: 14px;
+      --radius-sm: 4px;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --radius-xl: 16px;
+      --admin-radius: 8px;
       --admin-gap: 16px;
 
       /* Fluid Motion Timing */
       --ease: cubic-bezier(0.16, 1, 0.3, 1);
-      --dur: 0.2s;
+      --dur: 0.25s;
     }
 
     [data-theme="dark"] {
-      --bg: #09110c;
-      --surface: #101c15;
-      --surface-2: #16261c;
-      --surface-3: #1e3325;
-      --surface-translucent: rgba(16, 28, 21, 0.9);
+      --bg: #000000;
+      --surface: #0a0a0a;
+      --surface-2: #141414;
+      --surface-3: #1f1f1f;
+      --surface-translucent: rgba(0, 0, 0, 0.94);
 
-      --text: #f2f6f1;
-      --soft: #b0c2b3;
-      --faint: #7b9181;
+      --text: #ffffff;
+      --soft: #a3a3a3;
+      --faint: #666666;
 
-      --line: #203325;
-      --line-subtle: rgba(32, 51, 37, 0.6);
+      --line: #262626;
+      --line-subtle: rgba(38, 38, 38, 0.5);
 
-      --brand: #79c78d;
-      --brand-hover: #8fd4a1;
-      --brand-2: #579363;
-      --brand-soft: #163420;
-      --gold: #d6b468;
-      --gold-soft: #2d2510;
+      --brand: #ffffff;
+      --brand-hover: #cccccc;
+      --brand-2: #f0f0f0;
+      --brand-soft: #1a1a1a;
+      --gold: #8c8c8c;
+      --gold-soft: #141414;
 
-      --danger: #ff7d85;
-      --danger-soft: #361215;
-      --warning: #eeb85d;
-      --warning-soft: #36270a;
-      --success: #6ec985;
-      --success-soft: #12331c;
+      --danger: #f28b82;
+      --danger-soft: #3c1e1e;
+      --warning: #fde293;
+      --warning-soft: #3d3115;
+      --success: #81c995;
+      --success-soft: #1e3624;
 
-      --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
-      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.24), 0 1px 2px rgba(0, 0, 0, 0.12);
-      --shadow: 0 8px 24px rgba(0, 0, 0, 0.32), 0 2px 6px rgba(0, 0, 0, 0.16);
-      --shadow-lg: 0 20px 56px rgba(0, 0, 0, 0.44), 0 4px 14px rgba(0, 0, 0, 0.24);
+      --shadow-xs: none;
+      --shadow-sm: 0 1px 3px rgba(0,0,0,0.8);
+      --shadow: 0 4px 12px rgba(0,0,0,0.9);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,1);
     }
 
     /* ── Document Reset ──────────────────────────────────────────────── */
@@ -301,7 +301,7 @@
       flex: 0 0 auto;
       border-radius: 8px;
       color: #fff;
-      background: linear-gradient(135deg, var(--brand), var(--brand-2));
+      background: var(--brand);
       font-weight: 800;
       font-size: 0.8rem;
     }
@@ -378,9 +378,9 @@
     /* ── Content Area: Generous Whitespace ─────────────────────────── */
     .content {
       flex: 1 0 auto;
-      width: min(1320px, calc(100% - clamp(28px, 5vw, 76px)));
+      width: min(1400px, calc(100% - clamp(32px, 5vw, 96px)));
       margin: 0 auto;
-      padding: clamp(28px, 4vw, 56px) 0 64px;
+      padding: clamp(32px, 5vw, 64px) 0 80px;
     }
 
     /* ── 1. EDITORIAL WELCOME (REPLACES GIANT HERO) ─────────────────── */
@@ -658,16 +658,13 @@
       color: #fff;
       border-color: transparent;
       background: var(--brand);
-      box-shadow: 0 2px 10px color-mix(in srgb, var(--brand) 28%, transparent);
     }
     .btn.primary:hover {
       background: var(--brand-hover);
-      box-shadow: 0 4px 14px color-mix(in srgb, var(--brand) 38%, transparent);
     }
     [data-theme="dark"] .btn.primary {
       color: #07120b;
       background: var(--brand);
-      box-shadow: 0 2px 10px rgba(121, 199, 141, 0.28);
     }
     .btn.soft {
       color: var(--brand);
@@ -1634,12 +1631,12 @@
       .theme-logo-pair > img { transition: none }
     }
     .upload-preview-list { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-direction: column; gap: 8px; }
-    .upload-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 8px; background: var(--surface-2); font-size: 13px; border: 1px solid var(--border); }
+    .upload-item { display: flex; justify-content: space-between; align-items: center; padding: 12px; border-radius: 8px; background: var(--surface-2); font-size: 13px; border: 1px solid var(--line); }
     .upload-info { display: flex; flex-direction: column; gap: 2px; }
-    .upload-name { font-weight: 500; color: var(--text-1); word-break: break-all; }
-    .upload-size { color: var(--text-2); font-size: 12px; }
+    .upload-name { font-weight: 500; color: var(--text); word-break: break-all; }
+    .upload-size { color: var(--faint); font-size: 12px; }
     .upload-status { font-weight: 500; }
-    .upload-item.pending .upload-status { color: var(--text-2); }
+    .upload-item.pending .upload-status { color: var(--faint); }
     .upload-item.success .upload-status { color: var(--success); }
     .upload-item.error .upload-status { color: var(--danger); }
   </style>
@@ -1674,6 +1671,8 @@
     <symbol id="i-upload" viewBox="0 0 24 24"><path d="M12 16V4M7 9l5-5 5 5M5 20h14"/></symbol>
     <symbol id="i-music" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></symbol>
     <symbol id="i-info" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></symbol>
+    <symbol id="i-newspaper" viewBox="0 0 24 24"><path d="M4 22h16a2 2 0 0 0 2-2V4a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v16a2 2 0 0 1-2 2Zm0 0a2 2 0 0 1-2-2v-9c0-1.1.9-2 2-2h2"/><path d="M18 14h-8"/><path d="M15 18h-5"/><path d="M10 6h8v4h-8V6Z"/></symbol>
+    <symbol id="i-layout" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><path d="M3 9h18"/><path d="M9 21V9"/></symbol>
   </svg>
 
   <div class="loader" id="loader"><div><div class="loader-mark"><span class="orbit"></span><span class="theme-logo-pair loader-advent" aria-hidden="true"><img class="logo-light" src="https://gmahk-galilea.vercel.app/assets/logo-galilea-light.webp" alt=""><img class="logo-dark" src="https://gmahk-galilea.vercel.app/assets/logo-galilea-dark.webp" alt=""></span></div><p>Menyiapkan ruang kerja Galilea</p><span class="loader-note">Konten · Persetujuan · Pelayanan</span></div></div>
@@ -1701,7 +1700,7 @@
     const logoMark=className=>'<span class="theme-logo-pair '+attr(className||'brand-logo')+'" role="img" aria-label="Logo GMAHK Galilea"><img class="logo-light" src="https://gmahk-galilea.vercel.app/assets/logo-galilea-light.webp" alt=""><img class="logo-dark" src="https://gmahk-galilea.vercel.app/assets/logo-galilea-dark.webp" alt=""></span>';
     const esc=value=>String(value==null?'':value).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
     const attr=esc;
-    function server(name,args,timeoutMs){return new Promise((resolve,reject)=>{let done=false;const timer=setTimeout(()=>{if(!done){done=true;reject(new Error('Server admin belum merespons. Coba kembali; data Anda tidak berubah.'))}},Math.max(8000,Number(timeoutMs)||25000));const finish=fn=>value=>{if(done)return;done=true;clearTimeout(timer);fn(value)};if(typeof google!=='undefined'&&google.script&&google.script.run&&typeof google.script.run[name]==='function'){const runner=google.script.run.withSuccessHandler(finish(resolve)).withFailureHandler(finish(error=>reject(new Error(error&&error.message?error.message:String(error)))));runner[name].apply(runner,args||[]);return}fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:name,args:args||[]})}).then(res=>res.json()).then(payload=>{if(!payload||payload.ok===false){finish(error=>reject(new Error(error&&error.message?error.message:String(error))))(payload&&payload.error?payload.error:'Terjadi gangguan server admin.')}else{finish(resolve)(payload.data!==undefined?payload.data:payload)}}).catch(finish(error=>reject(new Error(error&&error.message?error.message:String(error)))))})}
+    function server(name,args,timeoutMs){return new Promise((resolve,reject)=>{let done=false;const timer=setTimeout(()=>{if(!done){done=true;reject(new Error('Server admin belum merespons. Coba kembali; data Anda tidak berubah.'))}},Math.max(8000,Number(timeoutMs)||25000));const finish=fn=>value=>{if(done)return;done=true;clearTimeout(timer);fn(value)};if(typeof google!=='undefined'&&google.script&&google.script.run&&typeof google.script.run[name]==='function'){const runner=google.script.run.withSuccessHandler(finish(resolve)).withFailureHandler(finish(error=>reject(new Error(error&&error.message?error.message:String(error)))));runner[name].apply(runner,args||[]);return}fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:name,args:args||[]})}).then(res=>{if(!res.ok){const ct=res.headers.get('content-type')||'';if(!ct.includes('application/json'))throw new Error('Server mengembalikan error '+res.status+'. Coba kembali.');}return res.json()}).then(payload=>{if(!payload||payload.ok===false){finish(error=>reject(new Error(error&&error.message?error.message:String(error))))(payload&&payload.error?payload.error:'Terjadi gangguan server admin.')}else{finish(resolve)(payload.data!==undefined?payload.data:payload)}}).catch(finish(error=>reject(new Error(error&&error.message?error.message:String(error)))))})}
     function toast(message){const el=document.createElement('div');el.className='toast';el.textContent=message;$('#toasts').append(el);setTimeout(()=>el.remove(),3800)}
     function setBusy(button,busy,label){if(!button)return;button.disabled=busy;if(busy){button.dataset.old=button.innerHTML;button.textContent=label||'Memproses…'}else if(button.dataset.old){button.innerHTML=button.dataset.old;delete button.dataset.old}}
     function status(value){const raw=String(value||'DRAFT').toUpperCase(),key=raw.toLowerCase(),labels={DRAFT:'Draf',PENDING:'Menunggu Tinjauan',REVIEW:'Sedang Ditinjau',APPROVED:'Sudah Disetujui',PUBLISH:'Sudah Terbit',REJECTED:'Perlu Revisi'};return '<span class="status '+key+'" title="Status: '+attr(labels[raw]||raw)+'">'+esc(labels[raw]||raw)+'</span>'}
@@ -1713,7 +1712,7 @@
     function shell(){
       const user=state.boot.user, d=state.boot.dashboard;
       const entityNav=state.boot.entities.filter(e=>!['settings','schedule'].includes(e.key)).map(e=>nav(e.key,e.icon,e.label)).join('');
-      return '<div class="admin-shell"><div class="mobile-overlay" id="overlay"></div><aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard">'+logoMark('brand-logo')+'<span><strong>Portal Sekretariat</strong><span>GMAHK Galilea Balikpapan</span><span class="build-badge">BUILD V'+esc(state.boot.version)+'</span></span></a><div class="nav-scroll"><div class="nav-label">Ringkasan</div>'+nav('dashboard','grid','Dashboard')+'<div class="nav-label">Kelola Konten</div>'+entityNav+nav('settings','settings','Identitas & Tampilan')+nav('schedule','calendar','Jadwal Pelayanan')+(user.permissions.edit?'<div class="nav-label">Operasional</div>'+nav('services','heart','Layanan Jemaat'):'')+(user.permissions.approve?nav('approvals','check','Persetujuan',d.pendingApprovals)+nav('activity','clock','Audit & Aktivitas'):'')+(user.permissions.manageAdmins?nav('users','shield','Pengelola Portal'):'')+(user.permissions.edit?nav('system','settings','Sistem & Backup'):'')+'</div><div class="sidebar-user"><div class="user-row"><span class="avatar">'+esc(initials(user.name))+'</span><span><strong>'+esc(user.name)+'</strong><span>'+esc(user.role)+' · '+esc(user.email)+'</span></span></div></div></aside><section class="workspace"><header class="topbar"><div class="button-row"><button class="icon-btn mobile-menu" id="mobile-menu" aria-label="Buka menu">'+icon('menu')+'</button><div class="crumb"><strong id="crumb-title">Dashboard</strong><span>Kelola website dan pelayanan jemaat</span></div></div><div class="top-actions"><a class="icon-btn" href="'+attr(state.boot.publicSite.publicUrl||APP_URL)+'" target="_blank" rel="noopener" title="Buka website">'+icon('external')+'</a><button class="icon-btn" id="theme-toggle" aria-label="Ganti tema">'+icon(currentTheme()==='dark'?'sun':'moon')+'</button></div></header><main class="content" id="content"></main><footer class="admin-footer"><div class="footer-inner"><span>Portal Administrasi GMAHK Galilea Balikpapan · Build V'+esc(state.boot.version)+'</span><span class="faint">Koneksi Data: Google Sheets &amp; Vercel Edge</span></div></footer></section></div>';
+      return '<div class="admin-shell"><div class="mobile-overlay" id="overlay"></div><aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard">'+logoMark('brand-logo')+'<span><strong>Portal Sekretariat</strong><span>GMAHK Galilea Balikpapan</span><span class="build-badge">BUILD V'+esc(state.boot.version)+'</span></span></a><div class="nav-scroll"><div class="nav-label">Ringkasan</div>'+nav('dashboard','grid','Dashboard')+'<div class="nav-label">Kelola Konten</div>'+entityNav+nav('settings','settings','Identitas & Tampilan')+nav('schedule','calendar','Jadwal Pelayanan')+(user.permissions.edit?'<div class="nav-label">Operasional</div>'+nav('services','heart','Layanan Jemaat'):'')+(user.permissions.approve?nav('approvals','check','Persetujuan'):'')+(user.permissions.approve?nav('activity','clock','Audit & Aktivitas'):'')+(user.permissions.manageAdmins?nav('users','shield','Pengelola Portal'):'')+(user.permissions.edit?nav('system','settings','Sistem & Backup'):'')+'</div><div class="sidebar-user"><div class="user-row"><span class="avatar">'+esc(initials(user.name))+'</span><span><strong>'+esc(user.name)+'</strong><span>'+esc(user.role)+' · '+esc(user.email)+'</span></span></div></div></aside><section class="workspace"><header class="topbar"><div class="button-row"><button class="icon-btn mobile-menu" id="mobile-menu" aria-label="Buka menu">'+icon('menu')+'</button><div class="crumb"><strong id="crumb-title">Dashboard</strong><span>Kelola website dan pelayanan jemaat</span></div></div><div class="top-actions"><div style="position:relative"><button class="icon-btn" id="notif-toggle" aria-label="Notifikasi">'+icon('bell')+'<span class="count" id="notif-badge" style="position:absolute;top:-4px;right:-4px;padding:0 4px;font-size:10px" hidden>0</span></button><div id="notif-panel" class="card" style="position:absolute;top:100%;right:0;width:300px;display:none;flex-direction:column;gap:8px;padding:12px;z-index:100;box-shadow:var(--shadow-lg);margin-top:8px"></div></div><a class="icon-btn" href="'+attr(state.boot.publicSite.publicUrl||APP_URL)+'" target="_blank" rel="noopener" title="Buka website">'+icon('external')+'</a><button class="icon-btn" id="theme-toggle" aria-label="Ganti tema">'+icon(currentTheme()==='dark'?'sun':'moon')+'</button></div></header><main class="content" id="content"></main><footer class="admin-footer"><div class="footer-inner"><span>Portal Administrasi GMAHK Galilea Balikpapan · Build V'+esc(state.boot.version)+'</span><span class="faint">Koneksi Data: Google Sheets &amp; Vercel Edge</span></div></footer></section></div>';
     }
     function nav(route,iconName,label,count){const value=Math.max(0,Number(count)||0);return '<button class="nav-item" data-route="'+attr(route)+'">'+icon(iconName)+'<span>'+esc(label)+'</span><span class="count" data-nav-count="'+attr(route)+'" '+(value?'':'hidden')+'>'+esc(value)+'</span></button>'}
     function closeSidebar(){$('#sidebar')?.classList.remove('open');$('#overlay')?.classList.remove('open')}
@@ -1729,15 +1728,15 @@
       const d=state.boot.dashboard, u=state.boot.user, canEdit=u.permissions.edit, loading=Boolean(d.loading), publicToday=String(state.boot.publicSite.publicUrl||APP_URL).replace(/#.*$/,'')+'#today';
       const heroActions=canEdit?'<div class="welcome-actions"><button class="btn primary" data-route="worshipPlans">Siapkan ibadah '+icon('plus')+'</button><button class="btn" data-route="schedule">Edit jadwal</button><a class="btn soft" href="'+attr(publicToday)+'" target="_blank" rel="noopener">Mode Operator '+icon('external')+'</a></div>':'';
       const quickItems=canEdit?
-        quick('worshipPlans','calendar','Susunan Ibadah','Tema, ayat, lagu, dan liturgi Sabat.')+
+        quick('worshipPlans','layout','Susunan Ibadah','Tema, ayat, lagu, dan liturgi Sabat.')+
         quick('themeSong','music','Lagu Tema','Ayat 1, Ayat 2, ayat tambahan, dan Refrain.')+
         quick('announcements','bell','Agenda dan Pengumuman','Warta jemaat aktif dan pengumuman.')+
-        quick('activities','calendar','Berita Jemaat','Dokumentasi kegiatan gereja yang berlangsung.')+
+        quick('activities','newspaper','Berita Jemaat','Dokumentasi kegiatan gereja yang berlangsung.')+
         quick('schedule','calendar','Jadwal Pelayanan','Tugas diaken, khotbah, dan pembagian ibadah.')+
         quick('services','heart','Layanan Jemaat','Tindak lanjuti pokok doa dan kunjungan.')+
         quick('system','settings','Kesehatan Sistem','Pemeriksaan cache, sumber data, dan cadangan.')
         :
-        quick('worshipPlans','calendar','Susunan Ibadah','Lihat susunan ibadah aktif.')+
+        quick('worshipPlans','layout','Susunan Ibadah','Lihat susunan ibadah aktif.')+
         quick('themeSong','music','Lagu Tema','Lihat lirik lagu tema aktif.')+
         quick('announcements','bell','Agenda dan Pengumuman','Lihat informasi warta yang diterbitkan.');
 
@@ -1806,8 +1805,28 @@
       '</button>';
     }
 
-    function syncApprovalBadge(){const badge=$('[data-nav-count="approvals"]');if(!badge||!state.boot)return;const value=Math.max(0,Number(state.boot.dashboard.pendingApprovals)||0);badge.textContent=value;badge.hidden=!value}
-    async function loadDashboardSummary(showError){if(!state.boot)return;const request=++state.dashboardRequest;state.boot.dashboard.loading=true;state.boot.dashboard.error='';if(state.route==='dashboard')renderDashboard();try{const result=await server('adminGetDashboardSummary',[],32000);if(request!==state.dashboardRequest)return;if(result&&result.dashboard)state.boot.dashboard=Object.assign({},state.boot.dashboard,result.dashboard,{loading:false,error:''});if(result&&result.publicSite)state.boot.publicSite=Object.assign({},state.boot.publicSite,result.publicSite);syncApprovalBadge();if(state.route==='dashboard')renderDashboard()}catch(error){if(request!==state.dashboardRequest)return;state.boot.dashboard.loading=false;state.boot.dashboard.error=cleanError(error.message);if(state.route==='dashboard')renderDashboard();if(showError)toast(state.boot.dashboard.error)}}
+    function syncNotifications(){
+      if(!state.boot||!state.boot.dashboard)return;
+      const d=state.boot.dashboard;
+      const pending=Math.max(0,Number(d.pendingApprovals)||0);
+      const drafts=Math.max(0,Number(d.myDrafts)||0);
+      const services=Math.max(0,Number(d.serviceRequests)||0);
+      const total=pending+drafts+services;
+      const badge=$('#notif-badge');
+      if(badge){badge.textContent=total;badge.hidden=!total}
+      const panel=$('#notif-panel');
+      if(panel){
+        let html='<div style="font-weight:600;padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:4px">Notifikasi</div>';
+        if(total===0)html+='<div class="muted small" style="padding:12px 0;text-align:center">Tidak ada pemberitahuan baru.</div>';
+        else{
+          if(pending>0)html+='<button class="nav-item" data-route="approvals" style="width:100%;justify-content:flex-start;height:auto;padding:8px">'+icon('check')+'<span style="white-space:normal;text-align:left">'+pending+' persetujuan menunggu</span></button>';
+          if(drafts>0)html+='<button class="nav-item" data-route="dashboard" style="width:100%;justify-content:flex-start;height:auto;padding:8px">'+icon('edit')+'<span style="white-space:normal;text-align:left">'+drafts+' draft perlu direvisi</span></button>';
+          if(services>0)html+='<button class="nav-item" data-route="services" style="width:100%;justify-content:flex-start;height:auto;padding:8px">'+icon('heart')+'<span style="white-space:normal;text-align:left">'+services+' layanan jemaat baru</span></button>';
+        }
+        panel.innerHTML=html;
+      }
+    }
+    async function loadDashboardSummary(showError){if(!state.boot)return;const request=++state.dashboardRequest;state.boot.dashboard.loading=true;state.boot.dashboard.error='';if(state.route==='dashboard')renderDashboard();try{const result=await server('adminGetDashboardSummary',[],32000);if(request!==state.dashboardRequest)return;if(result&&result.dashboard)state.boot.dashboard=Object.assign({},state.boot.dashboard,result.dashboard,{loading:false,error:''});if(result&&result.publicSite)state.boot.publicSite=Object.assign({},state.boot.publicSite,result.publicSite);syncNotifications();if(state.route==='dashboard')renderDashboard()}catch(error){if(request!==state.dashboardRequest)return;state.boot.dashboard.loading=false;state.boot.dashboard.error=cleanError(error.message);if(state.route==='dashboard')renderDashboard();if(showError)toast(state.boot.dashboard.error)}}
 
     async function loadActivity(){state.activity=await server('adminGetDashboardActivity',[]);const audit=state.activity.audit||[],health=state.activity.health||[];$('#content').innerHTML='<div class="page-head"><div><span class="eyebrow">JEJAK PERUBAHAN</span><h1>Audit & Aktivitas</h1><p>Riwayat tindakan pengelola dan hasil pemeriksaan sumber terakhir.</p></div><button class="btn" data-reload>'+icon('refresh')+'Muat ulang</button></div><div class="grid grid-2"><section><div class="section-head" style="margin-top:0"><h3>Aktivitas terbaru</h3></div><div class="activity-list">'+(audit.length?audit.map(activityHtml).join(''):emptyHtml('Belum ada aktivitas yang tercatat.'))+'</div></section><section><div class="section-head" style="margin-top:0"><h3>Status sumber terakhir</h3></div><div class="activity-list">'+(health.length?health.map(item=>'<article class="activity-row"><span class="activity-dot"></span><div><strong>'+esc(item.source)+'</strong><span>'+esc(item.note||'Tidak ada catatan.')+'</span></div>'+status(item.status)+'</article>').join(''):emptyHtml('Pemeriksaan sistem belum pernah dijalankan.'))+'</div></section></div>'}
     function activityHtml(item){return '<article class="activity-row"><span class="activity-dot"></span><div><strong>'+esc(item.name||item.email)+' · '+esc(item.action)+'</strong><span>'+esc(friendlyEntity(item.entity))+(item.detail?' · '+esc(item.detail):'')+'</span></div><time>'+esc(item.time)+'</time></article>'}
@@ -1856,9 +1875,9 @@
     function openScheduleEditor(record,workflow){const data=state.entityData;if(!data.sections||!data.sections.length)return toast('Bagian jadwal belum ditemukan pada spreadsheet.');const sectionId=record&&((record.values&&record.values.sectionId)||record.sectionId)||data.sections[0].id||'';const section=data.sections.find(s=>s.id===sectionId)||data.sections[0];const values=record&&record.values||record||{};const fields=values.fields||{};const locked=Boolean(record&&record.id&&!/^NEW-/i.test(record.id));state.currentEdit={entity:'schedule',entityId:record&&record.id||'',workflowId:workflow&&workflow.id||'',action:workflow&&workflow.action||'UPSERT'};$('#editor-title').textContent=record?'Edit Jadwal':'Tambah Jadwal';$('#editor-subtitle').textContent=data.sheetName+(locked?' · Jenis ibadah dikunci untuk menjaga struktur sheet':'');$('#editor-workflow').innerHTML=workflowGuide(workflow&&workflow.state||'DRAFT');const sectionControl='<select '+(locked?'disabled':'name="sectionId"')+' id="schedule-section">'+data.sections.map(s=>'<option value="'+s.id+'" '+(s.id===section.id?'selected':'')+'>'+esc(s.title)+'</option>').join('')+'</select>'+(locked?'<input type="hidden" name="sectionId" value="'+attr(section.id)+'">':'');$('#editor-fields').innerHTML='<div class="field"><label>Jenis Ibadah *</label>'+sectionControl+'</div><div class="field"><label>Tanggal *</label><input type="date" name="isoDate" value="'+attr(values.isoDate||'')+'" required></div><div class="field full" id="schedule-fields">'+scheduleFieldsHtml(section,fields)+'</div>';$('#editor-preview').classList.remove('show');$('#editor-preview').innerHTML='';$('#editor-dialog').showModal()}
     function scheduleFieldsHtml(section,values){return '<div class="form-grid">'+section.fields.map(name=>'<div class="field"><label>'+esc(name)+'</label><input name="schedule:'+attr(name)+'" value="'+attr(values[name]||'')+'"></div>').join('')+'</div>'}
     async function saveEditor(event){event.preventDefault();const button=event.submitter,intent=button&&button.value||'draft',form=event.currentTarget;if(!form.reportValidity())return;const snapshot=editorSnapshot(),validation=editorValidation(snapshot);if(intent==='submit'&&!validation.ready){previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujuan.');return}const data=Object.fromEntries(new FormData(form).entries());let payload;if(state.currentEdit.entity==='schedule'){payload={sectionId:data.sectionId,isoDate:data.isoDate,fields:{}};Object.keys(data).filter(k=>k.startsWith('schedule:')).forEach(k=>payload.fields[k.slice(9)]=data[k])}else{payload={};(state.entityData.fields||[]).forEach(f=>payload[f.key]=data[f.key]||'')}const buttons=$$('button[type="submit"]',form);buttons.forEach(b=>b.disabled=true);setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:state.currentEdit.entity,entityId:state.currentEdit.entityId,workflowId:state.currentEdit.workflowId,action:state.currentEdit.action,payload:payload,submit:intent==='submit'}]);$('#editor-dialog').close();toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{buttons.forEach(b=>b.disabled=false);setBusy(button,false)}}
-    async function requestDelete(id){if(!confirm('Ajukan penghapusan konten ini untuk persetujuan?'))return;try{const result=await server('adminSaveWorkflow',[{entity:state.entity,entityId:id,action:'DELETE',payload:{},submit:true}]);toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}}
-    async function resubmitWorkflow(id){const workflow=(state.entityData.workflows||[]).find(w=>w.id===id);if(!workflow)return;if(!confirm('Ajukan kembali permintaan '+(workflow.action==='DELETE'?'penghapusan':'perubahan')+' ini?'))return;try{const result=await server('adminSaveWorkflow',[{entity:workflow.entity,entityId:workflow.entityId,workflowId:workflow.id,action:workflow.action,payload:workflow.payload||{},submit:true}]);toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}}
-    async function cancelWorkflow(id){if(!confirm('Tarik pengajuan ini kembali menjadi draft?'))return;try{const result=await server('adminCancelWorkflow',[id]);toast(result.message);if(state.boot&&state.boot.dashboard)state.boot.dashboard.myDrafts=Number(state.boot.dashboard.myDrafts||0)+1;await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}}
+    async function requestDelete(id,button){if(!confirm('Ajukan penghapusan konten ini untuk persetujuan?'))return;setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:state.entity,entityId:id,action:'DELETE',payload:{},submit:true}]);toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
+    async function resubmitWorkflow(id,button){const workflow=(state.entityData.workflows||[]).find(w=>w.id===id);if(!workflow)return;if(!confirm('Ajukan kembali permintaan '+(workflow.action==='DELETE'?'penghapusan':'perubahan')+' ini?'))return;setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:workflow.entity,entityId:workflow.entityId,workflowId:workflow.id,action:workflow.action,payload:workflow.payload||{},submit:true}]);toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
+    async function cancelWorkflow(id,button){if(!confirm('Tarik pengajuan ini kembali menjadi draft?'))return;setBusy(button,true);try{const result=await server('adminCancelWorkflow',[id]);toast(result.message);if(state.boot&&state.boot.dashboard)state.boot.dashboard.myDrafts=Number(state.boot.dashboard.myDrafts||0)+1;await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
 
         function normalizeDriveUrl(url) {
       const match = url.match(/drive\.google\.com\/uc\?export=view&id=([^&]+)/);
@@ -1882,9 +1901,13 @@
         for(let index=0;index<files.length;index++){
           const file=files[index];
           const kb = Math.round(file.size/1024);
-          const liId = 'up-' + Date.now() + '-' + index;
+          const liId = 'upload-item-' + target + '-' + index + '-' + Date.now();
+          let thumbUrl = '';
+          try { thumbUrl = URL.createObjectURL(file); } catch (e) {}
+          const imgHtml = thumbUrl ? '<img src="'+attr(thumbUrl)+'" style="width:48px;height:48px;object-fit:cover;border-radius:6px;flex:0 0 auto;margin-right:12px">' : '';
+          
           if(previewList) {
-            previewList.insertAdjacentHTML('beforeend', '<li id="'+liId+'" class="upload-item pending"><div class="upload-info"><span class="upload-name">'+esc(file.name)+'</span><span class="upload-size">'+kb+' KB</span></div><div class="upload-status">Mengunggah...</div></li>');
+            previewList.insertAdjacentHTML('beforeend', '<li id="'+liId+'" class="upload-item pending" style="justify-content:flex-start">'+imgHtml+'<div class="upload-info" style="flex:1"><span class="upload-name">'+esc(file.name)+'</span><span class="upload-size">'+kb+' KB</span></div><div class="upload-status">Mengunggah...</div></li>');
           }
           
           try {
@@ -1922,8 +1945,8 @@
     async function loadApprovals(filter,force){if(filter)state.approvalStatus=filter;const cached=state.approvalCache[state.approvalStatus];state.approvals=!force&&cached&&Date.now()-cached.time<60000?cached.items:await server('adminListApprovals',[state.approvalStatus],10000);state.approvalCache[state.approvalStatus]={time:Date.now(),items:state.approvals};const items=state.approvals,labels={PENDING:'Menunggu',APPROVED:'Diterbitkan',REJECTED:'Perlu revisi'};$('#content').innerHTML='<div class="page-head"><div><span class="eyebrow">ALUR PUBLIKASI</span><h1>Persetujuan Konten</h1><p>Tinjau perubahan dengan cepat. Alasan revisi akan dikirim kembali kepada editor.</p></div><span class="status '+state.approvalStatus.toLowerCase()+'">'+esc(items.length)+' '+esc(labels[state.approvalStatus]||state.approvalStatus)+'</span></div><div class="approval-tabs">'+['PENDING','APPROVED','REJECTED'].map(key=>'<button class="approval-tab '+(state.approvalStatus===key?'active':'')+'" data-approval-status="'+key+'">'+esc(labels[key])+'</button>').join('')+'</div><div class="approval-list">'+(items.length?items.map(approvalHtml).join(''):emptyHtml('Belum ada item pada status ini.'))+'</div>'}
     function approvalHtml(item){const reviewer=item.reviewerEmail?'<span class="small faint">'+esc(item.reviewerEmail+' · '+item.reviewedAt)+'</span>':'';const primary=item.state==='PENDING'?'<button class="btn primary" data-open-review="'+attr(item.id)+'">Tinjau sekarang '+icon('check')+'</button>':reviewer;const remove='<button class="btn danger" data-delete-approval="'+attr(item.id)+'" aria-label="Hapus catatan persetujuan">'+icon('trash')+'Hapus</button>';return '<article class="card approval-card"><div><div class="approval-meta">'+status(item.state)+'<span>'+esc(friendlyEntity(item.entity))+'</span><span>'+esc(item.ownerName)+'</span><span>'+esc(item.updatedAt)+'</span></div><h3 style="margin-top:16px">'+esc(item.action==='DELETE'?'Penghapusan konten':'Perubahan '+friendlyEntity(item.entity))+'</h3>'+payloadHtml(item.payload)+(item.note?'<p class="workflow-note">Catatan reviewer: '+esc(item.note)+'</p>':'')+'</div><div class="button-row">'+primary+remove+'</div></article>'}
     function payloadHtml(payload){const entries=Object.keys(payload||{});if(!entries.length)return'<div class="payload"><div><small>Perubahan</small><strong>Konten akan dihapus setelah disetujui.</strong></div></div>';return '<div class="payload">'+entries.map(key=>{const value=payload[key];if(value&&typeof value==='object')return'<div class="payload-wide"><small>'+esc(key)+'</small><strong>'+Object.keys(value).map(child=>esc(child)+': '+esc(value[child])).join('<br>')+'</strong></div>';return'<div><small>'+esc(key)+'</small><strong>'+esc(value)+'</strong></div>'}).join('')+'</div>'}
-    function openReview(id){const item=(state.approvals||[]).find(x=>x.id===id);if(!item)return toast('Pengajuan ini sudah diproses. Muat ulang daftar.');state.currentReview=item;state.reviewMode='';$('#review-caption').textContent='Periksa isi sebelum mengambil keputusan';$('#review-body').innerHTML=workflowGuide('REVIEW')+'<div class="approval-meta">'+status(item.state)+'<span>'+esc(friendlyEntity(item.entity))+'</span><span>'+esc(item.ownerName)+'</span></div><h2 class="review-title">'+esc(item.action==='DELETE'?'Konfirmasi penghapusan':'Periksa sebelum diterbitkan')+'</h2>'+payloadHtml(item.payload)+'<section class="review-reason" id="review-reason" aria-hidden="true"><div class="reason-head">'+icon('edit')+'<div><strong>Alasan revisi</strong><span>Jelaskan bagian yang harus diperbaiki. Catatan ini langsung terlihat oleh editor.</span></div></div><textarea id="review-note" minlength="4" placeholder="Contoh: Perbaiki tanggal kegiatan dan tambahkan lokasi yang lengkap."></textarea><span class="reason-help" id="reason-help">Minimal 4 karakter.</span></section>';const reject=$('[data-review="REJECT"]');reject.innerHTML='Minta revisi';reject.classList.remove('primary');reject.classList.add('danger');$('#review-dialog').showModal()}
-    async function review(decision){if(!state.currentReview)return;const reason=$('#review-reason'),note=$('#review-note')?$('#review-note').value.trim():'';if(decision==='REJECT'&&state.reviewMode!=='reject'){state.reviewMode='reject';reason.classList.add('show');reason.setAttribute('aria-hidden','false');$('#review-caption').textContent='Tuliskan alasan revisi sebelum dikirim';const reject=$('[data-review="REJECT"]');reject.innerHTML=icon('send')+'Kirim untuk revisi';reject.classList.remove('danger');reject.classList.add('primary');requestAnimationFrame(()=>{$('#review-note').focus();reason.scrollIntoView({behavior:'smooth',block:'nearest'})});return}if(decision==='REJECT'&&note.length<4){$('#review-note').focus();$('#reason-help').classList.add('error');return}const buttons=$$('[data-review]'),button=$('[data-review="'+decision+'"]'),reviewed=state.currentReview;buttons.forEach(b=>b.disabled=true);setBusy(button,true,decision==='REJECT'?'Mengirim revisi…':'Menerbitkan…');try{const result=await server('adminReviewWorkflow',[reviewed.id,decision,note],12000);$('#review-dialog').close();toast(result.message);if(state.boot&&state.boot.dashboard)state.boot.dashboard.pendingApprovals=Math.max(0,Number(state.boot.dashboard.pendingApprovals||0)-1);state.approvalCache.PENDING={time:Date.now(),items:(state.approvalCache.PENDING&&state.approvalCache.PENDING.items||state.approvals).filter(item=>item.id!==reviewed.id)};const target=decision==='APPROVE'?'APPROVED':'REJECTED';const moved=Object.assign({},reviewed,{state:result.state,note:note,reviewerEmail:state.boot.user.email,reviewedAt:'Baru saja'});const existing=state.approvalCache[target]&&state.approvalCache[target].items||[];state.approvalCache[target]={time:Date.now(),items:[moved].concat(existing.filter(item=>item.id!==moved.id))};state.currentReview=null;state.reviewMode='';await loadApprovals(target,false)}catch(error){toast(cleanError(error.message))}finally{buttons.forEach(b=>b.disabled=false);setBusy(button,false)}}
+    function openReview(id){const item=(state.approvals||[]).find(x=>x.id===id);if(!item)return toast('Pengajuan ini sudah diproses. Muat ulang daftar.');state.currentReview=item;state.reviewMode='';$('#review-caption').textContent='Periksa isi sebelum mengambil keputusan';const isDelete=item.action==='DELETE';const warningHtml=isDelete?'<div class="editor-validation-row warning" style="margin-top:16px;color:var(--danger);border-color:var(--danger)">'+icon('trash')+'<strong>Konten ini akan dihapus permanen setelah disetujui.</strong></div>':'';$('#review-body').innerHTML=workflowGuide('REVIEW')+'<div class="approval-meta">'+status(item.state)+'<span>'+esc(friendlyEntity(item.entity))+'</span><span>'+esc(item.ownerName)+'</span></div><h2 class="review-title">'+esc(isDelete?'Konfirmasi penghapusan':'Periksa sebelum diterbitkan')+'</h2>'+payloadHtml(item.payload)+warningHtml+'<section class="review-reason" id="review-reason" aria-hidden="true"><div class="reason-head">'+icon('edit')+'<div><strong>Alasan revisi</strong><span>Jelaskan bagian yang harus diperbaiki. Catatan ini langsung terlihat oleh editor.</span></div></div><textarea id="review-note" minlength="4" placeholder="Contoh: Perbaiki tanggal kegiatan dan tambahkan lokasi yang lengkap."></textarea><span class="reason-help" id="reason-help">Minimal 4 karakter.</span></section>';const reject=$('[data-review="REJECT"]');reject.innerHTML='Minta revisi';reject.classList.remove('primary');reject.classList.add('danger');const approve=$('[data-review="APPROVE"]');if(isDelete){approve.innerHTML=icon('trash')+'Setujui Penghapusan';approve.classList.remove('primary');approve.classList.add('danger');}else{approve.innerHTML=icon('check')+'Setujui & Terbitkan';approve.classList.remove('danger');approve.classList.add('primary');}$('#review-dialog').showModal()}
+    async function review(decision){if(!state.currentReview)return;const reason=$('#review-reason'),note=$('#review-note')?$('#review-note').value.trim():'';if(decision==='REJECT'&&state.reviewMode!=='reject'){state.reviewMode='reject';reason.classList.add('show');reason.setAttribute('aria-hidden','false');$('#review-caption').textContent='Tuliskan alasan revisi sebelum dikirim';const reject=$('[data-review="REJECT"]');reject.innerHTML=icon('send')+'Kirim untuk revisi';reject.classList.remove('danger');reject.classList.add('primary');requestAnimationFrame(()=>{$('#review-note').focus();reason.scrollIntoView({behavior:'smooth',block:'nearest'})});return}if(decision==='REJECT'&&note.length<4){$('#review-note').focus();$('#reason-help').classList.add('error');return}const buttons=$$('[data-review]'),button=$('[data-review="'+decision+'"]'),reviewed=state.currentReview;buttons.forEach(b=>b.disabled=true);setBusy(button,true,decision==='REJECT'?'Mengirim revisi…':'Menerbitkan…');try{const result=await server('adminReviewWorkflow',[reviewed.id,decision,note],30000);$('#review-dialog').close();toast(result.message);if(state.boot&&state.boot.dashboard)state.boot.dashboard.pendingApprovals=Math.max(0,Number(state.boot.dashboard.pendingApprovals||0)-1);state.approvalCache.PENDING={time:Date.now(),items:(state.approvalCache.PENDING&&state.approvalCache.PENDING.items||state.approvals).filter(item=>item.id!==reviewed.id)};const target=decision==='APPROVE'?'APPROVED':'REJECTED';const moved=Object.assign({},reviewed,{state:result.state,note:note,reviewerEmail:state.boot.user.email,reviewedAt:'Baru saja'});const existing=state.approvalCache[target]&&state.approvalCache[target].items||[];state.approvalCache[target]={time:Date.now(),items:[moved].concat(existing.filter(item=>item.id!==moved.id))};state.currentReview=null;state.reviewMode='';await loadApprovals(target,false)}catch(error){toast(cleanError(error.message))}finally{buttons.forEach(b=>b.disabled=false);setBusy(button,false)}}
 
     async function deleteApproval(id){const item=(state.approvals||[]).find(entry=>entry.id===id);if(!item)return;const published=item.state==='APPROVED';const warning=published?'Riwayat persetujuan akan dihapus, tetapi konten yang sudah terbit tetap tampil.':'Pengajuan ini akan dihapus dari daftar persetujuan.';if(!confirm(warning+' Tindakan ini tidak dapat dibatalkan.'))return;const button=$('[data-delete-approval="'+CSS.escape(id)+'"]');setBusy(button,true,'Menghapus…');try{const result=await server('adminDeleteApproval',[id]);if(item.state==='PENDING'&&state.boot&&state.boot.dashboard)state.boot.dashboard.pendingApprovals=Math.max(0,Number(state.boot.dashboard.pendingApprovals||0)-1);state.approvals=state.approvals.filter(entry=>entry.id!==id);state.approvalCache[state.approvalStatus]={time:Date.now(),items:state.approvals};toast(result.message||'Catatan persetujuan dihapus.');renderApprovalsCurrent()}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
     function renderApprovalsCurrent(){const items=state.approvals,labels={PENDING:'Menunggu',APPROVED:'Diterbitkan',REJECTED:'Perlu revisi'};const list=$('.approval-list'),badge=$('.page-head>.status');if(list)list.innerHTML=items.length?items.map(approvalHtml).join(''):emptyHtml('Belum ada item pada status ini.');if(badge)badge.textContent=items.length+' '+(labels[state.approvalStatus]||state.approvalStatus)}
@@ -1943,7 +1966,7 @@
     function userHtml(user){return '<article class="card user-card"><div class="user-row"><span class="avatar">'+esc(initials(user.name))+'</span><div><strong>'+esc(user.name)+'</strong><span class="muted small">'+esc(user.email)+' · '+esc(user.role)+' · '+esc(user.status)+'</span></div></div><div class="button-row"><button class="btn" data-edit-user="'+attr(user.id)+'">'+icon('edit')+'Edit</button><button class="btn danger" data-delete-user="'+attr(user.id)+'">'+icon('trash')+'</button></div></article>'}
     function openUser(id){const user=state.users.find(x=>x.id===id)||{id:'',name:'',email:'',role:'VIEWER',status:'AKTIF'};const form=$('#user-form');form.reset();Object.keys(user).forEach(key=>{if(form.elements[key])form.elements[key].value=user[key]});$('#user-dialog').showModal()}
     async function saveUser(event){event.preventDefault();const button=event.submitter,set=Object.fromEntries(new FormData(event.currentTarget).entries());setBusy(button,true);try{const result=await server('adminSaveUser',[set]);$('#user-dialog').close();toast(result.message||'Data pengelola disimpan.');await loadUsers()}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
-    async function deleteUser(id){if(!confirm('Hapus pengelola ini dari portal?'))return;try{await server('adminDeleteUser',[id]);toast('Pengelola dihapus.');await loadUsers()}catch(error){toast(cleanError(error.message))}}
+    async function deleteUser(id,button){if(!confirm('Hapus pengelola ini dari portal?'))return;setBusy(button,true);try{await server('adminDeleteUser',[id]);toast('Pengelola dihapus.');await loadUsers()}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
 
     function renderSystem(){const canBackup=state.boot.user.permissions.backup;$('#content').innerHTML='<div class="page-head"><div><span class="eyebrow">SYSTEM OPERATIONS</span><h1>Sistem, arsip & backup</h1><p>Perawatan website dilakukan tanpa mengubah isi sumber API.</p></div><span class="status publish">V'+esc(state.boot.version)+'</span></div><div class="grid grid-4"><article class="card card-pad"><span class="metric-icon">'+icon('refresh')+'</span><h3 style="margin-top:24px">Perbarui Cache</h3><p class="muted">Paksa viewer membaca perubahan spreadsheet terbaru.</p><button class="btn primary" data-system="refresh">Jalankan sekarang</button></article><article class="card card-pad"><span class="metric-icon">'+icon('check')+'</span><h3 style="margin-top:24px">Pemeriksaan Sumber</h3><p class="muted">Periksa materi, video, Alkitab, dan layanan.</p><button class="btn" data-system="health">Periksa sistem</button></article><article class="card card-pad"><span class="metric-icon">'+icon('download')+'</span><h3 style="margin-top:24px">Arsip PDF Publik</h3><p class="muted">Bangun ulang PDF Alkitab dan Lagu Sion lengkap untuk viewer.</p><button class="btn" data-system="archives" '+(canBackup?'':'disabled')+'>Bangun arsip</button></article><article class="card card-pad"><span class="metric-icon">'+icon('download')+'</span><h3 style="margin-top:24px">Backup Data</h3><p class="muted">Buat salinan spreadsheet dan layanan jemaat di Drive.</p><button class="btn" data-system="backup" '+(canBackup?'':'disabled')+'>Buat backup</button></article></div><div id="system-result" style="margin-top:20px"></div><article class="card card-pad" style="margin-top:22px"><span class="eyebrow">KEAMANAN DEPLOYMENT</span><h3>Portal admin memakai deployment khusus.</h3><p class="muted">Buka alamat Vercel <strong>/admin</strong>. Vercel akan meneruskan Anda ke deployment admin yang berjalan sebagai <strong>User accessing the web app</strong> sehingga email Google dapat diverifikasi.</p></article>'}
     async function runSystem(action,button){const label=action==='backup'?'Membuat backup…':action==='archives'?'Menyusun PDF lengkap…':'Memproses…';setBusy(button,true,label);try{const result=await server('adminRunSystemAction',[action],action==='archives'?110000:22000);$('#system-result').innerHTML='<article class="card card-pad"><span class="status approved">BERHASIL</span><pre style="white-space:pre-wrap;color:var(--soft);overflow-wrap:anywhere">'+esc(typeof result==='string'?result:JSON.stringify(result,null,2))+'</pre></article>';toast(action==='archives'?'Arsip PDF siap digunakan di viewer.':'Aksi sistem selesai.')}catch(error){$('#system-result').innerHTML=errorBox(error.message)}finally{setBusy(button,false)}}
@@ -1963,9 +1986,22 @@
       $('#root').innerHTML='<main class="gate"><article class="gate-card">'+logoMark('gate-logo')+'<span class="eyebrow">'+eyebrow+'</span><h1>'+title+'</h1><p class="muted gate-message">'+esc(message)+'</p><div class="steps">'+steps+'</div><button class="btn primary" onclick="location.reload()">Muat ulang portal</button></article></main>';
     }
     function bindShell(){
-      $('#mobile-menu')?.addEventListener('click',()=>{$('#sidebar').classList.toggle('open');$('#overlay').classList.toggle('open')});$('#overlay')?.addEventListener('click',closeSidebar);$('#theme-toggle')?.addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
+      $('#mobile-menu')?.addEventListener('click',()=>{$('#sidebar').classList.toggle('open');$('#overlay').classList.toggle('open')});
+      $('#overlay')?.addEventListener('click',closeSidebar);
+      $('#theme-toggle')?.addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
+      $('#notif-toggle')?.addEventListener('click',(e)=>{
+        e.stopPropagation();
+        const p=$('#notif-panel');
+        if(p)p.style.display=p.style.display==='none'?'flex':'none';
+      });
+      document.addEventListener('click',(e)=>{
+        if(!e.target.closest('#notif-panel')){
+          const p=$('#notif-panel');
+          if(p)p.style.display='none';
+        }
+      });
     }
-    document.addEventListener('click',event=>{const route=event.target.closest('[data-route]');if(route)return navigate(route.dataset.route);const close=event.target.closest('[data-close]');if(close)return $('#'+close.dataset.close).close();if(event.target.closest('[data-preview-editor]'))return previewEditor();if(event.target.closest('[data-new-record]'))return openNewRecord();const edit=event.target.closest('[data-edit-record]');if(edit)return openRecord(edit.dataset.editRecord);const duplicate=event.target.closest('[data-duplicate-schedule]');if(duplicate)return duplicateSchedule(duplicate.dataset.duplicateSchedule);const del=event.target.closest('[data-delete-record]');if(del)return requestDelete(del.dataset.deleteRecord);const ew=event.target.closest('[data-edit-workflow]');if(ew)return openWorkflow(ew.dataset.editWorkflow);const rw=event.target.closest('[data-resubmit-workflow]');if(rw)return resubmitWorkflow(rw.dataset.resubmitWorkflow);const cw=event.target.closest('[data-cancel-workflow]');if(cw)return cancelWorkflow(cw.dataset.cancelWorkflow);const dw=event.target.closest('[data-delete-workflow]');if(dw){if(!confirm('Hapus draft ini secara permanen?'))return;return server('adminDeleteWorkflow',[dw.dataset.deleteWorkflow]).then(()=>{toast('Draft dihapus.');loadEntity(state.entity)}).catch(e=>toast(cleanError(e.message)))}if(event.target.closest('[data-dashboard-refresh]'))return loadDashboardSummary(true);if(event.target.closest('[data-reload]')||event.target.closest('[data-retry]'))return renderRoute();const approvalTab=event.target.closest('[data-approval-status]');if(approvalTab)return loadApprovals(approvalTab.dataset.approvalStatus);const reviewButton=event.target.closest('[data-open-review]');if(reviewButton)return openReview(reviewButton.dataset.openReview);const reviewAction=event.target.closest('[data-review]');if(reviewAction)return review(reviewAction.dataset.review);const deleteApprovalButton=event.target.closest('[data-delete-approval]');if(deleteApprovalButton)return deleteApproval(deleteApprovalButton.dataset.deleteApproval);const service=event.target.closest('[data-open-service]');if(service)return openService(service.dataset.openService);const deleteServiceButton=event.target.closest('[data-delete-service]');if(deleteServiceButton)return deleteService(deleteServiceButton.dataset.deleteService);const sharePrayerButton=event.target.closest('[data-share-prayer]');if(sharePrayerButton)return sharePrayer(sharePrayerButton.dataset.sharePrayer);if(event.target.closest('[data-new-user]'))return openUser('');const eu=event.target.closest('[data-edit-user]');if(eu)return openUser(eu.dataset.editUser);const du=event.target.closest('[data-delete-user]');if(du)return deleteUser(du.dataset.deleteUser);const sys=event.target.closest('[data-system]');if(sys)return runSystem(sys.dataset.system,sys)});
+    document.addEventListener('click',event=>{const route=event.target.closest('[data-route]');if(route)return navigate(route.dataset.route);const close=event.target.closest('[data-close]');if(close)return $('#'+close.dataset.close).close();if(event.target.closest('[data-preview-editor]'))return previewEditor();if(event.target.closest('[data-new-record]'))return openNewRecord();const edit=event.target.closest('[data-edit-record]');if(edit)return openRecord(edit.dataset.editRecord);const duplicate=event.target.closest('[data-duplicate-schedule]');if(duplicate)return duplicateSchedule(duplicate.dataset.duplicateSchedule);const del=event.target.closest('[data-delete-record]');if(del)return requestDelete(del.dataset.deleteRecord,del);const ew=event.target.closest('[data-edit-workflow]');if(ew)return openWorkflow(ew.dataset.editWorkflow);const rw=event.target.closest('[data-resubmit-workflow]');if(rw)return resubmitWorkflow(rw.dataset.resubmitWorkflow,rw);const cw=event.target.closest('[data-cancel-workflow]');if(cw)return cancelWorkflow(cw.dataset.cancelWorkflow,cw);const dw=event.target.closest('[data-delete-workflow]');if(dw){if(!confirm('Hapus draft ini secara permanen?'))return;setBusy(dw,true);return server('adminDeleteWorkflow',[dw.dataset.deleteWorkflow]).then(()=>{toast('Draft dihapus.');loadEntity(state.entity)}).catch(e=>toast(cleanError(e.message))).finally(()=>setBusy(dw,false))}if(event.target.closest('[data-dashboard-refresh]'))return loadDashboardSummary(true);if(event.target.closest('[data-reload]')||event.target.closest('[data-retry]'))return renderRoute();const approvalTab=event.target.closest('[data-approval-status]');if(approvalTab)return loadApprovals(approvalTab.dataset.approvalStatus);const reviewButton=event.target.closest('[data-open-review]');if(reviewButton)return openReview(reviewButton.dataset.openReview);const reviewAction=event.target.closest('[data-review]');if(reviewAction)return review(reviewAction.dataset.review);const deleteApprovalButton=event.target.closest('[data-delete-approval]');if(deleteApprovalButton)return deleteApproval(deleteApprovalButton.dataset.deleteApproval);const service=event.target.closest('[data-open-service]');if(service)return openService(service.dataset.openService);const deleteServiceButton=event.target.closest('[data-delete-service]');if(deleteServiceButton)return deleteService(deleteServiceButton.dataset.deleteService);const sharePrayerButton=event.target.closest('[data-share-prayer]');if(sharePrayerButton)return sharePrayer(sharePrayerButton.dataset.sharePrayer);if(event.target.closest('[data-new-user]'))return openUser('');const eu=event.target.closest('[data-edit-user]');if(eu)return openUser(eu.dataset.editUser);const du=event.target.closest('[data-delete-user]');if(du)return deleteUser(du.dataset.deleteUser,du);const sys=event.target.closest('[data-system]');if(sys)return runSystem(sys.dataset.system,sys)});
     function queueSearch(render,inputId){clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{render();requestAnimationFrame(()=>{const input=$('#'+inputId);if(!input)return;input.focus();const end=input.value.length;input.setSelectionRange(end,end)})},180)}
     document.addEventListener('input',event=>{if(event.target.id==='entity-search'){state.search=event.target.value;queueSearch(renderEntity,'entity-search')}if(event.target.id==='service-search'){state.search=event.target.value;queueSearch(renderServices,'service-search')}});
     document.addEventListener('change',event=>{if(event.target.id==='entity-status'){state.status=event.target.value;renderEntity()}if(event.target.id==='service-status'){state.status=event.target.value;renderServices()}if(event.target.matches('.image-file'))uploadImage(event.target);if(event.target.id==='schedule-section'){const section=state.entityData.sections.find(s=>s.id===event.target.value);$('#schedule-fields').innerHTML=scheduleFieldsHtml(section,{})}});

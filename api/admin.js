@@ -83,12 +83,23 @@ async function callGoogleAppsScript(method, args) {
       redirect: 'follow',
       signal: controller.signal
     });
+    
     const text = await upstream.text();
-    console.log('[APPS_SCRIPT_RES]', method, text);
+    console.log('[APPS_SCRIPT_RES]', method, text.slice(0, 200));
+    
+    if (!upstream.ok) {
+      return { ok: false, error: 'Server merespons dengan status ' + upstream.status + ': ' + text.slice(0, 100) };
+    }
+    
+    const contentType = upstream.headers.get('content-type') || '';
+    if (contentType.includes('text/html')) {
+      return { ok: false, error: 'Respons backend Apps Script bukan JSON (kemungkinan crash): ' + text.slice(0, 160) };
+    }
+    
     try {
       return JSON.parse(text);
     } catch (_) {
-      return { ok: false, error: 'Respons backend Apps Script bukan JSON: ' + text.slice(0, 160) };
+      return { ok: false, error: 'Gagal membaca response backend sebagai JSON.' };
     }
   } catch (err) {
     return { ok: false, error: err && err.message ? err.message : String(err) };
@@ -177,7 +188,7 @@ const ENTITY_SCHEMAS = {
   },
   activities: {
     label: 'Berita Jemaat',
-    icon: 'calendar',
+    icon: 'newspaper',
     fields: [
       { key: 'date', label: 'Tanggal Kejadian', type: 'date', required: true },
       { key: 'title', label: 'Judul Berita', type: 'text', required: true },
@@ -244,7 +255,7 @@ const ENTITY_SCHEMAS = {
   },
   worshipPlans: {
     label: 'Susunan Ibadah',
-    icon: 'calendar',
+    icon: 'layout',
     fields: [
       { key: 'date', label: 'Tanggal Ibadah', type: 'date', required: true },
       { key: 'type', label: 'Jenis Ibadah', type: 'select', required: true, options: ['Kebaktian Khotbah', 'Sekolah Sabat', 'Rabu Malam', 'Pemuda Advent'] },
@@ -348,274 +359,10 @@ export default async function handler(request, response) {
         return reply(response, 200, upstreamResult);
       }
 
-      // Step B: Resilient live bridge powered by 100% REAL Google Sheets data
-      const siteData = await fetchLiveWebsiteData(method === 'adminRunSystemAction');
-      const site = siteData.site || {};
-      const churchName = site.church_name || 'GMAHK Galilea Balikpapan';
-      const churchEmail = site.email || 'galileabalikpapan@gmail.com';
-
-      // Method 1: adminGetBootstrap
-      if (method === 'adminGetBootstrap') {
-        const activeAnnouncements = Array.isArray(siteData.announcements) ? siteData.announcements.length : 0;
-        const entities = Object.keys(ENTITY_SCHEMAS).map(key => ({
-          key,
-          label: ENTITY_SCHEMAS[key].label,
-          icon: ENTITY_SCHEMAS[key].icon
-        }));
-
-        return reply(response, 200, {
-          ok: true,
-          data: {
-            version: '20.3.0',
-            user: {
-              id: 'ADM-GALILEA',
-              email: churchEmail,
-              name: 'Sekretariat ' + (site.short_name || churchName),
-              role: 'SUPERADMIN',
-              permissions: {
-                view: true,
-                edit: true,
-                approve: true,
-                manageAdmins: true,
-                backup: true
-              }
-            },
-            entities,
-            dashboard: {
-              loading: false,
-              pendingApprovals: 0,
-              myDrafts: 0,
-              activeAnnouncements,
-              serviceRequests: 0,
-              updatedAt: siteData.updatedAt || 'Terhubung ke Google Sheets',
-              scheduleSheet: siteData.scheduleSheet || 'Triwulan III 2026',
-              systemStatus: 'ONLINE'
-            },
-            publicSite: {
-              publicUrl: '/'
-            }
-          }
-        });
-      }
-
-      // Method 2: adminGetDashboardSummary
-      if (method === 'adminGetDashboardSummary') {
-        const activeAnnouncements = Array.isArray(siteData.announcements) ? siteData.announcements.length : 0;
-        return reply(response, 200, {
-          ok: true,
-          data: {
-            dashboard: {
-              loading: false,
-              pendingApprovals: 0,
-              myDrafts: 0,
-              activeAnnouncements,
-              serviceRequests: 0,
-              updatedAt: siteData.updatedAt || 'Terhubung ke Google Sheets',
-              scheduleSheet: siteData.scheduleSheet || 'Triwulan III 2026',
-              systemStatus: 'ONLINE'
-            },
-            publicSite: {
-              publicUrl: '/'
-            }
-          }
-        });
-      }
-
-      // Method 3: adminListEntity
-      if (method === 'adminListEntity') {
-        const [entityKey] = args;
-        const schema = ENTITY_SCHEMAS[entityKey] || { label: entityKey, icon: 'grid', fields: [] };
-        let records = [];
-
-        if (entityKey === 'announcements') {
-          records = (siteData.announcements || []).map((item, idx) => ({
-            id: item.id || ('ANN-' + idx),
-            title: item.title,
-            status: item.status || 'PUBLISH',
-            group: item.category || 'UMUM',
-            values: {
-              date: item.dateLabel || item.date || '',
-              title: item.title || '',
-              summary: item.summary || item.content || '',
-              url: item.url || '',
-              endDate: item.endDate || '',
-              priority: item.priority || 'NORMAL',
-              includeInBulletin: item.includeInBulletin ? 'YA' : 'TIDAK',
-              category: item.category || 'UMUM'
-            }
-          }));
-        } else if (entityKey === 'activities') {
-          records = (siteData.activities || []).map((item, idx) => ({
-            id: item.id || ('ACT-' + idx),
-            title: item.title,
-            status: item.status || 'PUBLISH',
-            group: item.location || 'Gereja',
-            values: {
-              date: item.dateLabel || '',
-              title: item.title || '',
-              location: item.location || '',
-              description: item.description || '',
-              url: item.url || '',
-              photos: Array.isArray(item.photos) ? item.photos.join('\n') : ''
-            }
-          }));
-        } else if (entityKey === 'themeSong') {
-          const song = siteData.themeSong;
-          if (song) {
-            const v1 = song.lyrics?.find(l => l.type === 'verse' && l.index === 1)?.lines?.join('\n') || '';
-            const v2 = song.lyrics?.find(l => l.type === 'verse' && l.index === 2)?.lines?.join('\n') || '';
-            const v3 = song.lyrics?.find(l => l.type === 'verse' && l.index === 3)?.lines?.join('\n') || '';
-            const ref = song.lyrics?.find(l => l.type === 'chorus' || l.type === 'refrain')?.lines?.join('\n') || '';
-
-            records = [{
-              id: song.id || 'THEME-01',
-              title: song.title || 'Lagu Tema Jemaat',
-              status: 'PUBLISH',
-              group: 'Lagu Sion',
-              values: {
-                title: song.title || '',
-                verse1: v1,
-                verse2: v2,
-                verse3: v3,
-                refrain: ref,
-                note: song.note || song.source || ''
-              }
-            }];
-          }
-        } else if (entityKey === 'gallery') {
-          records = (siteData.gallery || []).map((item, idx) => ({
-            id: item.id || ('GAL-' + idx),
-            title: item.title || 'Foto Galeri',
-            status: 'PUBLISH',
-            group: 'Galeri',
-            values: {
-              imageUrl: item.imageUrl || item.url || '',
-              title: item.title || '',
-              caption: item.caption || item.description || ''
-            }
-          }));
-        } else if (entityKey === 'leaders') {
-          records = (siteData.leaders || []).map((item, idx) => ({
-            id: item.id || ('LEAD-' + (item.order || idx + 1)),
-            title: item.name + ' — ' + item.role,
-            status: item.status || 'PUBLISH',
-            group: item.role,
-            values: {
-              order: item.order || (idx + 1),
-              name: item.name || '',
-              role: item.role || '',
-              photoUrl: item.photoUrl || '',
-              description: item.description || ''
-            }
-          }));
-        } else if (entityKey === 'banners') {
-          records = (siteData.banners || []).map((item, idx) => ({
-            id: item.id || ('BAN-' + idx),
-            title: item.title || 'Banner',
-            status: item.status || 'PUBLISH',
-            group: item.variant || 'INFO',
-            values: {
-              startDate: item.startDate || '',
-              endDate: item.endDate || '',
-              title: item.title || '',
-              message: item.message || '',
-              url: item.url || '',
-              buttonLabel: item.buttonLabel || '',
-              variant: item.variant || 'INFO'
-            }
-          }));
-        } else if (entityKey === 'faq') {
-          records = (siteData.faq || []).map((item, idx) => ({
-            id: item.id || ('FAQ-' + idx),
-            title: item.question || 'Pertanyaan',
-            status: 'PUBLISH',
-            group: item.category || 'Umum',
-            values: {
-              category: item.category || 'Umum',
-              question: item.question || '',
-              answer: item.answer || '',
-              order: item.order || (idx + 1)
-            }
-          }));
-        } else if (entityKey === 'worshipPlans') {
-          records = (siteData.worshipPlans || []).map((item, idx) => ({
-            id: item.id || ('WOR-' + idx),
-            title: item.theme || ('Susunan Ibadah ' + (item.date || '')),
-            status: item.status || 'PUBLISH',
-            group: item.type || 'Kebaktian Khotbah',
-            values: {
-              date: item.date || '',
-              type: item.type || 'Kebaktian Khotbah',
-              theme: item.theme || '',
-              scripture: item.scripture || '',
-              openingSong: item.openingSong || '',
-              closingSong: item.closingSong || '',
-              preacher: item.preacher || '',
-              notes: item.notes || ''
-            }
-          }));
-        } else if (entityKey === 'settings') {
-          const siteEntries = Object.entries(site);
-          records = siteEntries.map(([k, v]) => ({
-            id: k,
-            title: k.replace(/_/g, ' ').toUpperCase(),
-            status: 'PUBLISH',
-            group: 'Pengaturan',
-            values: {
-              key: k,
-              value: typeof v === 'object' ? JSON.stringify(v) : String(v || '')
-            }
-          }));
-        } else if (entityKey === 'schedule') {
-          const sections = siteData.sections || [];
-          records = [];
-          for (const section of sections) {
-            for (const rec of (section.records || [])) {
-              const fieldMap = {};
-              if (Array.isArray(rec.fields)) {
-                for (const f of rec.fields) {
-                  if (f && f.label) fieldMap[f.label] = f.value || '';
-                }
-              } else if (rec.fields && typeof rec.fields === 'object') {
-                Object.assign(fieldMap, rec.fields);
-              }
-
-              records.push({
-                id: rec.id || ('SCHED-' + section.id + '-' + (rec.isoDate || rec.dateLabel || Math.random())),
-                sectionId: section.id,
-                sectionTitle: section.title,
-                dateLabel: rec.dateLabel || '',
-                time: rec.time || '',
-                isoDate: rec.isoDate || '',
-                status: 'PUBLISH',
-                title: section.title + ' — ' + (rec.dateLabel || ''),
-                fields: fieldMap
-              });
-            }
-          }
-        }
-
-        const workflows = [];
-
-        return reply(response, 200, {
-          ok: true,
-          data: {
-            entity: entityKey,
-            label: schema.label,
-            sheetName: siteData.scheduleSheet || 'Triwulan III 2026',
-            fields: schema.fields || [],
-            records,
-            workflows,
-            sections: siteData.sections || []
-          }
-        });
-      }
-
-
-
-
-
-
+      // ----------------------------------------------------------------------
+      // STEP B: LOCAL EXECUTION (ONLY FOR CACHE REFRESH)
+      // ----------------------------------------------------------------------
+      
       // Method 18: adminRunSystemAction — only Vercel-side cache clear is handled locally
       if (method === 'adminRunSystemAction') {
         const [action] = args;
