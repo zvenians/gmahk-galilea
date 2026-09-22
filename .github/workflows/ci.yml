@@ -93,7 +93,7 @@ jobs:
             "runtimeVersion": "V8",
             "webapp": {
               "executeAs": "USER_ACCESSING",
-              "access": "MY_DOMAIN"
+              "access": "ANYONE"
             }
           }
           EOF
