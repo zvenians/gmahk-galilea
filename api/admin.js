@@ -291,26 +291,14 @@ export default async function handler(request, response) {
   response.setHeader('X-Content-Type-Options', 'nosniff');
   response.setHeader('X-Galilea-Admin-Build', BUILD);
 
-  // 1. GET requests: serve the native Admin Panel SPA on Vercel
+  // 1. GET requests: Redirect to authenticated Apps Script URL
   if (request.method === 'GET' || request.method === 'HEAD') {
-    if (String(request.query && request.query.open || '') === '1') {
-      try {
-        const target = resolveAdminUrl();
-        console.info('[api/admin] forwarding authenticated admin entry');
-        return response.redirect(307, target.toString());
-      } catch (err) {
-        return response.status(503).send('URL Apps Script admin belum siap.');
-      }
-    }
-
     try {
-      const html = loadAdminHtml();
-      response.setHeader('Content-Type', 'text/html; charset=utf-8');
-      return response.status(200).send(html);
-    } catch (error) {
-      console.error('[api/admin] Gagal memuat Admins.html:', error);
-      response.setHeader('Content-Type', 'text/html; charset=utf-8');
-      return response.status(500).send('<!doctype html><html><head><title>Galilea Admin Error</title></head><body><h1>Admin Panel Gagal Dimuat</h1><p>' + (error && error.message ? error.message : String(error)) + '</p></body></html>');
+      const target = resolveAdminUrl();
+      console.info('[api/admin] redirecting to authenticated Apps Script Admin UI');
+      return response.redirect(307, target.toString());
+    } catch (err) {
+      return response.status(503).send('URL Apps Script admin belum siap.');
     }
   }
 
@@ -322,6 +310,17 @@ export default async function handler(request, response) {
 
     if (!method) {
       return reply(response, 400, { ok: false, error: 'Nama method tidak boleh kosong.' });
+    }
+
+    const PRIVILEGED_METHODS = [
+      'adminGetBootstrap', 'adminGetDashboardSummary', 'adminGetDashboardActivity',
+      'adminSaveWorkflow', 'adminReviewWorkflow', 'adminDeleteWorkflow', 'adminCancelWorkflow',
+      'adminDeleteApproval', 'adminSaveUser', 'adminDeleteUser', 'adminUploadImage',
+      'adminUpdateServiceStatus', 'adminDeleteService', 'adminRunSystemAction'
+    ];
+
+    if (PRIVILEGED_METHODS.includes(method)) {
+      return reply(response, 403, { ok: false, error: 'FORBIDDEN: Endpoint ini telah dikunci untuk mencegah akses anonim. Silakan akses portal dari environment yang terautentikasi (Apps Script).' });
     }
 
     try {

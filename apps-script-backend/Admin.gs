@@ -222,10 +222,11 @@ function gaEnsureServiceColumns_() {
 /* -------------------------------------------------------------------------- */
 
 function gaCurrentUser_() {
-  const email = gaNormalizeEmail_(Session.getActiveUser().getEmail() || Session.getEffectiveUser().getEmail());
-  if (!email) {
-    throw new Error('LOGIN_REQUIRED|Akun Google belum terbaca. Gunakan deployment admin yang dijalankan sebagai “User accessing the web app”.');
+  const activeEmail = Session.getActiveUser().getEmail();
+  if (!activeEmail) {
+    throw new Error('LOGIN_REQUIRED|Akun Google belum terbaca. Akses anonim ditolak.');
   }
+  const email = gaNormalizeEmail_(activeEmail);
   const spreadsheet = gwSpreadsheet_();
   let sheet = spreadsheet.getSheetByName(GA.SHEETS.admins);
   if (!sheet || sheet.getLastRow() < 2) {
@@ -927,8 +928,21 @@ function adminSaveUser(payload) {
 }
 
 function gaGrantAdminAccess_(email, role, status) {
-  if (status !== 'AKTIF') return '';
   const warnings = [];
+  const revoke = function(resource, label) {
+    try { resource.removeEditor(email); resource.removeViewer(email); }
+    catch (error) { warnings.push('cabut ' + label + ': ' + gwErrorMessage_(error)); }
+  };
+  const spreadsheet = gwSpreadsheet_();
+  
+  if (status !== 'AKTIF') {
+    revoke(DriveApp.getFileById(spreadsheet.getId()), 'spreadsheet utama');
+    try { revoke(DriveApp.getFileById(gwEnsureServiceStore_().getId()), 'data layanan'); } catch(e) {}
+    const folderId = PropertiesService.getScriptProperties().getProperty(GA.IMAGE_FOLDER_PROPERTY);
+    if (folderId) { try { revoke(DriveApp.getFolderById(folderId), 'folder media'); } catch(e) {} }
+    return warnings.join(' | ').slice(0, 700);
+  }
+
   const level = GA.ROLES[role] || GA.ROLES.VIEWER;
   const grant = function (resource, label, editor) {
     try {
@@ -936,13 +950,11 @@ function gaGrantAdminAccess_(email, role, status) {
       else resource.addViewer(email);
     } catch (error) { warnings.push(label + ': ' + gwErrorMessage_(error)); }
   };
-  const spreadsheet = gwSpreadsheet_();
+  
   grant(DriveApp.getFileById(spreadsheet.getId()), 'spreadsheet utama', level >= GA.ROLES.EDITOR);
   if (level >= GA.ROLES.EDITOR) {
-    try {
-      const serviceStore = gwEnsureServiceStore_();
-      grant(DriveApp.getFileById(serviceStore.getId()), 'data layanan jemaat', true);
-    } catch (error) { warnings.push('data layanan jemaat: ' + gwErrorMessage_(error)); }
+    try { grant(DriveApp.getFileById(gwEnsureServiceStore_().getId()), 'data layanan jemaat', true); }
+    catch (error) { warnings.push('data layanan jemaat: ' + gwErrorMessage_(error)); }
     const folderId = PropertiesService.getScriptProperties().getProperty(GA.IMAGE_FOLDER_PROPERTY);
     if (folderId) {
       try { grant(DriveApp.getFolderById(folderId), 'folder media website', true); }

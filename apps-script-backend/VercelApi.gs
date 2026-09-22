@@ -69,25 +69,7 @@ function galileaVercelHandlers_() {
     submitServiceRequest: function (args) { return submitServiceRequest.apply(null, args); },
     translateViewerTexts: function (args) { return translateViewerTexts.apply(null, args); },
 
-    // Admin Backend Handlers
-    adminGetBootstrap: function (args) { return adminGetBootstrap.apply(null, args); },
-    adminGetDashboardSummary: function (args) { return adminGetDashboardSummary.apply(null, args); },
-    adminGetDashboardActivity: function (args) { return adminGetDashboardActivity.apply(null, args); },
-    adminListEntity: function (args) { return adminListEntity.apply(null, args); },
-    adminSaveWorkflow: function (args) { return adminSaveWorkflow.apply(null, args); },
-    adminCancelWorkflow: function (args) { return adminCancelWorkflow.apply(null, args); },
-    adminUploadImage: function (args) { return adminUploadImage.apply(null, args); },
-    adminListApprovals: function (args) { return adminListApprovals.apply(null, args); },
-    adminReviewWorkflow: function (args) { return adminReviewWorkflow.apply(null, args); },
-    adminDeleteApproval: function (args) { return adminDeleteApproval.apply(null, args); },
-    adminListServices: function (args) { return adminListServices.apply(null, args); },
-    adminUpdateServiceStatus: function (args) { return adminUpdateServiceStatus.apply(null, args); },
-    adminDeleteService: function (args) { return adminDeleteService.apply(null, args); },
-    adminListUsers: function (args) { return adminListUsers.apply(null, args); },
-    adminSaveUser: function (args) { return adminSaveUser.apply(null, args); },
-    adminDeleteUser: function (args) { return adminDeleteUser.apply(null, args); },
-    adminRunSystemAction: function (args) { return adminRunSystemAction.apply(null, args); },
-    adminDeleteWorkflow: function (args) { return adminDeleteWorkflow.apply(null, args); }
+    // Admin Backend Handlers have been removed from Vercel Bridge to prevent privilege escalation bypass
   };
 }
 
