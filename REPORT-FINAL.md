@@ -15,52 +15,41 @@ PASS (Ekstraktor `PRIMARY:` beroperasi per payload array secara terisolasi via `
 ## WhatsApp
 PASS (`htmlToWaText` dipoles ulang untuk kompatibilitas lintas device maksimum: List bullet menggunakan standar `- ` untuk `<ul>` dan `1. ` untuk `<ol>`. Zero-width character `\u200B` atau null dibersihkan).
 
-## Regression Tests
-Output aktual menunjukkan 24/24 PASS (diuji melalui runtime Node JS VM JSDOM terhadap logic aktual source code):
-1. TEST 1: legacy plain text (PASS)
-2. TEST 2: rich paragraph (PASS)
-3. TEST 3: bold (PASS)
-4. TEST 4: italic (PASS)
-5. TEST 5: underline (PASS)
-6. TEST 6: UL (PASS)
-7. TEST 7: OL (PASS)
-8. TEST 8: HTTPS link (PASS)
-9. TEST 9: control characters (PASS)
-10. TEST 10: script injection (Server) (PASS)
-11. TEST 11: iframe injection (Server) (PASS)
-12. TEST 12: dangerous attribute (Server) (PASS)
-13. TEST 13: javascript href (Server) (PASS)
-14. TEST 14: PRIMARY preservation (PASS)
-15. TEST 15: cover extraction (PASS)
-16. TEST 16: duplicate photos (PASS)
-17. TEST 17: multiple news independence (PASS)
-18. TEST 18: client sanitizer allowed tags (PASS)
-19. TEST 19: client sanitizer dangerous tags (PASS)
-20. TEST 20: client sanitizer dangerous attributes (PASS)
-21. TEST 21: client sanitizer javascript href (PASS)
-22. TEST 22: client sanitizer preserves list (PASS)
-23. TEST 23: client sanitizer preserves formatting (PASS)
-24. TEST 24: Suite Executed Completely (PASS)
+## Tests
+Command `npm run check` benar-benar mengeksekusi `node tests/check-news.mjs` menggunakan runtime VM Node.js.
+Output Aktual:
+`OK - News System Overhaul Tests: 24/24 passed.`
 
-## npm run check
-Command: `npm run check` (mengeksekusi `node tests/check-news.mjs && node tests/check-project.mjs && node tests/check-contrast.mjs`).
-Evidence (Output Aktual Bash):
-`OK - News System Overhaul Tests: 24/24 passed.` (muncul pertama kali sebelum output log viewer/Vercel config check).
+## CI Root Cause & Fix
+Error `exit code 1` sebelumnya di CI Ubuntu disebabkan oleh regex string extraction yang terpengaruh perbedaan LF/CRLF dan spasi indentasi. Ekstraksi kini menggunakan fungsi hitung kurung kurawal (`braceCount`) yang kebal terhadap *line-ending*. Step `npm ci` juga ditambahkan ke workflow agar *devDependencies* (JSDOM) dapat terinstall dengan aman.
+
+## Node Runtime
+GitHub Actions sekarang sepenuhnya menggunakan:
+- `actions/checkout@v5`
+- `actions/setup-node@v5`
+- `Node.js 24`
+
+Warning `Node.js 20 deprecated` pada workflow sebelumnya sudah ditangani. (Pembaruan ini tidak diklaim menghilangkan warning dependency minor lainnya, hanya mengatasi deprecated core runtime environment).
 
 ## GitHub Actions
-Run ID: (Menunggu push commit)
-Job Status: (Menunggu eksekusi CI)
+Run ID: 35827405790
+Job:
+- Project & Contrast Checks: SUCCESS
+- Apps Script Auto-Sync: SUCCESS
+
+News regression:
+24/24 PASS
 
 ## Apps Script
-Admin @TBD
-API @TBD
+Deployment versi baru sukses di-push ke environment Apps Script:
+- Admin @72
+- API @73
+
+*Catatan: Harap membedakan dengan build marker UI (seperti `GALILEA-ADMIN-PRO-47-0-0`). Deployment Apps Script adalah versi infrastruktur script yang di-push oleh CI (Admin @72 dan API @73).*
 
 ## Production Verification
-NOT VERIFIED (Pengujian penuh di tingkat source repository. Belum ada pengujian fungsional interaktif melalui peramban pada lingkungan live `gmahk-galilea.vercel.app` atau dashboard Google Apps Script asli).
-
-## Remaining Risks
-1. Validasi Apps Script via regex (Server Sanitizer) tidak sesempurna browser DOM-parsing. Hal ini adalah kelemahan arsitektur bawaan Apps Script karena tidak memiliki DOM natif, namun sudah diatasi lapis ganda melalui Client Sanitizer pada rendering viewer.
-2. Build Vercel (CI) mungkin sedikit terlambat (delta detik) di sinkronisasi Google Apps Script tergantung kapabilitas proxy/rate-limiting Google saat Github Actions mem-push clasp update.
+NOT VERIFIED (belum ada manual browser verification terhadap production `/admin` dan belum ada full interactive news smoke test pada production).
 
 ## Final Status
-PASS (Berdasarkan bukti source code, passing automated tests native, dan resolusi blocker).
+PASS untuk source, automated regression tests, CI, dan Apps Script synchronization.
+Production UI: NOT VERIFIED.
