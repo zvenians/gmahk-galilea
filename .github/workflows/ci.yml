@@ -53,7 +53,12 @@ jobs:
       - name: Configure Clasp Target
         run: |
           echo "Writing .clasp.json..."
-          echo "$CLASP_JSON" | tr -d '\000' | grep -v '^$' > .clasp.json
+          SCRIPT_ID=$(echo "$CLASP_JSON" | tr -d '\000' | grep -o -E '[a-zA-Z0-9_-]{30,}' | head -1)
+          if [ -z "$SCRIPT_ID" ]; then
+            echo "Error: Could not extract valid Script ID from secret."
+            exit 1
+          fi
+          echo "{\"scriptId\":\"$SCRIPT_ID\", \"rootDir\":\"apps-script-backend\"}" > .clasp.json
           chmod 600 .clasp.json
         env:
           CLASP_JSON: ${{ secrets.CLASP_JSON }}
