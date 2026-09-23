@@ -5967,7 +5967,7 @@
           
           text = text.replace(/<ul[^>]*>[\s\S]*?<\/ul>/gi, function(match) {
             let m = match.replace(/\n/g, '');
-            return m.replace(/<li[^>]*>/gi, '* ').replace(/<\/li>/gi, '\n').replace(/<\/?ul[^>]*>/gi, '');
+            return m.replace(/<li[^>]*>/gi, '• ').replace(/<\/li>/gi, '\n').replace(/<\/?ul[^>]*>/gi, '');
           });
           
           text = text.replace(/<ol[^>]*>[\s\S]*?<\/ol>/gi, function(match) {

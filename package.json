@@ -6,7 +6,7 @@
   "description": "Viewer Vercel GMAHK Galilea Balikpapan dengan backend Google Apps Script.",
   "scripts": {
     "dev": "vercel dev",
-    "check": "node tests/check-project.mjs && node tests/check-contrast.mjs"
+    "check": "node tests/check-news.mjs && node tests/check-project.mjs && node tests/check-contrast.mjs"
   },
   "engines": {
     "node": ">=20"

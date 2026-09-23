@@ -816,13 +816,29 @@ function gaSanitizePayload_(entity, payload) {
       value = original ? (gwSafeUrl_(original) || '') : '';
       if (original && !value) throw new Error('Tautan pada kolom “' + field.label + '” harus menggunakan alamat HTTPS yang valid.');
     } else if (field.type === 'images') {
+      let hasPrimary = false;
       const urls = String(value == null ? '' : value).split(/[\n,;]+/).map(function (item) {
         const original = item.trim();
-        return original ? (gwSafeUrl_(original) || '') : '';
+        if (!original) return '';
+        const isPrimary = /^PRIMARY:/i.test(original);
+        const urlToTest = isPrimary ? original.substring(8).trim() : original;
+        const safeUrl = gwSafeUrl_(urlToTest);
+        if (!safeUrl) return '';
+        if (isPrimary && !hasPrimary) {
+          hasPrimary = true;
+          return 'PRIMARY:' + safeUrl;
+        }
+        return safeUrl;
       }).filter(Boolean);
       if (urls.length > 12) throw new Error('Maksimal 12 foto untuk satu kegiatan.');
       value = urls.join('\n');
-    } else value = String(value == null ? '' : value).slice(0, field.type === 'textarea' ? 8000 : 1000).trim();
+    } else {
+      let rawStr = String(value == null ? '' : value).slice(0, field.type === 'textarea' ? 8000 : 1000).trim();
+      if (field.type === 'textarea') {
+        rawStr = gaSanitizeHtml_(rawStr);
+      }
+      value = rawStr;
+    }
     if (field.options.length && value && field.options.indexOf(String(value).toUpperCase()) < 0) throw new Error('Pilihan “' + field.label + '” tidak valid.');
     clean[field.key] = field.options.length ? String(value).toUpperCase() : value;
   });
@@ -832,6 +848,37 @@ function gaSanitizePayload_(entity, payload) {
 function gaSheetValue_(field, value) {
   if (field.type === 'date' && /^\d{4}-\d{2}-\d{2}$/.test(String(value || ''))) return new Date(String(value) + 'T00:00:00' + GW.UTC_OFFSET);
   return value == null ? '' : value;
+}
+
+function gaSanitizeHtml_(html) {
+  if (!html) return '';
+  let text = String(html);
+  text = text.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+  text = text.replace(/<iframe\b[^<]*(?:(?!<\/iframe>)<[^<]*)*<\/iframe>/gi, '');
+  text = text.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+  text = text.replace(/<object\b[^<]*(?:(?!<\/object>)<[^<]*)*<\/object>/gi, '');
+  text = text.replace(/<embed\b[^<]*(?:(?!<\/embed>)<[^<]*)*<\/embed>/gi, '');
+  text = text.replace(/<\/?([a-z][a-z0-9]*)\b[^>]*>/gi, function(match, p1) {
+    const tag = p1.toLowerCase();
+    const allowedTags = ['p', 'strong', 'b', 'em', 'i', 'u', 'br', 'ul', 'ol', 'li', 'a'];
+    if (allowedTags.indexOf(tag) === -1) return '';
+    if (match.charAt(1) === '/') return '</' + tag + '>';
+    if (tag === 'a') {
+      const hrefMatch = match.match(/href\s*=\s*(["'])(.*?)\1/i);
+      if (hrefMatch) {
+        let href = hrefMatch[2].trim();
+        if (/^(javascript:|data:|vbscript:)/i.test(href)) return '<a>';
+        if (!/^https:\/\//i.test(href)) return '<a>';
+        return '<a href="' + href.replace(/"/g, '&quot;') + '">';
+      }
+      return '<a>';
+    } else if (tag === 'br') {
+      return '<br>';
+    } else {
+      return '<' + tag + '>';
+    }
+  });
+  return text.trim();
 }
 
 /* -------------------------------------------------------------------------- */

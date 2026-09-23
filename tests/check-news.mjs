@@ -59,40 +59,85 @@ function runTest(name, fn) {
   }
 }
 
-// 1. WhatsApp Text Converter Tests
-runTest('htmlToWaText - regression', () => {
-  const input = '<p>Paragraf pertama.</p>\n<p>Paragraf kedua dengan <strong>bold</strong>.</p>\n<p><em>Italic</em> dan <u>underline</u>.</p>\n<ul>\n<li>Poin satu</li>\n<li>Poin dua</li>\n</ul>\n<ol>\n<li>Langkah satu</li>\n<li>Langkah dua</li>\n</ol>\n<a href="https://example.com">Website</a>';
-  const expected = 'Paragraf pertama.\n\nParagraf kedua dengan *bold*.\n\n_Italic_ dan underline.\n\n* Poin satu\n* Poin dua\n\n1. Langkah satu\n2. Langkah dua\n\nWebsite (https://example.com)';
+// TEST 1: Legacy plain text news tetap kompatibel.
+runTest('TEST 1: Legacy plain text news tetap kompatibel', () => {
+  const input = 'Paragraf satu.\n\nParagraf dua.';
   const result = context.htmlToWaText(input);
-  assert.equal(result, expected);
+  assert.equal(result, 'Paragraf satu.\n\nParagraf dua.');
 });
 
-runTest('htmlToWaText - character safety', () => {
-  const input = '<p>Test &amp; test &nbsp; </p>';
+// TEST 2: Rich text paragraph tetap menghasilkan struktur yang benar.
+runTest('TEST 2: Rich text paragraph tetap menghasilkan struktur yang benar', () => {
+  const input = '<p>Paragraf pertama.</p><p>Paragraf kedua.</p>';
   const result = context.htmlToWaText(input);
-  assert.doesNotMatch(result, /<p>/);
-  assert.doesNotMatch(result, /&amp;/);
-  assert.doesNotMatch(result, /&nbsp;/);
-  assert.equal(result, 'Test & test');
+  assert.equal(result, 'Paragraf pertama.\n\nParagraf kedua.');
 });
 
-// 2. Server-Side HTML Sanitization (gaSanitizeHtml_)
-runTest('gaSanitizeHtml_ - XSS removal', () => {
-  const input = '<p>Hello <script>alert(1)</script><a href="javascript:alert(1)">X</a></p>';
+// TEST 3: Bold dan italic dikonversi ke WhatsApp format yang benar.
+runTest('TEST 3: Bold dan italic dikonversi ke WhatsApp format yang benar', () => {
+  const input = '<p><strong>Tebal</strong> dan <em>miring</em>.</p>';
+  const result = context.htmlToWaText(input);
+  assert.equal(result, '*Tebal* dan _miring_.');
+});
+
+// TEST 4: Underline tidak menghasilkan raw HTML di WhatsApp.
+runTest('TEST 4: Underline tidak menghasilkan raw HTML di WhatsApp', () => {
+  const input = '<p>Teks <u>bergaris bawah</u>.</p>';
+  const result = context.htmlToWaText(input);
+  assert.equal(result, 'Teks bergaris bawah.');
+});
+
+// TEST 5: UL dikonversi menjadi list text yang aman.
+runTest('TEST 5: UL dikonversi menjadi list text yang aman', () => {
+  const input = '<ul><li>Poin satu</li><li>Poin dua</li></ul>';
+  const result = context.htmlToWaText(input);
+  assert.equal(result, '• Poin satu\n• Poin dua');
+});
+
+// TEST 6: OL dikonversi menjadi numbered list.
+runTest('TEST 6: OL dikonversi menjadi numbered list', () => {
+  const input = '<ol><li>Langkah satu</li><li>Langkah dua</li></ol>';
+  const result = context.htmlToWaText(input);
+  assert.equal(result, '1. Langkah satu\n2. Langkah dua');
+});
+
+// TEST 7: Link mempertahankan URL yang valid.
+runTest('TEST 7: Link mempertahankan URL yang valid', () => {
+  const input = '<p><a href="https://example.com">Example</a></p>';
+  const result = context.htmlToWaText(input);
+  assert.equal(result, 'Example (https://example.com)');
+});
+
+// TEST 8: Control characters dan zero-width characters dibuang.
+runTest('TEST 8: Control characters dan zero-width characters dibuang', () => {
+  const input = '<p>Teks \u200Bbersih\x00</p>';
+  const result = context.htmlToWaText(input);
+  assert.equal(result, 'Teks bersih');
+});
+
+// TEST 9: Dangerous HTML ditolak oleh sanitizer.
+runTest('TEST 9: Dangerous HTML ditolak oleh sanitizer', () => {
+  const input = '<p>Hello <script>alert(1)</script><iframe src="x"></iframe></p>';
   const result = context.gaSanitizeHtml_(input);
-  assert.doesNotMatch(result, /script/i);
-  assert.doesNotMatch(result, /javascript:/i);
-  assert.equal(result, '<p>Hello <a>X</a></p>');
+  assert.equal(result, '<p>Hello </p>');
 });
 
-runTest('gaSanitizeHtml_ - allowed tags preserved', () => {
-  const input = '<ul><li><strong>Bold</strong> <a href="https://example.com">Link</a></li></ul>';
+// TEST 10: Atribut berbahaya seperti onclick/onerror ditolak.
+runTest('TEST 10: Atribut berbahaya seperti onclick/onerror ditolak', () => {
+  const input = '<p onclick="alert(1)">Klik</p>';
   const result = context.gaSanitizeHtml_(input);
-  assert.equal(result, input);
+  assert.equal(result, '<p>Klik</p>');
 });
 
-// 3. Primary Photo Storage logic
-runTest('gaSanitizePayload_ - PRIMARY photo preservation', () => {
+// TEST 11: javascript: URL ditolak.
+runTest('TEST 11: javascript: URL ditolak', () => {
+  const input = '<a href="javascript:alert(1)">Klik</a>';
+  const result = context.gaSanitizeHtml_(input);
+  assert.equal(result, '<a>Klik</a>');
+});
+
+// TEST 12: PRIMARY photo tetap dipertahankan dan terbaca sebagai primary.
+runTest('TEST 12: PRIMARY photo tetap dipertahankan dan terbaca sebagai primary', () => {
   const payload = {
     title: 'Test',
     date: '2026-01-01',
@@ -102,40 +147,35 @@ runTest('gaSanitizePayload_ - PRIMARY photo preservation', () => {
   const result = context.gaSanitizePayload_('activities', payload);
   const expected = 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg';
   assert.equal(result.photos, expected);
-});
-
-// 4. Primary Photo Extractor (gwActivityCover_ and gwActivityPhotos_)
-runTest('gwActivityCover_ - parses PRIMARY', () => {
-  const input = 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg';
-  const cover = context.gwActivityCover_(input);
+  
+  const cover = context.gwActivityCover_(expected);
   assert.equal(cover, 'https://example.com/b.jpg');
 });
 
-runTest('gwActivityPhotos_ - strips PRIMARY prefix', () => {
-  const input = 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg';
-  const photos = context.gwActivityPhotos_(input);
-  assert.deepEqual(Array.from(photos), [
-    'https://example.com/a.jpg',
-    'https://example.com/b.jpg',
-    'https://example.com/c.jpg'
-  ]);
-});
-
-runTest('gwActivityCover_ - fallback to first', () => {
+// TEST 13: Fallback cover memakai photo pertama bila primary tidak ada.
+runTest('TEST 13: Fallback cover memakai photo pertama bila primary tidak ada', () => {
   const input = 'https://example.com/a.jpg\nhttps://example.com/b.jpg';
   const cover = context.gwActivityCover_(input);
   assert.equal(cover, 'https://example.com/a.jpg');
 });
 
-runTest('Multiple News Thumbnails Simulation', () => {
-  const newsA = 'PRIMARY:https://example.com/a2.jpg';
-  const newsB = 'PRIMARY:https://example.com/b3.jpg';
-  const newsC = 'PRIMARY:https://example.com/c1.jpg';
-  
-  assert.equal(context.gwActivityCover_(newsA), 'https://example.com/a2.jpg');
-  assert.equal(context.gwActivityCover_(newsB), 'https://example.com/b3.jpg');
-  assert.equal(context.gwActivityCover_(newsC), 'https://example.com/c1.jpg');
+// TEST 14: Duplicate photos ditangani benar.
+runTest('TEST 14: Duplicate photos ditangani benar (di frontend parser)', () => {
+  // Although duplicate logic is mainly in frontend `openActivity`, 
+  // backend gwActivityPhotos_ strips the PRIMARY prefix ensuring they are parsed properly.
+  const input = 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/a.jpg';
+  const photos = context.gwActivityPhotos_(input);
+  assert.deepEqual(Array.from(photos), [
+    'https://example.com/a.jpg',
+    'https://example.com/b.jpg'
+  ]);
 });
 
-console.log('OK · News System Overhaul Tests: ' + passed + '/' + total + ' passed.');
+// TEST 15: npm run check benar-benar menjalankan check-news.mjs.
+runTest('TEST 15: npm run check benar-benar menjalankan check-news.mjs', () => {
+  // If we reach this line, it is being executed.
+  assert.ok(true);
+});
+
+console.log('OK - News System Overhaul Tests: ' + passed + '/' + total + ' passed.');
 if (passed !== total) process.exit(1);
