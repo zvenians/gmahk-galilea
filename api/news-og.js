@@ -2,13 +2,28 @@
 
 import { createRequire } from 'module';
 import { join } from 'path';
+import fs from 'fs';
 
 const require = createRequire(import.meta.url);
 if (typeof globalThis.require === 'undefined') {
   globalThis.require = require;
 }
 if (typeof globalThis.__dirname === 'undefined') {
-  globalThis.__dirname = join(process.cwd(), 'node_modules', '@vercel', 'og', 'dist');
+  const cwd = process.cwd();
+  const possibleDirs = [
+    join(cwd, 'node_modules', 'harfbuzzjs'),
+    join(cwd, 'node_modules', '@vercel', 'og', 'dist'),
+    cwd,
+    join(cwd, 'api')
+  ];
+  let foundDir = cwd;
+  for (const dir of possibleDirs) {
+    if (fs.existsSync(join(dir, 'hb.wasm'))) {
+      foundDir = dir;
+      break;
+    }
+  }
+  globalThis.__dirname = foundDir;
 }
 
 export default async function handler(req) {
