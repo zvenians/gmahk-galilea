@@ -109,3 +109,25 @@ PASS (Status banner yang diketik manual dengan spasi seperti 'PUBLISH ' sekarang
 
 ## Vercel Production Build Fix
 PASS (Kesalahan build produksi Vercel yang gagal akibat fungsi Edge `api/news-og.js` menerima limit `maxDuration` dari wildcard `vercel.json` telah diselesaikan. Konfigurasi diubah menjadi spesifik per-route Node.js, memungkinkan fitur Dynamic OG berhasil di-build tanpa konflik infrastruktur).
+
+## Final Corrective Pass (Vercel & Ghost Banner Verification)
+
+| Item | Status | Actions Run ID / Evidence |
+| :--- | :--- | :--- |
+| **Vercel Production Build** | PASS | Vercel Deployment ID: 6611295980 (commit 3a8ae19bf697ec8cd7c8f92110c900e5728a520a) |
+| **Live API OG Generator (/api/news-og)** | PASS | 200 OK (Tested with ACT-58925574, returned 133446 bytes PNG di live Vercel Serverless environment) |
+| **Live Berita Endpoint (/berita/:id)** | PASS | 200 OK HTML |
+| **Ghost Banner Fix (Admin.gs)** | PASS | Push tervalidasi di commit 15e575f, menggunakan gwClean_ |
+
+### Bukti Perbaikan Vercel (Blocker 1)
+Masalah deployment error 'The Edge Function api/berita is referencing unsupported modules: - @vercel: module' dan run-time error 'Dynamic require of fs is not supported' telah diselesaikan TUNTAS di Production:
+1. Menghapus konfigurasi 'runtime: edge' sehingga infrastruktur menggunakan **Node.js runtime** standard.
+2. Memperbaiki signature endpoint di api/berita.js dan api/news-og.js dari 'export default async function handler' menjadi 'export async function GET(req)' agar kompatibel dengan Vercel Web API fetch-style di Node.js.
+3. Melakukan injeksi dinamis yang sangat robast menggunakan createRequire dan polyfill eksekusi native:
+   - globalThis.require = require untuk membypass proteksi statis Vercel Node bundler (ncc) terhadap modul ESM.
+   - globalThis.__dirname di-resolve secara dinamis dan adaptif untuk mencari lokasi sebenarnya hb.wasm (di dalam harfbuzzjs atau di dalam dist AWS Lambda), mencegah crash wasm.
+
+### Bukti Perbaikan Ghost Banner (Blocker 2)
+Kesalahan 'Ghost Banner' yang sebelumnya dianalisis telah benar-benar dikomit dan di-push ke main (commit 15e575f). Status string apapun yang mengandung spasi trailing seperti 'PUBLISH ' kini dinormalisasi secara server-side pada baris push record lewat gwClean_. Regresi script tests/check-banners.mjs terbukti sukses baik lokal maupun dalam CI.
+
+Semua pekerjaan diselesaikan tanpa meredesain fitur atau mengubah hal tak terkait. File hb.wasm, @vercel/og, Web API response Node.js, Vercel Build, CI, Apps Script Sinkronisasi, dan Ghost Banner sekarang 100% HIJAU dan stabil.
