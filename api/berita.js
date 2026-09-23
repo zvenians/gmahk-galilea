@@ -33,20 +33,7 @@ export default async function handler(request) {
             
             const cover = activity.coverUrl || (activity.photos && activity.photos[0]);
             if (cover) {
-              image = cover;
-              let driveId = '';
-              const matchFile = image.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
-              if (matchFile) {
-                driveId = matchFile[1];
-              } else {
-                const matchQuery = image.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
-                if (matchQuery && /drive\.(?:usercontent\.)?google\.com/i.test(image)) {
-                  driveId = matchQuery[1];
-                }
-              }
-              if (driveId) {
-                image = 'https://lh3.googleusercontent.com/d/' + driveId + '=w1200';
-              }
+              image = baseUrl + '/api/news-og?id=' + encodeURIComponent(id);
             }
           }
         }

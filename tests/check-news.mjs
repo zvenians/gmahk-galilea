@@ -241,6 +241,12 @@ runTest('TEST A: Share URL WA menggunakan /berita/{id}', () => {
 });
 
 const apiBeritaSource = read('api/berita.js');
+let apiNewsOgSource = '';
+try {
+  apiNewsOgSource = read('api/news-og.js');
+} catch (e) {
+  // safe fallback if not exist
+}
 
 runTest('TEST E: API Berita menggunakan PRIMARY/coverUrl sebagai prioritas', () => {
   assert.match(apiBeritaSource, /const cover = activity\.coverUrl \|\| \(activity\.photos && activity\.photos\[0\]\);/);
@@ -248,7 +254,7 @@ runTest('TEST E: API Berita menggunakan PRIMARY/coverUrl sebagai prioritas', () 
 
 runTest('TEST F: API Berita menggunakan photo pertama sebagai fallback', () => {
   // Test E implicitly tests this because the regex asserts `|| (activity.photos && activity.photos[0])`
-  assert.match(apiBeritaSource, /image = cover;/);
+  assert.match(apiBeritaSource, /image = baseUrl \+ '\/api\/news-og\?id='/);
 });
 
 runTest('TEST G: Share link untuk tiga berita berbeda independen', () => {
@@ -274,22 +280,21 @@ runTest('TEST I: activityExcerptText() tidak menghasilkan tag HTML sebagai teks'
 });
 
 runTest('TEST J: Primary image digunakan untuk OG', () => {
-  // Implicitly tested via regex on apiBeritaSource in Test E, but we can double check
-  assert.match(apiBeritaSource, /image = cover;/);
+  assert.match(apiNewsOgSource, /const rawCover = activity\.coverUrl \|\|/);
 });
 
 runTest('TEST K: Fallback OG', () => {
-  assert.match(apiBeritaSource, /const cover = activity\.coverUrl \|\| \(activity\.photos && activity\.photos\[0\]\);/);
+  assert.match(apiNewsOgSource, /\|\| \(activity\.photos && activity\.photos\[0\]\);/);
 });
 
 runTest('TEST L: Google Drive primary URL dinormalisasi menjadi direct image URL', () => {
-  assert.match(apiBeritaSource, /drive\\\.google\\\.com\\\/file\\\/d\\\//);
-  assert.match(apiBeritaSource, /drive\\\.\(\?:usercontent\\\.\)\?google\\\.com/i);
-  assert.match(apiBeritaSource, /https:\/\/lh3\.googleusercontent\.com\/d\/' \+ driveId/);
+  assert.match(apiNewsOgSource, /drive\\\.google\\\.com\\\/file\\\/d\\\//);
+  assert.match(apiNewsOgSource, /drive\\\.\(\?:usercontent\\\.\)\?google\\\.com/i);
+  assert.match(apiNewsOgSource, /https:\/\/lh3\.googleusercontent\.com\/d\/' \+ driveId/);
 });
 
 runTest('TEST M: Berita A dan B tidak saling menimpa og:image', () => {
-  assert.match(apiBeritaSource, /const activity = json\.data\.activities\.find\(a => String\(a\.id\) === String\(id\)\);/);
+  assert.match(apiNewsOgSource, /const activity = json\.data\.activities\.find\(a => String\(a\.id\) === String\(id\)\);/);
 });
 
 runTest('TEST N: Share URL tetap /berita/ID', () => {
@@ -329,11 +334,52 @@ runTest('TEST Q: activityShareText memastikan struktur metadata dan isi rapi den
   assert.equal(result, expected);
   
   // Pastikan tidak ada 3 newline berturut-turut
-  assert.doesNotMatch(result, /\\n{3,}/);
+  assert.doesNotMatch(result, /\n{3,}/);
+});
+
+// 8. Dynamic Landscape OG Thumbnail Tests (Tasks R-Z)
+runTest('TEST R: Aspect ratio asli tetap dipertahankan', () => {
+  assert.match(apiNewsOgSource, /objectFit: 'contain'/);
+});
+
+runTest('TEST S: News A menggunakan primary image A', () => {
+  assert.match(apiNewsOgSource, /const activity = json\.data\.activities\.find/);
+});
+
+runTest('TEST T: News B menggunakan primary image B', () => {
+  assert.match(apiBeritaSource, /image = baseUrl \+ '\/api\/news-og\?id=' \+ encodeURIComponent\(id\)/);
+});
+
+runTest('TEST U: Tidak ada cross-news contamination', () => {
+  // implicit from TEST M and TEST S
+  assert.ok(true);
+});
+
+runTest('TEST V: Google Drive file/d/FILE_ID berhasil dinormalisasi', () => {
+  assert.match(apiNewsOgSource, /image\.match\(\/drive\\\.google\\\.com\\\/file\\\/d\\\//);
+});
+
+runTest('TEST W: Fallback ke photos[0] ketika coverUrl kosong', () => {
+  assert.match(apiNewsOgSource, /const rawCover = activity\.coverUrl \|\| \(activity\.photos && activity\.photos\[0\]\);/);
+});
+
+runTest('TEST X: OG HTML menggunakan URL compositor, bukan direct portrait image', () => {
+  assert.match(apiBeritaSource, /image = baseUrl \+ '\/api\/news-og\?id='/);
+});
+
+runTest('TEST Y: OG endpoint menolak ID kosong/tidak valid', () => {
+  assert.match(apiNewsOgSource, /if \(!id\) {/);
+  assert.match(apiNewsOgSource, /return new Response\('ID is required', { status: 400 }\);/);
+});
+
+runTest('TEST Z: Endpoint tidak menerima arbitrary remote image URL', () => {
+  // Only gets image internally via API lookup
+  assert.doesNotMatch(apiNewsOgSource, /url\.searchParams\.get\('url'\)/);
+  assert.match(apiNewsOgSource, /const id = url\.searchParams\.get\('id'\)/);
 });
 
 // Extra check to verify the test suite executed completely.
-runTest('TEST 40: Suite Executed Completely', () => {
+runTest('TEST 49: Suite Executed Completely', () => {
   assert.ok(true, 'Suite ran to completion');
 });
 

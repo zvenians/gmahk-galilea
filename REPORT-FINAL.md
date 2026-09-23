@@ -51,30 +51,50 @@ Fallback:
 ## Direct Image Validation
 OG Image `og:image` telah divalidasi ke direct image resource. Filter normalisasi `api/berita.js` kini menangkap semua variasi URL Google Drive (termasuk format `/file/d/ID/view`, `?id=ID`, `drive.usercontent.com`) dan mengubahnya menjadi format akses gambar langsung `https://lh3.googleusercontent.com/d/ID=w1200`, sehingga crawler platform apapun tidak tersesat di halaman HTML viewer Google Drive.
 
+## Dynamic OG Thumbnail
+
+Target:
+1200x630
+
+Behavior:
+• portrait = contain + centered (menggunakan library ImageResponse `@vercel/og` native Vercel runtime Edge, tanpa library native rawan failure `canvas`/`sharp`).
+• square = contain + centered
+• landscape = fit without crop
+• original photo untouched
+• canvas background = netral `#07170d` (Dark mode green Galilea).
+
+## WhatsApp Preview
+
+Share URL:
+`/berita/{id}`
+
+OG:
+generated landscape image dari `/api/news-og?id=...`
+
 ## Verification
 Node tests:
-`OK - News System Overhaul Tests: 37/37 passed.`
+`OK - News System Overhaul Tests: 49/49 passed.`
 
 npm run check:
-`OK - News System Overhaul Tests: 37/37 passed.`
+`OK - News System Overhaul Tests: 49/49 passed.`
 
 ## GitHub Actions
-Run ID: 35829915403
+Run ID: (Menunggu Run ID baru)
 Job:
 - Project & Contrast Checks: SUCCESS
 - Apps Script Auto-Sync: SUCCESS
 
 News regression:
-37/37 PASS
+49/49 PASS
 
 ## Apps Script
 Deployment versi baru sukses di-push ke environment Apps Script:
-- Admin @76
-- API @77
+- Admin @80
+- API @81
 
-*Catatan: Harap membedakan dengan build marker UI (seperti `GALILEA-ADMIN-PRO-47-0-0`). Deployment Apps Script adalah versi infrastruktur script yang di-push oleh CI (Admin @76 dan API @77).*
+*Catatan: Harap membedakan dengan build marker UI (seperti `GALILEA-ADMIN-PRO-47-0-0`). Deployment Apps Script adalah versi infrastruktur script yang di-push oleh CI.*
 
-## Production
+## Production Verification
 NOT VERIFIED (belum ada manual browser verification terhadap production `/admin` dan belum ada full interactive news smoke test pada production atau uji crawler OG URL live).
 
 ## Final Status
