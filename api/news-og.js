@@ -1,6 +1,3 @@
-export const config = {
-  runtime: 'edge'
-};
 
 import { ImageResponse } from '@vercel/og';
 
