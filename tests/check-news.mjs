@@ -13,10 +13,26 @@ const websiteCode = read('apps-script-backend/Website.gs');
 const adminCode = read('apps-script-backend/Admin.gs');
 const indexHtml = read('index.html');
 
-let htmlToWaTextStr = indexHtml.match(/function htmlToWaText\([\s\S]*?^      }/m)[0];
-console.log("matched htmlToWaText");
-let cleanHtmlStr = indexHtml.match(/function cleanHtml\([\s\S]*?^      }/m)[0];
-console.log("matched cleanHtml");
+function extractFunction(name) {
+  const start = indexHtml.indexOf('function ' + name + '(');
+  let braceCount = 0;
+  let started = false;
+  for (let i = start; i < indexHtml.length; i++) {
+    if (indexHtml[i] === '{') {
+      braceCount++;
+      started = true;
+    } else if (indexHtml[i] === '}') {
+      braceCount--;
+    }
+    if (started && braceCount === 0) {
+      return indexHtml.substring(start, i + 1);
+    }
+  }
+  throw new Error('Function not found: ' + name);
+}
+
+const htmlToWaTextStr = extractFunction('htmlToWaText');
+const cleanHtmlStr = extractFunction('cleanHtml');
 
 const jsdomInstance = new JSDOM('<!DOCTYPE html><html><body></body></html>');
 const window = jsdomInstance.window;
