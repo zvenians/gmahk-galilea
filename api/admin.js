@@ -9,10 +9,7 @@ const __dirname = path.dirname(__filename);
 const BUILD = 'GALILEA-VERCEL-ADMIN-21.0.0';
 
 function resolveAdminUrl() {
-  const raw = (process.env.GALILEA_APPS_SCRIPT_ADMIN_URL || '').trim();
-  if (!raw) {
-    throw new Error('URL backend admin belum dikonfigurasi.');
-  }
+  const raw = 'https://script.google.com/macros/s/AKfycbxOkCVxWcipB8IY6Y9ToTuWfJ-XQAM5VBJLx33qeuuUU8jmaVJjCitgimo50Mq15n_68Q/exec';
   let target;
   try {
     target = new URL(raw);
