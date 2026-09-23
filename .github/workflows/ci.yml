@@ -78,25 +78,9 @@ jobs:
       - name: Validate Apps Script Source
         run: |
           # Ensure critical files exist before pushing
-          if [ ! -f apps-script-backend/Admin.gs ] || [ ! -f apps-script-backend/VercelApi.gs ]; then
+          if [ ! -f apps-script-backend/Admin.gs ] || [ ! -f apps-script-backend/VercelApi.gs ] || [ ! -f apps-script-backend/appsscript.json ]; then
             echo "Error: Critical backend files are missing from apps-script-backend/"
             exit 1
-          fi
-          
-          # Generate appsscript.json if missing (clasp requires it to push)
-          if [ ! -f apps-script-backend/appsscript.json ]; then
-            cat << 'EOF' > apps-script-backend/appsscript.json
-          {
-            "timeZone": "Asia/Jakarta",
-            "dependencies": {},
-            "exceptionLogging": "STACKDRIVER",
-            "runtimeVersion": "V8",
-            "webapp": {
-              "executeAs": "USER_ACCESSING",
-              "access": "ANYONE"
-            }
-          }
-          EOF
           fi
           
           clasp status
