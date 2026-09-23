@@ -26,9 +26,9 @@ if (typeof globalThis.__dirname === 'undefined') {
   globalThis.__dirname = foundDir;
 }
 
-export default async function handler(req) {
+export async function GET(req) {
   try {
-    const { ImageResponse } = require('@vercel/og');
+    const { ImageResponse } = await import('@vercel/og');
     const url = new URL(req.url);
     const id = url.searchParams.get('id');
     
