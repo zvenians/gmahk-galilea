@@ -1114,7 +1114,7 @@ function gwReadActivities_(spreadsheet, now) {
       url: gwSafeUrl_(display[index][4]),
       status: gwNormalize_(display[index][5]),
       photos: photos,
-      coverUrl: photos[0] || '',
+      coverUrl: gwActivityCover_(display[index][6]),
       photoCount: photos.length
     };
   }).filter(function (item) {
@@ -1128,13 +1128,29 @@ function gwActivityPhotos_(value) {
   const seen = {};
   return String(value == null ? '' : value)
     .split(/[\n,;]+/)
-    .map(function (item) { return gwSafeUrl_(item.trim()); })
+    .map(function (item) { return gwSafeUrl_(item.trim().replace(/^PRIMARY:/i, '')); })
     .filter(function (url) {
       if (!url || seen[url]) return false;
       seen[url] = true;
       return true;
     })
     .slice(0, 12);
+}
+
+function gwActivityCover_(value) {
+  const urls = String(value == null ? '' : value).split(/[\n,;]+/);
+  let primary = '';
+  let first = '';
+  for (let i = 0; i < urls.length; i++) {
+    const raw = urls[i].trim();
+    if (!raw) continue;
+    if (raw.toUpperCase().indexOf('PRIMARY:') === 0) {
+      primary = gwSafeUrl_(raw.substring(8));
+    }
+    const clean = gwSafeUrl_(raw.replace(/^PRIMARY:/i, ''));
+    if (!first && clean) first = clean;
+  }
+  return primary || first || '';
 }
 
 function gwReadGallery_(spreadsheet) {

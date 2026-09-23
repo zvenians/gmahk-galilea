@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id" data-theme="light" data-build="GALILEA-ADMIN-PRO-46-0-0">
+<html lang="id" data-theme="light" data-build="GALILEA-ADMIN-PRO-47-0-0">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
@@ -1754,6 +1754,32 @@
     .upload-item.pending .upload-status { color: var(--faint); }
     .upload-item.success .upload-status { color: var(--success); }
     .upload-item.error .upload-status { color: var(--danger); }
+    /* Rich Text Editor & Photo Manager */
+    .rich-editor { border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg); overflow: hidden; display: flex; flex-direction: column; }
+    .rich-editor:focus-within { border-color: var(--brand); box-shadow: 0 0 0 2px var(--brand-soft); }
+    .rich-toolbar { display: flex; flex-wrap: wrap; gap: 4px; padding: 6px; border-bottom: 1px solid var(--line); background: var(--surface-2); }
+    .rich-toolbar button { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: transparent; border-radius: 4px; color: var(--text); cursor: pointer; transition: background var(--dur); }
+    .rich-toolbar button:hover { background: var(--line); }
+    .rich-toolbar button.active { background: var(--line); color: var(--brand); }
+    .rich-toolbar button svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .rich-toolbar-sep { width: 1px; background: var(--line); margin: 4px; }
+    .rich-content { min-height: 150px; padding: 12px; font-size: 14px; line-height: 1.6; outline: none; overflow-y: auto; max-height: 400px; }
+    .rich-content p { margin: 0 0 1em 0; }
+    .rich-content p:last-child { margin-bottom: 0; }
+    .rich-content ul, .rich-content ol { margin: 0 0 1em 0; padding-left: 24px; }
+    .rich-content li { margin-bottom: 4px; }
+    .rich-content a { color: var(--brand); text-decoration: underline; }
+    .photo-manager { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 12px; margin-top: 12px; }
+    .photo-thumb { position: relative; border-radius: var(--radius-sm); overflow: hidden; border: 1px solid var(--line); background: var(--surface-2); aspect-ratio: 1; display: flex; flex-direction: column; }
+    .photo-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .photo-thumb-actions { position: absolute; inset: 0; background: rgba(0,0,0,0.6); display: flex; flex-direction: column; justify-content: center; align-items: center; opacity: 0; transition: opacity var(--dur); gap: 8px; }
+    .photo-thumb:hover .photo-thumb-actions { opacity: 1; }
+    .photo-thumb.is-primary .photo-thumb-actions { opacity: 1; background: transparent; justify-content: flex-start; align-items: flex-end; padding: 8px; }
+    .btn-set-primary { background: var(--bg); color: var(--text); border: none; padding: 6px 12px; border-radius: 4px; font-size: 12px; font-weight: 500; cursor: pointer; box-shadow: var(--shadow-sm); }
+    .btn-set-primary:hover { background: var(--surface-3); }
+    .photo-badge-primary { background: var(--brand); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 10px; font-weight: 600; box-shadow: var(--shadow-sm); }
+    .btn-remove-photo { position: absolute; top: 4px; right: 4px; background: rgba(0,0,0,0.5); color: #fff; border: none; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; cursor: pointer; }
+    .btn-remove-photo:hover { background: var(--danger); }
   </style>
 </head>
 <body>
@@ -1986,15 +2012,118 @@
       if(id==='navigation_menu_label'){configured.type='text';configured.help='Maksimal 12 karakter. Contoh: MENU';return configured}
       return configured;
     }
-    function openGenericEditor(record,workflow){const data=state.entityData;state.currentEdit={entity:data.entity,entityId:record&&record.id||'',workflowId:workflow&&workflow.id||'',action:workflow&&workflow.action||'UPSERT'};$('#editor-title').textContent=(record?'Edit ':'Tambah ')+data.label;$('#editor-subtitle').textContent=workflow?(workflow.state==='REJECTED'?'Perbaiki catatan reviewer lalu ajukan kembali.':'Lanjutkan draft sebelum diajukan.'):'Perubahan baru akan masuk alur persetujuan.';$('#editor-workflow').innerHTML=workflowGuide(workflow&&workflow.state||'DRAFT');$('#editor-fields').innerHTML=data.fields.map(field=>{const configured=data.entity==='settings'?settingFieldConfig(record,field):Object.assign({},field);return fieldHtml(configured,record&&record.values?record.values[field.key]:'')}).join('');$('#editor-preview').classList.remove('show');$('#editor-preview').innerHTML='';$('#editor-dialog').showModal()}
-    function editorSnapshot(){const form=$('#editor-form'),values=Object.fromEntries(new FormData(form).entries());if(state.currentEdit&&state.currentEdit.entity==='schedule'){const fields={};Object.keys(values).filter(key=>key.startsWith('schedule:')).forEach(key=>fields[key.slice(9)]=values[key]);return{Jenis:values.sectionId||'',Tanggal:values.isoDate||'',...fields}}const result={};(state.entityData.fields||[]).forEach(field=>{const value=values[field.key];if(value)result[field.label]=value});return result}
+    function legacyToHtml(text){
+      if(!text)return'';
+      if(/<[a-z][\s\S]*>/i.test(text))return text; // Already HTML
+      return text.split(/\n{2,}/).map(p=>'<p>'+esc(p.trim()).replace(/\n/g,'<br>')+'</p>').join('');
+    }
+    function sanitizeHtml(html){
+      if(!html)return'';
+      const div=document.createElement('div');div.innerHTML=html;
+      const allowedTags=['P','STRONG','B','EM','I','U','BR','UL','OL','LI','A','DIV','SPAN'];
+      function clean(node){
+        if(node.nodeType===3)return; // Text node
+        if(node.nodeType!==1){node.remove();return;}
+        if(!allowedTags.includes(node.nodeName)){
+          while(node.firstChild)node.parentNode.insertBefore(node.firstChild,node);
+          node.remove();return;
+        }
+        const attrs=node.attributes;
+        for(let i=attrs.length-1;i>=0;i--){
+          const name=attrs[i].name.toLowerCase(),val=attrs[i].value.toLowerCase();
+          if(name==='href'){if(val.startsWith('javascript:'))node.removeAttribute(name);}
+          else node.removeAttribute(name); // Strip all other attributes (class, style, etc)
+        }
+        Array.from(node.childNodes).forEach(clean);
+      }
+      Array.from(div.childNodes).forEach(clean);
+      return div.innerHTML;
+    }
+    function initRichEditor(key){
+      const editor=$('[data-rich-editor="'+CSS.escape(key)+'"]'),textarea=$('[name="'+CSS.escape(key)+'"].sr-only');
+      if(!editor||!textarea)return;
+      editor.innerHTML=legacyToHtml(textarea.value);
+      const toolbar=$('[data-rich-target="'+CSS.escape(key)+'"]');
+      if(toolbar){
+        toolbar.addEventListener('click',e=>{
+          const btn=e.target.closest('[data-command]');
+          if(!btn)return;
+          e.preventDefault();
+          const cmd=btn.dataset.command;
+          if(cmd==='createLink'){
+            const url=prompt('Masukkan URL:','https://');
+            if(url)document.execCommand(cmd,false,url);
+          } else {
+            document.execCommand(cmd,false,null);
+          }
+          editor.focus();
+        });
+      }
+      editor.addEventListener('input',()=>textarea.value=sanitizeHtml(editor.innerHTML));
+      editor.addEventListener('blur',()=>textarea.value=sanitizeHtml(editor.innerHTML));
+    }
+    function initPhotoManagers(){
+      $$('.image-collection').forEach(textarea=>{
+        const key=textarea.name,manager=$('#photo-manager-'+CSS.escape(key));
+        if(!manager)return;
+        renderPhotoManager(key);
+      });
+    }
+    function renderPhotoManager(key){
+      const textarea=$('[name="'+CSS.escape(key)+'"]'),manager=$('#photo-manager-'+CSS.escape(key));
+      if(!textarea||!manager)return;
+      const urls=textarea.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
+      manager.innerHTML=urls.length?urls.map((url,idx)=>{
+        const isPrimary=url.toUpperCase().startsWith('PRIMARY:'),cleanUrl=url.replace(/^PRIMARY:/i,'');
+        return '<div class="photo-thumb '+(isPrimary?'is-primary':'')+'"><img src="'+attr(cleanUrl)+'" loading="lazy"><div class="photo-thumb-actions">'+(isPrimary?'<span class="photo-badge-primary">FOTO UTAMA</span>':'<button type="button" class="btn-set-primary" onclick="setPrimaryPhoto(\''+attr(key)+'\','+idx+')">Jadikan Utama</button>')+'</div><button type="button" class="btn-remove-photo" title="Hapus foto" onclick="removePhoto(\''+attr(key)+'\','+idx+')">'+icon('trash')+'</button></div>';
+      }).join(''):'<div class="v18-empty" style="grid-column: 1 / -1; padding: 16px;">Belum ada foto yang dipilih.</div>';
+    }
+    window.setPrimaryPhoto=function(key,index){
+      const textarea=$('[name="'+CSS.escape(key)+'"]');if(!textarea)return;
+      const urls=textarea.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
+      for(let i=0;i<urls.length;i++){
+        let u=urls[i];
+        if(u.toUpperCase().startsWith('PRIMARY:')) u=u.substring(8);
+        if(i===index) u='PRIMARY:'+u;
+        urls[i]=u;
+      }
+      textarea.value=urls.join('\n');
+      renderPhotoManager(key);
+    };
+    window.removePhoto=function(key,index){
+      const textarea=$('[name="'+CSS.escape(key)+'"]');if(!textarea)return;
+      const urls=textarea.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
+      urls.splice(index,1);
+      textarea.value=urls.join('\n');
+      renderPhotoManager(key);
+    };
+
+    function openGenericEditor(record,workflow){const data=state.entityData;state.currentEdit={entity:data.entity,entityId:record&&record.id||'',workflowId:workflow&&workflow.id||'',action:workflow&&workflow.action||'UPSERT'};$('#editor-title').textContent=(record?'Edit ':'Tambah ')+data.label;$('#editor-subtitle').textContent=workflow?(workflow.state==='REJECTED'?'Perbaiki catatan reviewer lalu ajukan kembali.':'Lanjutkan draft sebelum diajukan.'):'Perubahan baru akan masuk alur persetujuan.';$('#editor-workflow').innerHTML=workflowGuide(workflow&&workflow.state||'DRAFT');$('#editor-fields').innerHTML=data.fields.map(field=>{const configured=data.entity==='settings'?settingFieldConfig(record,field):Object.assign({},field);return fieldHtml(configured,record&&record.values?record.values[field.key]:'')}).join('');
+      $('#editor-preview').classList.remove('show');$('#editor-preview').innerHTML='';
+      $$('[data-rich-editor]').forEach(el => initRichEditor(el.dataset.richEditor));
+      initPhotoManagers();
+      $('#editor-dialog').showModal();
+    }
+    function editorSnapshot(){
+      $$('[data-rich-editor]').forEach(el => {
+        const key = el.dataset.richEditor;
+        const textarea = $('[name="'+CSS.escape(key)+'"].sr-only');
+        if (textarea) textarea.value = sanitizeHtml(el.innerHTML);
+      });
+      const form=$('#editor-form'),values=Object.fromEntries(new FormData(form).entries());if(state.currentEdit&&state.currentEdit.entity==='schedule'){const fields={};Object.keys(values).filter(key=>key.startsWith('schedule:')).forEach(key=>fields[key.slice(9)]=values[key]);return{Jenis:values.sectionId||'',Tanggal:values.isoDate||'',...fields}}const result={};(state.entityData.fields||[]).forEach(field=>{const value=values[field.key];if(value)result[field.label]=value});return result}
     function editorValidation(snapshot){const entries=Object.entries(snapshot||{}),filled=entries.filter(item=>String(item[1]||'').trim()).length,issues=[];if(state.currentEdit&&state.currentEdit.entity==='schedule'){if(!snapshot.Tanggal)issues.push('Tanggal belum diisi.');const duties=entries.filter(item=>!['Jenis','Tanggal'].includes(item[0])&&String(item[1]||'').trim());if(!duties.length)issues.push('Belum ada petugas yang diisi.');if(duties.length>8)issues.push('Petugas akan dibagi otomatis menjadi beberapa layar agar tidak terpotong.');}else{const required=(state.entityData.fields||[]).filter(field=>field.required).filter(field=>!String(snapshot[field.label]||'').trim());required.forEach(field=>issues.push(field.label+' wajib diisi.'));}return{filled:filled,total:entries.length,issues:issues,ready:issues.filter(item=>/belum|wajib/i.test(item)).length===0}}
-    function previewEditor(){const box=$('#editor-preview'),snapshot=editorSnapshot(),entries=Object.entries(snapshot),validation=editorValidation(snapshot);const checks='<div class="editor-validation"><div class="editor-validation-row '+(validation.ready?'ready':'warning')+'">'+icon(validation.ready?'check':'info')+'<strong>'+(validation.ready?'Isi utama siap diperiksa.':'Masih ada bagian yang perlu diperiksa.')+'</strong></div>'+validation.issues.map(issue=>'<div class="editor-validation-row warning">'+icon('info')+'<span>'+esc(issue)+'</span></div>').join('')+'</div>';let preview='';if(state.currentEdit&&state.currentEdit.entity==='schedule'){const section=(state.entityData.sections||[]).find(item=>item.id===snapshot.Jenis),label=section&&section.title||snapshot.Jenis||'Jenis Ibadah',duties=entries.filter(item=>!['Jenis','Tanggal'].includes(item[0])&&String(item[1]||'').trim()).slice(0,8);preview='<article class="editor-projector" aria-label="Pratinjau layar 16 banding 9"><div class="editor-projector-title"><small>PRATINJAU 16:9</small><strong>'+esc(label)+'</strong><span>'+esc(snapshot.Tanggal||'Tanggal belum diisi')+'</span></div><dl class="editor-projector-fields">'+(duties.length?duties.map(item=>'<div><dt>'+esc(item[0])+'</dt><dd>'+esc(item[1])+'</dd></div>').join(''):'<div><dt>Petugas</dt><dd>Belum diisi</dd></div>')+'</dl></article>';}else preview='<article class="editor-preview-card"><h3>'+esc(snapshot['Tema Ibadah']||snapshot.Judul||snapshot['Nama Kegiatan']||state.entityData.label)+'</h3><dl>'+entries.map(item=>'<div><dt>'+esc(item[0])+'</dt><dd>'+esc(item[1])+'</dd></div>').join('')+'</dl></article>';box.innerHTML='<div class="editor-preview-head"><div><span class="eyebrow">PRATINJAU SEBELUM DIAJUKAN</span><strong>'+(state.currentEdit&&state.currentEdit.entity==='schedule'?'Simulasi tampilan proyektor':'Pemeriksaan isi publik')+'</strong></div>'+status('DRAFT')+'</div>'+checks+preview;box.classList.add('show');box.scrollIntoView({behavior:'smooth',block:'nearest'})}
+    function previewEditor(){const box=$('#editor-preview'),snapshot=editorSnapshot(),entries=Object.entries(snapshot),validation=editorValidation(snapshot);const checks='<div class="editor-validation"><div class="editor-validation-row '+(validation.ready?'ready':'warning')+'">'+icon(validation.ready?'check':'info')+'<strong>'+(validation.ready?'Isi utama siap diperiksa.':'Masih ada bagian yang perlu diperiksa.')+'</strong></div>'+validation.issues.map(issue=>'<div class="editor-validation-row warning">'+icon('info')+'<span>'+esc(issue)+'</span></div>').join('')+'</div>';let preview='';if(state.currentEdit&&state.currentEdit.entity==='schedule'){const section=(state.entityData.sections||[]).find(item=>item.id===snapshot.Jenis),label=section&&section.title||snapshot.Jenis||'Jenis Ibadah',duties=entries.filter(item=>!['Jenis','Tanggal'].includes(item[0])&&String(item[1]||'').trim()).slice(0,8);preview='<article class="editor-projector" aria-label="Pratinjau layar 16 banding 9"><div class="editor-projector-title"><small>PRATINJAU 16:9</small><strong>'+esc(label)+'</strong><span>'+esc(snapshot.Tanggal||'Tanggal belum diisi')+'</span></div><dl class="editor-projector-fields">'+(duties.length?duties.map(item=>'<div><dt>'+esc(item[0])+'</dt><dd>'+esc(item[1])+'</dd></div>').join(''):'<div><dt>Petugas</dt><dd>Belum diisi</dd></div>')+'</dl></article>';}else preview='<article class="editor-preview-card"><h3>'+esc(snapshot['Tema Ibadah']||snapshot.Judul||snapshot['Nama Kegiatan']||state.entityData.label)+'</h3><dl>'+entries.map(item=>{let val=item[1]; if(val.includes('<') && val.includes('>')) val='<div style="font-size:14px;line-height:1.5;">'+val+'</div>'; else val=esc(val); return '<div><dt>'+esc(item[0])+'</dt><dd>'+val+'</dd></div>';}).join('')+'</dl></article>';box.innerHTML='<div class="editor-preview-head"><div><span class="eyebrow">PRATINJAU SEBELUM DIAJUKAN</span><strong>'+(state.currentEdit&&state.currentEdit.entity==='schedule'?'Simulasi tampilan proyektor':'Pemeriksaan isi publik')+'</strong></div>'+status('DRAFT')+'</div>'+checks+preview;box.classList.add('show');box.scrollIntoView({behavior:'smooth',block:'nearest'})}
     function fieldHtml(field,value){
       const full=['textarea','image','images','url'].includes(field.type)?' full':'';
       let control;
-      if(field.type==='textarea') control='<textarea name="'+attr(field.key)+'" placeholder="'+attr(field.help||'Ketik isi di sini.')+'" '+(field.required?'required':'')+'>'+esc(value)+'</textarea>';
-      else if(field.type==='images') control='<textarea name="'+attr(field.key)+'" class="image-collection" rows="5" placeholder="URL foto akan tampil di sini, satu URL per baris">'+esc(value)+'</textarea><ul class="upload-preview-list" id="upload-preview-'+attr(field.key)+'"></ul><div class="image-upload-panel"><div><strong>Galeri kegiatan</strong><span>Pilih beberapa foto sekaligus. Maksimal 12 foto, masing-masing 4 MB.</span></div><label class="btn soft">'+icon('upload')+'Pilih beberapa foto<input class="image-file sr-only" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" data-image-mode="append" data-image-target="'+attr(field.key)+'"></label></div>';
+      if(field.type==='textarea') {
+        if(state.entityData.entity==='activities' && field.key==='description') {
+          control='<div class="rich-editor"><div class="rich-toolbar" data-rich-target="'+attr(field.key)+'"><button type="button" data-command="bold" title="Bold">'+icon('edit')+'</button><button type="button" data-command="italic" title="Italic"><i>I</i></button><button type="button" data-command="underline" title="Underline"><u>U</u></button><div class="rich-toolbar-sep"></div><button type="button" data-command="insertUnorderedList" title="Bullet List">•</button><button type="button" data-command="insertOrderedList" title="Numbered List">1.</button><div class="rich-toolbar-sep"></div><button type="button" data-command="createLink" title="Link">'+icon('link')+'</button><button type="button" data-command="removeFormat" title="Clear Formatting">'+icon('trash')+'</button></div><div class="rich-content" contenteditable="true" data-rich-editor="'+attr(field.key)+'"></div><textarea name="'+attr(field.key)+'" class="sr-only" '+(field.required?'required':'')+'>'+esc(value)+'</textarea></div>';
+        } else {
+          control='<textarea name="'+attr(field.key)+'" placeholder="'+attr(field.help||'Ketik isi di sini.')+'" '+(field.required?'required':'')+'>'+esc(value)+'</textarea>';
+        }
+      }
+      else if(field.type==='images') control='<textarea name="'+attr(field.key)+'" class="image-collection sr-only" rows="5">'+esc(value)+'</textarea><div class="photo-manager" id="photo-manager-'+attr(field.key)+'"></div><div class="image-upload-panel"><div><strong>Galeri kegiatan</strong><span>Pilih beberapa foto sekaligus. Maksimal 12 foto, masing-masing 4 MB. Foto pertama akan menjadi sampul kecuali Anda menentukan foto utama.</span></div><label class="btn soft">'+icon('upload')+'Pilih beberapa foto<input class="image-file sr-only" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" data-image-mode="append" data-image-target="'+attr(field.key)+'"></label></div>';
       else if(field.type==='select') control='<select name="'+attr(field.key)+'" '+(field.required?'required':'')+'>'+field.options.map(o=>'<option '+(String(value)===o?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
       else control='<input name="'+attr(field.key)+'" type="'+(field.type==='image'?'url':attr(field.type))+'" value="'+attr(value)+'" '+(field.required?'required':'')+'>'+(field.type==='image'?'<ul class="upload-preview-list" id="upload-preview-'+attr(field.key)+'"></ul><div class="button-row"><label class="btn soft">'+icon('upload')+'Unggah gambar<input class="image-file sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-image-target="'+attr(field.key)+'"></label></div>':'');
       return '<div class="field'+full+'"><label>'+esc(field.label)+(field.required?' *':'')+'</label>'+control+(field.help?'<span class="help">'+esc(field.help)+'</span>':'')+'</div>';
@@ -2059,6 +2188,7 @@
           const existing=append?String(field.value||'').split(/\n+/).map(value=>value.trim()).filter(Boolean):[];
           field.value=existing.concat(uploaded).slice(0,12).join('\n');
           field.dispatchEvent(new Event('change',{bubbles:true}));
+          if(typeof renderPhotoManager === 'function') renderPhotoManager(field.name);
         }
         if(uploaded.length) toast(uploaded.length+' foto berhasil ditambahkan.');
       } catch(error){
