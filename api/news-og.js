@@ -1,15 +1,14 @@
 
 
 import { createRequire } from 'module';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
+import { join } from 'path';
 
 const require = createRequire(import.meta.url);
 if (typeof globalThis.require === 'undefined') {
   globalThis.require = require;
 }
 if (typeof globalThis.__dirname === 'undefined') {
-  globalThis.__dirname = dirname(fileURLToPath(import.meta.url));
+  globalThis.__dirname = join(process.cwd(), 'node_modules', '@vercel', 'og', 'dist');
 }
 
 export default async function handler(req) {
