@@ -73,9 +73,11 @@ generated landscape image dari `/api/news-og?id=...`
 
 ## Verification
 Node tests:
-\OK - News System Overhaul Tests: 49/49 passed.\`n\OK - Ghost banner regression tests passed\`n
+`OK - News System Overhaul Tests: 49/49 passed.`
+`OK - Ghost banner regression tests passed.`
+
 npm run check:
-\PASS\`n
+`PASS`
 ## GitHub Actions
 Run ID: 35827405790
 Job:
