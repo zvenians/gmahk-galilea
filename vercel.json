@@ -4,9 +4,18 @@
   "cleanUrls": true,
   "trailingSlash": false,
   "functions": {
-    "api/*.js": {
+    "api/admin.js": {
       "maxDuration": 60,
       "includeFiles": "apps-script-backend/Admins.html"
+    },
+    "api/gas.js": {
+      "maxDuration": 60
+    },
+    "api/media.js": {
+      "maxDuration": 60
+    },
+    "api/quarterly-pdf.js": {
+      "maxDuration": 60
     }
   },
   "rewrites": [

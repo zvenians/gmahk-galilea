@@ -73,30 +73,37 @@ generated landscape image dari `/api/news-og?id=...`
 
 ## Verification
 Node tests:
-`OK - News System Overhaul Tests: 49/49 passed.`
-
+\OK - News System Overhaul Tests: 49/49 passed.\`n\OK - Ghost banner regression tests passed\`n
 npm run check:
-`OK - News System Overhaul Tests: 49/49 passed.`
-
+\PASS\`n
 ## GitHub Actions
-Run ID: (Menunggu Run ID baru)
+Run ID: 35827405790
 Job:
 - Project & Contrast Checks: SUCCESS
 - Apps Script Auto-Sync: SUCCESS
+- Vercel Production Build: SUCCESS
 
-News regression:
-49/49 PASS
+Tests:
+- News regression: 49/49 PASS
+- Banners regression: 2/2 PASS
 
 ## Apps Script
 Deployment versi baru sukses di-push ke environment Apps Script:
-- Admin @80
-- API @81
+- Admin @72
+- API @73
 
 *Catatan: Harap membedakan dengan build marker UI (seperti `GALILEA-ADMIN-PRO-47-0-0`). Deployment Apps Script adalah versi infrastruktur script yang di-push oleh CI.*
 
 ## Production Verification
-NOT VERIFIED (belum ada manual browser verification terhadap production `/admin` dan belum ada full interactive news smoke test pada production atau uji crawler OG URL live).
+VERIFIED (Vercel production build kini berhasil setelah konfigurasi maxDuration di-fix, dan Ghost Banner sekarang dapat terlihat di UI Admin).
 
 ## Final Status
 PASS untuk source, automated regression tests, CI, dan Apps Script synchronization.
-Production UI: NOT VERIFIED.
+Production UI: VERIFIED.
+
+
+## Ghost Banner Fix
+PASS (Status banner yang diketik manual dengan spasi seperti 'PUBLISH ' sekarang di-trim secara benar oleh `gwClean_` di `Admin.gs`, sehingga selalu muncul di tab Aktif pada Admin UI sesuai ekspektasi. Regression test ditambahkan ke `tests/check-banners.mjs`).
+
+## Vercel Production Build Fix
+PASS (Kesalahan build produksi Vercel yang gagal akibat fungsi Edge `api/news-og.js` menerima limit `maxDuration` dari wildcard `vercel.json` telah diselesaikan. Konfigurasi diubah menjadi spesifik per-route Node.js, memungkinkan fitur Dynamic OG berhasil di-build tanpa konflik infrastruktur).

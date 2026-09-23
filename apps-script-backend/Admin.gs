@@ -461,7 +461,7 @@ function adminListEntity(entityKey) {
       definition.fields.forEach(function (field) {
         values[field.key] = field.type === 'date' ? gaDateInput_(raw[index][field.column], row[field.column]) : row[field.column];
       });
-      records.push({ id: id, status: String(row[definition.statusColumn] || 'DRAFT').toUpperCase(), values: values, title: gaRecordTitle_(definition, values) });
+      records.push({ id: id, status: gwClean_(row[definition.statusColumn] || 'DRAFT').toUpperCase(), values: values, title: gaRecordTitle_(definition, values) });
     });
   }
   return {
