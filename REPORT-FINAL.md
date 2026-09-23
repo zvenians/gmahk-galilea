@@ -31,24 +31,49 @@ GitHub Actions sekarang sepenuhnya menggunakan:
 
 Warning `Node.js 20 deprecated` pada workflow sebelumnya sudah ditangani. (Pembaruan ini tidak diklaim menghilangkan warning dependency minor lainnya, hanya mengatasi deprecated core runtime environment).
 
+## WhatsApp Share URL
+Old:
+`https://gmahk-galilea.vercel.app/#berita/ID`
+
+New:
+`https://gmahk-galilea.vercel.app/berita/ID`
+(WhatsApp crawler tidak dapat membaca fragment hash `#berita/`. Perbaikan menggunakan origin URL yang di-rewrite Vercel memastikan OG tags diproses secara native per berita).
+
+## WhatsApp HTML Cleanup
+Literal HTML seperti `<strong>` atau entitas HTML `&lt;strong&gt;` sama sekali tidak boleh muncul dalam hasil final dan telah disterilisasi. Algoritma `htmlToWaText` ditulis ulang menggunakan native DOM traverser sehingga:
+- Format sah dikonversi murni menjadi markah WhatsApp (mis. `*Tebal*`).
+- Kode HTML harfiah terurai dengan aman lalu di-strip otomatis melalui filter non-whitelist regex `text.replace(/<\/?[a-z][\s\S]*?>/gi, '')`.
+
+## OG Thumbnail
+Primary photo: `coverUrl`
+Fallback: `photos[0]`
+Endpoint server `/api/berita.js` (`/berita/:id`) memastikan pengambilan gambar prioritas dengan skema fallback aman (sebagaimana dites oleh unit test Node.js `TEST E` dan `TEST F`).
+
+## Verification
+Node tests:
+`OK - News System Overhaul Tests: 30/30 passed.`
+
+npm run check:
+`OK - News System Overhaul Tests: 30/30 passed.`
+
 ## GitHub Actions
-Run ID: 35827405790
+Run ID: 35828954986
 Job:
 - Project & Contrast Checks: SUCCESS
 - Apps Script Auto-Sync: SUCCESS
 
 News regression:
-24/24 PASS
+30/30 PASS
 
 ## Apps Script
 Deployment versi baru sukses di-push ke environment Apps Script:
-- Admin @72
-- API @73
+- Admin @74
+- API @75
 
-*Catatan: Harap membedakan dengan build marker UI (seperti `GALILEA-ADMIN-PRO-47-0-0`). Deployment Apps Script adalah versi infrastruktur script yang di-push oleh CI (Admin @72 dan API @73).*
+*Catatan: Harap membedakan dengan build marker UI (seperti `GALILEA-ADMIN-PRO-47-0-0`). Deployment Apps Script adalah versi infrastruktur script yang di-push oleh CI (Admin @74 dan API @75).*
 
 ## Production Verification
-NOT VERIFIED (belum ada manual browser verification terhadap production `/admin` dan belum ada full interactive news smoke test pada production).
+NOT VERIFIED (belum ada manual browser verification terhadap production `/admin` dan belum ada full interactive news smoke test pada production atau uji crawler OG URL live).
 
 ## Final Status
 PASS untuk source, automated regression tests, CI, dan Apps Script synchronization.
