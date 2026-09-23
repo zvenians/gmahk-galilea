@@ -16,6 +16,12 @@
     },
     "api/quarterly-pdf.js": {
       "maxDuration": 60
+    },
+    "api/berita.js": {
+      "maxDuration": 60
+    },
+    "api/news-og.js": {
+      "maxDuration": 60
     }
   },
   "rewrites": [
