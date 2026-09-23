@@ -34,11 +34,18 @@ export default async function handler(request) {
             const cover = activity.coverUrl || (activity.photos && activity.photos[0]);
             if (cover) {
               image = cover;
-              if (image.includes('drive.google.com/uc?export=view&id=')) {
-                const match = image.match(/id=([^&]+)/);
-                if (match) {
-                  image = 'https://lh3.googleusercontent.com/d/' + match[1] + '=w1200';
+              let driveId = '';
+              const matchFile = image.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
+              if (matchFile) {
+                driveId = matchFile[1];
+              } else {
+                const matchQuery = image.match(/[?&]id=([a-zA-Z0-9_-]+)/i);
+                if (matchQuery && /drive\.(?:usercontent\.)?google\.com/i.test(image)) {
+                  driveId = matchQuery[1];
                 }
+              }
+              if (driveId) {
+                image = 'https://lh3.googleusercontent.com/d/' + driveId + '=w1200';
               }
             }
           }

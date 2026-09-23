@@ -5543,12 +5543,21 @@
         return pageHead('Kehidupan Jemaat', 'Berita Jemaat', 'Cerita dan dokumentasi kegiatan yang sudah berlangsung. Bagian ini tidak dimasukkan ke Warta Jemaat.') + '<section class="section activity-archive"><div class="shell"><div class="v18-toolbar"><strong>'+esc(items.length)+' berita</strong><div class="v18-filter">'+years.map(year=>'<button class="tab '+(state.activityYear===year?'active':'')+'" type="button" data-activity-year="'+attr(year)+'">'+esc(year)+'</button>').join('')+'</div></div><div class="activity-cinema-grid">' + (items.length ? items.map((item,index) => activityCardHtml(item,index===0)).join('') : '<div class="v18-empty">Belum ada Berita Jemaat pada tahun ini.</div>') + '</div></div></section>';
       }
 
+      function activityExcerptText(value) {
+        if (!value) return '';
+        const div = document.createElement('div');
+        div.innerHTML = String(value).replace(/<br\s*\/?>/gi, ' ');
+        let text = div.textContent || div.innerText || '';
+        text = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\u200B-\u200D\uFEFF]/g, '');
+        return text.replace(/\s+/g, ' ').trim();
+      }
+
       function activityCardHtml(item, featured) {
         const cover = safeUrl(item.coverUrl || (item.photos || [])[0]);
         return '<article class="activity-film ' + (featured?'featured':'') + '">' +
           '<button class="activity-film-hit" type="button" data-open-activity="' + attr(item.id) + '" aria-label="Buka kegiatan ' + attr(item.title) + '"></button>' +
           '<div class="activity-film-media">' + (cover?'<img src="' + attr(cover) + '" alt="' + attr(item.title) + '" loading="lazy" decoding="async">':'<span class="activity-film-placeholder">' + icon('image') + '</span>') + '<span class="film-shade"></span></div>' +
-          '<div class="activity-film-copy"><div class="film-meta"><span>' + esc(item.dateLabel || 'Berita Jemaat') + '</span><span>' + esc(item.location || 'GMAHK Galilea') + '</span></div><h3>' + esc(item.title) + '</h3><p>' + esc(item.description || '') + '</p><div class="film-cta"><span>Baca berita</span>' + icon('arrow') + (item.photoCount?'<small>' + esc(item.photoCount) + ' foto</small>':'') + '</div></div></article>';
+          '<div class="activity-film-copy"><div class="film-meta"><span>' + esc(item.dateLabel || 'Berita Jemaat') + '</span><span>' + esc(item.location || 'GMAHK Galilea') + '</span></div><h3>' + esc(item.title) + '</h3><p>' + esc(activityExcerptText(item.description)) + '</p><div class="film-cta"><span>Baca berita</span>' + icon('arrow') + (item.photoCount?'<small>' + esc(item.photoCount) + ' foto</small>':'') + '</div></div></article>';
       }
 
       function activityBodyHtml(text) {

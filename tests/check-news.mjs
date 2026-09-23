@@ -33,6 +33,8 @@ function extractFunction(name) {
 
 const htmlToWaTextStr = extractFunction('htmlToWaText');
 const cleanHtmlStr = extractFunction('cleanHtml');
+const activityExcerptTextStr = extractFunction('activityExcerptText');
+const activityCardHtmlStr = extractFunction('activityCardHtml');
 
 const jsdomInstance = new JSDOM('<!DOCTYPE html><html><body></body></html>');
 const window = jsdomInstance.window;
@@ -73,6 +75,17 @@ vm.runInContext(`
   
   ${cleanHtmlStr}
   globalThis.cleanHtml = cleanHtml;
+  
+  ${activityExcerptTextStr}
+  globalThis.activityExcerptText = activityExcerptText;
+  
+  // mock for activityCardHtml test
+  globalThis.esc = str => String(str).replace(/</g, '&lt;');
+  globalThis.safeUrl = str => str;
+  globalThis.attr = str => str;
+  globalThis.icon = str => '';
+  ${activityCardHtmlStr}
+  globalThis.activityCardHtml = activityCardHtml;
 `, context);
 
 let passed = 0;
@@ -242,8 +255,49 @@ runTest('TEST G: Share link untuk tiga berita berbeda independen', () => {
   assert.match(indexHtml, /const item=\(state\.data\.activities\|\|\[\]\)\.find\(activity=>String\(activity\.id\)===String\(activityShare\.dataset\.shareActivity\)\);/);
 });
 
+// 6. News Card Excerpt & Drive URL OG (Tasks H-N)
+runTest('TEST H: activityCardHtml tidak boleh mengandung raw HTML dari description', () => {
+  const item = {
+    id: '123', title: 'Test', dateLabel: 'Date', location: 'Loc',
+    description: '<p><strong>Judul</strong> isi</p>'
+  };
+  const html = context.activityCardHtml(item, false);
+  // It should escape the text, but the text itself should be "Judul isi"
+  assert.match(html, /<p>Judul isi<\/p>/);
+  assert.doesNotMatch(html, /&lt;strong&gt;/);
+});
+
+runTest('TEST I: activityExcerptText() tidak menghasilkan tag HTML sebagai teks', () => {
+  const input = '<p><strong>Tebal</strong> <em>Miring</em> <u>Bawah</u> <ul><li>List</li></ul> <ol><li>List2</li></ol> <a href="#">Link</a></p>';
+  const result = context.activityExcerptText(input);
+  assert.equal(result, 'Tebal Miring Bawah List List2 Link');
+});
+
+runTest('TEST J: Primary image digunakan untuk OG', () => {
+  // Implicitly tested via regex on apiBeritaSource in Test E, but we can double check
+  assert.match(apiBeritaSource, /image = cover;/);
+});
+
+runTest('TEST K: Fallback OG', () => {
+  assert.match(apiBeritaSource, /const cover = activity\.coverUrl \|\| \(activity\.photos && activity\.photos\[0\]\);/);
+});
+
+runTest('TEST L: Google Drive primary URL dinormalisasi menjadi direct image URL', () => {
+  assert.match(apiBeritaSource, /drive\\\.google\\\.com\\\/file\\\/d\\\//);
+  assert.match(apiBeritaSource, /drive\\\.\(\?:usercontent\\\.\)\?google\\\.com/i);
+  assert.match(apiBeritaSource, /https:\/\/lh3\.googleusercontent\.com\/d\/' \+ driveId/);
+});
+
+runTest('TEST M: Berita A dan B tidak saling menimpa og:image', () => {
+  assert.match(apiBeritaSource, /const activity = json\.data\.activities\.find\(a => String\(a\.id\) === String\(id\)\);/);
+});
+
+runTest('TEST N: Share URL tetap /berita/ID', () => {
+  assert.match(indexHtml, /location\.origin\s*\+\s*'\/berita\/'\s*\+\s*encodeURIComponent/);
+});
+
 // Extra check to verify the test suite executed completely.
-runTest('TEST 30: Suite Executed Completely', () => {
+runTest('TEST 37: Suite Executed Completely', () => {
   assert.ok(true, 'Suite ran to completion');
 });
 

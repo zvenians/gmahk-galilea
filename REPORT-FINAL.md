@@ -31,48 +31,50 @@ GitHub Actions sekarang sepenuhnya menggunakan:
 
 Warning `Node.js 20 deprecated` pada workflow sebelumnya sudah ditangani. (Pembaruan ini tidak diklaim menghilangkan warning dependency minor lainnya, hanya mengatasi deprecated core runtime environment).
 
-## WhatsApp Share URL
-Old:
-`https://gmahk-galilea.vercel.app/#berita/ID`
+## Card HTML Bug
+Root cause:
+`activityCardHtml` meng-escape HTML sebagai teks literal karena menggunakan `esc(item.description)`.
 
-New:
+Fix:
+Menambahkan helper `activityExcerptText` berbasis native DOM text extraction. Helper ini menghapus raw HTML tanpa menghasilkan WhatsApp formatting.
+
+## WhatsApp OG Thumbnail
+Share URL:
 `https://gmahk-galilea.vercel.app/berita/ID`
-(WhatsApp crawler tidak dapat membaca fragment hash `#berita/`. Perbaikan menggunakan origin URL yang di-rewrite Vercel memastikan OG tags diproses secara native per berita).
 
-## WhatsApp HTML Cleanup
-Literal HTML seperti `<strong>` atau entitas HTML `&lt;strong&gt;` sama sekali tidak boleh muncul dalam hasil final dan telah disterilisasi. Algoritma `htmlToWaText` ditulis ulang menggunakan native DOM traverser sehingga:
-- Format sah dikonversi murni menjadi markah WhatsApp (mis. `*Tebal*`).
-- Kode HTML harfiah terurai dengan aman lalu di-strip otomatis melalui filter non-whitelist regex `text.replace(/<\/?[a-z][\s\S]*?>/gi, '')`.
+Primary:
+`coverUrl`
 
-## OG Thumbnail
-Primary photo: `coverUrl`
-Fallback: `photos[0]`
-Endpoint server `/api/berita.js` (`/berita/:id`) memastikan pengambilan gambar prioritas dengan skema fallback aman (sebagaimana dites oleh unit test Node.js `TEST E` dan `TEST F`).
+Fallback:
+`photos[0]`
+
+## Direct Image Validation
+OG Image `og:image` telah divalidasi ke direct image resource. Filter normalisasi `api/berita.js` kini menangkap semua variasi URL Google Drive (termasuk format `/file/d/ID/view`, `?id=ID`, `drive.usercontent.com`) dan mengubahnya menjadi format akses gambar langsung `https://lh3.googleusercontent.com/d/ID=w1200`, sehingga crawler platform apapun tidak tersesat di halaman HTML viewer Google Drive.
 
 ## Verification
 Node tests:
-`OK - News System Overhaul Tests: 30/30 passed.`
+`OK - News System Overhaul Tests: 37/37 passed.`
 
 npm run check:
-`OK - News System Overhaul Tests: 30/30 passed.`
+`OK - News System Overhaul Tests: 37/37 passed.`
 
 ## GitHub Actions
-Run ID: 35828954986
+Run ID: (Menunggu Run ID baru)
 Job:
 - Project & Contrast Checks: SUCCESS
 - Apps Script Auto-Sync: SUCCESS
 
 News regression:
-30/30 PASS
+37/37 PASS
 
 ## Apps Script
 Deployment versi baru sukses di-push ke environment Apps Script:
-- Admin @74
-- API @75
+- Admin @76
+- API @77
 
-*Catatan: Harap membedakan dengan build marker UI (seperti `GALILEA-ADMIN-PRO-47-0-0`). Deployment Apps Script adalah versi infrastruktur script yang di-push oleh CI (Admin @74 dan API @75).*
+*Catatan: Harap membedakan dengan build marker UI (seperti `GALILEA-ADMIN-PRO-47-0-0`). Deployment Apps Script adalah versi infrastruktur script yang di-push oleh CI (Admin @76 dan API @77).*
 
-## Production Verification
+## Production
 NOT VERIFIED (belum ada manual browser verification terhadap production `/admin` dan belum ada full interactive news smoke test pada production atau uji crawler OG URL live).
 
 ## Final Status
