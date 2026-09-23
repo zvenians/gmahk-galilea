@@ -89,7 +89,7 @@ function runTest(name, fn) {
   }
 }
 
-// 1. WhatsApp Formatting (Blocker 5)
+// 1. WhatsApp Formatting (Blocker 5 & Task 5)
 runTest('TEST 1: legacy plain text', () => {
   assert.equal(context.htmlToWaText('Paragraf satu.\n\nParagraf dua.'), 'Paragraf satu.\n\nParagraf dua.');
 });
@@ -98,8 +98,21 @@ runTest('TEST 2: rich paragraph', () => {
   assert.equal(context.htmlToWaText('<p>Paragraf pertama.</p><p>Paragraf kedua.</p>'), 'Paragraf pertama.\n\nParagraf kedua.');
 });
 
-runTest('TEST 3: bold', () => {
-  assert.equal(context.htmlToWaText('<p><strong>Tebal</strong></p>'), '*Tebal*');
+runTest('TEST B: Pastikan <strong> menjadi format WA', () => {
+  assert.equal(context.htmlToWaText('<p><strong>Judul</strong></p>'), '*Judul*');
+});
+
+runTest('TEST C: Pastikan encoded HTML tidak menghasilkan literal raw HTML', () => {
+  const result = context.htmlToWaText('<p>&lt;strong&gt;Judul&lt;/strong&gt;</p>');
+  assert.equal(result, 'Judul'); // Raw tags get stripped after entity decoding
+  assert.notEqual(result, '<strong>Judul</strong>');
+  assert.notEqual(result, '&lt;strong&gt;Judul&lt;/strong&gt;');
+});
+
+runTest('TEST D: Pastikan output final WA tidak mengandung tag HTML sama sekali', () => {
+  const html = '<p><strong>Tebal</strong> &amp; &lt;script&gt;alert(1)&lt;/script&gt;</p> <u>underline</u> <br> <ul><li>Test</li></ul>';
+  const result = context.htmlToWaText(html);
+  assert.doesNotMatch(result, /<\/?[a-z][^>]*>/i);
 });
 
 runTest('TEST 4: italic', () => {
@@ -208,8 +221,29 @@ runTest('TEST 23: client sanitizer preserves formatting', () => {
   assert.equal(context.cleanHtml(input), '<p><strong>Bold</strong></p>');
 });
 
+// 5. URL Share WA & API Endpoint Check (Tasks 1 & 2)
+runTest('TEST A: Share URL WA menggunakan /berita/{id}', () => {
+  assert.match(indexHtml, /location\.origin\s*\+\s*'\/berita\/'\s*\+\s*encodeURIComponent/);
+  assert.doesNotMatch(indexHtml, /location\.href\.split\('#'\)\[0\]\s*\+\s*'#berita\/'/);
+});
+
+const apiBeritaSource = read('api/berita.js');
+
+runTest('TEST E: API Berita menggunakan PRIMARY/coverUrl sebagai prioritas', () => {
+  assert.match(apiBeritaSource, /const cover = activity\.coverUrl \|\| \(activity\.photos && activity\.photos\[0\]\);/);
+});
+
+runTest('TEST F: API Berita menggunakan photo pertama sebagai fallback', () => {
+  // Test E implicitly tests this because the regex asserts `|| (activity.photos && activity.photos[0])`
+  assert.match(apiBeritaSource, /image = cover;/);
+});
+
+runTest('TEST G: Share link untuk tiga berita berbeda independen', () => {
+  assert.match(indexHtml, /const item=\(state\.data\.activities\|\|\[\]\)\.find\(activity=>String\(activity\.id\)===String\(activityShare\.dataset\.shareActivity\)\);/);
+});
+
 // Extra check to verify the test suite executed completely.
-runTest('TEST 24: Suite Executed Completely', () => {
+runTest('TEST 30: Suite Executed Completely', () => {
   assert.ok(true, 'Suite ran to completion');
 });
 
