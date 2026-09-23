@@ -40,40 +40,23 @@ jobs:
           node-version: 20
 
       - name: Install clasp
-        run: npm install -g @google/clasp
+        run: npm install -g @google/clasp@2.4.2
 
       - name: Authenticate Clasp
         run: |
-          if [ -z "${{ secrets.CLASPRC_JSON }}" ]; then
-            echo "Error: CLASPRC_JSON secret is missing. Cannot authenticate clasp."
-            exit 1
-          fi
-          echo '${{ secrets.CLASPRC_JSON }}' > ~/.clasprc.json
+          echo "Writing clasprc.json..."
+          echo "$CLASPRC_JSON" | tr -d '\000' | grep -v '^$' > ~/.clasprc.json
+          chmod 600 ~/.clasprc.json
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
 
       - name: Configure Clasp Target
         run: |
-          if [ -z "${{ secrets.CLASP_JSON }}" ]; then
-            echo "Error: CLASP_JSON secret is missing."
-            exit 1
-          fi
-          
-          # Safely extract scriptId to handle PowerShell quote-stripping and UTF-16 null bytes corruption
-          RAW_SECRET='${{ secrets.CLASP_JSON }}'
-          SCRIPT_ID=$(echo "$RAW_SECRET" | tr -d '\000' | grep -o -E '[a-zA-Z0-9_-]{30,}' | head -1 || true)
-          
-          if [ -z "$SCRIPT_ID" ]; then
-            echo "Error: Could not extract valid Script ID from secret."
-            exit 1
-          fi
-          
-          echo "{\"scriptId\":\"$SCRIPT_ID\", \"rootDir\":\"apps-script-backend\"}" > .clasp.json
-          
-          cat << 'EOF' > .claspignore
-          **/**
-          !apps-script-backend/**/*.gs
-          !apps-script-backend/**/*.html
-          !apps-script-backend/appsscript.json
-          EOF
+          echo "Writing .clasp.json..."
+          echo "$CLASP_JSON" | tr -d '\000' | grep -v '^$' > .clasp.json
+          chmod 600 .clasp.json
+        env:
+          CLASP_JSON: ${{ secrets.CLASP_JSON }}
 
       - name: Validate Apps Script Source
         run: |
@@ -82,40 +65,56 @@ jobs:
             echo "Error: Critical backend files are missing from apps-script-backend/"
             exit 1
           fi
-          
           clasp status
 
-      - name: Push to Apps Script
-        run: clasp push --force
-
-      - name: Version and Redeploy Existing Deployments
+      - name: Push and Deploy Admin Portal (USER_ACCESSING)
         run: |
-          # Create immutable version
-          OUTPUT=$(clasp version "GitHub ${{ github.sha }}")
-          echo "$OUTPUT"
+          if [ -z "$DEPLOYMENT_ID_ADMIN" ]; then
+            echo "Error: DEPLOYMENT_ID_ADMIN secret is missing."
+            exit 1
+          fi
           
-          # Extract the created version number
+          # Modify manifest for Admin (USER_ACCESSING)
+          jq '.webapp.executeAs = "USER_ACCESSING" | .webapp.access = "ANYONE"' apps-script-backend/appsscript.json > tmp.json && mv tmp.json apps-script-backend/appsscript.json
+          
+          echo "Pushing Admin Source..."
+          clasp push --force
+          
+          echo "Creating Admin Version..."
+          OUTPUT=$(clasp version "Admin: GitHub $GITHUB_SHA")
           VERSION=$(echo "$OUTPUT" | grep -o -E '[0-9]+' | tail -1)
-          
           if [ -z "$VERSION" ]; then
             echo "Error: Failed to extract Apps Script version."
             exit 1
           fi
           
-          echo "Extracted Apps Script Version: $VERSION"
-          
-          # Redeploy Admin Portal
-          if [ -n "${{ secrets.DEPLOYMENT_ID_ADMIN }}" ]; then
-            clasp deploy -i "${{ secrets.DEPLOYMENT_ID_ADMIN }}" -V "$VERSION" -d "Admin: GitHub ${{ github.sha }}"
-            echo "✅ Admin Deployment Redeployed"
-          else
-            echo "⚠️ Warning: DEPLOYMENT_ID_ADMIN secret is missing."
+          echo "Deploying Admin to version $VERSION..."
+          clasp deploy -i "$DEPLOYMENT_ID_ADMIN" -V "$VERSION" -d "Admin: GitHub $GITHUB_SHA"
+        env:
+          DEPLOYMENT_ID_ADMIN: ${{ secrets.DEPLOYMENT_ID_ADMIN }}
+
+      - name: Push and Deploy Public API (USER_DEPLOYING)
+        run: |
+          if [ -z "$DEPLOYMENT_ID_API" ]; then
+            echo "Error: DEPLOYMENT_ID_API secret is missing."
+            exit 1
           fi
           
-          # Redeploy Public API
-          if [ -n "${{ secrets.DEPLOYMENT_ID_API }}" ]; then
-            clasp deploy -i "${{ secrets.DEPLOYMENT_ID_API }}" -V "$VERSION" -d "API: GitHub ${{ github.sha }}"
-            echo "✅ API Deployment Redeployed"
-          else
-            echo "⚠️ Warning: DEPLOYMENT_ID_API secret is missing."
+          # Modify manifest for API (USER_DEPLOYING, ANYONE_ANONYMOUS)
+          jq '.webapp.executeAs = "USER_DEPLOYING" | .webapp.access = "ANYONE_ANONYMOUS"' apps-script-backend/appsscript.json > tmp.json && mv tmp.json apps-script-backend/appsscript.json
+          
+          echo "Pushing API Source..."
+          clasp push --force
+          
+          echo "Creating API Version..."
+          OUTPUT=$(clasp version "API: GitHub $GITHUB_SHA")
+          VERSION=$(echo "$OUTPUT" | grep -o -E '[0-9]+' | tail -1)
+          if [ -z "$VERSION" ]; then
+            echo "Error: Failed to extract Apps Script version."
+            exit 1
           fi
+          
+          echo "Deploying API to version $VERSION..."
+          clasp deploy -i "$DEPLOYMENT_ID_API" -V "$VERSION" -d "API: GitHub $GITHUB_SHA"
+        env:
+          DEPLOYMENT_ID_API: ${{ secrets.DEPLOYMENT_ID_API }}
