@@ -3653,7 +3653,51 @@
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#039;');
       const attr = value => esc(value).replace(/`/g, '&#096;');
-      const cleanHtml = value => String(value || '');
+      function cleanHtml(value) {
+        if (!value) return '';
+        const temp = document.createElement('div');
+        temp.innerHTML = String(value);
+        const allowedTags = ['P', 'STRONG', 'B', 'EM', 'I', 'U', 'BR', 'UL', 'OL', 'LI', 'A'];
+        
+        function traverse(node) {
+          const children = Array.prototype.slice.call(node.childNodes);
+          for (let i = 0; i < children.length; i++) traverse(children[i]);
+          
+          if (node.nodeType === 3) return;
+          if (node.nodeType !== 1) {
+            node.parentNode.removeChild(node);
+            return;
+          }
+          const tag = node.nodeName.toUpperCase();
+          const dangerousTags = ['SCRIPT', 'STYLE', 'IFRAME', 'OBJECT', 'EMBED', 'FORM', 'HEAD', 'META', 'LINK'];
+          if (dangerousTags.indexOf(tag) !== -1) {
+            node.parentNode.removeChild(node);
+            return;
+          }
+          
+          if (allowedTags.indexOf(tag) === -1) {
+            while (node.firstChild) node.parentNode.insertBefore(node.firstChild, node);
+            node.parentNode.removeChild(node);
+          } else {
+            const attrs = Array.prototype.slice.call(node.attributes);
+            for (let i = 0; i < attrs.length; i++) {
+              const attrName = attrs[i].name.toLowerCase();
+              if (tag === 'A' && attrName === 'href') {
+                const hrefVal = node.getAttribute('href').trim();
+                if (!/^https:\/\//i.test(hrefVal) || /^(javascript:|data:|vbscript:)/i.test(hrefVal)) {
+                  node.removeAttribute('href');
+                }
+              } else {
+                node.removeAttribute(attrs[i].name);
+              }
+            }
+          }
+        }
+        
+        const children = Array.prototype.slice.call(temp.childNodes);
+        for (let i = 0; i < children.length; i++) traverse(children[i]);
+        return temp.innerHTML;
+      }
       const safeUrl = value => /^https:\/\//i.test(String(value || '')) ? String(value) : '';
       const initials = value => String(value || '').split(/\s+/).filter(Boolean).slice(0,2).map(part => part[0]).join('').toUpperCase();
       function googleDriveFileId(value) {
@@ -5509,7 +5553,7 @@
 
       function activityBodyHtml(text) {
         if (!text) return '';
-        if (/<[a-z][\s\S]*>/i.test(text)) return text;
+        if (/<[a-z][\s\S]*>/i.test(text)) return cleanHtml(text);
         return text.split(/\n{2,}/).map(p => '<p>' + esc(p.trim()).replace(/\n/g, '<br>') + '</p>').join('');
       }
 
@@ -5967,7 +6011,7 @@
           
           text = text.replace(/<ul[^>]*>[\s\S]*?<\/ul>/gi, function(match) {
             let m = match.replace(/\n/g, '');
-            return m.replace(/<li[^>]*>/gi, '• ').replace(/<\/li>/gi, '\n').replace(/<\/?ul[^>]*>/gi, '');
+            return m.replace(/<li[^>]*>/gi, '- ').replace(/<\/li>/gi, '\n').replace(/<\/?ul[^>]*>/gi, '');
           });
           
           text = text.replace(/<ol[^>]*>[\s\S]*?<\/ol>/gi, function(match) {

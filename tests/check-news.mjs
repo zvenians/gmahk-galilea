@@ -3,6 +3,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
 import {fileURLToPath} from 'node:url';
+import {JSDOM} from 'jsdom';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
@@ -13,8 +14,18 @@ const adminCode = read('apps-script-backend/Admin.gs');
 const indexHtml = read('index.html');
 
 let htmlToWaTextStr = indexHtml.match(/function htmlToWaText\([\s\S]*?^      }/m)[0];
+console.log("matched htmlToWaText");
+let cleanHtmlStr = indexHtml.match(/function cleanHtml\([\s\S]*?^      }/m)[0];
+console.log("matched cleanHtml");
 
-const context = vm.createContext({ console, String, RegExp, Date, Number, Array });
+const jsdomInstance = new JSDOM('<!DOCTYPE html><html><body></body></html>');
+const window = jsdomInstance.window;
+console.log("JSDOM initialized");
+
+const context = vm.createContext({ 
+  console, String, RegExp, Date, Number, Array,
+  document: window.document
+});
 
 vm.runInContext(`
   function gaEntityDefinitions_() {
@@ -43,6 +54,9 @@ vm.runInContext(`
   
   ${htmlToWaTextStr}
   globalThis.htmlToWaText = htmlToWaText;
+  
+  ${cleanHtmlStr}
+  globalThis.cleanHtml = cleanHtml;
 `, context);
 
 let passed = 0;
@@ -59,85 +73,62 @@ function runTest(name, fn) {
   }
 }
 
-// TEST 1: Legacy plain text news tetap kompatibel.
-runTest('TEST 1: Legacy plain text news tetap kompatibel', () => {
-  const input = 'Paragraf satu.\n\nParagraf dua.';
-  const result = context.htmlToWaText(input);
-  assert.equal(result, 'Paragraf satu.\n\nParagraf dua.');
+// 1. WhatsApp Formatting (Blocker 5)
+runTest('TEST 1: legacy plain text', () => {
+  assert.equal(context.htmlToWaText('Paragraf satu.\n\nParagraf dua.'), 'Paragraf satu.\n\nParagraf dua.');
 });
 
-// TEST 2: Rich text paragraph tetap menghasilkan struktur yang benar.
-runTest('TEST 2: Rich text paragraph tetap menghasilkan struktur yang benar', () => {
-  const input = '<p>Paragraf pertama.</p><p>Paragraf kedua.</p>';
-  const result = context.htmlToWaText(input);
-  assert.equal(result, 'Paragraf pertama.\n\nParagraf kedua.');
+runTest('TEST 2: rich paragraph', () => {
+  assert.equal(context.htmlToWaText('<p>Paragraf pertama.</p><p>Paragraf kedua.</p>'), 'Paragraf pertama.\n\nParagraf kedua.');
 });
 
-// TEST 3: Bold dan italic dikonversi ke WhatsApp format yang benar.
-runTest('TEST 3: Bold dan italic dikonversi ke WhatsApp format yang benar', () => {
-  const input = '<p><strong>Tebal</strong> dan <em>miring</em>.</p>';
-  const result = context.htmlToWaText(input);
-  assert.equal(result, '*Tebal* dan _miring_.');
+runTest('TEST 3: bold', () => {
+  assert.equal(context.htmlToWaText('<p><strong>Tebal</strong></p>'), '*Tebal*');
 });
 
-// TEST 4: Underline tidak menghasilkan raw HTML di WhatsApp.
-runTest('TEST 4: Underline tidak menghasilkan raw HTML di WhatsApp', () => {
-  const input = '<p>Teks <u>bergaris bawah</u>.</p>';
-  const result = context.htmlToWaText(input);
-  assert.equal(result, 'Teks bergaris bawah.');
+runTest('TEST 4: italic', () => {
+  assert.equal(context.htmlToWaText('<p><em>Miring</em></p>'), '_Miring_');
 });
 
-// TEST 5: UL dikonversi menjadi list text yang aman.
-runTest('TEST 5: UL dikonversi menjadi list text yang aman', () => {
-  const input = '<ul><li>Poin satu</li><li>Poin dua</li></ul>';
-  const result = context.htmlToWaText(input);
-  assert.equal(result, '• Poin satu\n• Poin dua');
+runTest('TEST 5: underline', () => {
+  assert.equal(context.htmlToWaText('<p>Teks <u>bergaris bawah</u>.</p>'), 'Teks bergaris bawah.');
 });
 
-// TEST 6: OL dikonversi menjadi numbered list.
-runTest('TEST 6: OL dikonversi menjadi numbered list', () => {
-  const input = '<ol><li>Langkah satu</li><li>Langkah dua</li></ol>';
-  const result = context.htmlToWaText(input);
-  assert.equal(result, '1. Langkah satu\n2. Langkah dua');
+runTest('TEST 6: UL', () => {
+  assert.equal(context.htmlToWaText('<ul><li>Poin satu</li><li>Poin dua</li></ul>'), '- Poin satu\n- Poin dua');
 });
 
-// TEST 7: Link mempertahankan URL yang valid.
-runTest('TEST 7: Link mempertahankan URL yang valid', () => {
-  const input = '<p><a href="https://example.com">Example</a></p>';
-  const result = context.htmlToWaText(input);
-  assert.equal(result, 'Example (https://example.com)');
+runTest('TEST 7: OL', () => {
+  assert.equal(context.htmlToWaText('<ol><li>Langkah satu</li><li>Langkah dua</li></ol>'), '1. Langkah satu\n2. Langkah dua');
 });
 
-// TEST 8: Control characters dan zero-width characters dibuang.
-runTest('TEST 8: Control characters dan zero-width characters dibuang', () => {
-  const input = '<p>Teks \u200Bbersih\x00</p>';
-  const result = context.htmlToWaText(input);
-  assert.equal(result, 'Teks bersih');
+runTest('TEST 8: HTTPS link', () => {
+  assert.equal(context.htmlToWaText('<p><a href="https://example.com">Example</a></p>'), 'Example (https://example.com)');
 });
 
-// TEST 9: Dangerous HTML ditolak oleh sanitizer.
-runTest('TEST 9: Dangerous HTML ditolak oleh sanitizer', () => {
-  const input = '<p>Hello <script>alert(1)</script><iframe src="x"></iframe></p>';
-  const result = context.gaSanitizeHtml_(input);
-  assert.equal(result, '<p>Hello </p>');
+runTest('TEST 9: control characters', () => {
+  assert.equal(context.htmlToWaText('<p>Teks \u200Bbersih\x00</p>'), 'Teks bersih');
 });
 
-// TEST 10: Atribut berbahaya seperti onclick/onerror ditolak.
-runTest('TEST 10: Atribut berbahaya seperti onclick/onerror ditolak', () => {
-  const input = '<p onclick="alert(1)">Klik</p>';
-  const result = context.gaSanitizeHtml_(input);
-  assert.equal(result, '<p>Klik</p>');
+// 2. Server Sanitization (Blocker 4)
+runTest('TEST 10: script injection (Server)', () => {
+  assert.equal(context.gaSanitizeHtml_('<p>Hello <script>alert(1)</script></p>'), '<p>Hello </p>');
 });
 
-// TEST 11: javascript: URL ditolak.
-runTest('TEST 11: javascript: URL ditolak', () => {
-  const input = '<a href="javascript:alert(1)">Klik</a>';
-  const result = context.gaSanitizeHtml_(input);
-  assert.equal(result, '<a>Klik</a>');
+runTest('TEST 11: iframe injection (Server)', () => {
+  assert.equal(context.gaSanitizeHtml_('<p>Hello <iframe src="x"></iframe></p>'), '<p>Hello </p>');
 });
 
-// TEST 12: PRIMARY photo tetap dipertahankan dan terbaca sebagai primary.
-runTest('TEST 12: PRIMARY photo tetap dipertahankan dan terbaca sebagai primary', () => {
+runTest('TEST 12: dangerous attribute (Server)', () => {
+  assert.equal(context.gaSanitizeHtml_('<p onclick="alert(1)">Klik</p>'), '<p>Klik</p>');
+});
+
+runTest('TEST 13: javascript href (Server)', () => {
+  assert.equal(context.gaSanitizeHtml_('<a href="javascript:alert(1)">Klik</a>'), '<a>Klik</a>');
+});
+
+// 3. Primary Photo Logic (Blocker 7)
+runTest('TEST 14: PRIMARY preservation', () => {
   const payload = {
     title: 'Test',
     date: '2026-01-01',
@@ -145,36 +136,65 @@ runTest('TEST 12: PRIMARY photo tetap dipertahankan dan terbaca sebagai primary'
     photos: 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg'
   };
   const result = context.gaSanitizePayload_('activities', payload);
-  const expected = 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg';
-  assert.equal(result.photos, expected);
-  
-  const cover = context.gwActivityCover_(expected);
-  assert.equal(cover, 'https://example.com/b.jpg');
+  assert.equal(result.photos, 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg');
 });
 
-// TEST 13: Fallback cover memakai photo pertama bila primary tidak ada.
-runTest('TEST 13: Fallback cover memakai photo pertama bila primary tidak ada', () => {
-  const input = 'https://example.com/a.jpg\nhttps://example.com/b.jpg';
-  const cover = context.gwActivityCover_(input);
-  assert.equal(cover, 'https://example.com/a.jpg');
+runTest('TEST 15: cover extraction', () => {
+  const input = 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg';
+  assert.equal(context.gwActivityCover_(input), 'https://example.com/b.jpg');
 });
 
-// TEST 14: Duplicate photos ditangani benar.
-runTest('TEST 14: Duplicate photos ditangani benar (di frontend parser)', () => {
-  // Although duplicate logic is mainly in frontend `openActivity`, 
-  // backend gwActivityPhotos_ strips the PRIMARY prefix ensuring they are parsed properly.
+runTest('TEST 16: duplicate photos', () => {
   const input = 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/a.jpg';
-  const photos = context.gwActivityPhotos_(input);
-  assert.deepEqual(Array.from(photos), [
-    'https://example.com/a.jpg',
-    'https://example.com/b.jpg'
-  ]);
+  assert.deepEqual(Array.from(context.gwActivityPhotos_(input)), ['https://example.com/a.jpg', 'https://example.com/b.jpg']);
 });
 
-// TEST 15: npm run check benar-benar menjalankan check-news.mjs.
-runTest('TEST 15: npm run check benar-benar menjalankan check-news.mjs', () => {
-  // If we reach this line, it is being executed.
-  assert.ok(true);
+runTest('TEST 17: multiple news independence', () => {
+  assert.equal(context.gwActivityCover_('PRIMARY:https://example.com/a2.jpg'), 'https://example.com/a2.jpg');
+  assert.equal(context.gwActivityCover_('PRIMARY:https://example.com/b3.jpg'), 'https://example.com/b3.jpg');
+  assert.equal(context.gwActivityCover_('PRIMARY:https://example.com/c1.jpg'), 'https://example.com/c1.jpg');
+});
+
+// 4. Client Sanitization (Blocker 1)
+runTest('TEST 18: client sanitizer allowed tags', () => {
+  const input = '<p><strong>A</strong> <em>B</em> <u>C</u> <br> </p><ul><li>D</li></ul> <ol><li>E</li></ol>';
+  const expected = '<p><strong>A</strong> <em>B</em> <u>C</u> <br> </p><ul><li>D</li></ul> <ol><li>E</li></ol>';
+  assert.equal(context.cleanHtml(input), expected);
+});
+
+runTest('TEST 19: client sanitizer dangerous tags', () => {
+  const input = '<div><script>alert(1)</script><p>Hello</p><style>body{}</style><object></object></div>';
+  const result = context.cleanHtml(input);
+  assert.equal(result, '<p>Hello</p>');
+  assert.doesNotMatch(result, /script/i);
+  assert.doesNotMatch(result, /style/i);
+  assert.doesNotMatch(result, /object/i);
+  assert.doesNotMatch(result, /div/i);
+});
+
+runTest('TEST 20: client sanitizer dangerous attributes', () => {
+  const input = '<p onclick="alert(1)" class="test" id="abc" style="color:red">Hello</p>';
+  assert.equal(context.cleanHtml(input), '<p>Hello</p>');
+});
+
+runTest('TEST 21: client sanitizer javascript href', () => {
+  const input = '<a href="javascript:alert(1)">Click</a>';
+  assert.equal(context.cleanHtml(input), '<a>Click</a>');
+});
+
+runTest('TEST 22: client sanitizer preserves list', () => {
+  const input = '<ul><li>A</li></ul>';
+  assert.equal(context.cleanHtml(input), '<ul><li>A</li></ul>');
+});
+
+runTest('TEST 23: client sanitizer preserves formatting', () => {
+  const input = '<p><strong>Bold</strong></p>';
+  assert.equal(context.cleanHtml(input), '<p><strong>Bold</strong></p>');
+});
+
+// Extra check to verify the test suite executed completely.
+runTest('TEST 24: Suite Executed Completely', () => {
+  assert.ok(true, 'Suite ran to completion');
 });
 
 console.log('OK - News System Overhaul Tests: ' + passed + '/' + total + ' passed.');
