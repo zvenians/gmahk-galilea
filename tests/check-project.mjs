@@ -314,8 +314,8 @@ const {default: adminHandler} = await import('../api/admin.js');
 delete process.env.GALILEA_APPS_SCRIPT_ADMIN_URL;
 response = mockResponse();
 adminHandler({method: 'GET', query: {open: '1'}}, response);
-assert.equal(response.statusCode, 503);
-assert.match(response.body, /URL Apps Script admin belum siap/);
+assert.equal(response.statusCode, 307);
+assert.match(response.body, /page=admin/);
 
 process.env.GALILEA_APPS_SCRIPT_ADMIN_URL = 'https://script.google.com/macros/s/DEPLOYMENT_ID/exec';
 response = mockResponse();
