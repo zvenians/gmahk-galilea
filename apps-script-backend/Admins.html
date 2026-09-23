@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id" data-theme="light" data-build="GALILEA-ADMIN-PRO-45-0-0">
+<html lang="id" data-theme="light" data-build="GALILEA-ADMIN-PRO-46-0-0">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
@@ -12,91 +12,100 @@
        ═══════════════════════════════════════════════════════════════════════ */
 
     :root {
-      /* PURE WHITE - Editorial & Minimal Foundation */
+      /* ── Light Mode Foundation */
       --bg: #ffffff;
+      --sidebar-bg: #fafaf9;
       --surface: #ffffff;
-      --surface-2: #fcfcfc;
-      --surface-3: #f5f5f5;
-      --surface-translucent: rgba(255, 255, 255, 0.94);
+      --surface-2: #f7f7f5;
+      --surface-3: #f0f0ee;
+      --surface-translucent: rgba(250, 250, 249, 0.95);
 
-      /* High-contrast Typography */
-      --text: #111111;
-      --soft: #555555;
-      --faint: #888888;
+      /* Typography */
+      --text: #171717;
+      --soft: #6b6b6b;
+      --faint: #9b9b9b;
 
-      /* Ultra-thin structural lines */
-      --line: #efefef;
-      --line-subtle: rgba(239, 239, 239, 0.5);
+      /* Structural */
+      --line: #e8e8e6;
+      --line-subtle: rgba(232, 232, 230, 0.5);
 
-      /* Monochromatic Brand accent with slight editorial tint */
-      --brand: #000000;
-      --brand-hover: #333333;
-      --brand-2: #111111;
-      --brand-soft: #f4f4f4;
-      --gold: #737373;
-      --gold-soft: #fcfcfc;
+      /* GMAHK Green Accent */
+      --brand: #1a6b3a;
+      --brand-hover: #145530;
+      --brand-2: #1e7a43;
+      --brand-soft: #eef5f1;
+      --brand-active-bg: #eef5f1;
+      --brand-active-text: #1a6b3a;
 
-      /* Semantic Status Colors (Desaturated/Minimal) */
-      --danger: #d93025;
-      --danger-soft: #fce8e6;
-      --warning: #f29900;
-      --warning-soft: #fef0d9;
-      --success: #1e8e3e;
-      --success-soft: #e6f4ea;
+      /* Legacy aliases (kept for compat) */
+      --gold: #1a6b3a;
+      --gold-soft: #eef5f1;
 
-      /* Clean Elevations - mostly flat except for modals */
-      --shadow-xs: none;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.04);
-      --shadow: 0 4px 12px rgba(0,0,0,0.05);
-      --shadow-lg: 0 12px 32px rgba(0,0,0,0.08);
+      /* Semantic */
+      --danger: #c0392b;
+      --danger-soft: #fdecea;
+      --warning: #d97706;
+      --warning-soft: #fef3cd;
+      --success: #1a6b3a;
+      --success-soft: #eef5f1;
 
-      /* Layout Dimensions */
-      --sidebar: 270px;
-      --topbar: 66px;
-      --radius-sm: 4px;
-      --radius: 8px;
-      --radius-lg: 12px;
-      --radius-xl: 16px;
+      /* Elevation */
+      --shadow-xs: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-sm: 0 2px 6px rgba(0,0,0,0.06);
+      --shadow: 0 4px 16px rgba(0,0,0,0.08);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+
+      /* Layout */
+      --sidebar: 228px;
+      --topbar: 58px;
+      --radius-sm: 8px;
+      --radius: 10px;
+      --radius-lg: 14px;
+      --radius-xl: 18px;
       --admin-radius: 8px;
       --admin-gap: 16px;
 
-      /* Fluid Motion Timing */
+      /* Motion */
       --ease: cubic-bezier(0.16, 1, 0.3, 1);
-      --dur: 0.25s;
+      --dur: 0.2s;
     }
 
     [data-theme="dark"] {
-      --bg: #000000;
-      --surface: #0a0a0a;
-      --surface-2: #141414;
-      --surface-3: #1f1f1f;
-      --surface-translucent: rgba(0, 0, 0, 0.94);
+      --bg: #111211;
+      --sidebar-bg: #0d0e0d;
+      --surface: #181a18;
+      --surface-2: #1d1f1d;
+      --surface-3: #222422;
+      --surface-translucent: rgba(13, 14, 13, 0.96);
 
-      --text: #ffffff;
-      --soft: #a3a3a3;
-      --faint: #666666;
+      --text: #f5f5f3;
+      --soft: #a4a6a3;
+      --faint: #6b6d6a;
 
-      --line: #262626;
-      --line-subtle: rgba(38, 38, 38, 0.5);
+      --line: #2b2d2b;
+      --line-subtle: rgba(43, 45, 43, 0.5);
 
-      --brand: #ffffff;
-      --brand-hover: #cccccc;
-      --brand-2: #f0f0f0;
-      --brand-soft: #1a1a1a;
-      --gold: #8c8c8c;
-      --gold-soft: #141414;
+      --brand: #4caf70;
+      --brand-hover: #5dc47f;
+      --brand-2: #3d9a5f;
+      --brand-soft: #162a1e;
+      --brand-active-bg: #162a1e;
+      --brand-active-text: #4caf70;
 
-      --danger: #f28b82;
-      --danger-soft: #3c1e1e;
-      --warning: #fde293;
-      --warning-soft: #3d3115;
-      --success: #81c995;
-      --success-soft: #1e3624;
+      --gold: #4caf70;
+      --gold-soft: #162a1e;
 
-      --shadow-xs: none;
-      --shadow-sm: 0 1px 3px rgba(0,0,0,0.8);
-      --shadow: 0 4px 12px rgba(0,0,0,0.9);
-      --shadow-lg: 0 12px 32px rgba(0,0,0,1);
+      --danger: #e57373;
+      --danger-soft: #2d1515;
+      --warning: #fbbf24;
+      --warning-soft: #2a1f0a;
+      --success: #4caf70;
+      --success-soft: #162a1e;
+
+      --shadow-xs: 0 1px 2px rgba(0,0,0,0.5);
+      --shadow-sm: 0 2px 6px rgba(0,0,0,0.6);
+      --shadow: 0 4px 16px rgba(0,0,0,0.7);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.8);
     }
 
     /* ── Document Reset ──────────────────────────────────────────────── */
@@ -178,19 +187,18 @@
       flex-direction: column;
       padding: 16px 10px 14px;
       border-right: 1px solid var(--line);
-      background: var(--surface-translucent);
-      backdrop-filter: blur(24px);
+      background: var(--sidebar-bg);
     }
 
     .brand {
       display: flex;
       align-items: center;
-      gap: 11px;
-      padding: 6px 8px 16px;
+      gap: 10px;
+      padding: 4px 8px 14px;
       border-bottom: 1px solid var(--line);
       transition: opacity var(--dur) var(--ease);
     }
-    .brand:hover { opacity: 0.85 }
+    .brand:hover { opacity: 0.8 }
 
     .brand strong, .brand span {
       display: block;
@@ -198,14 +206,15 @@
       overflow-wrap: anywhere;
     }
     .brand strong {
-      font-size: 0.86rem;
-      font-weight: 800;
-      letter-spacing: -0.015em;
+      font-size: 0.84rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      color: var(--text);
     }
     .brand span {
-      margin-top: 2px;
+      margin-top: 1px;
       color: var(--faint);
-      font-size: 0.63rem;
+      font-size: 0.62rem;
       font-weight: 500;
     }
 
@@ -230,35 +239,30 @@
     .nav-item {
       position: relative;
       width: 100%;
-      min-height: 38px;
+      min-height: 36px;
       display: flex;
       align-items: center;
-      gap: 10px;
-      padding: 0 11px;
+      gap: 9px;
+      padding: 0 10px;
       border-radius: var(--radius-sm);
       color: var(--soft);
       background: transparent;
       text-align: left;
-      font-size: 0.77rem;
-      font-weight: 650;
+      font-size: 0.8rem;
+      font-weight: 600;
       letter-spacing: -0.01em;
       transition: all var(--dur) var(--ease);
     }
 
     .nav-item:hover {
       color: var(--text);
-      background: var(--surface-2);
+      background: color-mix(in srgb, var(--brand) 6%, var(--sidebar-bg));
     }
 
     .nav-item.active {
-      color: #fff;
-      background: var(--brand);
-      box-shadow: 0 2px 8px color-mix(in srgb, var(--brand) 28%, transparent);
-    }
-    [data-theme="dark"] .nav-item.active {
-      color: #07120b;
-      background: var(--brand);
-      box-shadow: 0 2px 8px rgba(121, 199, 141, 0.24);
+      color: var(--brand-active-text);
+      background: var(--brand-active-bg);
+      font-weight: 700;
     }
 
     .nav-item .count {
@@ -270,14 +274,14 @@
       justify-content: center;
       padding: 0 5px;
       border-radius: 999px;
-      color: inherit;
-      background: rgba(255, 255, 255, 0.22);
-      font-size: 0.62rem;
+      color: var(--brand-active-text);
+      background: var(--brand-soft);
+      font-size: 0.6rem;
       font-weight: 800;
     }
-    [data-theme="light"] .nav-item:not(.active) .count {
-      background: var(--brand-soft);
-      color: var(--brand);
+    .nav-item.active .count {
+      color: var(--brand-active-text);
+      background: color-mix(in srgb, var(--brand) 15%, var(--brand-active-bg));
     }
 
     .sidebar-user {
@@ -294,16 +298,16 @@
       gap: 9px;
     }
     .avatar {
-      width: 34px;
-      height: 34px;
+      width: 32px;
+      height: 32px;
       display: grid;
       place-items: center;
       flex: 0 0 auto;
-      border-radius: 8px;
+      border-radius: 7px;
       color: #fff;
       background: var(--brand);
-      font-weight: 800;
-      font-size: 0.8rem;
+      font-weight: 700;
+      font-size: 0.75rem;
     }
 
     .sidebar-user strong, .sidebar-user span {
@@ -313,22 +317,11 @@
       white-space: normal;
       overflow-wrap: anywhere;
     }
-    .sidebar-user strong { font-size: 0.76rem; font-weight: 750 }
-    .sidebar-user span { color: var(--faint); font-size: 0.63rem }
+    .sidebar-user strong { font-size: 0.76rem; font-weight: 650 }
+    .sidebar-user span { color: var(--faint); font-size: 0.62rem }
     .sidebar-user .user-row > span:last-child { min-width: 0 }
 
-    .build-badge {
-      display: inline-flex !important;
-      width: max-content;
-      margin-top: 6px;
-      padding: 2px 7px;
-      border-radius: 999px;
-      color: var(--brand) !important;
-      background: var(--brand-soft);
-      font-size: 0.56rem !important;
-      font-weight: 800;
-      letter-spacing: 0.06em;
-    }
+    .build-badge { display: none !important }
 
     /* ── Topbar (Navbar) ───────────────────────────────────────────── */
     .workspace {
@@ -348,28 +341,28 @@
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 8px clamp(18px, 3vw, 44px);
+      padding: 6px clamp(16px, 3vw, 40px);
       border-bottom: 1px solid var(--line);
-      background: color-mix(in srgb, var(--bg) 92%, transparent);
-      backdrop-filter: blur(20px);
+      background: color-mix(in srgb, var(--bg) 94%, transparent);
+      backdrop-filter: blur(16px);
     }
 
     .crumb strong, .crumb span { display: block }
     .crumb strong {
-      font-size: 0.92rem;
-      font-weight: 750;
-      letter-spacing: -0.015em;
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: -0.01em;
     }
     .crumb span {
       color: var(--faint);
-      font-size: 0.69rem;
+      font-size: 0.68rem;
     }
     .crumb { min-width: 0 }
 
     .top-actions {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       flex: 0 0 auto;
     }
     .mobile-menu { display: none }
@@ -378,14 +371,14 @@
     /* ── Content Area: Generous Whitespace ─────────────────────────── */
     .content {
       flex: 1 0 auto;
-      width: min(1400px, calc(100% - clamp(32px, 5vw, 96px)));
+      width: min(1360px, calc(100% - clamp(28px, 5vw, 80px)));
       margin: 0 auto;
-      padding: clamp(32px, 5vw, 64px) 0 80px;
+      padding: clamp(28px, 4vw, 56px) 0 72px;
     }
 
     /* ── 1. EDITORIAL WELCOME (REPLACES GIANT HERO) ─────────────────── */
     .editorial-welcome {
-      margin-bottom: 34px;
+      margin-bottom: 32px;
     }
     .welcome-header {
       display: flex;
@@ -399,58 +392,55 @@
       align-items: center;
       gap: 8px;
       margin-bottom: 8px;
-      font-size: 0.66rem;
-      font-weight: 800;
-      letter-spacing: 0.12em;
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
       color: var(--brand);
+      text-transform: uppercase;
     }
     .eyebrow-sep { opacity: 0.4 }
     .welcome-title {
-      margin-bottom: 8px;
+      margin-bottom: 6px;
       max-width: 780px;
-      font-size: clamp(2.1rem, 4.4vw, 3.6rem);
+      font-size: clamp(2rem, 4vw, 3.2rem);
       line-height: 1.04;
       letter-spacing: -0.04em;
     }
-    .welcome-sub {
-      max-width: 620px;
-      color: var(--soft);
-      font-size: 0.93rem;
-      line-height: 1.58;
-      margin-bottom: 0;
+    .welcome-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 6px 14px;
+      margin-bottom: 20px;
     }
-    .welcome-status-pill {
+    .welcome-meta-item {
       display: flex;
       align-items: center;
-      gap: 16px;
-      padding: 10px 16px;
-      border: 1px solid var(--line);
-      border-radius: var(--radius-sm);
-      background: var(--surface);
-      box-shadow: var(--shadow-xs);
-    }
-    .status-row {
-      display: flex;
-      flex-direction: column;
-      gap: 1px;
-    }
-    .status-label {
-      color: var(--faint);
-      font-size: 0.6rem;
-      text-transform: uppercase;
-      font-weight: 750;
-      letter-spacing: 0.06em;
-    }
-    .status-val {
+      gap: 5px;
+      color: var(--soft);
       font-size: 0.78rem;
-      font-weight: 750;
-      color: var(--text);
+      font-weight: 500;
+    }
+    .welcome-meta-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: var(--brand);
+      opacity: 0.5;
+    }
+    .welcome-meta-status { color: var(--brand); font-weight: 600 }
+    .welcome-sub {
+      max-width: 560px;
+      color: var(--soft);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      margin-bottom: 0;
     }
     .welcome-actions {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
-      margin-top: 18px;
+      margin-top: 20px;
     }
 
     .dashboard-sync-strip {
@@ -459,10 +449,10 @@
       justify-content: space-between;
       gap: 12px;
       margin-top: 16px;
-      padding: 8px 12px;
+      padding: 7px 12px;
       border-radius: var(--radius-sm);
       background: var(--surface-2);
-      font-size: 0.72rem;
+      font-size: 0.71rem;
       color: var(--soft);
     }
     .sync-meta {
@@ -470,7 +460,7 @@
       align-items: center;
       gap: 8px;
     }
-    .sync-meta .icon { color: var(--brand); width: 16px; height: 16px }
+    .sync-meta .icon { color: var(--brand); width: 14px; height: 14px }
     .dashboard-sync-strip.is-loading .icon { animation: spin 1.2s linear infinite }
     .dashboard-sync-strip.is-error {
       color: var(--danger);
@@ -479,13 +469,13 @@
     .btn-sync {
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      padding: 4px 10px;
+      gap: 5px;
+      padding: 3px 9px;
       border: 1px solid var(--line);
       border-radius: 6px;
       background: var(--surface);
-      font-size: 0.68rem;
-      font-weight: 700;
+      font-size: 0.67rem;
+      font-weight: 600;
       color: var(--text);
       transition: all var(--dur) var(--ease);
     }
@@ -493,13 +483,13 @@
 
     /* ── 2. EDITORIAL METRICS BAR (REPLACES 4 CARDS) ────────────────── */
     .editorial-metrics-section {
-      margin-bottom: 38px;
+      margin-bottom: 32px;
     }
     .section-label {
       color: var(--faint);
-      font-size: 0.61rem;
-      font-weight: 800;
-      letter-spacing: 0.12em;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
       text-transform: uppercase;
       margin-bottom: 10px;
     }
@@ -513,12 +503,13 @@
       overflow: hidden;
     }
     .metric-block {
-      padding: 18px 22px;
+      padding: 16px 20px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      min-height: 120px;
+      min-height: 110px;
       transition: background var(--dur) var(--ease);
+      cursor: default;
     }
     .metric-block:hover { background: var(--surface-2) }
     .metric-top {
@@ -529,30 +520,158 @@
     }
     .metric-name {
       color: var(--faint);
-      font-size: 0.7rem;
-      font-weight: 750;
+      font-size: 0.68rem;
+      font-weight: 700;
     }
     .metric-icon-small {
       color: var(--brand);
-      opacity: 0.8;
+      opacity: 0.7;
     }
-    .metric-icon-small .icon { width: 16px; height: 16px }
+    .metric-icon-small .icon { width: 15px; height: 15px }
     .metric-number {
-      font-size: clamp(2rem, 3.4vw, 2.9rem);
+      font-size: clamp(1.8rem, 3vw, 2.6rem);
       font-weight: 800;
-      letter-spacing: -0.045em;
+      letter-spacing: -0.04em;
       line-height: 1;
-      margin: 10px 0 4px;
+      margin: 8px 0 3px;
       color: var(--text);
     }
     .metric-caption {
       color: var(--soft);
-      font-size: 0.71rem;
+      font-size: 0.7rem;
     }
     .metric-divider {
       width: 1px;
       background: var(--line);
     }
+
+    /* ── PERLU PERHATIAN (ATTENTION SECTION) ────────────────────────── */
+    .dashboard-attention-section {
+      margin-bottom: 32px;
+    }
+    .attention-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+    }
+    .attention-header h2 {
+      font-size: 1.0rem;
+      font-weight: 700;
+      letter-spacing: -0.015em;
+      margin: 0;
+    }
+    .attention-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--danger);
+      color: #fff;
+      font-size: 0.6rem;
+      font-weight: 800;
+    }
+    .attention-list {
+      display: grid;
+      gap: 6px;
+    }
+    .attention-item {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 12px 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      background: var(--surface);
+      text-align: left;
+      transition: all var(--dur) var(--ease);
+      cursor: pointer;
+    }
+    .attention-item:hover {
+      border-color: color-mix(in srgb, var(--brand) 40%, var(--line));
+      background: var(--brand-soft);
+    }
+    .attention-count {
+      font-size: 1.4rem;
+      font-weight: 800;
+      letter-spacing: -0.04em;
+      color: var(--text);
+      min-width: 36px;
+      line-height: 1;
+    }
+    .attention-text strong {
+      display: block;
+      font-size: 0.84rem;
+      font-weight: 650;
+      color: var(--text);
+    }
+    .attention-text span {
+      display: block;
+      margin-top: 1px;
+      color: var(--soft);
+      font-size: 0.72rem;
+    }
+    .attention-arrow {
+      margin-left: auto;
+      color: var(--faint);
+    }
+
+    /* ── AKTIVITAS MINI (MINI ACTIVITY FEED) ────────────────────────── */
+    .dashboard-activity-section {
+      margin-bottom: 32px;
+    }
+    .activity-mini-list {
+      display: grid;
+      gap: 2px;
+    }
+    .activity-mini-row {
+      display: grid;
+      grid-template-columns: 52px minmax(0, 1fr);
+      align-items: start;
+      gap: 8px;
+      padding: 9px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .activity-mini-row:last-child { border-bottom: 0 }
+    .activity-mini-time {
+      color: var(--faint);
+      font-size: 0.68rem;
+      font-weight: 600;
+      padding-top: 1px;
+    }
+    .activity-mini-text strong {
+      display: block;
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+    }
+    .activity-mini-text span {
+      display: block;
+      margin-top: 1px;
+      color: var(--soft);
+      font-size: 0.7rem;
+    }
+
+    /* ── TOAST WITH UNDO ────────────────────────────────────────────── */
+    .toast-undo {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 6px;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: var(--brand);
+      font-size: 0.76rem;
+      font-weight: 700;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      cursor: pointer;
+    }
+    .toast-undo:hover { opacity: 0.8 }
 
     /* ── 3. COMPACT ACTION TILES (REPLACES 7 CARDS) ────────────────── */
     .editorial-actions-section {
@@ -633,18 +752,18 @@
     .btn {
       position: relative;
       overflow: hidden;
-      min-height: 38px;
+      min-height: 36px;
       display: inline-flex;
       align-items: center;
       justify-content: center;
-      gap: 7px;
-      padding: 8px 14px;
+      gap: 6px;
+      padding: 7px 14px;
       border: 1px solid var(--line);
       border-radius: var(--radius-sm);
       color: var(--text);
       background: var(--surface);
-      font-size: 0.78rem;
-      font-weight: 700;
+      font-size: 0.8rem;
+      font-weight: 600;
       letter-spacing: -0.01em;
       transition: all var(--dur) var(--ease);
       box-shadow: var(--shadow-xs);
@@ -655,16 +774,12 @@
       box-shadow: var(--shadow-sm);
     }
     .btn.primary {
-      color: #fff;
+      color: #ffffff;
       border-color: transparent;
       background: var(--brand);
     }
     .btn.primary:hover {
       background: var(--brand-hover);
-    }
-    [data-theme="dark"] .btn.primary {
-      color: #07120b;
-      background: var(--brand);
     }
     .btn.soft {
       color: var(--brand);
@@ -673,7 +788,7 @@
       box-shadow: none;
     }
     .btn.soft:hover {
-      background: color-mix(in srgb, var(--brand-soft) 80%, var(--brand));
+      background: color-mix(in srgb, var(--brand-soft) 75%, var(--brand));
     }
     .btn.danger {
       color: var(--danger);
@@ -686,7 +801,7 @@
       background: color-mix(in srgb, var(--danger-soft) 70%, var(--danger));
     }
     .btn:disabled {
-      opacity: 0.48;
+      opacity: 0.45;
       cursor: not-allowed;
       transform: none !important;
     }
@@ -697,8 +812,8 @@
       min-width: 0;
     }
     .icon-btn {
-      width: 38px;
-      height: 38px;
+      width: 36px;
+      height: 36px;
       display: grid;
       place-items: center;
       border: 1px solid var(--line);
@@ -710,7 +825,7 @@
     }
     .icon-btn:hover {
       color: var(--brand);
-      border-color: var(--brand);
+      border-color: color-mix(in srgb, var(--brand) 50%, var(--line));
       transform: translateY(-1px);
     }
 
@@ -1505,22 +1620,22 @@
     .official-advent-logo { display: block; object-fit: contain }
     [data-theme="dark"] .gate-logo { filter: brightness(0) invert(1) }
 
-    [data-theme="light"] .nav-item { color: #425547 }
-    [data-theme="light"] .nav-item.active { color: #fff }
-    [data-theme="dark"] .nav-item { color: #b0c2b3 }
-    [data-theme="dark"] .nav-item.active { color: #07120b }
+    [data-theme="light"] .nav-item { color: var(--soft) }
+    [data-theme="light"] .nav-item.active { color: var(--brand-active-text) }
+    [data-theme="dark"] .nav-item { color: var(--soft) }
+    [data-theme="dark"] .nav-item.active { color: var(--brand-active-text) }
 
-    [data-theme="dark"] :is(.card, .record, .service-card, .user-card, .metric-block, .action-tile, .role-card, .workflow-item, .toolbar, dialog > form, .editorial-metrics-bar, .welcome-status-pill) {
+    [data-theme="dark"] :is(.card, .record, .service-card, .user-card, .metric-block, .action-tile, .role-card, .workflow-item, .toolbar, dialog > form, .editorial-metrics-bar) {
       color: var(--text);
       border-color: var(--line);
       background: var(--surface);
     }
     [data-theme="dark"] input, [data-theme="dark"] select, [data-theme="dark"] textarea {
-      color: #f2f6f1;
-      background: #14241a;
-      border-color: rgba(210, 232, 205, 0.16);
+      color: var(--text);
+      background: var(--surface-2);
+      border-color: var(--line);
     }
-    [data-theme="dark"] option { color: #f2f6f1; background: #14241a }
+    [data-theme="dark"] option { color: var(--text); background: var(--surface-2) }
 
     /* ── Responsive Architecture Lock ──────────────────────────────── */
     /* responsive admin lock: iPhone, Android, tablet, dan desktop */
@@ -1609,7 +1724,7 @@
       .editorial-metrics-bar { grid-template-columns: 1fr }
       .metric-divider { display: none }
       .form-grid { grid-template-columns: 1fr }
-      .welcome-status-pill { flex-direction: column; align-items: flex-start; gap: 8px }
+      .welcome-meta { flex-direction: column; align-items: flex-start; gap: 4px }
       .record { grid-template-columns: 1fr }
       .record-actions { justify-content: flex-start }
       .toolbar, .filters { flex-direction: column; align-items: stretch }
@@ -1701,7 +1816,7 @@
     const esc=value=>String(value==null?'':value).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
     const attr=esc;
     function server(name,args,timeoutMs){return new Promise((resolve,reject)=>{let done=false;const timer=setTimeout(()=>{if(!done){done=true;reject(new Error('Server admin belum merespons. Coba kembali; data Anda tidak berubah.'))}},Math.max(8000,Number(timeoutMs)||25000));const finish=fn=>value=>{if(done)return;done=true;clearTimeout(timer);fn(value)};if(typeof google!=='undefined'&&google.script&&google.script.run&&typeof google.script.run[name]==='function'){const runner=google.script.run.withSuccessHandler(finish(resolve)).withFailureHandler(finish(error=>reject(new Error(error&&error.message?error.message:String(error)))));runner[name].apply(runner,args||[]);return}fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:name,args:args||[]})}).then(res=>{if(!res.ok){const ct=res.headers.get('content-type')||'';if(!ct.includes('application/json'))throw new Error('Server mengembalikan error '+res.status+'. Coba kembali.');}return res.json()}).then(payload=>{if(!payload||payload.ok===false){finish(error=>reject(new Error(error&&error.message?error.message:String(error))))(payload&&payload.error?payload.error:'Terjadi gangguan server admin.')}else{finish(resolve)(payload.data!==undefined?payload.data:payload)}}).catch(finish(error=>reject(new Error(error&&error.message?error.message:String(error)))))})}
-    function toast(message){const el=document.createElement('div');el.className='toast';el.textContent=message;$('#toasts').append(el);setTimeout(()=>el.remove(),3800)}
+    function toast(message,undoFn,duration){const el=document.createElement('div');el.className='toast';if(undoFn){el.innerHTML='<span>'+esc(message)+'</span><button class="toast-undo">Urungkan</button>';el.querySelector('.toast-undo').addEventListener('click',()=>{undoFn();el.remove()})}else{el.textContent=message}$('#toasts').append(el);const t=setTimeout(()=>el.remove(),duration||4200);if(undoFn)el.querySelector('.toast-undo').addEventListener('click',()=>clearTimeout(t))}
     function setBusy(button,busy,label){if(!button)return;button.disabled=busy;if(busy){button.dataset.old=button.innerHTML;button.textContent=label||'Memproses…'}else if(button.dataset.old){button.innerHTML=button.dataset.old;delete button.dataset.old}}
     function status(value){const raw=String(value||'DRAFT').toUpperCase(),key=raw.toLowerCase(),labels={DRAFT:'Draf',PENDING:'Menunggu Tinjauan',REVIEW:'Sedang Ditinjau',APPROVED:'Sudah Disetujui',PUBLISH:'Sudah Terbit',REJECTED:'Perlu Revisi'};return '<span class="status '+key+'" title="Status: '+attr(labels[raw]||raw)+'">'+esc(labels[raw]||raw)+'</span>'}
     function friendlyEntity(key){const item=(state.boot.entities||[]).find(e=>e.key===key);return item?item.label:key}
@@ -1712,7 +1827,7 @@
     function shell(){
       const user=state.boot.user, d=state.boot.dashboard;
       const entityNav=state.boot.entities.filter(e=>!['settings','schedule'].includes(e.key)).map(e=>nav(e.key,e.icon,e.label)).join('');
-      return '<div class="admin-shell"><div class="mobile-overlay" id="overlay"></div><aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard">'+logoMark('brand-logo')+'<span><strong>Portal Sekretariat</strong><span>GMAHK Galilea Balikpapan</span><span class="build-badge">BUILD V'+esc(state.boot.version)+'</span></span></a><div class="nav-scroll"><div class="nav-label">Ringkasan</div>'+nav('dashboard','grid','Dashboard')+'<div class="nav-label">Kelola Konten</div>'+entityNav+nav('settings','settings','Identitas & Tampilan')+nav('schedule','calendar','Jadwal Pelayanan')+(user.permissions.edit?'<div class="nav-label">Operasional</div>'+nav('services','heart','Layanan Jemaat'):'')+(user.permissions.approve?nav('approvals','check','Persetujuan'):'')+(user.permissions.approve?nav('activity','clock','Audit & Aktivitas'):'')+(user.permissions.manageAdmins?nav('users','shield','Pengelola Portal'):'')+(user.permissions.edit?nav('system','settings','Sistem & Backup'):'')+'</div><div class="sidebar-user"><div class="user-row"><span class="avatar">'+esc(initials(user.name))+'</span><span><strong>'+esc(user.name)+'</strong><span>'+esc(user.role)+' · '+esc(user.email)+'</span></span></div></div></aside><section class="workspace"><header class="topbar"><div class="button-row"><button class="icon-btn mobile-menu" id="mobile-menu" aria-label="Buka menu">'+icon('menu')+'</button><div class="crumb"><strong id="crumb-title">Dashboard</strong><span>Kelola website dan pelayanan jemaat</span></div></div><div class="top-actions"><div style="position:relative"><button class="icon-btn" id="notif-toggle" aria-label="Notifikasi">'+icon('bell')+'<span class="count" id="notif-badge" style="position:absolute;top:-4px;right:-4px;padding:0 4px;font-size:10px" hidden>0</span></button><div id="notif-panel" class="card" style="position:absolute;top:100%;right:0;width:300px;display:none;flex-direction:column;gap:8px;padding:12px;z-index:100;box-shadow:var(--shadow-lg);margin-top:8px"></div></div><a class="icon-btn" href="'+attr(state.boot.publicSite.publicUrl||APP_URL)+'" target="_blank" rel="noopener" title="Buka website">'+icon('external')+'</a><button class="icon-btn" id="theme-toggle" aria-label="Ganti tema">'+icon(currentTheme()==='dark'?'sun':'moon')+'</button></div></header><main class="content" id="content"></main><footer class="admin-footer"><div class="footer-inner"><span>Portal Administrasi GMAHK Galilea Balikpapan · Build V'+esc(state.boot.version)+'</span><span class="faint">Koneksi Data: Google Sheets &amp; Vercel Edge</span></div></footer></section></div>';
+      return '<div class="admin-shell"><div class="mobile-overlay" id="overlay"></div><aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard">'+logoMark('brand-logo')+'<span><strong>GMAHK Galilea</strong><span>Admin</span></span></a><div class="nav-scroll"><div class="nav-label">OVERVIEW</div>'+nav('dashboard','grid','Dashboard')+'<div class="nav-label">KONTEN</div>'+entityNav+nav('settings','settings','Pengaturan')+'<div class="nav-label">IBADAH</div>'+nav('schedule','calendar','Jadwal Pelayanan')+(user.permissions.edit?'<div class="nav-label">JEMAAT</div>'+nav('services','heart','Layanan Jemaat'):'')+(user.permissions.approve?nav('approvals','check','Persetujuan'):'')+(user.permissions.approve?nav('activity','clock','Aktivitas'):'')+(user.permissions.manageAdmins?nav('users','shield','Pengelola'):'')+(user.permissions.edit?nav('system','settings','Sistem'):'')+'</div><div class="sidebar-user"><div class="user-row"><span class="avatar">'+esc(initials(user.name))+'</span><span><strong>'+esc(user.name)+'</strong><span>'+esc(user.role)+'</span></span></div></div></aside><section class="workspace"><header class="topbar"><div class="button-row"><button class="icon-btn mobile-menu" id="mobile-menu" aria-label="Buka menu">'+icon('menu')+'</button><div class="crumb"><strong id="crumb-title">Dashboard</strong><span>GMAHK Galilea</span></div></div><div class="top-actions"><div style="position:relative"><button class="icon-btn" id="notif-toggle" aria-label="Notifikasi">'+icon('bell')+'<span class="count" id="notif-badge" style="position:absolute;top:-4px;right:-4px;padding:0 4px;font-size:10px" hidden>0</span></button><div id="notif-panel" class="card" style="position:absolute;top:100%;right:0;width:290px;display:none;flex-direction:column;gap:8px;padding:12px;z-index:100;box-shadow:var(--shadow-lg);margin-top:8px"></div></div><a class="icon-btn" href="'+attr(state.boot.publicSite.publicUrl||APP_URL)+'" target="_blank" rel="noopener" title="Buka website">'+icon('external')+'</a><button class="icon-btn" id="theme-toggle" aria-label="Ganti tema">'+icon(currentTheme()==='dark'?'sun':'moon')+'</button></div></header><main class="content" id="content"></main><footer class="admin-footer"><div class="footer-inner"><span>GMAHK Galilea Balikpapan</span><span class="faint">Google Sheets · Vercel Edge</span></div></footer></section></div>';
     }
     function nav(route,iconName,label,count){const value=Math.max(0,Number(count)||0);return '<button class="nav-item" data-route="'+attr(route)+'">'+icon(iconName)+'<span>'+esc(label)+'</span><span class="count" data-nav-count="'+attr(route)+'" '+(value?'':'hidden')+'>'+esc(value)+'</span></button>'}
     function closeSidebar(){$('#sidebar')?.classList.remove('open');$('#overlay')?.classList.remove('open')}
@@ -1726,7 +1841,7 @@
 
     function renderDashboard(){
       const d=state.boot.dashboard, u=state.boot.user, canEdit=u.permissions.edit, loading=Boolean(d.loading), publicToday=String(state.boot.publicSite.publicUrl||APP_URL).replace(/#.*$/,'')+'#today';
-      const heroActions=canEdit?'<div class="welcome-actions"><button class="btn primary" data-route="worshipPlans">Siapkan ibadah '+icon('plus')+'</button><button class="btn" data-route="schedule">Edit jadwal</button><a class="btn soft" href="'+attr(publicToday)+'" target="_blank" rel="noopener">Mode Operator '+icon('external')+'</a></div>':'';
+      const heroActions=canEdit?'<div class="welcome-actions"><button class="btn primary" data-route="worshipPlans">'+icon('plus')+'Siapkan ibadah</button><button class="btn" data-route="schedule">Edit jadwal</button><a class="btn soft" href="'+attr(publicToday)+'" target="_blank" rel="noopener">Mode Operator '+icon('external')+'</a></div>':'';
       const quickItems=canEdit?
         quick('worshipPlans','layout','Susunan Ibadah','Tema, ayat, lagu, dan liturgi Sabat.')+
         quick('themeSong','music','Lagu Tema','Ayat 1, Ayat 2, ayat tambahan, dan Refrain.')+
@@ -1741,30 +1856,42 @@
         quick('announcements','bell','Agenda dan Pengumuman','Lihat informasi warta yang diterbitkan.');
 
       const syncClass=d.error?' is-error':loading?' is-loading':'';
-      const syncText=d.error?'Statistik belum tersambung: '+d.error:loading?'Portal sudah siap. Memperbarui statistik…':'Data terhubung · Google Sheets '+esc(d.scheduleSheet||'Triwulan III 2026')+' · '+d.updatedAt;
-      const syncAction=loading?'':'<button class="btn-sync" type="button" data-dashboard-refresh>'+icon('refresh')+(d.error?'Coba lagi':'Sinkronkan')+'</button>';
+      const syncText=d.error?'Statistik belum tersambung: '+d.error:loading?'Portal siap. Memperbarui statistik…':'Data terhubung · Google Sheets '+esc(d.scheduleSheet||'Triwulan III 2026')+' · '+d.updatedAt;
+      const syncAction=loading?''+'':'<button class="btn-sync" type="button" data-dashboard-refresh>'+icon('refresh')+(d.error?'Coba lagi':'Perbarui')+'</button>';
       const metricValue=value=>loading?'—':value==null?'—':value;
+
+      // Attention section: hanya tampil kalau ada item
+      const pendingVal=Number(d.pendingApprovals)||0;
+      const draftVal=Number(d.myDrafts)||0;
+      const serviceVal=Number(d.serviceRequests)||0;
+      const totalAttention=pendingVal+draftVal+serviceVal;
+      let attentionItems='';
+      if(pendingVal>0)attentionItems+='<button class="attention-item" data-route="approvals"><span class="attention-count">'+pendingVal+'</span><div class="attention-text"><strong>Persetujuan menunggu tinjauan</strong><span>Konten sudah diajukan dan perlu keputusan Anda</span></div><span class="attention-arrow">'+icon('external')+'</span></button>';
+      if(draftVal>0)attentionItems+='<button class="attention-item" data-route="approvals"><span class="attention-count">'+draftVal+'</span><div class="attention-text"><strong>Draft belum diajukan</strong><span>Konten dalam proses penulisan</span></div><span class="attention-arrow">'+icon('external')+'</span></button>';
+      if(serviceVal>0)attentionItems+='<button class="attention-item" data-route="services"><span class="attention-count">'+serviceVal+'</span><div class="attention-text"><strong>Layanan jemaat perlu tindak lanjut</strong><span>Permohonan baru atau sedang diproses</span></div><span class="attention-arrow">'+icon('external')+'</span></button>';
+      const attentionSection=(!loading&&totalAttention>0)?
+        '<section class="dashboard-attention-section">'+
+          '<div class="attention-header"><h2>Perlu Perhatian</h2><span class="attention-badge">'+totalAttention+'</span></div>'+
+          '<div class="attention-list">'+attentionItems+'</div>'+
+        '</section>':'';
 
       $('#content').innerHTML =
         '<section class="editorial-welcome">' +
-          '<div class="welcome-header">' +
-            '<div>' +
-              '<div class="welcome-eyebrow"><span class="eyebrow-brand">GMAHK GALILEA</span><span class="eyebrow-sep">·</span><span>CONTROL CENTER</span></div>' +
-              '<h1 class="welcome-title">Selamat datang, '+esc(u.name)+'.</h1>' +
-              '<p class="welcome-sub">'+(canEdit?'Kelola seluruh konten website, jadwal ibadah, dan pelayanan jemaat dalam satu ruang kerja yang tenang dan tertata.':'Akses peninjauan Anda siap. Seluruh konten publik dapat diperiksa secara aman.')+'</p>' +
-            '</div>' +
-            '<div class="welcome-status-pill">' +
-              '<div class="status-row"><span class="status-label">Peran</span><span class="status-val">'+esc(u.role)+'</span></div>' +
-              '<div class="status-row"><span class="status-label">Jadwal</span><span class="status-val">'+esc(d.scheduleSheet)+'</span></div>' +
-              '<div class="status-row"><span class="status-label">Koneksi</span><span class="status-val">'+esc(d.systemStatus)+'</span></div>' +
-            '</div>' +
+          '<div class="welcome-eyebrow"><span>GMAHK GALILEA</span><span class="eyebrow-sep">·</span><span>CONTROL CENTER</span></div>' +
+          '<h1 class="welcome-title">Selamat datang, '+esc(u.name)+'.</h1>' +
+          '<div class="welcome-meta">' +
+            '<span class="welcome-meta-item"><span class="welcome-meta-status">'+esc(u.role)+'</span></span>' +
+            (d.scheduleSheet?'<span class="welcome-meta-dot"></span><span class="welcome-meta-item">'+esc(d.scheduleSheet)+'</span>':'')+
+            (d.systemStatus?'<span class="welcome-meta-dot"></span><span class="welcome-meta-item">'+esc(d.systemStatus)+'</span>':'')+
           '</div>' +
+          '<p class="welcome-sub">'+(canEdit?'Kelola seluruh konten website, jadwal ibadah, dan pelayanan jemaat dalam satu ruang kerja yang tenang dan tertata.':'Akses peninjauan Anda siap. Seluruh konten publik dapat diperiksa secara aman.')+'</p>' +
           heroActions +
           '<div class="dashboard-sync-strip'+syncClass+'">' +
             '<span class="sync-meta">'+icon(d.error?'info':'refresh')+'<span>'+esc(syncText)+'</span></span>' +
             syncAction +
           '</div>' +
         '</section>' +
+        attentionSection +
         '<section class="editorial-metrics-section">' +
           '<div class="section-label">RINGKASAN AKTIVITAS</div>' +
           '<div class="editorial-metrics-bar">' +
