@@ -296,8 +296,44 @@ runTest('TEST N: Share URL tetap /berita/ID', () => {
   assert.match(indexHtml, /location\.origin\s*\+\s*'\/berita\/'\s*\+\s*encodeURIComponent/);
 });
 
+// 7. Format WhatsApp Newline Structure (Tasks O-Q)
+runTest('TEST O: htmlToWaText tidak memecah kalimat berdasar text node HTML yang memiliki newline', () => {
+  const input = `<p>Paragraf pertama dengan kalimat yang 
+cukup panjang sehingga harus wrap secara natural.</p>
+<p>Paragraf kedua juga panjang dan tidak 
+boleh dipecah menjadi newline per kata.</p>`;
+  const result = context.htmlToWaText(input);
+  assert.equal(result, 'Paragraf pertama dengan kalimat yang cukup panjang sehingga harus wrap secara natural.\n\nParagraf kedua juga panjang dan tidak boleh dipecah menjadi newline per kata.');
+});
+
+runTest('TEST P: htmlToWaText membersihkan spasi berlebih pada tag inline', () => {
+  const input = '<p>Hello <strong> World </strong> !</p>';
+  const result = context.htmlToWaText(input);
+  assert.equal(result, 'Hello *World* !');
+});
+
+runTest('TEST Q: activityShareText memastikan struktur metadata dan isi rapi dengan max 1 blank line', () => {
+  const item = {
+    title: 'Judul',
+    dateLabel: 'Tanggal',
+    location: 'Lokasi',
+    description: '<p>Isi berita</p>'
+  };
+  const expected = '*BERITA JEMAAT*\n\n*Judul*\nTanggal\nLokasi\n\nIsi berita';
+  
+  // Note: we need to expose activityShareText to test it
+  const activityShareTextStr = extractFunction('activityShareText');
+  vm.runInContext(activityShareTextStr + '\nglobalThis.activityShareText = activityShareText;', context);
+  
+  const result = context.activityShareText(item);
+  assert.equal(result, expected);
+  
+  // Pastikan tidak ada 3 newline berturut-turut
+  assert.doesNotMatch(result, /\\n{3,}/);
+});
+
 // Extra check to verify the test suite executed completely.
-runTest('TEST 37: Suite Executed Completely', () => {
+runTest('TEST 40: Suite Executed Completely', () => {
   assert.ok(true, 'Suite ran to completion');
 });
 

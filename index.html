@@ -6008,14 +6008,19 @@
       }
       function htmlToWaText(html) {
         if (!html) return '';
+        if (!/<[a-z][\s\S]*>/i.test(html)) return String(html).trim();
         const div = document.createElement('div');
-        div.innerHTML = String(html).replace(/<br\s*\/?>/gi, '\n');
+        div.innerHTML = String(html);
         
         function traverse(node) {
-          if (node.nodeType === 3) return node.nodeValue;
+          if (node.nodeType === 3) {
+            return node.nodeValue.replace(/\s+/g, ' ');
+          }
           if (node.nodeType !== 1) return '';
           
           const tag = node.nodeName.toUpperCase();
+          if (tag === 'BR') return '\n';
+          
           const children = Array.prototype.slice.call(node.childNodes);
           let text = '';
           
@@ -6041,13 +6046,13 @@
             text += traverse(children[i]);
           }
           
-          if (tag === 'STRONG' || tag === 'B') return '*' + text + '*';
-          if (tag === 'EM' || tag === 'I') return '_' + text + '_';
-          if (tag === 'P') return text + '\n\n';
+          if (tag === 'STRONG' || tag === 'B') return '*' + text.trim() + '*';
+          if (tag === 'EM' || tag === 'I') return '_' + text.trim() + '_';
+          if (tag === 'P' || tag === 'DIV') return text.trim() + '\n\n';
           if (tag === 'A') {
             const href = node.getAttribute('href') || '';
-            if (href && href !== text) return text + ' (' + href + ')';
-            return text;
+            if (href && href !== text.trim()) return text.trim() + ' (' + href + ')';
+            return text.trim();
           }
           
           return text;
@@ -6056,16 +6061,21 @@
         let text = traverse(div);
         text = text.replace(/<\/?[a-z][\s\S]*?>/gi, '');
         text = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F\u200B-\u200D\uFEFF]/g, '');
+        text = text.replace(/[ \t]+\n/g, '\n').replace(/\n[ \t]+/g, '\n');
         return text.replace(/\n{3,}/g, '\n\n').trim();
       }
 
       function activityShareText(item){
-        const lines = ['*BERITA JEMAAT*','','*' + (item.title||'') + '*'];
-        if(item.dateLabel) lines.push(item.dateLabel);
-        if(item.location) lines.push(item.location);
-        lines.push('');
-        if(item.description) lines.push(htmlToWaText(item.description));
-        return lines.join('\n');
+        const lines = ['*BERITA JEMAAT*','','*' + String(item.title||'').trim() + '*'];
+        if(item.dateLabel) lines.push(String(item.dateLabel).trim());
+        if(item.location) lines.push(String(item.location).trim());
+        
+        let text = lines.join('\n');
+        if(item.description) {
+          const body = htmlToWaText(item.description);
+          if (body) text += '\n\n' + body;
+        }
+        return text;
       }
       function announcementShareText(item){
         const meta=announcementGroupMeta(announcementCategory(item));
