@@ -1,12 +1,14 @@
 
-export const config = {
-  runtime: 'edge'
-};
 
-import { ImageResponse } from '@vercel/og';
+import { createRequire } from 'module';
+const require = createRequire(import.meta.url);
+if (typeof globalThis.require === 'undefined') {
+  globalThis.require = require;
+}
 
 export default async function handler(req) {
   try {
+    const { ImageResponse } = require('@vercel/og');
     const url = new URL(req.url);
     const id = url.searchParams.get('id');
     
