@@ -64,13 +64,68 @@ function galileaVercelHandlers_() {
     getSabbathResourceDetail: function (args) { return getSabbathResourceDetail.apply(null, args); },
     getSabbathResources: function (args) { return getSabbathResources.apply(null, args); },
     getSabbathSchoolLibrary: function (args) { return getSabbathSchoolLibrary.apply(null, args); },
-    getWebsiteData: function (args) { return getWebsiteData.apply(null, args); },
+    getWebsiteData: function (args) { return galileaGetWebsiteDataForViewer_(); },
     searchWebsite: function (args) { return searchWebsite.apply(null, args); },
     submitServiceRequest: function (args) { return submitServiceRequest.apply(null, args); },
     translateViewerTexts: function (args) { return translateViewerTexts.apply(null, args); },
 
     // Admin Backend Handlers have been removed from Vercel Bridge to prevent privilege escalation bypass
   };
+}
+
+/**
+ * Public viewer adapter.
+ *
+ * Website.gs historically excluded activities dated today because it used
+ * `dateValue < today`. That is correct for the old "already happened" archive
+ * semantics, but it makes a news item published on the current date disappear
+ * from the public viewer even though Admin correctly shows it as PUBLISH.
+ *
+ * We deliberately keep Website.gs untouched. This adapter starts from its
+ * normal public payload, then reconciles `activities` directly from the same
+ * public sheet using the viewer rule: PUBLISH + dated today or earlier.
+ * No draft/admin-only data is exposed.
+ */
+function galileaGetWebsiteDataForViewer_() {
+  const data = getWebsiteData();
+  if (!data || !Array.isArray(data.activities)) return data;
+
+  const spreadsheet = gwSpreadsheet_();
+  const sheet = spreadsheet.getSheetByName(GW.SHEETS.activities);
+  if (!sheet || sheet.getLastRow() < 2) {
+    data.activities = [];
+    return data;
+  }
+
+  const count = sheet.getLastRow() - 1;
+  const width = Math.max(8, Math.min(sheet.getLastColumn(), 8));
+  const raw = sheet.getRange(2, 1, count, width).getValues();
+  const display = sheet.getRange(2, 1, count, width).getDisplayValues();
+  const today = new Date(Utilities.formatDate(new Date(), GW.TIMEZONE, 'yyyy-MM-dd') + 'T00:00:00' + GW.UTC_OFFSET).getTime();
+
+  data.activities = raw.map(function (row, index) {
+    const date = gwParseDate_(row[0], display[index][0]);
+    const photos = gwActivityPhotos_(display[index][6]);
+    return {
+      id: gwClean_(display[index][7]) || ('ACT-' + (index + 2)),
+      dateValue: date ? date.getTime() : 0,
+      dateLabel: date ? gwFormatLongDate_(date) : gwClean_(display[index][0]),
+      title: gwClean_(display[index][1]),
+      location: gwClean_(display[index][2]),
+      description: gwClean_(display[index][3]),
+      url: gwSafeUrl_(display[index][4]),
+      status: gwNormalize_(display[index][5]),
+      photos: photos,
+      coverUrl: gwActivityCover_(display[index][6]),
+      photoCount: photos.length
+    };
+  }).filter(function (item) {
+    return item.status === 'publish' && item.title && item.dateValue <= today;
+  }).sort(function (a, b) {
+    return b.dateValue - a.dateValue;
+  }).slice(0, 24);
+
+  return data;
 }
 
 function galileaParseVercelRequest_(e) {
