@@ -1225,7 +1225,8 @@
     background: var(--surface-2);
   }
   .image-upload-panel strong, .image-upload-panel span { display: block }
-  .image-upload-panel span { margin-top: 2px; color: var(--soft); font-size: 0.68rem }
+  .image-upload-panel > div { min-width: 0; flex: 1 1 auto; }
+  .image-upload-panel span { margin-top: 2px; color: var(--soft); font-size: 0.68rem; }
   .image-collection { min-height: 120px }
 
   /* Upload items */
@@ -1883,7 +1884,7 @@
         }
       }
       
-      else if(field.type==='images') control='<textarea name="'+attr(field.key)+'" class="sr-only" rows="1">'+esc(value)+'</textarea>';
+      else if(field.type==='images') control='<textarea name="'+attr(field.key)+'" class="image-collection sr-only" rows="5">'+esc(value)+'</textarea>'+'<div class="photo-manager" id="photo-manager-'+attr(field.key)+'"></div>'+'<div class="image-upload-panel"><div><strong>'+esc(field.label)+'</strong><span>Upload foto (cover berita). Format: JPG/PNG/WEBP.</span></div>'+'<label class="btn soft">'+icon('upload')+'Pilih Foto<input class="image-file sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-image-target="'+attr(field.key)+'"></label></div>';
       else if(field.type==='media') control='<textarea name="'+attr(field.key)+'" class="media-collection sr-only" rows="5">'+esc(value)+'</textarea><div class="media-manager" id="media-manager-'+attr(field.key)+'"></div><div class="image-upload-panel"><div><strong>Media Kegiatan</strong><span>Tambahkan foto, video, audio, dokumen, atau file lain. Tidak ada batas ukuran dari aplikasi. Kapasitas mengikuti Google Drive.</span></div><label class="btn soft">'+icon('upload')+'Tambah media<input class="media-file sr-only" type="file" multiple accept="*/*" data-image-mode="append" data-media-target="'+attr(field.key)+'"></label></div>';
 
       else if(field.type==='select') control='<select name="'+attr(field.key)+'" '+(field.required?'required':'')+'>'+field.options.map(o=>'<option '+(String(value)===o?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
@@ -2346,19 +2347,39 @@ window.uploadImage = async function(input) {
   if (!file) return;
   const targetKey = input.dataset.imageTarget;
   const urlInput = document.querySelector('[name="' + CSS.escape(targetKey) + '"]');
-  const previewList = document.getElementById('upload-preview-' + targetKey);
+  const isMultiple = urlInput.tagName.toLowerCase() === 'textarea' && urlInput.classList.contains('image-collection');
+  const previewList = document.getElementById(isMultiple ? 'photo-manager-' + targetKey : 'upload-preview-' + targetKey);
   
   let thumbUrl = '';
   try { thumbUrl = URL.createObjectURL(file); } catch(e){}
   
-  previewList.innerHTML = '<li class="upload-item pending" style="justify-content:flex-start; margin-bottom: 8px;">' +
-    '<div class="media-thumb sq-64"><img src="'+attr(thumbUrl)+'" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>⚠️</div>\'"></div>' +
-    '<div class="upload-info"><span class="upload-name">'+esc(file.name)+'</span>' +
-    '<div class="progress-bar-bg" style="width:100%;height:4px;background:#ddd;margin-top:4px;border-radius:2px;overflow:hidden"><div class="progress-bar-fill" style="width:0%;height:100%;background:var(--accent);transition:width 0.2s"></div></div>' +
-    '</div><div class="upload-status" style="margin-left:12px;font-size:12px">Mengunggah...</div></li>';
+  let pendingHtml = '';
+  if (isMultiple) {
+    pendingHtml = '<div class="photo-thumb pending" style="opacity:0.7">' +
+      '<img src="'+attr(thumbUrl)+'" loading="lazy">' +
+      '<div class="photo-thumb-actions" style="opacity:1;background:rgba(0,0,0,0.7)">' +
+      '<div class="upload-status" style="color:#fff;font-size:10px;text-align:center;width:100%">0%</div>' +
+      '<div class="progress-bar-bg" style="width:80%;height:4px;background:#555;border-radius:2px;overflow:hidden;margin-top:4px"><div class="progress-bar-fill" style="width:0%;height:100%;background:var(--accent);transition:width 0.2s"></div></div>' +
+      '</div></div>';
+  } else {
+    pendingHtml = '<li class="upload-item pending" style="justify-content:flex-start; margin-bottom: 8px;">' +
+      '<div class="media-thumb sq-64"><img src="'+attr(thumbUrl)+'" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>⚠️</div>\'"></div>' +
+      '<div class="upload-info"><span class="upload-name">'+esc(file.name)+'</span>' +
+      '<div class="progress-bar-bg" style="width:100%;height:4px;background:#ddd;margin-top:4px;border-radius:2px;overflow:hidden"><div class="progress-bar-fill" style="width:0%;height:100%;background:var(--accent);transition:width 0.2s"></div></div>' +
+      '</div><div class="upload-status" style="margin-left:12px;font-size:12px">Mengunggah...</div></li>';
+  }
     
+  if (isMultiple) {
+    // Append pending to photo-manager
+    const div = document.createElement('div');
+    div.innerHTML = pendingHtml;
+    previewList.appendChild(div.firstElementChild);
+  } else {
+    previewList.innerHTML = pendingHtml;
+  }
+  
   input.value = '';
-  const li = previewList.firstElementChild;
+  const li = isMultiple ? previewList.lastElementChild : previewList.firstElementChild;
   const statusEl = li.querySelector('.upload-status');
   const progressFill = li.querySelector('.progress-bar-fill');
   
@@ -2443,17 +2464,31 @@ window.uploadImage = async function(input) {
     progressFill.style.width = '100%';
     progressFill.style.background = '#4CAF50';
     
-    urlInput.value = finalRes.url;
-    
-    const removeBtn = document.createElement('button');
-    removeBtn.type = 'button';
-    removeBtn.className = 'btn small soft error-text';
-    removeBtn.textContent = 'Hapus';
-    removeBtn.onclick = () => {
-      urlInput.value = '';
-      previewList.innerHTML = '';
-    };
-    li.appendChild(removeBtn);
+    if (isMultiple) {
+      // Append to legacy textarea
+      let urls = urlInput.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
+      // If it's the first image, make it PRIMARY
+      if (urls.length === 0) {
+        urls.push('PRIMARY:' + finalRes.url);
+      } else {
+        urls.push(finalRes.url);
+      }
+      urlInput.value = urls.join('\n');
+      if (typeof renderPhotoManager === 'function') {
+        renderPhotoManager(targetKey);
+      }
+    } else {
+      urlInput.value = finalRes.url;
+      const removeBtn = document.createElement('button');
+      removeBtn.type = 'button';
+      removeBtn.className = 'btn small soft error-text';
+      removeBtn.textContent = 'Hapus';
+      removeBtn.onclick = () => {
+        urlInput.value = '';
+        previewList.innerHTML = '';
+      };
+      li.appendChild(removeBtn);
+    }
     
   } catch(err) {
     li.className = 'upload-item error';
