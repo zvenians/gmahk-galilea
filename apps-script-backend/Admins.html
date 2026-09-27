@@ -1226,6 +1226,7 @@
   }
   .image-upload-panel strong, .image-upload-panel span { display: block }
   .image-upload-panel > div { min-width: 0; flex: 1 1 auto; }
+  .image-upload-panel > label { flex: 0 0 auto; white-space: nowrap; }
   .image-upload-panel span { margin-top: 2px; color: var(--soft); font-size: 0.68rem; }
   .image-collection { min-height: 120px }
 
@@ -1822,6 +1823,7 @@
         renderPhotoManager(key);
       });
     }
+    window.renderPhotoManager = renderPhotoManager;
     function renderPhotoManager(key){
       const textarea=$('[name="'+CSS.escape(key)+'"]'),manager=$('#photo-manager-'+CSS.escape(key));
       if(!textarea||!manager)return;
@@ -2369,7 +2371,10 @@ window.uploadImage = async function(input) {
       '</div><div class="upload-status" style="margin-left:12px;font-size:12px">Mengunggah...</div></li>';
   }
     
+  let existingPrimary = null;
   if (isMultiple) {
+    existingPrimary = previewList.querySelector('.photo-thumb.is-primary');
+    if (existingPrimary) existingPrimary.style.display = 'none';
     // Append pending to photo-manager
     const div = document.createElement('div');
     div.innerHTML = pendingHtml;
@@ -2465,17 +2470,16 @@ window.uploadImage = async function(input) {
     progressFill.style.background = '#4CAF50';
     
     if (isMultiple) {
-      // Append to legacy textarea
       let urls = urlInput.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
-      // If it's the first image, make it PRIMARY
-      if (urls.length === 0) {
-        urls.push('PRIMARY:' + finalRes.url);
+      let primaryIndex = urls.findIndex(u => u.toUpperCase().startsWith('PRIMARY:'));
+      if (primaryIndex >= 0) {
+        urls[primaryIndex] = 'PRIMARY:' + finalRes.url;
       } else {
-        urls.push(finalRes.url);
+        urls.unshift('PRIMARY:' + finalRes.url);
       }
       urlInput.value = urls.join('\n');
-      if (typeof renderPhotoManager === 'function') {
-        renderPhotoManager(targetKey);
+      if (typeof window.renderPhotoManager === 'function') {
+        window.renderPhotoManager(targetKey);
       }
     } else {
       urlInput.value = finalRes.url;
@@ -2491,6 +2495,7 @@ window.uploadImage = async function(input) {
     }
     
   } catch(err) {
+    if (existingPrimary) existingPrimary.style.display = '';
     li.className = 'upload-item error';
     statusEl.textContent = 'Gagal: ' + cleanError(err.message);
     progressFill.style.background = '#f44336';
