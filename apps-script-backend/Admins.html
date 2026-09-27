@@ -647,6 +647,8 @@
     background: var(--surface);
     font-size: 0.78rem;
     font-weight: 600;
+    white-space: nowrap;
+    flex-shrink: 0;
     letter-spacing: -0.008em;
     transition: all var(--dur) var(--ease);
   }
@@ -1852,6 +1854,13 @@
       $('#editor-preview').classList.remove('show');$('#editor-preview').innerHTML='';
       $$('[data-rich-editor]').forEach(el => initRichEditor(el.dataset.richEditor));
       initPhotoManagers();
+      setTimeout(() => {
+        if(typeof renderMediaManager === 'function') {
+           document.querySelectorAll('.media-collection').forEach(el => {
+             renderMediaManager(el.name);
+           });
+        }
+      }, 50);
       $('#editor-dialog').showModal();
     }
     function editorSnapshot(){
@@ -1878,7 +1887,16 @@
       else if(field.type==='media') control='<textarea name="'+attr(field.key)+'" class="media-collection sr-only" rows="5">'+esc(value)+'</textarea><div class="media-manager" id="media-manager-'+attr(field.key)+'"></div><div class="image-upload-panel"><div><strong>Media Kegiatan</strong><span>Tambahkan foto, video, audio, dokumen, atau file lain. Tidak ada batas ukuran dari aplikasi. Kapasitas mengikuti Google Drive.</span></div><label class="btn soft">'+icon('upload')+'Tambah media<input class="media-file sr-only" type="file" multiple accept="*/*" data-image-mode="append" data-media-target="'+attr(field.key)+'"></label></div>';
 
       else if(field.type==='select') control='<select name="'+attr(field.key)+'" '+(field.required?'required':'')+'>'+field.options.map(o=>'<option '+(String(value)===o?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
-      else control='<input name="'+attr(field.key)+'" type="'+(field.type==='image'?'url':attr(field.type))+'" value="'+attr(value)+'" '+(field.required?'required':'')+'>'+(field.type==='image'?'<ul class="upload-preview-list" id="upload-preview-'+attr(field.key)+'"></ul><div class="button-row"><label class="btn soft">'+icon('upload')+'Unggah gambar<input class="image-file sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-image-target="'+attr(field.key)+'"></label></div>':'');
+      else {
+  if (field.type === 'image') {
+    const existingPreview = value ? '<li class="upload-item success" style="justify-content:flex-start; margin-bottom: 8px;"><div class="media-thumb sq-64"><img src="'+attr(value)+'" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>⚠️</div>\'"></div><div class="upload-info"><span class="upload-name">'+attr(value.split('/').pop())+'</span></div><button type="button" class="btn small soft error-text" onclick="document.querySelector(\'[name=\\\"'+attr(field.key)+'\\\"]\').value=\'\'; document.getElementById(\'upload-preview-'+attr(field.key)+'\').innerHTML=\'\'">Hapus</button></li>' : '';
+    control = '<input name="'+attr(field.key)+'" type="url" value="'+attr(value)+'" '+(field.required?'required':'')+'>'+
+              '<ul class="upload-preview-list" id="upload-preview-'+attr(field.key)+'">'+existingPreview+'</ul>'+
+              '<div class="button-row"><label class="btn soft">'+icon('upload')+'Unggah gambar<input class="image-file sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-image-target="'+attr(field.key)+'"></label></div>';
+  } else {
+    control = '<input name="'+attr(field.key)+'" type="'+attr(field.type)+'" value="'+attr(value)+'" '+(field.required?'required':'')+'>';
+  }
+}
       return '<div class="field'+full+'"><label>'+esc(field.label)+(field.required?' *':'')+'</label>'+control+(field.help?'<span class="help">'+esc(field.help)+'</span>':'')+'</div>';
     }
     function openScheduleEditor(record,workflow){const data=state.entityData;if(!data.sections||!data.sections.length)return toast('Bagian jadwal belum ditemukan pada spreadsheet.');const sectionId=record&&((record.values&&record.values.sectionId)||record.sectionId)||data.sections[0].id||'';const section=data.sections.find(s=>s.id===sectionId)||data.sections[0];const values=record&&record.values||record||{};const fields=values.fields||{};const locked=Boolean(record&&record.id&&!/^NEW-/i.test(record.id));state.currentEdit={entity:'schedule',entityId:record&&record.id||'',workflowId:workflow&&workflow.id||'',action:workflow&&workflow.action||'UPSERT'};$('#editor-title').textContent=record?'Edit Jadwal':'Tambah Jadwal';$('#editor-subtitle').textContent=data.sheetName+(locked?' · Jenis ibadah dikunci untuk menjaga struktur sheet':'');$('#editor-workflow').innerHTML=workflowGuide(workflow&&workflow.state||'DRAFT');const sectionControl='<select '+(locked?'disabled':'name="sectionId"')+' id="schedule-section">'+data.sections.map(s=>'<option value="'+s.id+'" '+(s.id===section.id?'selected':'')+'>'+esc(s.title)+'</option>').join('')+'</select>'+(locked?'<input type="hidden" name="sectionId" value="'+attr(section.id)+'">':'');$('#editor-fields').innerHTML='<div class="field"><label>Jenis Ibadah *</label>'+sectionControl+'</div><div class="field"><label>Tanggal *</label><input type="date" name="isoDate" value="'+attr(values.isoDate||'')+'" required></div><div class="field full" id="schedule-fields">'+scheduleFieldsHtml(section,fields)+'</div>';$('#editor-preview').classList.remove('show');
@@ -1974,7 +1992,20 @@ previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujua
     document.addEventListener('click',event=>{const route=event.target.closest('[data-route]');if(route)return navigate(route.dataset.route);const close=event.target.closest('[data-close]');if(close)return $('#'+close.dataset.close).close();if(event.target.closest('[data-preview-editor]'))return previewEditor();if(event.target.closest('[data-new-record]'))return openNewRecord();const edit=event.target.closest('[data-edit-record]');if(edit)return openRecord(edit.dataset.editRecord);const duplicate=event.target.closest('[data-duplicate-schedule]');if(duplicate)return duplicateSchedule(duplicate.dataset.duplicateSchedule);const del=event.target.closest('[data-delete-record]');if(del)return requestDelete(del.dataset.deleteRecord,del);const ew=event.target.closest('[data-edit-workflow]');if(ew)return openWorkflow(ew.dataset.editWorkflow);const rw=event.target.closest('[data-resubmit-workflow]');if(rw)return resubmitWorkflow(rw.dataset.resubmitWorkflow,rw);const cw=event.target.closest('[data-cancel-workflow]');if(cw)return cancelWorkflow(cw.dataset.cancelWorkflow,cw);const dw=event.target.closest('[data-delete-workflow]');if(dw){if(!confirm('Hapus draft ini secara permanen?'))return;setBusy(dw,true);return server('adminDeleteWorkflow',[dw.dataset.deleteWorkflow]).then(()=>{toast('Draft dihapus.');loadEntity(state.entity)}).catch(e=>toast(cleanError(e.message))).finally(()=>setBusy(dw,false))}if(event.target.closest('[data-dashboard-refresh]'))return loadDashboardSummary(true);if(event.target.closest('[data-reload]')||event.target.closest('[data-retry]'))return renderRoute();const approvalTab=event.target.closest('[data-approval-status]');if(approvalTab)return loadApprovals(approvalTab.dataset.approvalStatus);const reviewButton=event.target.closest('[data-open-review]');if(reviewButton)return openReview(reviewButton.dataset.openReview);const reviewAction=event.target.closest('[data-review]');if(reviewAction)return review(reviewAction.dataset.review);const deleteApprovalButton=event.target.closest('[data-delete-approval]');if(deleteApprovalButton)return deleteApproval(deleteApprovalButton.dataset.deleteApproval);const service=event.target.closest('[data-open-service]');if(service)return openService(service.dataset.openService);const deleteServiceButton=event.target.closest('[data-delete-service]');if(deleteServiceButton)return deleteService(deleteServiceButton.dataset.deleteService);const sharePrayerButton=event.target.closest('[data-share-prayer]');if(sharePrayerButton)return sharePrayer(sharePrayerButton.dataset.sharePrayer);if(event.target.closest('[data-new-user]'))return openUser('');const eu=event.target.closest('[data-edit-user]');if(eu)return openUser(eu.dataset.editUser);const du=event.target.closest('[data-delete-user]');if(du)return deleteUser(du.dataset.deleteUser,du);const sys=event.target.closest('[data-system]');if(sys)return runSystem(sys.dataset.system,sys)});
     function queueSearch(render,inputId){clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{render();requestAnimationFrame(()=>{const input=$('#'+inputId);if(!input)return;input.focus();const end=input.value.length;input.setSelectionRange(end,end)})},180)}
     document.addEventListener('input',event=>{if(event.target.id==='entity-search'){state.search=event.target.value;queueSearch(renderEntity,'entity-search')}if(event.target.id==='service-search'){state.search=event.target.value;queueSearch(renderServices,'service-search')}});
-    document.addEventListener('change',event=>{if(event.target.id==='entity-status'){state.status=event.target.value;renderEntity()}if(event.target.id==='service-status'){state.status=event.target.value;renderServices()}if(event.target.matches('.image-file'))uploadImage(event.target);if(event.target.id==='schedule-section'){const section=state.entityData.sections.find(s=>s.id===event.target.value);$('#schedule-fields').innerHTML=scheduleFieldsHtml(section,{})}});
+    document.addEventListener('change',event=>{
+    if(event.target.id==='entity-status'){state.status=event.target.value;renderEntity()}
+    if(event.target.id==='service-status'){state.status=event.target.value;renderServices()}
+    if(event.target.matches('.image-file')) {
+      if(window.uploadImage) window.uploadImage(event.target);
+    }
+    if(event.target.matches('.media-file')) {
+      if(window.uploadMediaEngine) window.uploadMediaEngine(event.target);
+    }
+    if(event.target.id==='schedule-section'){
+      const section=state.entityData.sections.find(s=>s.id===event.target.value);
+      $('#schedule-fields').innerHTML=scheduleFieldsHtml(section,{});
+    }
+  });
     $('#editor-form').addEventListener('submit',saveEditor);$('#user-form').addEventListener('submit',saveUser);$('#save-service').addEventListener('click',saveService);
     window.addEventListener('hashchange',()=>{const route=location.hash.slice(1);if(route&&route!==state.route)navigate(route)});
     async function boot(){applyTheme(currentTheme());try{state.boot=await server('adminGetBootstrap',[],30000);$('#root').innerHTML=shell();bindShell();const route=location.hash.slice(1)||'dashboard';navigate(route);$('#loader').classList.add('hidden');loadDashboardSummary(false)}catch(error){showGate(error)}}
@@ -2308,6 +2339,128 @@ async function uploadMediaFile(file, targetKey) {
     return null;
   }
 }
+
+
+window.uploadImage = async function(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const targetKey = input.dataset.imageTarget;
+  const urlInput = document.querySelector('[name="' + CSS.escape(targetKey) + '"]');
+  const previewList = document.getElementById('upload-preview-' + targetKey);
+  
+  let thumbUrl = '';
+  try { thumbUrl = URL.createObjectURL(file); } catch(e){}
+  
+  previewList.innerHTML = '<li class="upload-item pending" style="justify-content:flex-start; margin-bottom: 8px;">' +
+    '<div class="media-thumb sq-64"><img src="'+attr(thumbUrl)+'" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>⚠️</div>\'"></div>' +
+    '<div class="upload-info"><span class="upload-name">'+esc(file.name)+'</span>' +
+    '<div class="progress-bar-bg" style="width:100%;height:4px;background:#ddd;margin-top:4px;border-radius:2px;overflow:hidden"><div class="progress-bar-fill" style="width:0%;height:100%;background:var(--accent);transition:width 0.2s"></div></div>' +
+    '</div><div class="upload-status" style="margin-left:12px;font-size:12px">Mengunggah...</div></li>';
+    
+  input.value = '';
+  const li = previewList.firstElementChild;
+  const statusEl = li.querySelector('.upload-status');
+  const progressFill = li.querySelector('.progress-bar-fill');
+  
+  try {
+    statusEl.textContent = 'Inisialisasi...';
+    let sessionUrl = '';
+    const initRes = await server('adminCreateMediaUploadSession', [{ name: file.name, mimeType: file.type || 'application/octet-stream', size: file.size }], 30000);
+    if (!initRes || !initRes.sessionUrl) throw new Error('Gagal mendapatkan session URL.');
+    sessionUrl = initRes.sessionUrl;
+    
+    statusEl.textContent = 'Mengunggah...';
+    const CHUNK_SIZE = 16 * 1024 * 1024;
+    let offset = 0;
+    let driveFileId = '';
+    
+    while (offset < file.size) {
+      const end = Math.min(offset + CHUNK_SIZE, file.size);
+      const chunk = file.slice(offset, end);
+      let attempts = 0;
+      let chunkSuccess = false;
+      
+      while (attempts < 4 && !chunkSuccess) {
+        attempts++;
+        try {
+          await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', sessionUrl, true);
+            xhr.setRequestHeader('Content-Range', 'bytes ' + offset + '-' + (end - 1) + '/' + file.size);
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable) {
+                const percent = Math.round(((offset + e.loaded) / file.size) * 100);
+                progressFill.style.width = percent + '%';
+                statusEl.textContent = percent + '%';
+              }
+            };
+            xhr.onload = () => {
+              if (xhr.status === 200 || xhr.status === 201) { 
+                chunkSuccess = true; 
+                try {
+                  const resData = JSON.parse(xhr.responseText);
+                  if (resData.id) driveFileId = resData.id;
+                } catch(e) {}
+                resolve(); 
+              } else if (xhr.status === 308) {
+                chunkSuccess = true;
+                const range = xhr.getResponseHeader('Range');
+                if (range) {
+                  const match = range.match(/bytes=0-(\d+)/);
+                  if (match) offset = parseInt(match[1], 10) + 1;
+                }
+                resolve(); 
+              } else if (xhr.status === 404) {
+                reject(new Error('HTTP 404 Session Expired'));
+              } else { reject(new Error('HTTP ' + xhr.status)); }
+            };
+            xhr.onerror = () => reject(new Error('Network Error'));
+            xhr.send(chunk);
+          });
+        } catch(err) {
+          statusEl.textContent = 'Retry... (' + attempts + ')';
+          if (err.message.includes('HTTP 404')) {
+            const initRes2 = await server('adminCreateMediaUploadSession', [{ name: file.name, mimeType: file.type || 'application/octet-stream', size: file.size }], 30000);
+            if (!initRes2 || !initRes2.sessionUrl) throw new Error('Gagal session URL.');
+            sessionUrl = initRes2.sessionUrl;
+            offset = 0; attempts = 0; continue;
+          }
+          if (attempts >= 4) throw new Error('Gagal unggah chunk: ' + err.message);
+          await new Promise(r => setTimeout(r, Math.pow(2, attempts) * 1000));
+        }
+      }
+      if (!chunkSuccess && offset >= file.size) break;
+      if (driveFileId) break;
+    }
+    
+    if (!driveFileId) throw new Error('Tidak mendapatkan ID file.');
+    
+    statusEl.textContent = 'Finalisasi...';
+    const finalRes = await server('adminFinalizeMediaUpload', [{ fileId: driveFileId }], 30000);
+    
+    li.className = 'upload-item success';
+    statusEl.textContent = 'Berhasil';
+    progressFill.style.width = '100%';
+    progressFill.style.background = '#4CAF50';
+    
+    urlInput.value = finalRes.url;
+    
+    const removeBtn = document.createElement('button');
+    removeBtn.type = 'button';
+    removeBtn.className = 'btn small soft error-text';
+    removeBtn.textContent = 'Hapus';
+    removeBtn.onclick = () => {
+      urlInput.value = '';
+      previewList.innerHTML = '';
+    };
+    li.appendChild(removeBtn);
+    
+  } catch(err) {
+    li.className = 'upload-item error';
+    statusEl.textContent = 'Gagal: ' + cleanError(err.message);
+    progressFill.style.background = '#f44336';
+  }
+};
 
 window.uploadMediaEngine = async function(input) {
   const files = Array.from(input.files || []);
