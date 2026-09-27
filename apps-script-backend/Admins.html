@@ -2499,7 +2499,8 @@ async function uploadMediaFile(file, targetKey) {
                     const match = range.match(/bytes=0-(\d+)/);
                     if (match) offset = parseInt(match[1], 10) + 1;
                   }
-                  res(); // Don't set chunkSuccess here, let the loop retry at new offset
+                  chunkSuccess = true; // Break inner loop to reslice chunk
+                  res(); //, let the loop retry at new offset
                 } else if (qxhr.status === 404) {
                   rej(new Error('HTTP 404 Session Expired'));
                 } else {

@@ -454,3 +454,24 @@ runTest('TEST NEW 25: JSON Parsing pada response Drive Final', () => {
 
 console.log('OK - News System Overhaul Tests: ' + passed + '/' + total + ' passed.');
 if (passed !== total) process.exit(1);
+
+runTest('TEST NEW 23: Hanya ada satu implementasi uploadMediaFile', () => {
+  const adminCode = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  const matches = adminCode.match(/function uploadMediaFile\(/g) || [];
+  assert.equal(matches.length, 1, 'Harus hanya ada tepat satu definisi uploadMediaFile');
+});
+
+runTest('TEST NEW 24: Tidak boleh ada unconditional offset = end setelah HTTP 308', () => {
+  const adminCode = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  const hasBug = adminCode.includes('if (success && offset === end - 1) offset = end;\n      else offset = end;');
+  assert.equal(hasBug, false, 'Ditemukan bug override offset = end secara tidak bersyarat');
+  assert.match(adminCode, /Content-Range['"],\s*['"]bytes \*\//, 'Harus query status sebelum retry dengan bytes */TOTAL');
+});
+
+runTest('TEST NEW 25: JSON Parsing pada response Drive Final', () => {
+  const adminCode = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  assert.match(adminCode, /JSON\.parse\((xhr|qxhr)\.responseText\)/, 'Harus mem-parse ID file dari JSON response Drive secara langsung saat 200/201');
+});
+
+console.log('OK - News System Overhaul Tests: ' + passed + '/' + total + ' passed.');
+if (passed !== total) process.exit(1);
