@@ -428,3 +428,29 @@ runTest('TEST NEW 22: tidak ada proxy binary besar melalui Vercel', () => {
   const vercelApiGs = fs.readFileSync('apps-script-backend/VercelApi.gs', 'utf8');
   assert.doesNotMatch(vercelApiGs, /adminUploadImage/);
 });
+
+runTest('TEST NEW 23: Hanya ada satu implementasi uploadMediaFile', () => {
+  const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  const matches = adminsHtml.match(/function uploadMediaFile\(/g) || [];
+  assert.equal(matches.length, 1, 'Harus hanya ada tepat satu definisi uploadMediaFile');
+});
+
+runTest('TEST NEW 24: Tidak boleh ada unconditional offset = end setelah HTTP 308', () => {
+  // We check if the code has a branch for 308 that sets offset from Range, 
+  // and does NOT follow it immediately with offset = end.
+  // Actually, we can check if the old bug is removed.
+  const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  const hasBug = adminsHtml.includes('if (success && offset === end - 1) offset = end;\n      else offset = end;');
+  assert.equal(hasBug, false, 'Ditemukan bug override offset = end secara tidak bersyarat');
+  
+  // We can also ensure our status query pattern exists
+  assert.match(adminsHtml, /Content-Range['"],\s*['"]bytes \*\//, 'Harus query status sebelum retry dengan bytes */TOTAL');
+});
+
+runTest('TEST NEW 25: JSON Parsing pada response Drive Final', () => {
+  const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  assert.match(adminsHtml, /JSON\.parse\((xhr|qxhr)\.responseText\)/, 'Harus mem-parse ID file dari JSON response Drive secara langsung saat 200/201');
+});
+
+console.log('OK - News System Overhaul Tests: ' + passed + '/' + total + ' passed.');
+if (passed !== total) process.exit(1);

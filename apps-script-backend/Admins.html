@@ -2143,7 +2143,7 @@
 
     function scheduleFieldsHtml(section,values){return '<div class="form-grid">'+section.fields.map(name=>'<div class="field"><label>'+esc(name)+'</label><input name="schedule:'+attr(name)+'" value="'+attr(values[name]||'')+'"></div>').join('')+'</div>'}
     async function saveEditor(event){event.preventDefault();const button=event.submitter,intent=button&&button.value||'draft',form=event.currentTarget;if(!form.reportValidity())return;const snapshot=editorSnapshot(),validation=editorValidation(snapshot);
-      const pendingUploads = $('.media-manager .upload-item.pending, .media-manager .upload-item:not(.success):not(.error)');
+      const pendingUploads = Object.values(window.mediaUploadStates || {}).filter(s => s && s !== 'DONE' && s !== 'ERROR');
       if (pendingUploads.length > 0) {
         toast('Masih ada media yang sedang diunggah.');
         return;
@@ -2351,8 +2351,13 @@ window.removeMedia = function(targetKey, index) {
   renderMediaManager(targetKey);
 };
 
+// uploadMediaEngine.js replacement
+window.mediaUploadStates = window.mediaUploadStates || {};
+
 async function uploadMediaFile(file, targetKey) {
   const uploadId = 'up-' + Date.now() + '-' + Math.random().toString(36).substr(2,9);
+  window.mediaUploadStates[uploadId] = 'INITIALIZING';
+  
   const isImage = file.type.startsWith('image/');
   const isVideo = file.type.startsWith('video/');
   const isAudio = file.type.startsWith('audio/');
@@ -2388,153 +2393,33 @@ async function uploadMediaFile(file, targetKey) {
   const progressFill = el.querySelector('.progress-bar-fill');
 
   try {
-    // 1. Initialize session
+    window.mediaUploadStates[uploadId] = 'INITIALIZING';
     statusEl.textContent = 'Inisialisasi...';
-    const initRes = await server('adminCreateMediaUploadSession', [{ name: file.name, mimeType: file.type || 'application/octet-stream', size: file.size }], 30000);
-    if (!initRes || !initRes.sessionUrl) throw new Error('Gagal mendapatkan session URL.');
-    const sessionUrl = initRes.sessionUrl;
     
-    // 2. Chunk Upload via XHR
+    let sessionUrl = '';
+    const initSession = async () => {
+      const initRes = await server('adminCreateMediaUploadSession', [{ name: file.name, mimeType: file.type || 'application/octet-stream', size: file.size }], 30000);
+      if (!initRes || !initRes.sessionUrl) throw new Error('Gagal mendapatkan session URL.');
+      sessionUrl = initRes.sessionUrl;
+    };
+    await initSession();
+    
+    window.mediaUploadStates[uploadId] = 'UPLOADING';
     statusEl.textContent = 'Mengunggah...';
-    const CHUNK_SIZE = 16 * 1024 * 1024; // 16 MB chunk
-    let offset = 0;
     
-    while (offset < file.size) {
-      const end = Math.min(offset + CHUNK_SIZE, file.size);
-      const chunk = file.slice(offset, end);
-      
-      let attempts = 0;
-      let success = false;
-      while (attempts < 4 && !success) {
-        attempts++;
-        try {
-          await new Promise((resolve, reject) => {
-            const xhr = new XMLHttpRequest();
-            xhr.open('PUT', sessionUrl, true);
-            xhr.setRequestHeader('Content-Range', 'bytes ' + offset + '-' + (end - 1) + '/' + file.size);
-            
-            xhr.upload.onprogress = (e) => {
-              if (e.lengthComputable) {
-                const percent = Math.round(((offset + e.loaded) / file.size) * 100);
-                progressFill.style.width = percent + '%';
-                statusEl.textContent = percent + '%';
-              }
-            };
-            
-            xhr.onload = () => {
-              if (xhr.status === 200 || xhr.status === 201) { success = true; resolve(); }
-              else if (xhr.status === 308) {
-                const range = xhr.getResponseHeader('Range');
-                if (range) {
-                  const match = range.match(/bytes=0-(\d+)/);
-                  if (match) offset = parseInt(match[1], 10) + 1;
-                }
-                success = true; resolve(); // We advance offset below
-              }
-              else { reject(new Error('HTTP ' + xhr.status)); }
-            };
-            xhr.onerror = () => reject(new Error('Network Error'));
-            xhr.send(chunk);
-          });
-        } catch(err) {
-          if (attempts >= 4) throw new Error('Gagal unggah chunk setelah 4 kali coba: ' + err.message);
-          statusEl.textContent = 'Retry... (' + attempts + ')';
-          await new Promise(r => setTimeout(r, Math.pow(2, attempts) * 1000));
-          // Ask server for offset if we lost track
-          try {
-            const xhr = new XMLHttpRequest();
-            xhr.open('PUT', sessionUrl, true);
-            xhr.setRequestHeader('Content-Range', 'bytes */' + file.size);
-            await new Promise((res, rej) => {
-              xhr.onload = () => {
-                if (xhr.status === 308) {
-                  const range = xhr.getResponseHeader('Range');
-                  if (range) {
-                    const match = range.match(/bytes=0-(\d+)/);
-                    if (match) offset = parseInt(match[1], 10) + 1;
-                  }
-                }
-                res();
-              };
-              xhr.onerror = rej;
-              xhr.send();
-            });
-          } catch(e){}
-        }
-      }
-      if (!success && offset < file.size) throw new Error('Upload gagal.');
-      if (success && offset === end - 1) offset = end; // For 308
-      else offset = end; // Normal path
-    }
-    
-    // 3. Finalize
-    statusEl.textContent = 'Finalisasi...';
-    // We don't have the fileId from the Drive response directly if we did CORS PUT,
-    // wait, Drive API returns the File JSON on 200/201.
-    // Let's do a trick: we didn't capture the response body in the loop above for 200.
-    // Let's modify the loop to capture it.
-  } catch(err) {
-    el.className = 'upload-item error';
-    statusEl.textContent = 'Gagal: ' + cleanError(err.message);
-    progressFill.style.background = '#f44336';
-  }
-}
-</script>
-<script>
-async function uploadMediaFile(file, targetKey) {
-  const uploadId = 'up-' + Date.now() + '-' + Math.random().toString(36).substr(2,9);
-  const isImage = file.type.startsWith('image/');
-  const isVideo = file.type.startsWith('video/');
-  const isAudio = file.type.startsWith('audio/');
-  
-  let thumbUrl = '';
-  try { 
-    thumbUrl = URL.createObjectURL(file); 
-    localObjectUrls.add(thumbUrl);
-  } catch (e) {}
-
-  let previewHtml = '';
-  if (isImage && thumbUrl) previewHtml = '<img src="'+attr(thumbUrl)+'" style="width:64px;height:64px;object-fit:cover;border-radius:6px;flex:0 0 auto;margin-right:12px">';
-  else if (isVideo && thumbUrl) previewHtml = '<video src="'+attr(thumbUrl)+'" style="width:64px;height:64px;object-fit:cover;border-radius:6px;flex:0 0 auto;margin-right:12px" preload="metadata"></video>';
-  else if (isAudio) previewHtml = '<div style="width:64px;height:64px;background:#333;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">🎵</div>';
-  else previewHtml = '<div style="width:64px;height:64px;background:#eee;color:#666;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">📄</div>';
-
-  const container = $('#media-manager-' + CSS.escape(targetKey));
-  const el = document.createElement('div');
-  el.id = uploadId;
-  el.className = 'upload-item pending';
-  el.style.justifyContent = 'flex-start';
-  el.style.marginBottom = '8px';
-  el.style.position = 'relative';
-  
-  el.innerHTML = previewHtml + 
-    '<div class="upload-info" style="flex:1"><span class="upload-name" style="word-break:break-all">'+esc(file.name)+'</span><span class="upload-size">'+Math.round(file.size/1024)+' KB</span>' +
-    '<div class="progress-bar-bg" style="width:100%;height:4px;background:#ddd;margin-top:4px;border-radius:2px;overflow:hidden"><div class="progress-bar-fill" style="width:0%;height:100%;background:var(--accent);transition:width 0.2s"></div></div>' +
-    '</div><div class="upload-status" style="margin-left:12px;font-size:12px">Menyiapkan...</div>';
-  
-  container.appendChild(el);
-  
-  const statusEl = el.querySelector('.upload-status');
-  const progressFill = el.querySelector('.progress-bar-fill');
-
-  try {
-    statusEl.textContent = 'Inisialisasi...';
-    const initRes = await server('adminCreateMediaUploadSession', [{ name: file.name, mimeType: file.type || 'application/octet-stream', size: file.size }], 30000);
-    if (!initRes || !initRes.sessionUrl) throw new Error('Gagal mendapatkan session URL.');
-    const sessionUrl = initRes.sessionUrl;
-    
-    statusEl.textContent = 'Mengunggah...';
-    const CHUNK_SIZE = 16 * 1024 * 1024; // 16 MB chunk
+    const CHUNK_SIZE = 16 * 1024 * 1024;
     let offset = 0;
     let driveFileId = '';
     
     while (offset < file.size) {
+      window.mediaUploadStates[uploadId] = 'UPLOADING';
       const end = Math.min(offset + CHUNK_SIZE, file.size);
       const chunk = file.slice(offset, end);
       
       let attempts = 0;
-      let success = false;
-      while (attempts < 4 && !success) {
+      let chunkSuccess = false;
+      
+      while (attempts < 4 && !chunkSuccess) {
         attempts++;
         try {
           await new Promise((resolve, reject) => {
@@ -2552,20 +2437,27 @@ async function uploadMediaFile(file, targetKey) {
             
             xhr.onload = () => {
               if (xhr.status === 200 || xhr.status === 201) { 
-                success = true; 
+                chunkSuccess = true; 
                 try {
                   const resData = JSON.parse(xhr.responseText);
-                  driveFileId = resData.id;
+                  if (resData.id) driveFileId = resData.id;
                 } catch(e) {}
                 resolve(); 
               }
               else if (xhr.status === 308) {
+                chunkSuccess = true;
                 const range = xhr.getResponseHeader('Range');
                 if (range) {
                   const match = range.match(/bytes=0-(\d+)/);
                   if (match) offset = parseInt(match[1], 10) + 1;
+                } else {
+                  // If no Range header on 308, assume no bytes were saved.
                 }
-                success = true; resolve(); 
+                resolve(); 
+              }
+              else if (xhr.status === 404) {
+                // Session expired.
+                reject(new Error('HTTP 404 Session Expired'));
               }
               else { reject(new Error('HTTP ' + xhr.status)); }
             };
@@ -2573,66 +2465,92 @@ async function uploadMediaFile(file, targetKey) {
             xhr.send(chunk);
           });
         } catch(err) {
-          if (attempts >= 4) throw new Error('Gagal unggah chunk setelah 4 kali coba: ' + err.message);
+          window.mediaUploadStates[uploadId] = 'RETRYING';
           statusEl.textContent = 'Retry... (' + attempts + ')';
+          
+          if (err.message.includes('HTTP 404')) {
+            // Session expired, restart completely
+            await initSession();
+            offset = 0;
+            attempts = 0;
+            continue;
+          }
+          
+          if (attempts >= 4) throw new Error('Gagal unggah chunk setelah 4 kali coba: ' + err.message);
           await new Promise(r => setTimeout(r, Math.pow(2, attempts) * 1000));
+          
+          // Query status before retrying to prevent duplicate bytes
           try {
-            const xhr = new XMLHttpRequest();
-            xhr.open('PUT', sessionUrl, true);
-            xhr.setRequestHeader('Content-Range', 'bytes */' + file.size);
             await new Promise((res, rej) => {
-              xhr.onload = () => {
-                if (xhr.status === 308) {
-                  const range = xhr.getResponseHeader('Range');
+              const qxhr = new XMLHttpRequest();
+              qxhr.open('PUT', sessionUrl, true);
+              qxhr.setRequestHeader('Content-Range', 'bytes */' + file.size);
+              qxhr.onload = () => {
+                if (qxhr.status === 200 || qxhr.status === 201) {
+                  chunkSuccess = true;
+                  try {
+                    const resData = JSON.parse(qxhr.responseText);
+                    if (resData.id) driveFileId = resData.id;
+                  } catch(e) {}
+                  res();
+                } else if (qxhr.status === 308) {
+                  const range = qxhr.getResponseHeader('Range');
                   if (range) {
                     const match = range.match(/bytes=0-(\d+)/);
                     if (match) offset = parseInt(match[1], 10) + 1;
                   }
+                  res(); // Don't set chunkSuccess here, let the loop retry at new offset
+                } else if (qxhr.status === 404) {
+                  rej(new Error('HTTP 404 Session Expired'));
+                } else {
+                  res(); // Ignore other errors, retry the chunk
                 }
-                res();
               };
-              xhr.onerror = rej;
-              xhr.send();
+              qxhr.onerror = () => res(); // Ignore network errors on status query, let loop retry
+              qxhr.send();
             });
-          } catch(e){}
+          } catch (qerr) {
+            if (qerr.message.includes('HTTP 404')) {
+              await initSession();
+              offset = 0;
+              attempts = 0;
+            }
+          }
         }
       }
-      if (!success && offset < file.size) throw new Error('Upload gagal.');
-      if (success && offset === end - 1) offset = end; 
-      else offset = end; 
+      if (!chunkSuccess) {
+        // Did we advance via status query? If not, we fail.
+        if (offset >= file.size) break;
+        // The loop will just continue from the new offset if we got 308 from status query!
+      }
+      if (driveFileId) break; // Reached 200/201!
     }
     
     if (!driveFileId) throw new Error('Tidak mendapatkan ID file dari Google Drive.');
     
+    window.mediaUploadStates[uploadId] = 'FINALIZING';
     statusEl.textContent = 'Finalisasi...';
     const finalRes = await server('adminFinalizeMediaUpload', [{ fileId: driveFileId }], 30000);
     
+    window.mediaUploadStates[uploadId] = 'DONE';
     el.className = 'upload-item success';
     statusEl.textContent = 'Berhasil';
     progressFill.style.width = '100%';
     progressFill.style.background = '#4CAF50';
     
-    // Convert to media obj
-    const mediaObj = {
+    return {
       id: finalRes.id,
       name: finalRes.name,
       mimeType: finalRes.mimeType,
       size: finalRes.size,
-      url: finalRes.url, // legacy viewer url
+      url: finalRes.url, 
       viewUrl: finalRes.viewUrl,
       downloadUrl: finalRes.downloadUrl,
       primary: false
     };
     
-    // Automatically re-render the whole block to replace the local progress item with the final synced item!
-    // Wait, if we return `mediaObj`, `uploadMediaEngine` will push to state and call `renderMediaManager`.
-    // Calling `renderMediaManager` will clear the container and rewrite EVERYTHING.
-    // That means it will wipe out OTHER active uploads' DOM elements!
-    // So we CANNOT use `renderMediaManager` while there are active uploads!
-    // We should just append to the hidden inputs directly.
-    return mediaObj;
-    
   } catch(err) {
+    window.mediaUploadStates[uploadId] = 'ERROR';
     el.className = 'upload-item error';
     statusEl.textContent = 'Gagal: ' + cleanError(err.message);
     progressFill.style.background = '#f44336';
@@ -2644,29 +2562,25 @@ window.uploadMediaEngine = async function(input) {
   const files = Array.from(input.files || []);
   if (!files.length) return;
   const targetKey = input.dataset.mediaTarget;
-  
   input.value = '';
-  
   for (const file of files) {
-    uploadMediaFile(file, targetKey).then((mediaObj) => {
+    const p = uploadMediaFile(file, targetKey);
+    p.then((mediaObj) => {
       if (mediaObj) {
-         const mediaInput = $('[name="'+CSS.escape(targetKey)+'"]');
-         const photosInput = $('[name="photos"]');
-         let media = parseMediaField(mediaInput.value, photosInput ? photosInput.value : '');
-         media.push(mediaObj);
-         saveMediaField(targetKey, media);
-         
-         // To prevent destroying other active uploads, we just replace this specific upload item's HTML
-         // with the "finalized" version (using `removeMedia` / `setPrimaryMedia` bindings).
-         const el = document.getElementById(mediaObj.id) || document.querySelector('.upload-item.success:not([data-bound])');
-         // But `renderMediaManager` does it cleanly.
-         // Let's just check if there are OTHER pending uploads.
-         const pendingUploads = $$('#media-manager-' + CSS.escape(targetKey) + ' .upload-item.pending, #media-manager-' + CSS.escape(targetKey) + ' .upload-item:not(.success):not(.error)');
-         if (pendingUploads.length === 0) {
-           renderMediaManager(targetKey);
-         }
+        const mediaInput = $('[name="'+CSS.escape(targetKey)+'"]');
+        const photosInput = $('[name="photos"]');
+        let mediaArr = parseMediaField(mediaInput.value, photosInput ? photosInput.value : '');
+        mediaArr.push(mediaObj);
+        saveMediaField(targetKey, mediaArr);
+        
+        // Only render if all uploads for this target are DONE or ERROR
+        const hasActiveUploads = Object.values(window.mediaUploadStates).some(state => state && state !== 'DONE' && state !== 'ERROR');
+        if (!hasActiveUploads) {
+          renderMediaManager(targetKey);
+        }
       }
     });
   }
 };
+;
 </script>
