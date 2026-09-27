@@ -5553,7 +5553,7 @@
       }
 
       function activityCardHtml(item, featured) {
-        const cover = safeUrl(item.coverUrl || (item.photos || [])[0]);
+        const cover = safeUrl(item.coverUrl || (item.media && item.media.find(m => m.mimeType.startsWith("image/")) ? item.media.find(m => m.mimeType.startsWith("image/")).url : "") || (item.photos || [])[0]);
         return '<article class="activity-film ' + (featured?'featured':'') + '">' +
           '<button class="activity-film-hit" type="button" data-open-activity="' + attr(item.id) + '" aria-label="Buka kegiatan ' + attr(item.title) + '"></button>' +
           '<div class="activity-film-media">' + (cover?'<img src="' + attr(cover) + '" alt="' + attr(item.title) + '" loading="lazy" decoding="async">':'<span class="activity-film-placeholder">' + icon('image') + '</span>') + '<span class="film-shade"></span></div>' +
@@ -5570,28 +5570,37 @@
         const item=(state.data.activities||[]).find(activity=>String(activity.id)===String(id));
         if(!item)return toast('Berita Jemaat belum ditemukan.');
         history.pushState({route:'activities',beritaId:id},'','#berita/' + encodeURIComponent(id));
-        const cover = safeUrl(item.coverUrl || (item.photos||[])[0]);
+        const cover = safeUrl(item.coverUrl || (item.media && item.media.find(m => m.mimeType.startsWith("image/")) ? item.media.find(m => m.mimeType.startsWith("image/")).url : "") || (item.photos||[])[0]);
         if(cover){const ogImg=document.querySelector('meta[property="og:image"]');if(ogImg)ogImg.content=cover;}
         const ogTitle=document.querySelector('meta[property="og:title"]');if(ogTitle)ogTitle.content=item.title+' — Berita Jemaat Galilea';
         const ogDesc=document.querySelector('meta[property="og:description"]');if(ogDesc)ogDesc.content=htmlToWaText(item.description||'').slice(0,160);
         document.title=item.title+' — GMAHK Galilea';
         
-        const photos=(item.photos||[]).filter(Boolean);
+        
+        const media = item.media || [];
         let gallery='';
-        if(photos.length){
-          // Jika foto cover ada (dari PRIMARY: atau fallback index 0), taruh di index 0
-          const sortedPhotos = [...photos];
-          if(item.coverUrl && sortedPhotos.indexOf(item.coverUrl) > 0) {
-            sortedPhotos.splice(sortedPhotos.indexOf(item.coverUrl), 1);
-            sortedPhotos.unshift(item.coverUrl);
-          }
+        if(media.length){
+          const sortedMedia = [...media].sort((a, b) => b.primary - a.primary);
           
-          gallery='<div class="activity-slideshow" data-slide-index="0" data-slide-count="'+sortedPhotos.length+'"><div class="slideshow-stage">' +
-            sortedPhotos.map((url,index)=>'<div class="slideshow-slide" data-story-photo="' + attr(url) + '"><img src="' + attr(url) + '" alt="' + attr(item.title) + ' · foto ' + (index+1) + '" loading="lazy" decoding="async"></div>').join('') +
-            '</div>' + (sortedPhotos.length>1?'<div class="slideshow-nav"><button class="slideshow-btn" type="button" aria-label="Sebelumnya" onclick="prevSlide(this)">'+icon('chevron')+'</button><button class="slideshow-btn" type="button" aria-label="Selanjutnya" onclick="nextSlide(this)" style="transform:rotate(180deg)">'+icon('chevron')+'</button></div><div class="slideshow-counter">1 / '+sortedPhotos.length+'</div>':'') +
+          gallery='<div class="activity-slideshow" data-slide-index="0" data-slide-count="'+sortedMedia.length+'"><div class="slideshow-stage">' +
+            sortedMedia.map((m, index) => {
+               if (m.mimeType.startsWith('image/')) {
+                 return '<div class="slideshow-slide"><img src="' + attr(m.url) + '" alt="' + attr(item.title) + ' · media ' + (index+1) + '" loading="lazy" decoding="async"></div>';
+               } else if (m.mimeType.startsWith('video/')) {
+                 // Direct downloadUrl needed for streaming without HTML page wrapper
+                 const vSrc = m.downloadUrl || m.url;
+                 return '<div class="slideshow-slide"><div style="padding:16px;background:#111;height:100%;display:flex;align-items:center"><video controls playsinline preload="metadata" src="' + attr(vSrc) + '" style="width:100%;max-height:100%"></video></div></div>';
+               } else if (m.mimeType.startsWith('audio/')) {
+                 const aSrc = m.downloadUrl || m.url;
+                 return '<div class="slideshow-slide"><div style="padding:32px;background:#f5f5f5;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center"><h3>'+esc(m.name)+'</h3><audio controls preload="metadata" src="' + attr(aSrc) + '" style="width:100%;margin-top:16px"></audio></div></div>';
+               } else {
+                 return '<div class="slideshow-slide"><div style="padding:32px;background:#f5f5f5;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:48px;color:#666">📄</div><h3 style="margin:16px 0 8px;text-align:center;word-break:break-all">'+esc(m.name)+'</h3><p style="color:#666;margin-bottom:16px">'+(m.size ? Math.round(m.size/1024)+' KB' : '')+'</p><a href="'+attr(m.viewUrl || m.url)+'" target="_blank" class="btn soft">Buka File</a></div></div>';
+               }
+            }).join('') +
+            '</div>' + (sortedMedia.length>1?'<div class="slideshow-nav"><button class="slideshow-btn" type="button" aria-label="Sebelumnya" onclick="prevSlide(this)">'+icon('chevron')+'</button><button class="slideshow-btn" type="button" aria-label="Selanjutnya" onclick="nextSlide(this)" style="transform:rotate(180deg)">'+icon('chevron')+'</button></div><div class="slideshow-counter">1 / '+sortedMedia.length+'</div>':'') +
             '</div>';
         } else {
-          gallery='<div class="activity-story-empty">'+icon('image')+'<span>Dokumentasi foto belum ditambahkan.</span></div>';
+          gallery='<div class="activity-story-empty">'+icon('image')+'<span>Media kegiatan belum ditambahkan.</span></div>';
         }
         
         const actions='<div class="button-row" style="margin-top: 32px;">'+(item.url?'<a class="btn primary" href="'+attr(item.url)+'" target="_blank" rel="noopener">Sumber berita'+icon('external')+'</a>':'')+'<button class="btn whatsapp" type="button" data-share-activity="'+attr(item.id)+'">'+brandIcon('whatsapp')+'Bagikan ke WhatsApp</button></div>';

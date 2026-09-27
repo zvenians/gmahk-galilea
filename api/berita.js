@@ -27,7 +27,8 @@ export async function GET(request) {
             title = activity.title + ' — Berita Jemaat';
             description = (activity.description || description).slice(0, 160);
             
-            const cover = activity.coverUrl || (activity.photos && activity.photos[0]);
+            const firstMediaImage = activity.media && activity.media.find(m => m.mimeType.startsWith('image/')) ? activity.media.find(m => m.mimeType.startsWith('image/')).url : null;
+            const cover = activity.coverUrl || firstMediaImage || (activity.photos && activity.photos[0]);
             if (cover) {
               image = baseUrl + '/api/news-og?id=' + encodeURIComponent(id);
             }

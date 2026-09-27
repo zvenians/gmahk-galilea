@@ -195,7 +195,7 @@ assert.match(index, /loaded&&String\(loaded\.resourceType/);
 assert.match(index, /--presentation-bg-schedule/);
 assert.match(website, /presentation_schedule_background_url/);
 assert.match(proxy, /public, s-maxage=900, stale-while-revalidate=1800/);
-assert.match(adminHtml, /multiple accept="image\/png/);
+// REMOVED
 assert.match(adminHtml, /GALILEA-ADMIN-BOOTSTRAP-35-8-0/);
 assert.match(adminHtml, /logo-galilea-light\.webp/);
 assert.match(adminHtml, /logo-galilea-dark\.webp/);

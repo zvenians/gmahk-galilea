@@ -60,7 +60,8 @@ export async function GET(req) {
       return new Response('Not found', { status: 404 });
     }
     
-    const rawCover = activity.coverUrl || (activity.photos && activity.photos[0]);
+    const firstMediaImage = activity.media && activity.media.find(m => m.mimeType.startsWith('image/')) ? activity.media.find(m => m.mimeType.startsWith('image/')).url : null;
+    const rawCover = activity.coverUrl || firstMediaImage || (activity.photos && activity.photos[0]);
     if (!rawCover) {
       return new ImageResponse(
         {

@@ -1097,24 +1097,44 @@ function gwReadActivities_(spreadsheet, now) {
   const sheet = spreadsheet.getSheetByName(GW.SHEETS.activities);
   if (!sheet || sheet.getLastRow() < 2) return [];
   const count = sheet.getLastRow() - 1;
-  const width = Math.max(8, Math.min(sheet.getLastColumn(), 8));
+  const width = Math.max(9, Math.min(sheet.getLastColumn(), 9));
   const raw = sheet.getRange(2, 1, count, width).getValues();
   const display = sheet.getRange(2, 1, count, width).getDisplayValues();
   const today = new Date(Utilities.formatDate(now, GW.TIMEZONE, 'yyyy-MM-dd') + 'T00:00:00' + GW.UTC_OFFSET).getTime();
   return raw.map(function (row, index) {
     const date = gwParseDate_(row[0], display[index][0]);
+    const dateLabel = date ? gwFormatLongDate_(date) : gwClean_(display[index][0]);
     const photos = gwActivityPhotos_(display[index][6]);
+    let media = [];
+    try {
+      media = display[index][8] ? JSON.parse(display[index][8]) : [];
+      if (!Array.isArray(media)) media = [];
+    } catch(e) { media = []; }
+    const coverUrl = gwActivityCover_(display[index][6]);
+    if (media.length === 0 && photos.length > 0) {
+      media = photos.map(function(url) {
+        return {
+          id: '',
+          name: 'Media ' + dateLabel,
+          mimeType: 'image/jpeg',
+          size: 0,
+          url: url,
+          primary: url === coverUrl
+        };
+      });
+    }
     return {
       id: gwClean_(display[index][7]) || ('ACT-' + (index + 2)),
       dateValue: date ? date.getTime() : 0,
-      dateLabel: date ? gwFormatLongDate_(date) : gwClean_(display[index][0]),
+      dateLabel: dateLabel,
       title: gwClean_(display[index][1]),
       location: gwClean_(display[index][2]),
       description: gwClean_(display[index][3]),
       url: gwSafeUrl_(display[index][4]),
       status: gwNormalize_(display[index][5]),
       photos: photos,
-      coverUrl: gwActivityCover_(display[index][6]),
+      media: media,
+      coverUrl: coverUrl,
       photoCount: photos.length
     };
   }).filter(function (item) {

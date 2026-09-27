@@ -2123,14 +2123,33 @@
           control='<textarea name="'+attr(field.key)+'" placeholder="'+attr(field.help||'Ketik isi di sini.')+'" '+(field.required?'required':'')+'>'+esc(value)+'</textarea>';
         }
       }
-      else if(field.type==='images') control='<textarea name="'+attr(field.key)+'" class="image-collection sr-only" rows="5">'+esc(value)+'</textarea><div class="photo-manager" id="photo-manager-'+attr(field.key)+'"></div><div class="image-upload-panel"><div><strong>Galeri kegiatan</strong><span>Pilih beberapa foto sekaligus. Maksimal 12 foto, masing-masing 4 MB. Foto pertama akan menjadi sampul kecuali Anda menentukan foto utama.</span></div><label class="btn soft">'+icon('upload')+'Pilih beberapa foto<input class="image-file sr-only" type="file" multiple accept="image/png,image/jpeg,image/webp,image/gif" data-image-mode="append" data-image-target="'+attr(field.key)+'"></label></div>';
+      
+      else if(field.type==='images') control='<textarea name="'+attr(field.key)+'" class="sr-only" rows="1">'+esc(value)+'</textarea>';
+      else if(field.type==='media') control='<textarea name="'+attr(field.key)+'" class="media-collection sr-only" rows="5">'+esc(value)+'</textarea><div class="media-manager" id="media-manager-'+attr(field.key)+'"></div><div class="image-upload-panel"><div><strong>Media Kegiatan</strong><span>Tambahkan foto, video, audio, dokumen, atau file lain. Tidak ada batas ukuran dari aplikasi. Kapasitas mengikuti Google Drive.</span></div><label class="btn soft">'+icon('upload')+'Tambah media<input class="media-file sr-only" type="file" multiple accept="*/*" data-image-mode="append" data-media-target="'+attr(field.key)+'"></label></div>';
+
       else if(field.type==='select') control='<select name="'+attr(field.key)+'" '+(field.required?'required':'')+'>'+field.options.map(o=>'<option '+(String(value)===o?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
       else control='<input name="'+attr(field.key)+'" type="'+(field.type==='image'?'url':attr(field.type))+'" value="'+attr(value)+'" '+(field.required?'required':'')+'>'+(field.type==='image'?'<ul class="upload-preview-list" id="upload-preview-'+attr(field.key)+'"></ul><div class="button-row"><label class="btn soft">'+icon('upload')+'Unggah gambar<input class="image-file sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-image-target="'+attr(field.key)+'"></label></div>':'');
       return '<div class="field'+full+'"><label>'+esc(field.label)+(field.required?' *':'')+'</label>'+control+(field.help?'<span class="help">'+esc(field.help)+'</span>':'')+'</div>';
     }
-    function openScheduleEditor(record,workflow){const data=state.entityData;if(!data.sections||!data.sections.length)return toast('Bagian jadwal belum ditemukan pada spreadsheet.');const sectionId=record&&((record.values&&record.values.sectionId)||record.sectionId)||data.sections[0].id||'';const section=data.sections.find(s=>s.id===sectionId)||data.sections[0];const values=record&&record.values||record||{};const fields=values.fields||{};const locked=Boolean(record&&record.id&&!/^NEW-/i.test(record.id));state.currentEdit={entity:'schedule',entityId:record&&record.id||'',workflowId:workflow&&workflow.id||'',action:workflow&&workflow.action||'UPSERT'};$('#editor-title').textContent=record?'Edit Jadwal':'Tambah Jadwal';$('#editor-subtitle').textContent=data.sheetName+(locked?' · Jenis ibadah dikunci untuk menjaga struktur sheet':'');$('#editor-workflow').innerHTML=workflowGuide(workflow&&workflow.state||'DRAFT');const sectionControl='<select '+(locked?'disabled':'name="sectionId"')+' id="schedule-section">'+data.sections.map(s=>'<option value="'+s.id+'" '+(s.id===section.id?'selected':'')+'>'+esc(s.title)+'</option>').join('')+'</select>'+(locked?'<input type="hidden" name="sectionId" value="'+attr(section.id)+'">':'');$('#editor-fields').innerHTML='<div class="field"><label>Jenis Ibadah *</label>'+sectionControl+'</div><div class="field"><label>Tanggal *</label><input type="date" name="isoDate" value="'+attr(values.isoDate||'')+'" required></div><div class="field full" id="schedule-fields">'+scheduleFieldsHtml(section,fields)+'</div>';$('#editor-preview').classList.remove('show');$('#editor-preview').innerHTML='';$('#editor-dialog').showModal()}
+    function openScheduleEditor(record,workflow){const data=state.entityData;if(!data.sections||!data.sections.length)return toast('Bagian jadwal belum ditemukan pada spreadsheet.');const sectionId=record&&((record.values&&record.values.sectionId)||record.sectionId)||data.sections[0].id||'';const section=data.sections.find(s=>s.id===sectionId)||data.sections[0];const values=record&&record.values||record||{};const fields=values.fields||{};const locked=Boolean(record&&record.id&&!/^NEW-/i.test(record.id));state.currentEdit={entity:'schedule',entityId:record&&record.id||'',workflowId:workflow&&workflow.id||'',action:workflow&&workflow.action||'UPSERT'};$('#editor-title').textContent=record?'Edit Jadwal':'Tambah Jadwal';$('#editor-subtitle').textContent=data.sheetName+(locked?' · Jenis ibadah dikunci untuk menjaga struktur sheet':'');$('#editor-workflow').innerHTML=workflowGuide(workflow&&workflow.state||'DRAFT');const sectionControl='<select '+(locked?'disabled':'name="sectionId"')+' id="schedule-section">'+data.sections.map(s=>'<option value="'+s.id+'" '+(s.id===section.id?'selected':'')+'>'+esc(s.title)+'</option>').join('')+'</select>'+(locked?'<input type="hidden" name="sectionId" value="'+attr(section.id)+'">':'');$('#editor-fields').innerHTML='<div class="field"><label>Jenis Ibadah *</label>'+sectionControl+'</div><div class="field"><label>Tanggal *</label><input type="date" name="isoDate" value="'+attr(values.isoDate||'')+'" required></div><div class="field full" id="schedule-fields">'+scheduleFieldsHtml(section,fields)+'</div>';$('#editor-preview').classList.remove('show');
+      $('#editor-preview').innerHTML='';
+      $('#editor-dialog').showModal();
+      if(state.currentEdit.entity==='activities') {
+         setTimeout(() => {
+           if(typeof renderMediaManager === 'function') renderMediaManager('media');
+         }, 100);
+      }
+    }
+
     function scheduleFieldsHtml(section,values){return '<div class="form-grid">'+section.fields.map(name=>'<div class="field"><label>'+esc(name)+'</label><input name="schedule:'+attr(name)+'" value="'+attr(values[name]||'')+'"></div>').join('')+'</div>'}
-    async function saveEditor(event){event.preventDefault();const button=event.submitter,intent=button&&button.value||'draft',form=event.currentTarget;if(!form.reportValidity())return;const snapshot=editorSnapshot(),validation=editorValidation(snapshot);if(intent==='submit'&&!validation.ready){previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujuan.');return}const data=Object.fromEntries(new FormData(form).entries());let payload;if(state.currentEdit.entity==='schedule'){payload={sectionId:data.sectionId,isoDate:data.isoDate,fields:{}};Object.keys(data).filter(k=>k.startsWith('schedule:')).forEach(k=>payload.fields[k.slice(9)]=data[k])}else{payload={};(state.entityData.fields||[]).forEach(f=>payload[f.key]=data[f.key]||'')}const buttons=$$('button[type="submit"]',form);buttons.forEach(b=>b.disabled=true);setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:state.currentEdit.entity,entityId:state.currentEdit.entityId,workflowId:state.currentEdit.workflowId,action:state.currentEdit.action,payload:payload,submit:intent==='submit'}]);$('#editor-dialog').close();toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{buttons.forEach(b=>b.disabled=false);setBusy(button,false)}}
+    async function saveEditor(event){event.preventDefault();const button=event.submitter,intent=button&&button.value||'draft',form=event.currentTarget;if(!form.reportValidity())return;const snapshot=editorSnapshot(),validation=editorValidation(snapshot);
+      const pendingUploads = $('.media-manager .upload-item.pending, .media-manager .upload-item:not(.success):not(.error)');
+      if (pendingUploads.length > 0) {
+        toast('Masih ada media yang sedang diunggah.');
+        return;
+      }
+      if(intent==='submit'&&!validation.ready){
+previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujuan.');return}const data=Object.fromEntries(new FormData(form).entries());let payload;if(state.currentEdit.entity==='schedule'){payload={sectionId:data.sectionId,isoDate:data.isoDate,fields:{}};Object.keys(data).filter(k=>k.startsWith('schedule:')).forEach(k=>payload.fields[k.slice(9)]=data[k])}else{payload={};(state.entityData.fields||[]).forEach(f=>payload[f.key]=data[f.key]||'')}const buttons=$$('button[type="submit"]',form);buttons.forEach(b=>b.disabled=true);setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:state.currentEdit.entity,entityId:state.currentEdit.entityId,workflowId:state.currentEdit.workflowId,action:state.currentEdit.action,payload:payload,submit:intent==='submit'}]);$('#editor-dialog').close();toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{buttons.forEach(b=>b.disabled=false);setBusy(button,false)}}
     async function requestDelete(id,button){if(!confirm('Ajukan penghapusan konten ini untuk persetujuan?'))return;setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:state.entity,entityId:id,action:'DELETE',payload:{},submit:true}]);toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
     async function resubmitWorkflow(id,button){const workflow=(state.entityData.workflows||[]).find(w=>w.id===id);if(!workflow)return;if(!confirm('Ajukan kembali permintaan '+(workflow.action==='DELETE'?'penghapusan':'perubahan')+' ini?'))return;setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:workflow.entity,entityId:workflow.entityId,workflowId:workflow.id,action:workflow.action,payload:workflow.payload||{},submit:true}]);toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
     async function cancelWorkflow(id,button){if(!confirm('Tarik pengajuan ini kembali menjadi draft?'))return;setBusy(button,true);try{const result=await server('adminCancelWorkflow',[id]);toast(result.message);if(state.boot&&state.boot.dashboard)state.boot.dashboard.myDrafts=Number(state.boot.dashboard.myDrafts||0)+1;await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
@@ -2141,63 +2160,7 @@
       return url;
     }
 
-    async function uploadImage(input){
-      const files=Array.from(input.files||[]);if(!files.length)return;
-      if(files.length>12)return toast('Maksimal 12 foto dalam satu unggahan.');
-      if(files.some(file=>file.size>4*1024*1024))return toast('Setiap gambar maksimal 4 MB.');
-      const target=input.dataset.imageTarget,append=input.dataset.imageMode==='append';
-      const field=$('[name="'+CSS.escape(target)+'"]',$('#editor-form'));
-      const previewList=$('#upload-preview-'+CSS.escape(target));
-      const uploaded=[];
-      $$('dialog[open] button[type="submit"], dialog[open] button[value="draft"], dialog[open] button[value="submit"]').forEach(b => { b.disabled = true; b.dataset.uploading = '1'; });
-      
-      try {
-        if(previewList && !append) previewList.innerHTML = '';
-        
-        for(let index=0;index<files.length;index++){
-          const file=files[index];
-          const kb = Math.round(file.size/1024);
-          const liId = 'upload-item-' + target + '-' + index + '-' + Date.now();
-          let thumbUrl = '';
-          try { thumbUrl = URL.createObjectURL(file); } catch (e) {}
-          const imgHtml = thumbUrl ? '<img src="'+attr(thumbUrl)+'" style="width:48px;height:48px;object-fit:cover;border-radius:6px;flex:0 0 auto;margin-right:12px">' : '';
-          
-          if(previewList) {
-            previewList.insertAdjacentHTML('beforeend', '<li id="'+liId+'" class="upload-item pending" style="justify-content:flex-start">'+imgHtml+'<div class="upload-info" style="flex:1"><span class="upload-name">'+esc(file.name)+'</span><span class="upload-size">'+kb+' KB</span></div><div class="upload-status">Mengunggah...</div></li>');
-          }
-          
-          try {
-            const base64=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(String(reader.result).split(',')[1]);reader.onerror=reject;reader.readAsDataURL(file)});
-            const result=await server('adminUploadImage',[{name:file.name,mimeType:file.type,base64:base64}],30000);
-            if(result&&result.url) {
-              uploaded.push(normalizeDriveUrl(result.url));
-              if(previewList) {
-                const li = $('#'+liId);
-                if(li) { li.className = 'upload-item success'; li.querySelector('.upload-status').textContent = 'Berhasil'; }
-              }
-            }
-          } catch(err) {
-            if(previewList) {
-              const li = $('#'+liId);
-              if(li) { li.className = 'upload-item error'; li.querySelector('.upload-status').textContent = 'Gagal: ' + cleanError(err.message); }
-            }
-          }
-        }
-        
-        if(field&&uploaded.length){
-          const existing=append?String(field.value||'').split(/\n+/).map(value=>value.trim()).filter(Boolean):[];
-          field.value=existing.concat(uploaded).slice(0,12).join('\n');
-          field.dispatchEvent(new Event('change',{bubbles:true}));
-          if(typeof renderPhotoManager === 'function') renderPhotoManager(field.name);
-        }
-        if(uploaded.length) toast(uploaded.length+' foto berhasil ditambahkan.');
-      } catch(error){
-        toast(cleanError(error.message));
-      } finally {
-        input.value='';
-        $$('dialog[open] button[data-uploading]').forEach(b => { b.disabled = false; delete b.dataset.uploading; });
-      }
-    }
+    
 
     async function loadApprovals(filter,force){if(filter)state.approvalStatus=filter;const cached=state.approvalCache[state.approvalStatus];state.approvals=!force&&cached&&Date.now()-cached.time<60000?cached.items:await server('adminListApprovals',[state.approvalStatus],10000);state.approvalCache[state.approvalStatus]={time:Date.now(),items:state.approvals};const items=state.approvals,labels={PENDING:'Menunggu',APPROVED:'Diterbitkan',REJECTED:'Perlu revisi'};$('#content').innerHTML='<div class="page-head"><div><span class="eyebrow">ALUR PUBLIKASI</span><h1>Persetujuan Konten</h1><p>Tinjau perubahan dengan cepat. Alasan revisi akan dikirim kembali kepada editor.</p></div><span class="status '+state.approvalStatus.toLowerCase()+'">'+esc(items.length)+' '+esc(labels[state.approvalStatus]||state.approvalStatus)+'</span></div><div class="approval-tabs">'+['PENDING','APPROVED','REJECTED'].map(key=>'<button class="approval-tab '+(state.approvalStatus===key?'active':'')+'" data-approval-status="'+key+'">'+esc(labels[key])+'</button>').join('')+'</div><div class="approval-list">'+(items.length?items.map(approvalHtml).join(''):emptyHtml('Belum ada item pada status ini.'))+'</div>'}
     function approvalHtml(item){const reviewer=item.reviewerEmail?'<span class="small faint">'+esc(item.reviewerEmail+' · '+item.reviewedAt)+'</span>':'';const primary=item.state==='PENDING'?'<button class="btn primary" data-open-review="'+attr(item.id)+'">Tinjau sekarang '+icon('check')+'</button>':reviewer;const remove='<button class="btn danger" data-delete-approval="'+attr(item.id)+'" aria-label="Hapus catatan persetujuan">'+icon('trash')+'Hapus</button>';return '<article class="card approval-card"><div><div class="approval-meta">'+status(item.state)+'<span>'+esc(friendlyEntity(item.entity))+'</span><span>'+esc(item.ownerName)+'</span><span>'+esc(item.updatedAt)+'</span></div><h3 style="margin-top:16px">'+esc(item.action==='DELETE'?'Penghapusan konten':'Perubahan '+friendlyEntity(item.entity))+'</h3>'+payloadHtml(item.payload)+(item.note?'<p class="workflow-note">Catatan reviewer: '+esc(item.note)+'</p>':'')+'</div><div class="button-row">'+primary+remove+'</div></article>'}
@@ -2270,3 +2233,440 @@
   </script>
 </body>
 </html>
+<script>
+/* -------------------------------------------------------------------------- */
+/* NEW MEDIA UPLOAD ENGINE (Resumable Upload)                                 */
+/* -------------------------------------------------------------------------- */
+const MEDIA_STATE = {
+  QUEUED: 'QUEUED',
+  INITIALIZING: 'INITIALIZING',
+  UPLOADING: 'UPLOADING',
+  FINALIZING: 'FINALIZING',
+  DONE: 'DONE',
+  ERROR: 'ERROR'
+};
+
+const activeUploads = new Map();
+const localObjectUrls = new Set();
+
+function revokeAllMediaUrls() {
+  localObjectUrls.forEach(url => { try { URL.revokeObjectURL(url); } catch(e){} });
+  localObjectUrls.clear();
+}
+
+function normalizeDriveUrl(url) {
+  const match = url.match(/drive\.google\.com\/uc\?export=view&id=([^&]+)/);
+  if (match) return 'https://lh3.googleusercontent.com/d/' + match[1] + '=w800';
+  return url;
+}
+
+function parseMediaField(mediaValue, photosValue) {
+  let media = [];
+  try { media = mediaValue ? JSON.parse(mediaValue) : []; } catch(e){}
+  if (!Array.isArray(media)) media = [];
+  
+  // Merge legacy photos if media is empty (backward compatibility)
+  if (media.length === 0 && photosValue) {
+    const urls = photosValue.split(/[\\n,;]+/).map(u => u.trim()).filter(Boolean);
+    let cover = '';
+    urls.forEach(u => { if(u.toUpperCase().startsWith('PRIMARY:')) cover = u.substring(8); });
+    urls.forEach(u => {
+      const clean = u.replace(/^PRIMARY:/i, '');
+      if (clean) {
+        media.push({
+          id: '',
+          name: 'Legacy Photo',
+          mimeType: 'image/jpeg',
+          size: 0,
+          url: clean,
+          primary: clean === cover,
+          legacy: true
+        });
+      }
+    });
+  }
+  return media;
+}
+
+function saveMediaField(targetKey, mediaArray) {
+  const mediaInput = $('[name="'+CSS.escape(targetKey)+'"]');
+  const photosInput = $('[name="photos"]'); // Hardcoded mapping back to photos for legacy
+  
+  if (mediaInput) mediaInput.value = JSON.stringify(mediaArray);
+  if (photosInput) {
+    const urls = mediaArray.map(m => (m.primary ? 'PRIMARY:' : '') + m.url);
+    photosInput.value = urls.join('\\n');
+  }
+}
+
+function renderMediaManager(targetKey) {
+  const container = $('#media-manager-' + CSS.escape(targetKey));
+  const mediaInput = $('[name="'+CSS.escape(targetKey)+'"]');
+  const photosInput = $('[name="photos"]');
+  if (!container || !mediaInput) return;
+  
+  let media = parseMediaField(mediaInput.value, photosInput ? photosInput.value : '');
+  
+  container.innerHTML = media.map((m, idx) => {
+    const isImage = m.mimeType.startsWith('image/');
+    const isVideo = m.mimeType.startsWith('video/');
+    const isAudio = m.mimeType.startsWith('audio/');
+    
+    let previewHtml = '';
+    if (isImage) previewHtml = '<img src="'+attr(m.url)+'" style="width:64px;height:64px;object-fit:cover;border-radius:6px;flex:0 0 auto;margin-right:12px">';
+    else if (isVideo) previewHtml = '<div style="width:64px;height:64px;background:#333;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">🎞️</div>';
+    else if (isAudio) previewHtml = '<div style="width:64px;height:64px;background:#333;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">🎵</div>';
+    else previewHtml = '<div style="width:64px;height:64px;background:#eee;color:#666;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">📄</div>';
+
+    const sizeKb = m.size ? Math.round(m.size/1024) + ' KB' : '';
+    
+    return '<div class="upload-item success" style="justify-content:flex-start; margin-bottom: 8px; position:relative">' + 
+      previewHtml + 
+      '<div class="upload-info" style="flex:1"><span class="upload-name" style="word-break:break-all">'+esc(m.name)+'</span>' +
+      (sizeKb ? '<span class="upload-size">'+sizeKb+'</span>' : '') +
+      '</div>' +
+      '<div style="display:flex;gap:8px;align-items:center">' +
+      (isImage ? '<button type="button" class="btn small soft" onclick="setPrimaryMedia(\''+attr(targetKey)+'\', '+idx+')">'+(m.primary?'★ FOTO UTAMA':'Jadikan Utama')+'</button>' : '') +
+      '<button type="button" class="btn small soft error-text" onclick="removeMedia(\''+attr(targetKey)+'\', '+idx+')">Hapus</button>' +
+      '</div></div>';
+  }).join('');
+}
+
+window.setPrimaryMedia = function(targetKey, index) {
+  const mediaInput = $('[name="'+CSS.escape(targetKey)+'"]');
+  const photosInput = $('[name="photos"]');
+  let media = parseMediaField(mediaInput.value, photosInput ? photosInput.value : '');
+  media.forEach((m, i) => m.primary = (i === index));
+  saveMediaField(targetKey, media);
+  renderMediaManager(targetKey);
+};
+
+window.removeMedia = function(targetKey, index) {
+  if (!confirm('Hapus media ini?')) return;
+  const mediaInput = $('[name="'+CSS.escape(targetKey)+'"]');
+  const photosInput = $('[name="photos"]');
+  let media = parseMediaField(mediaInput.value, photosInput ? photosInput.value : '');
+  media.splice(index, 1);
+  saveMediaField(targetKey, media);
+  renderMediaManager(targetKey);
+};
+
+async function uploadMediaFile(file, targetKey) {
+  const uploadId = 'up-' + Date.now() + '-' + Math.random().toString(36).substr(2,9);
+  const isImage = file.type.startsWith('image/');
+  const isVideo = file.type.startsWith('video/');
+  const isAudio = file.type.startsWith('audio/');
+  
+  let thumbUrl = '';
+  try { 
+    thumbUrl = URL.createObjectURL(file); 
+    localObjectUrls.add(thumbUrl);
+  } catch (e) {}
+
+  let previewHtml = '';
+  if (isImage && thumbUrl) previewHtml = '<img src="'+attr(thumbUrl)+'" style="width:64px;height:64px;object-fit:cover;border-radius:6px;flex:0 0 auto;margin-right:12px">';
+  else if (isVideo && thumbUrl) previewHtml = '<video src="'+attr(thumbUrl)+'" style="width:64px;height:64px;object-fit:cover;border-radius:6px;flex:0 0 auto;margin-right:12px" preload="metadata"></video>';
+  else if (isAudio) previewHtml = '<div style="width:64px;height:64px;background:#333;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">🎵</div>';
+  else previewHtml = '<div style="width:64px;height:64px;background:#eee;color:#666;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">📄</div>';
+
+  const container = $('#media-manager-' + CSS.escape(targetKey));
+  const el = document.createElement('div');
+  el.id = uploadId;
+  el.className = 'upload-item pending';
+  el.style.justifyContent = 'flex-start';
+  el.style.marginBottom = '8px';
+  el.style.position = 'relative';
+  
+  el.innerHTML = previewHtml + 
+    '<div class="upload-info" style="flex:1"><span class="upload-name" style="word-break:break-all">'+esc(file.name)+'</span><span class="upload-size">'+Math.round(file.size/1024)+' KB</span>' +
+    '<div class="progress-bar-bg" style="width:100%;height:4px;background:#ddd;margin-top:4px;border-radius:2px;overflow:hidden"><div class="progress-bar-fill" style="width:0%;height:100%;background:var(--accent);transition:width 0.2s"></div></div>' +
+    '</div><div class="upload-status" style="margin-left:12px;font-size:12px">Menyiapkan...</div>';
+  
+  container.appendChild(el);
+  
+  const statusEl = el.querySelector('.upload-status');
+  const progressFill = el.querySelector('.progress-bar-fill');
+
+  try {
+    // 1. Initialize session
+    statusEl.textContent = 'Inisialisasi...';
+    const initRes = await server('adminCreateMediaUploadSession', [{ name: file.name, mimeType: file.type || 'application/octet-stream', size: file.size }], 30000);
+    if (!initRes || !initRes.sessionUrl) throw new Error('Gagal mendapatkan session URL.');
+    const sessionUrl = initRes.sessionUrl;
+    
+    // 2. Chunk Upload via XHR
+    statusEl.textContent = 'Mengunggah...';
+    const CHUNK_SIZE = 16 * 1024 * 1024; // 16 MB chunk
+    let offset = 0;
+    
+    while (offset < file.size) {
+      const end = Math.min(offset + CHUNK_SIZE, file.size);
+      const chunk = file.slice(offset, end);
+      
+      let attempts = 0;
+      let success = false;
+      while (attempts < 4 && !success) {
+        attempts++;
+        try {
+          await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', sessionUrl, true);
+            xhr.setRequestHeader('Content-Range', 'bytes ' + offset + '-' + (end - 1) + '/' + file.size);
+            
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable) {
+                const percent = Math.round(((offset + e.loaded) / file.size) * 100);
+                progressFill.style.width = percent + '%';
+                statusEl.textContent = percent + '%';
+              }
+            };
+            
+            xhr.onload = () => {
+              if (xhr.status === 200 || xhr.status === 201) { success = true; resolve(); }
+              else if (xhr.status === 308) {
+                const range = xhr.getResponseHeader('Range');
+                if (range) {
+                  const match = range.match(/bytes=0-(\d+)/);
+                  if (match) offset = parseInt(match[1], 10) + 1;
+                }
+                success = true; resolve(); // We advance offset below
+              }
+              else { reject(new Error('HTTP ' + xhr.status)); }
+            };
+            xhr.onerror = () => reject(new Error('Network Error'));
+            xhr.send(chunk);
+          });
+        } catch(err) {
+          if (attempts >= 4) throw new Error('Gagal unggah chunk setelah 4 kali coba: ' + err.message);
+          statusEl.textContent = 'Retry... (' + attempts + ')';
+          await new Promise(r => setTimeout(r, Math.pow(2, attempts) * 1000));
+          // Ask server for offset if we lost track
+          try {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', sessionUrl, true);
+            xhr.setRequestHeader('Content-Range', 'bytes */' + file.size);
+            await new Promise((res, rej) => {
+              xhr.onload = () => {
+                if (xhr.status === 308) {
+                  const range = xhr.getResponseHeader('Range');
+                  if (range) {
+                    const match = range.match(/bytes=0-(\d+)/);
+                    if (match) offset = parseInt(match[1], 10) + 1;
+                  }
+                }
+                res();
+              };
+              xhr.onerror = rej;
+              xhr.send();
+            });
+          } catch(e){}
+        }
+      }
+      if (!success && offset < file.size) throw new Error('Upload gagal.');
+      if (success && offset === end - 1) offset = end; // For 308
+      else offset = end; // Normal path
+    }
+    
+    // 3. Finalize
+    statusEl.textContent = 'Finalisasi...';
+    // We don't have the fileId from the Drive response directly if we did CORS PUT,
+    // wait, Drive API returns the File JSON on 200/201.
+    // Let's do a trick: we didn't capture the response body in the loop above for 200.
+    // Let's modify the loop to capture it.
+  } catch(err) {
+    el.className = 'upload-item error';
+    statusEl.textContent = 'Gagal: ' + cleanError(err.message);
+    progressFill.style.background = '#f44336';
+  }
+}
+</script>
+<script>
+async function uploadMediaFile(file, targetKey) {
+  const uploadId = 'up-' + Date.now() + '-' + Math.random().toString(36).substr(2,9);
+  const isImage = file.type.startsWith('image/');
+  const isVideo = file.type.startsWith('video/');
+  const isAudio = file.type.startsWith('audio/');
+  
+  let thumbUrl = '';
+  try { 
+    thumbUrl = URL.createObjectURL(file); 
+    localObjectUrls.add(thumbUrl);
+  } catch (e) {}
+
+  let previewHtml = '';
+  if (isImage && thumbUrl) previewHtml = '<img src="'+attr(thumbUrl)+'" style="width:64px;height:64px;object-fit:cover;border-radius:6px;flex:0 0 auto;margin-right:12px">';
+  else if (isVideo && thumbUrl) previewHtml = '<video src="'+attr(thumbUrl)+'" style="width:64px;height:64px;object-fit:cover;border-radius:6px;flex:0 0 auto;margin-right:12px" preload="metadata"></video>';
+  else if (isAudio) previewHtml = '<div style="width:64px;height:64px;background:#333;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">🎵</div>';
+  else previewHtml = '<div style="width:64px;height:64px;background:#eee;color:#666;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">📄</div>';
+
+  const container = $('#media-manager-' + CSS.escape(targetKey));
+  const el = document.createElement('div');
+  el.id = uploadId;
+  el.className = 'upload-item pending';
+  el.style.justifyContent = 'flex-start';
+  el.style.marginBottom = '8px';
+  el.style.position = 'relative';
+  
+  el.innerHTML = previewHtml + 
+    '<div class="upload-info" style="flex:1"><span class="upload-name" style="word-break:break-all">'+esc(file.name)+'</span><span class="upload-size">'+Math.round(file.size/1024)+' KB</span>' +
+    '<div class="progress-bar-bg" style="width:100%;height:4px;background:#ddd;margin-top:4px;border-radius:2px;overflow:hidden"><div class="progress-bar-fill" style="width:0%;height:100%;background:var(--accent);transition:width 0.2s"></div></div>' +
+    '</div><div class="upload-status" style="margin-left:12px;font-size:12px">Menyiapkan...</div>';
+  
+  container.appendChild(el);
+  
+  const statusEl = el.querySelector('.upload-status');
+  const progressFill = el.querySelector('.progress-bar-fill');
+
+  try {
+    statusEl.textContent = 'Inisialisasi...';
+    const initRes = await server('adminCreateMediaUploadSession', [{ name: file.name, mimeType: file.type || 'application/octet-stream', size: file.size }], 30000);
+    if (!initRes || !initRes.sessionUrl) throw new Error('Gagal mendapatkan session URL.');
+    const sessionUrl = initRes.sessionUrl;
+    
+    statusEl.textContent = 'Mengunggah...';
+    const CHUNK_SIZE = 16 * 1024 * 1024; // 16 MB chunk
+    let offset = 0;
+    let driveFileId = '';
+    
+    while (offset < file.size) {
+      const end = Math.min(offset + CHUNK_SIZE, file.size);
+      const chunk = file.slice(offset, end);
+      
+      let attempts = 0;
+      let success = false;
+      while (attempts < 4 && !success) {
+        attempts++;
+        try {
+          await new Promise((resolve, reject) => {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', sessionUrl, true);
+            xhr.setRequestHeader('Content-Range', 'bytes ' + offset + '-' + (end - 1) + '/' + file.size);
+            
+            xhr.upload.onprogress = (e) => {
+              if (e.lengthComputable) {
+                const percent = Math.round(((offset + e.loaded) / file.size) * 100);
+                progressFill.style.width = percent + '%';
+                statusEl.textContent = percent + '%';
+              }
+            };
+            
+            xhr.onload = () => {
+              if (xhr.status === 200 || xhr.status === 201) { 
+                success = true; 
+                try {
+                  const resData = JSON.parse(xhr.responseText);
+                  driveFileId = resData.id;
+                } catch(e) {}
+                resolve(); 
+              }
+              else if (xhr.status === 308) {
+                const range = xhr.getResponseHeader('Range');
+                if (range) {
+                  const match = range.match(/bytes=0-(\d+)/);
+                  if (match) offset = parseInt(match[1], 10) + 1;
+                }
+                success = true; resolve(); 
+              }
+              else { reject(new Error('HTTP ' + xhr.status)); }
+            };
+            xhr.onerror = () => reject(new Error('Network Error'));
+            xhr.send(chunk);
+          });
+        } catch(err) {
+          if (attempts >= 4) throw new Error('Gagal unggah chunk setelah 4 kali coba: ' + err.message);
+          statusEl.textContent = 'Retry... (' + attempts + ')';
+          await new Promise(r => setTimeout(r, Math.pow(2, attempts) * 1000));
+          try {
+            const xhr = new XMLHttpRequest();
+            xhr.open('PUT', sessionUrl, true);
+            xhr.setRequestHeader('Content-Range', 'bytes */' + file.size);
+            await new Promise((res, rej) => {
+              xhr.onload = () => {
+                if (xhr.status === 308) {
+                  const range = xhr.getResponseHeader('Range');
+                  if (range) {
+                    const match = range.match(/bytes=0-(\d+)/);
+                    if (match) offset = parseInt(match[1], 10) + 1;
+                  }
+                }
+                res();
+              };
+              xhr.onerror = rej;
+              xhr.send();
+            });
+          } catch(e){}
+        }
+      }
+      if (!success && offset < file.size) throw new Error('Upload gagal.');
+      if (success && offset === end - 1) offset = end; 
+      else offset = end; 
+    }
+    
+    if (!driveFileId) throw new Error('Tidak mendapatkan ID file dari Google Drive.');
+    
+    statusEl.textContent = 'Finalisasi...';
+    const finalRes = await server('adminFinalizeMediaUpload', [{ fileId: driveFileId }], 30000);
+    
+    el.className = 'upload-item success';
+    statusEl.textContent = 'Berhasil';
+    progressFill.style.width = '100%';
+    progressFill.style.background = '#4CAF50';
+    
+    // Convert to media obj
+    const mediaObj = {
+      id: finalRes.id,
+      name: finalRes.name,
+      mimeType: finalRes.mimeType,
+      size: finalRes.size,
+      url: finalRes.url, // legacy viewer url
+      viewUrl: finalRes.viewUrl,
+      downloadUrl: finalRes.downloadUrl,
+      primary: false
+    };
+    
+    // Automatically re-render the whole block to replace the local progress item with the final synced item!
+    // Wait, if we return `mediaObj`, `uploadMediaEngine` will push to state and call `renderMediaManager`.
+    // Calling `renderMediaManager` will clear the container and rewrite EVERYTHING.
+    // That means it will wipe out OTHER active uploads' DOM elements!
+    // So we CANNOT use `renderMediaManager` while there are active uploads!
+    // We should just append to the hidden inputs directly.
+    return mediaObj;
+    
+  } catch(err) {
+    el.className = 'upload-item error';
+    statusEl.textContent = 'Gagal: ' + cleanError(err.message);
+    progressFill.style.background = '#f44336';
+    return null;
+  }
+}
+
+window.uploadMediaEngine = async function(input) {
+  const files = Array.from(input.files || []);
+  if (!files.length) return;
+  const targetKey = input.dataset.mediaTarget;
+  
+  input.value = '';
+  
+  for (const file of files) {
+    uploadMediaFile(file, targetKey).then((mediaObj) => {
+      if (mediaObj) {
+         const mediaInput = $('[name="'+CSS.escape(targetKey)+'"]');
+         const photosInput = $('[name="photos"]');
+         let media = parseMediaField(mediaInput.value, photosInput ? photosInput.value : '');
+         media.push(mediaObj);
+         saveMediaField(targetKey, media);
+         
+         // To prevent destroying other active uploads, we just replace this specific upload item's HTML
+         // with the "finalized" version (using `removeMedia` / `setPrimaryMedia` bindings).
+         const el = document.getElementById(mediaObj.id) || document.querySelector('.upload-item.success:not([data-bound])');
+         // But `renderMediaManager` does it cleanly.
+         // Let's just check if there are OTHER pending uploads.
+         const pendingUploads = $$('#media-manager-' + CSS.escape(targetKey) + ' .upload-item.pending, #media-manager-' + CSS.escape(targetKey) + ' .upload-item:not(.success):not(.error)');
+         if (pendingUploads.length === 0) {
+           renderMediaManager(targetKey);
+         }
+      }
+    });
+  }
+};
+</script>

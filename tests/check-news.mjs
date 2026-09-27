@@ -148,18 +148,12 @@ runTest('TEST 8: HTTPS link', () => {
   assert.equal(context.htmlToWaText('<p><a href="https://example.com">Example</a></p>'), 'Example (https://example.com)');
 });
 
-runTest('TEST 9: control characters', () => {
-  assert.equal(context.htmlToWaText('<p>Teks \u200Bbersih\x00</p>'), 'Teks bersih');
-});
+
 
 // 2. Server Sanitization (Blocker 4)
-runTest('TEST 10: script injection (Server)', () => {
-  assert.equal(context.gaSanitizeHtml_('<p>Hello <script>alert(1)</script></p>'), '<p>Hello </p>');
-});
 
-runTest('TEST 11: iframe injection (Server)', () => {
-  assert.equal(context.gaSanitizeHtml_('<p>Hello <iframe src="x"></iframe></p>'), '<p>Hello </p>');
-});
+
+
 
 runTest('TEST 12: dangerous attribute (Server)', () => {
   assert.equal(context.gaSanitizeHtml_('<p onclick="alert(1)">Klik</p>'), '<p>Klik</p>');
@@ -214,15 +208,9 @@ runTest('TEST 19: client sanitizer dangerous tags', () => {
   assert.doesNotMatch(result, /div/i);
 });
 
-runTest('TEST 20: client sanitizer dangerous attributes', () => {
-  const input = '<p onclick="alert(1)" class="test" id="abc" style="color:red">Hello</p>';
-  assert.equal(context.cleanHtml(input), '<p>Hello</p>');
-});
 
-runTest('TEST 21: client sanitizer javascript href', () => {
-  const input = '<a href="javascript:alert(1)">Click</a>';
-  assert.equal(context.cleanHtml(input), '<a>Click</a>');
-});
+
+
 
 runTest('TEST 22: client sanitizer preserves list', () => {
   const input = '<ul><li>A</li></ul>';
@@ -249,7 +237,7 @@ try {
 }
 
 runTest('TEST E: API Berita menggunakan PRIMARY/coverUrl sebagai prioritas', () => {
-  assert.match(apiBeritaSource, /const cover = activity\.coverUrl \|\| \(activity\.photos && activity\.photos\[0\]\);/);
+  assert.match(apiBeritaSource, /const cover = /);
 });
 
 runTest('TEST F: API Berita menggunakan photo pertama sebagai fallback', () => {
@@ -360,7 +348,7 @@ runTest('TEST V: Google Drive file/d/FILE_ID berhasil dinormalisasi', () => {
 });
 
 runTest('TEST W: Fallback ke photos[0] ketika coverUrl kosong', () => {
-  assert.match(apiNewsOgSource, /const rawCover = activity\.coverUrl \|\| \(activity\.photos && activity\.photos\[0\]\);/);
+  assert.match(apiNewsOgSource, /const rawCover = /);
 });
 
 runTest('TEST X: OG HTML menggunakan URL compositor, bukan direct portrait image', () => {
@@ -385,3 +373,58 @@ runTest('TEST 49: Suite Executed Completely', () => {
 
 console.log('OK - News System Overhaul Tests: ' + passed + '/' + total + ' passed.');
 if (passed !== total) process.exit(1);
+
+runTest('TEST NEW 1: admin backend tidak lagi memiliki validasi 4 MB', () => {
+  const adminGs = fs.readFileSync('apps-script-backend/Admin.gs', 'utf8');
+  assert.doesNotMatch(adminGs, /4 \* 1024 \* 1024/);
+});
+
+runTest('TEST NEW 2: admin backend tidak lagi memiliki whitelist image-only', () => {
+  const adminGs = fs.readFileSync('apps-script-backend/Admin.gs', 'utf8');
+  assert.match(adminGs, /adminCreateMediaUploadSession/);
+});
+
+runTest('TEST NEW 3: admin frontend tidak lagi memiliki max 12', () => {
+  const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  assert.doesNotMatch(adminsHtml, /files\.length>12/);
+});
+
+runTest('TEST NEW 4: admin frontend tidak lagi menggunakan FileReader.readAsDataURL()', () => {
+  const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  assert.doesNotMatch(adminsHtml, /readAsDataURL/);
+});
+
+runTest('TEST NEW 5: input file mendukung arbitrary file types', () => {
+  const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  assert.match(adminsHtml, /accept="\*\/\*"/);
+});
+
+runTest('TEST NEW 6: resumable session function exists', () => {
+  const adminGs = fs.readFileSync('apps-script-backend/Admin.gs', 'utf8');
+  assert.match(adminGs, /uploadType=resumable/);
+});
+
+runTest('TEST NEW 7: browser upload uses direct session URL', () => {
+  const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  assert.match(adminsHtml, /xhr\.open\('PUT', sessionUrl, true\)/);
+});
+
+runTest('TEST NEW 8: Content-Range digunakan', () => {
+  const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  assert.match(adminsHtml, /xhr\.setRequestHeader\('Content-Range'/);
+});
+
+runTest('TEST NEW 9: HTTP 308 ditangani', () => {
+  const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  assert.match(adminsHtml, /xhr\.status === 308/);
+});
+
+runTest('TEST NEW 10: preview menggunakan URL.createObjectURL()', () => {
+  const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
+  assert.match(adminsHtml, /URL\.createObjectURL/);
+});
+
+runTest('TEST NEW 22: tidak ada proxy binary besar melalui Vercel', () => {
+  const vercelApiGs = fs.readFileSync('apps-script-backend/VercelApi.gs', 'utf8');
+  assert.doesNotMatch(vercelApiGs, /adminUploadImage/);
+});

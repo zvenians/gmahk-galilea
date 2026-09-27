@@ -41,7 +41,8 @@ function gaEntityDefinitions_() {
         gaField_('location', 'Lokasi', 2, 'text', false),
         gaField_('description', 'Isi Berita', 3, 'textarea', true),
         gaField_('url', 'Tautan', 4, 'url', false),
-        gaField_('photos', 'Foto Berita', 6, 'images', false)
+        gaField_('photos', 'Foto Berita', 6, 'hidden', false),
+        gaField_('media', 'Media', 8, 'media', false)
       ], statusColumn: 5, idColumn: 7
     },
     themeSong: {
@@ -686,12 +687,12 @@ function gaApplyWorkflow_(spreadsheet, entity, entityId, action, payload) {
   }
   const newId = /^NEW-/i.test(entityId) || !entityId ? gaId_(entity.slice(0, 3).toUpperCase()) : entityId;
   if (!row) row = sheet.getLastRow() + 1;
-  const width = definition.idColumn + 1;
-  const existing = row <= sheet.getLastRow() ? sheet.getRange(row, 1, 1, width).getValues()[0] : new Array(width).fill('');
+  const maxWidth = Math.max.apply(null, [definition.idColumn + 1, definition.statusColumn + 1].concat(definition.fields.map(function(f) { return f.column + 1; })));
+  const existing = row <= sheet.getLastRow() ? sheet.getRange(row, 1, 1, maxWidth).getValues()[0] : new Array(maxWidth).fill('');
   definition.fields.forEach(function (field) { existing[field.column] = gaSheetValue_(field, payload[field.key]); });
   existing[definition.statusColumn] = 'PUBLISH';
   existing[definition.idColumn] = newId;
-  sheet.getRange(row, 1, 1, width).setValues([existing]);
+  sheet.getRange(row, 1, 1, maxWidth).setValues([existing]);
   return { id: newId, row: row };
 }
 
@@ -1031,21 +1032,7 @@ function adminDeleteUser(id) {
 /* Media, sistem, dan backup                                                   */
 /* -------------------------------------------------------------------------- */
 
-function adminUploadImage(filePayload) {
-  const user = gaRequireRole_('EDITOR');
-  const payload = filePayload && typeof filePayload === 'object' ? filePayload : {};
-  const mime = String(payload.mimeType || '');
-  if (!/^image\/(?:png|jpe?g|webp|gif)$/i.test(mime)) throw new Error('Format gambar harus PNG, JPG, WEBP, atau GIF.');
-  const bytes = Utilities.base64Decode(String(payload.base64 || ''));
-  if (!bytes.length || bytes.length > 4 * 1024 * 1024) throw new Error('Ukuran gambar maksimal 4 MB.');
-  const folder = gaImageFolder_();
-  const safeName = String(payload.name || 'gambar').replace(/[^a-zA-Z0-9._-]+/g, '-').slice(0, 100);
-  const file = folder.createFile(Utilities.newBlob(bytes, mime, Date.now() + '-' + safeName));
-  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
-  const url = 'https://drive.google.com/uc?export=view&id=' + file.getId();
-  gaAudit_(user, 'UPLOAD_IMAGE', 'media', file.getId(), safeName);
-  return { id: file.getId(), name: file.getName(), url: url };
-}
+
 
 function gaImageFolder_() {
   const properties = PropertiesService.getScriptProperties();
@@ -1137,4 +1124,82 @@ function gaAuditRaw_(spreadsheet, email, name, action, entity, entityId, detail)
   const sheet = spreadsheet.getSheetByName(GA.SHEETS.audit) || gaEnsureSheet_(spreadsheet, GA.SHEETS.audit,
     ['ID', 'Waktu', 'Email', 'Nama', 'Aksi', 'Entitas', 'ID Entitas', 'Detail']);
   sheet.appendRow([gaId_('LOG'), new Date(), email, name, action, entity, entityId, String(detail || '').slice(0, 1500)]);
+}
+ 
+function adminCreateMediaUploadSession(payload) {
+  const user = gaRequireRole_('EDITOR');
+  const data = payload && typeof payload === 'object' ? payload : {};
+  const name = String(data.name || 'media').trim();
+  const mimeType = String(data.mimeType || 'application/octet-stream');
+  const safeName = name.replace(/[^\p{L}\p{N}._ -]/gu, '-').slice(0, 200);
+  const folder = gaImageFolder_();
+  const folderId = folder.getId();
+  const token = ScriptApp.getOAuthToken();
+  const metadata = {
+    name: Date.now() + '-' + safeName,
+    mimeType: mimeType,
+    parents: [folderId]
+  };
+  const options = {
+    method: 'post',
+    contentType: 'application/json',
+    headers: {
+      Authorization: 'Bearer ' + token,
+      'X-Upload-Content-Type': mimeType,
+      'X-Upload-Content-Length': data.size ? String(data.size) : ''
+    },
+    payload: JSON.stringify(metadata),
+    muteHttpExceptions: true
+  };
+  const response = UrlFetchApp.fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable', options);
+  if (response.getResponseCode() !== 200) {
+    throw new Error('Gagal menginisialisasi sesi upload: ' + response.getContentText());
+  }
+  const headers = response.getHeaders();
+  const sessionUrl = headers['Location'] || headers['location'];
+  if (!sessionUrl) {
+    throw new Error('Session URL tidak ditemukan dari respons Google Drive.');
+  }
+  return { ok: true, sessionUrl: sessionUrl, folderId: folderId };
+}
+
+function adminFinalizeMediaUpload(payload) {
+  const user = gaRequireRole_('EDITOR');
+  const data = payload && typeof payload === 'object' ? payload : {};
+  const fileId = String(data.fileId || '');
+  if (!fileId) throw new Error('File ID kosong.');
+  let file;
+  try {
+    file = DriveApp.getFileById(fileId);
+  } catch (e) {
+    throw new Error('File tidak ditemukan di Google Drive.');
+  }
+  const folder = gaImageFolder_();
+  let inFolder = false;
+  const parents = file.getParents();
+  while (parents.hasNext()) {
+    if (parents.next().getId() === folder.getId()) {
+      inFolder = true;
+      break;
+    }
+  }
+  if (!inFolder) throw new Error('File tidak berada pada folder media Galilea.');
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+  const finalMime = file.getMimeType();
+  const finalSize = file.getSize();
+  const finalName = file.getName();
+  const url = 'https://drive.google.com/uc?export=view&id=' + fileId;
+  const viewUrl = file.getUrl();
+  const downloadUrl = file.getDownloadUrl();
+  gaAudit_(user, 'UPLOAD_MEDIA', 'media', fileId, finalName);
+  return {
+    ok: true,
+    id: fileId,
+    name: finalName,
+    mimeType: finalMime,
+    size: finalSize,
+    url: url,
+    viewUrl: viewUrl,
+    downloadUrl: downloadUrl
+  };
 }
