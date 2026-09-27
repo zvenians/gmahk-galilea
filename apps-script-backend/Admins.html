@@ -1233,8 +1233,38 @@
     padding: 10px; border-radius: var(--radius-sm); background: var(--surface-2);
     font-size: 13px; border: 1px solid var(--line);
   }
-  .upload-info { display: flex; flex-direction: column; gap: 2px }
-  .upload-name { font-weight: 500; color: var(--text); word-break: break-all }
+  .upload-info { display: flex; flex-direction: column; gap: 2px; flex: 1 1 auto; min-width: 0; }
+  .upload-name { font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .media-thumb {
+    position: relative;
+    flex: 0 0 auto;
+    overflow: hidden;
+    background: var(--surface-3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    margin-right: 12px;
+  }
+  .media-thumb.sq-64 { width: 64px; height: 64px; }
+  .media-thumb img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  .media-thumb-broken {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+    color: var(--faint);
+    font-size: 20px;
+    text-align: center;
+  }
   .upload-size { color: var(--faint); font-size: 11px }
   .upload-status { font-weight: 500 }
   .upload-item.pending .upload-status { color: var(--faint) }
@@ -1795,7 +1825,7 @@
       const urls=textarea.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
       manager.innerHTML=urls.length?urls.map((url,idx)=>{
         const isPrimary=url.toUpperCase().startsWith('PRIMARY:'),cleanUrl=url.replace(/^PRIMARY:/i,'');
-        return '<div class="photo-thumb '+(isPrimary?'is-primary':'')+'"><img src="'+attr(cleanUrl)+'" loading="lazy"><div class="photo-thumb-actions">'+(isPrimary?'<span class="photo-badge-primary">FOTO UTAMA</span>':'<button type="button" class="btn-set-primary" onclick="setPrimaryPhoto(\''+attr(key)+'\','+idx+')">Jadikan Utama</button>')+'</div><button type="button" class="btn-remove-photo" title="Hapus foto" onclick="removePhoto(\''+attr(key)+'\','+idx+')">'+icon('trash')+'</button></div>';
+        return '<div class="photo-thumb '+(isPrimary?'is-primary':'')+'"><img src="'+attr(cleanUrl)+'" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>⚠️</div>\'"><div class="photo-thumb-actions">'+(isPrimary?'<span class="photo-badge-primary">FOTO UTAMA</span>':'<button type="button" class="btn-set-primary" onclick="setPrimaryPhoto(\''+attr(key)+'\','+idx+')">Jadikan Utama</button>')+'</div><button type="button" class="btn-remove-photo" title="Hapus foto" onclick="removePhoto(\''+attr(key)+'\','+idx+')">'+icon('trash')+'</button></div>';
       }).join(''):'<div class="v18-empty" style="grid-column: 1 / -1; padding: 16px;">Belum ada foto yang dipilih.</div>';
     }
     window.setPrimaryPhoto=function(key,index){
@@ -2033,16 +2063,16 @@ function renderMediaManager(targetKey) {
     const isAudio = m.mimeType.startsWith('audio/');
     
     let previewHtml = '';
-    if (isImage) previewHtml = '<img src="'+attr(m.url)+'" style="width:64px;height:64px;object-fit:cover;border-radius:6px;flex:0 0 auto;margin-right:12px">';
-    else if (isVideo) previewHtml = '<div style="width:64px;height:64px;background:#333;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">🎞️</div>';
-    else if (isAudio) previewHtml = '<div style="width:64px;height:64px;background:#333;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">🎵</div>';
-    else previewHtml = '<div style="width:64px;height:64px;background:#eee;color:#666;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">📄</div>';
+    if (isImage) previewHtml = '<div class="media-thumb sq-64"><img src="'+attr(m.url)+'" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>⚠️</div>\'"></div>';
+    else if (isVideo) previewHtml = '<div class="media-thumb sq-64" style="background:#333;color:#fff;font-size:24px;">🎞️</div>';
+    else if (isAudio) previewHtml = '<div class="media-thumb sq-64" style="background:#333;color:#fff;font-size:24px;">🎵</div>';
+    else previewHtml = '<div class="media-thumb sq-64" style="font-size:24px;">📄</div>';
 
     const sizeKb = m.size ? Math.round(m.size/1024) + ' KB' : '';
     
     return '<div class="upload-item success" style="justify-content:flex-start; margin-bottom: 8px; position:relative">' + 
       previewHtml + 
-      '<div class="upload-info" style="flex:1"><span class="upload-name" style="word-break:break-all">'+esc(m.name)+'</span>' +
+      '<div class="upload-info"><span class="upload-name">'+esc(m.name)+'</span>' +
       (sizeKb ? '<span class="upload-size">'+sizeKb+'</span>' : '') +
       '</div>' +
       '<div style="display:flex;gap:8px;align-items:center">' +
@@ -2089,10 +2119,10 @@ async function uploadMediaFile(file, targetKey) {
   } catch (e) {}
 
   let previewHtml = '';
-  if (isImage && thumbUrl) previewHtml = '<img src="'+attr(thumbUrl)+'" style="width:64px;height:64px;object-fit:cover;border-radius:6px;flex:0 0 auto;margin-right:12px">';
-  else if (isVideo && thumbUrl) previewHtml = '<video src="'+attr(thumbUrl)+'" style="width:64px;height:64px;object-fit:cover;border-radius:6px;flex:0 0 auto;margin-right:12px" preload="metadata"></video>';
-  else if (isAudio) previewHtml = '<div style="width:64px;height:64px;background:#333;color:#fff;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">🎵</div>';
-  else previewHtml = '<div style="width:64px;height:64px;background:#eee;color:#666;display:flex;align-items:center;justify-content:center;border-radius:6px;margin-right:12px;font-size:24px;">📄</div>';
+  if (isImage && thumbUrl) previewHtml = '<div class="media-thumb sq-64"><img src="'+attr(thumbUrl)+'" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>⚠️</div>\'"></div>';
+  else if (isVideo && thumbUrl) previewHtml = '<video src="'+attr(thumbUrl)+'" class="media-thumb sq-64" preload="metadata"></video>';
+  else if (isAudio) previewHtml = '<div class="media-thumb sq-64" style="background:#333;color:#fff;font-size:24px;">🎵</div>';
+  else previewHtml = '<div class="media-thumb sq-64" style="font-size:24px;">📄</div>';
 
   const container = $('#media-manager-' + CSS.escape(targetKey));
   const el = document.createElement('div');
@@ -2103,7 +2133,7 @@ async function uploadMediaFile(file, targetKey) {
   el.style.position = 'relative';
   
   el.innerHTML = previewHtml + 
-    '<div class="upload-info" style="flex:1"><span class="upload-name" style="word-break:break-all">'+esc(file.name)+'</span><span class="upload-size">'+Math.round(file.size/1024)+' KB</span>' +
+    '<div class="upload-info"><span class="upload-name">'+esc(file.name)+'</span><span class="upload-size">'+Math.round(file.size/1024)+' KB</span>' +
     '<div class="progress-bar-bg" style="width:100%;height:4px;background:#ddd;margin-top:4px;border-radius:2px;overflow:hidden"><div class="progress-bar-fill" style="width:0%;height:100%;background:var(--accent);transition:width 0.2s"></div></div>' +
     '</div><div class="upload-status" style="margin-left:12px;font-size:12px">Menyiapkan...</div>';
   
