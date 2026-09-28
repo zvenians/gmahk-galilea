@@ -2449,6 +2449,8 @@ window.uploadImage = async function(input) {
                     if (range) {
                       const match = range.match(/bytes=0-(\d+)/);
                       if (match) offset = parseInt(match[1], 10) + 1;
+                    } else {
+                      offset += chunk.size;
                     }
                     resolve(); 
                   } else if (xhr.status === 404) {
