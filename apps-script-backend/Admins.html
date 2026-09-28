@@ -1762,8 +1762,13 @@
       let thumbSrc = values.photoUrl || values.imageUrl || values.image || values.photo;
       if (!thumbSrc && values.photos) {
         try {
-          const arr = values.photos.split('\n').filter(Boolean);
-          if (arr.length) thumbSrc = arr[0].replace('PRIMARY:', '');
+          const arr = values.photos.split('\n').map(u => u.trim()).filter(Boolean);
+          const primary = arr.find(u => /^PRIMARY:/i.test(u));
+          if (primary) {
+            thumbSrc = primary.replace(/^PRIMARY:/i, '');
+          } else if (arr.length) {
+            thumbSrc = arr[0].replace(/^PRIMARY:/i, '');
+          }
         } catch(e) {}
       }
       if (thumbSrc) {
@@ -1856,7 +1861,7 @@
     }
     window.renderPhotoManager = renderPhotoManager;
     function renderPhotoManager(key){
-      const textarea=$('[name="'+CSS.escape(key)+'"'),manager=$('#photo-manager-'+CSS.escape(key));
+      const textarea=$('[name="'+CSS.escape(key)+'"]'),manager=$('#photo-manager-'+CSS.escape(key));
       if(!textarea||!manager)return;
       const urls=textarea.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
       manager.className='photo-list';
