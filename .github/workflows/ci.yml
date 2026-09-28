@@ -98,6 +98,33 @@ jobs:
           
           echo "Deploying Admin to version $VERSION..."
           clasp deploy -i "$DEPLOYMENT_ID_ADMIN" -V "$VERSION" -d "Admin: GitHub $GITHUB_SHA"
+          
+          echo "Verifying Admin Deployment..."
+          clasp deployments > deployments.txt
+          cat deployments.txt
+          
+          DEPLOY_LINE=$(grep "$DEPLOYMENT_ID_ADMIN" deployments.txt | grep -v 'web app meta-version' || true)
+          
+          if [ -z "$DEPLOY_LINE" ]; then
+            echo "Error: DEPLOYMENT_ID_ADMIN not found in deployment list!"
+            exit 1
+          fi
+          
+          echo "Found deployment: $DEPLOY_LINE"
+          
+          if echo "$DEPLOY_LINE" | grep -q "@$VERSION"; then
+            echo "Version verified: $VERSION"
+          else
+            echo "Error: Version Mismatch! Expected @$VERSION"
+            exit 1
+          fi
+          
+          if echo "$DEPLOY_LINE" | grep -q "$GITHUB_SHA"; then
+            echo "Description verified: $GITHUB_SHA"
+          else
+            echo "Error: Description Mismatch! Expected $GITHUB_SHA"
+            exit 1
+          fi
         env:
           DEPLOYMENT_ID_ADMIN: ${{ secrets.DEPLOYMENT_ID_ADMIN }}
 
