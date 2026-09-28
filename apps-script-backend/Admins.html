@@ -2124,7 +2124,7 @@ function saveMediaField(targetKey, mediaArray) {
   if (mediaInput) mediaInput.value = JSON.stringify(mediaArray);
   if (photosInput) {
     const urls = mediaArray.map(m => (m.primary ? 'PRIMARY:' : '') + m.url);
-    photosInput.value = urls.join('\\n');
+    photosInput.value = urls.join('\n');
   }
 }
 
