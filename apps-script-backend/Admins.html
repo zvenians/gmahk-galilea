@@ -1274,6 +1274,15 @@
   .upload-item.pending .upload-status { color: var(--faint) }
   .upload-item.success .upload-status { color: var(--success) }
   .upload-item.error .upload-status { color: var(--danger) }
+  .upload-item.success { background: var(--success-soft); border-color: color-mix(in srgb, var(--success) 30%, var(--line)) }
+  .upload-item.error { background: var(--danger-soft); border-color: color-mix(in srgb, var(--danger) 30%, var(--line)) }
+  .upload-item.is-primary { border-color: var(--accent) !important; border-width: 2px !important; background: var(--accent-soft) !important }
+  .photo-primary-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 999px; background: var(--accent); color: #fff; font-size: 10px; font-weight: 700 }
+  .btn-set-primary-row { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); font-size: 10px; font-weight: 600; cursor: pointer; color: var(--text); transition: all var(--dur) var(--ease) }
+  .btn-set-primary-row:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-soft) }
+  .btn-remove-photo-row { display: inline-flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--line); background: var(--surface); font-size: 11px; cursor: pointer; color: var(--soft); transition: all var(--dur) var(--ease); flex: 0 0 auto }
+  .btn-remove-photo-row:hover { border-color: var(--danger); color: var(--danger); background: var(--danger-soft) }
+  .photo-list { display: grid; gap: 6px; margin: 8px 0 }
 
   /* Media manager */
   .media-manager { display: grid; gap: 6px; margin: 8px 0 }
@@ -1847,13 +1856,27 @@
     }
     window.renderPhotoManager = renderPhotoManager;
     function renderPhotoManager(key){
-      const textarea=$('[name="'+CSS.escape(key)+'"]'),manager=$('#photo-manager-'+CSS.escape(key));
+      const textarea=$('[name="'+CSS.escape(key)+'"'),manager=$('#photo-manager-'+CSS.escape(key));
       if(!textarea||!manager)return;
       const urls=textarea.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
-      manager.innerHTML=urls.length?urls.map((url,idx)=>{
-        const isPrimary=url.toUpperCase().startsWith('PRIMARY:'),cleanUrl=url.replace(/^PRIMARY:/i,'');
-        return '<div class="photo-thumb '+(isPrimary?'is-primary':'')+'"><img src="'+attr(cleanUrl)+'" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>⚠️</div>\'"><div class="photo-thumb-actions">'+(isPrimary?'<span class="photo-badge-primary">FOTO UTAMA</span>':'<button type="button" class="btn-set-primary" onclick="setPrimaryPhoto(\''+attr(key)+'\','+idx+')">Jadikan Utama</button>')+'</div><button type="button" class="btn-remove-photo" title="Hapus foto" onclick="removePhoto(\''+attr(key)+'\','+idx+')">'+icon('trash')+'</button></div>';
-      }).join(''):'<div class="v18-empty" style="grid-column: 1 / -1; padding: 16px;">Belum ada foto yang dipilih.</div>';
+      manager.className='photo-list';
+      if(!urls.length){manager.innerHTML='<div style="padding:12px;color:var(--faint);font-size:0.75rem">Belum ada foto. Gunakan tombol Pilih Foto di bawah.</div>';return;}
+      manager.innerHTML=urls.map((url,idx)=>{
+        const isPrimary=url.toUpperCase().startsWith('PRIMARY:');
+        const cleanUrl=url.replace(/^PRIMARY:/i,'');
+        const rawName=cleanUrl.split('/').pop().split('?')[0]||'foto';
+        let fname='Foto '+(idx+1);try{fname=decodeURIComponent(rawName)}catch(e){fname=rawName}
+        const pBtn=isPrimary?'<span class="photo-primary-badge">&#9733; FOTO UTAMA</span>':'<button type="button" class="btn-set-primary-row" onclick="setPrimaryPhoto(\''+attr(key)+'\','+idx+')">Jadikan Utama</button>';
+        return '<div class="upload-item success'+(isPrimary?' is-primary':'')+'" style="justify-content:flex-start">'+
+          '<div class="media-thumb sq-64"><img src="'+attr(cleanUrl)+'" loading="lazy" onerror="this.parentElement.textContent=\'\u26a0\'"></div>'+
+          '<div class="upload-info" style="flex:1;min-width:0;margin-left:10px">'+
+          '<span class="upload-name">'+esc(fname)+'</span>'+
+          '<span class="upload-status" style="color:var(--success)">&#10003; Tersimpan</span>'+
+          '<div style="margin-top:4px">'+pBtn+'</div>'+
+          '</div>'+
+          '<button type="button" class="btn-remove-photo-row" title="Hapus" onclick="removePhoto(\''+attr(key)+'\','+idx+')">&times;</button>'+
+          '</div>';
+      }).join('');
     }
     window.setPrimaryPhoto=function(key,index){
       const textarea=$('[name="'+CSS.escape(key)+'"]');if(!textarea)return;
@@ -2343,7 +2366,7 @@ async function uploadMediaFile(file, targetKey) {
     el.className = 'upload-item success';
     statusEl.textContent = 'Berhasil';
     progressFill.style.width = '100%';
-    progressFill.style.background = '#4CAF50';
+    progressFill.style.background = 'var(--success)';
     
     return {
       id: finalRes.id,
@@ -2360,7 +2383,7 @@ async function uploadMediaFile(file, targetKey) {
     window.mediaUploadStates[uploadId] = 'ERROR';
     el.className = 'upload-item error';
     statusEl.textContent = 'Gagal: ' + cleanError(err.message);
-    progressFill.style.background = '#f44336';
+    progressFill.style.background = 'var(--danger)';
     return null;
   }
 }
@@ -2381,24 +2404,24 @@ window.uploadImage = async function(input) {
     let thumbUrl = '';
     try { thumbUrl = URL.createObjectURL(file); } catch(e){}
     
-    const pendingHtml = '<li class="upload-item pending" style="justify-content:flex-start; margin-bottom: 8px; animation: fadeIn 0.3s ease; border: 1px solid var(--line-light); padding: 8px; border-radius: var(--radius-sm); display: flex; align-items: center;">' +
-      '<div class="media-thumb sq-64" style="margin-right: 12px; border-radius: 4px; overflow: hidden; width: 64px; height: 64px; flex-shrink: 0;"><img src="'+attr(thumbUrl)+'" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>?</div>\'"></div>' +
-      '<div class="upload-info" style="flex: 1"><div class="upload-name" style="font-weight: 500; font-size: 13px">'+esc(file.name)+'</div>' +
-      '<div style="font-size: 11px; color: var(--soft); margin-bottom: 6px">' + (file.size / 1024 / 1024).toFixed(2) + ' MB</div>' +
-      '<div class="progress-bar-bg" style="width:100%;height:6px;background:#e0e0e0;border-radius:3px;overflow:hidden"><div class="progress-bar-fill" style="width:0%;height:100%;background:var(--accent);transition:width 0.2s, background 0.2s"></div></div>' +
-      '</div><div class="upload-status" style="margin-left:16px;font-size:12px;font-weight:600;min-width:70px;text-align:right">Menunggu</div></li>';
-      
+    // Build upload item element directly for reliable DOM reference
+    const li = document.createElement(isMultiple ? 'div' : 'li');
+    li.className = 'upload-item pending';
+    li.style.cssText = 'justify-content:flex-start;margin-bottom:8px;display:flex;align-items:center';
+    li.innerHTML =
+      '<div class="media-thumb sq-64" style="flex-shrink:0"><img src="'+attr(thumbUrl)+'" loading="lazy" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.textContent=\'\u26a0\'"></div>'+
+      '<div class="upload-info" style="flex:1;min-width:0;margin-left:12px">'+
+        '<div class="upload-name" style="font-weight:500;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(file.name)+'</div>'+
+        '<div style="font-size:11px;color:var(--faint);margin-bottom:4px">'+(file.size/1024/1024).toFixed(2)+' MB</div>'+
+        '<div class="progress-bar-bg" style="width:100%;height:5px;background:var(--line);border-radius:3px;overflow:hidden"><div class="progress-bar-fill" style="width:0%;height:100%;background:var(--accent);transition:width 0.2s"></div></div>'+
+      '</div>'+
+      '<div class="upload-status" style="margin-left:12px;font-size:11px;font-weight:600;min-width:64px;text-align:right;flex-shrink:0">Menyiapkan...</div>';
     if (isMultiple) {
-      let existingPrimary = previewList.querySelector('.photo-thumb.is-primary');
-      if (existingPrimary) existingPrimary.style.display = 'none';
-      const div = document.createElement('div');
-      div.innerHTML = pendingHtml;
-      previewList.appendChild(div.firstElementChild);
+      previewList.appendChild(li);
     } else {
-      previewList.innerHTML = pendingHtml;
+      previewList.innerHTML = '';
+      previewList.appendChild(li);
     }
-    
-    const li = isMultiple ? previewList.lastElementChild : previewList.firstElementChild;
     const statusEl = li.querySelector('.upload-status');
     const progressFill = li.querySelector('.progress-bar-fill');
     
@@ -2613,26 +2636,18 @@ window.uploadImage = async function(input) {
         progressFill.style.background = 'var(--accent)';
         
         if (isMultiple) {
+          // Append URL (primary only if first)
           let urls = urlInput.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
-          let primaryIndex = urls.findIndex(u => u.toUpperCase().startsWith('PRIMARY:'));
-          if (primaryIndex >= 0) {
-            urls[primaryIndex] = 'PRIMARY:' + finalRes.url;
+          const hasPrimary = urls.some(u => u.toUpperCase().startsWith('PRIMARY:'));
+          if (!hasPrimary) {
+            urls.push('PRIMARY:' + finalRes.url);
           } else {
-            urls.unshift('PRIMARY:' + finalRes.url);
+            urls.push(finalRes.url);
           }
           urlInput.value = urls.join('\n');
-          
-          const removeBtn = document.createElement('button');
-          removeBtn.type = 'button';
-          removeBtn.className = 'btn small soft error-text';
-          removeBtn.textContent = 'Hapus dari daftar';
-          removeBtn.style.marginTop = '8px';
-          removeBtn.onclick = () => {
-             li.remove();
-             let currentUrls = urlInput.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
-             urlInput.value = currentUrls.filter(u => !u.includes(finalRes.url)).join('\n');
-          };
-          li.querySelector('.upload-info').appendChild(removeBtn);
+          // Remove pending item and refresh photo grid
+          li.remove();
+          if (typeof renderPhotoManager === 'function') renderPhotoManager(targetKey);
         } else {
           urlInput.value = finalRes.url;
           const removeBtn = document.createElement('button');
@@ -2640,21 +2655,18 @@ window.uploadImage = async function(input) {
           removeBtn.className = 'btn small soft error-text';
           removeBtn.textContent = 'Hapus';
           removeBtn.style.marginTop = '8px';
-          removeBtn.onclick = () => {
-            urlInput.value = '';
-            previewList.innerHTML = '';
-          };
+          removeBtn.onclick = () => { urlInput.value = ''; previewList.innerHTML = ''; };
           li.querySelector('.upload-info').appendChild(removeBtn);
         }
         
       } catch(err) {
         li.className = 'upload-item error';
         statusEl.textContent = 'Gagal';
-        statusEl.style.color = '#f44336';
-        progressFill.style.background = '#f44336';
+        statusEl.style.color = 'var(--danger)';
+        progressFill.style.background = 'var(--danger)';
         
         const errorDetail = document.createElement('div');
-        errorDetail.style.color = '#f44336';
+        errorDetail.style.color = 'var(--danger)';
         errorDetail.style.fontSize = '11px';
         errorDetail.style.marginTop = '4px';
         errorDetail.textContent = typeof cleanError === 'function' ? cleanError(err.message) : err.message;
