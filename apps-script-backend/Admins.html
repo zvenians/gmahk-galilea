@@ -2412,29 +2412,89 @@ window.uploadImage = async function(input) {
         
         statusEl.textContent = 'Mengunggah...';
         const CHUNK_SIZE = 8 * 1024 * 1024;
-        let offset = 0;
-        let driveFileId = '';
+        const MAX_STALL_COUNT = 5;
+        const MAX_SESSION_RECOVERY = 3;
+        const MAX_STATUS_QUERY = 10;
+        const MAX_RETRIES = 4;
         
+        let offset = 0; 
+        let driveFileId = '';
+        let stallCount = 0;
+        let recoveryCount = 0;
+        let globalQueryCount = 0;
+
+        const queryUploadStatus = async (url, size) => {
+          if (globalQueryCount >= MAX_STATUS_QUERY) {
+            throw new Error('FATAL: Upload dihentikan karena osilasi / terlalu banyak status query.');
+          }
+          globalQueryCount++;
+          
+          return new Promise((resolve, reject) => {
+            const q = new XMLHttpRequest();
+            q.open('PUT', url, true);
+            q.setRequestHeader('Content-Range', 'bytes */' + size);
+            q.timeout = 30000;
+            
+            q.onload = () => {
+              if (q.status === 200 || q.status === 201) {
+                try {
+                  const res = JSON.parse(q.responseText);
+                  if (res.id) resolve({ status: 'completed', fileId: res.id });
+                  else reject(new Error('Invalid response JSON'));
+                } catch(e) { reject(new Error('Invalid response JSON')); }
+              } else if (q.status === 308) {
+                const r = q.getResponseHeader('Range');
+                if (r) {
+                  const m = r.match(/^bytes=0-(\d+)$/);
+                  if (m) {
+                    const n = parseInt(m[1], 10);
+                    if (!isNaN(n) && n >= 0 && n < size) {
+                      resolve({ status: 'incomplete', nextOffset: n + 1 });
+                      return;
+                    }
+                  }
+                  reject(new Error('Malformed Range pada status query'));
+                } else {
+                  resolve({ status: 'incomplete', nextOffset: 0 }); 
+                }
+              } else if (q.status === 404) {
+                resolve({ status: 'session_expired' });
+              } else {
+                reject(new Error('Status query gagal: HTTP ' + q.status));
+              }
+            };
+            
+            q.ontimeout = () => reject(new Error('Status query timeout'));
+            q.onerror = () => reject(new Error('Network error saat query status'));
+            q.send(null);
+          });
+        };
+
         while (offset < file.size) {
           const end = Math.min(offset + CHUNK_SIZE, file.size);
           const chunk = file.slice(offset, end);
           let attempts = 0;
           let chunkSuccess = false;
+          let serverConfirmedOffset = offset;
           
-          while (attempts < 4 && !chunkSuccess) {
+          while (attempts < MAX_RETRIES && !chunkSuccess) {
             attempts++;
             try {
+              let queryNeeded = false;
               await new Promise((resolve, reject) => {
                 const xhr = new XMLHttpRequest();
                 xhr.open('PUT', sessionUrl, true);
                 xhr.setRequestHeader('Content-Range', 'bytes ' + offset + '-' + (end - 1) + '/' + file.size);
+                xhr.timeout = 60000;
+                
                 xhr.upload.onprogress = (e) => {
                   if (e.lengthComputable) {
-                    const percent = Math.round(((offset + e.loaded) / file.size) * 100);
-                    progressFill.style.width = percent + '%';
-                    statusEl.textContent = percent + '%';
+                    const localPercent = Math.round(((offset + e.loaded) / file.size) * 100);
+                    progressFill.style.width = localPercent + '%';
+                    statusEl.textContent = localPercent + '%';
                   }
                 };
+                
                 xhr.onload = () => {
                   if (xhr.status === 200 || xhr.status === 201) { 
                     chunkSuccess = true; 
@@ -2444,31 +2504,96 @@ window.uploadImage = async function(input) {
                     } catch(e) {}
                     resolve(); 
                   } else if (xhr.status === 308) {
-                    chunkSuccess = true;
                     const range = xhr.getResponseHeader('Range');
+                    let validRange = false;
                     if (range) {
-                      const match = range.match(/bytes=0-(\d+)/);
-                      if (match) offset = parseInt(match[1], 10) + 1;
-                    } else {
-                      offset += chunk.size;
+                      const match = range.match(/^bytes=0-(\d+)$/);
+                      if (match) {
+                        const n = parseInt(match[1], 10);
+                        if (!isNaN(n) && n >= 0 && n < file.size) {
+                          const proposedNext = n + 1;
+                          if (proposedNext >= offset && proposedNext <= end) { 
+                            serverConfirmedOffset = proposedNext;
+                            chunkSuccess = true;
+                            validRange = true;
+                          } else {
+                            console.log('INCONSISTENT RANGE', 'localOffset:', offset, 'chunkEnd:', end, 'responseRange:', range, 'proposedNext:', proposedNext, 'action: STATUS_QUERY');
+                          }
+                        }
+                      }
                     }
-                    resolve(); 
+                    if (!validRange) queryNeeded = true;
+                    resolve();
                   } else if (xhr.status === 404) {
-                    reject(new Error('HTTP 404 Session Expired'));
-                  } else { reject(new Error('HTTP ' + xhr.status + ': Upload Ditolak Google Drive')); }
+                    reject(new Error('RESTART_SESSION: HTTP 404 Session Expired'));
+                  } else if (xhr.status === 429 || (xhr.status === 403 && (xhr.responseText.includes('rateLimitExceeded') || xhr.responseText.includes('userRateLimitExceeded')))) {
+                    queryNeeded = true; 
+                    resolve();
+                  } else if (xhr.status === 403) {
+                    reject(new Error('FATAL: HTTP 403 Forbidden'));
+                  } else if (xhr.status >= 400 && xhr.status < 500) {
+                    reject(new Error('RESTART_SESSION: HTTP ' + xhr.status));
+                  } else if (xhr.status >= 500 && xhr.status < 600) {
+                    queryNeeded = true;
+                    resolve();
+                  } else {
+                    reject(new Error('FATAL: HTTP ' + xhr.status + ' Upload Ditolak Google Drive'));
+                  }
                 };
-                xhr.onerror = () => reject(new Error('Network Error (Koneksi Terputus)'));
+                
+                xhr.ontimeout = () => { queryNeeded = true; resolve(); };
+                xhr.onerror = () => { queryNeeded = true; resolve(); }; 
                 xhr.send(chunk);
               });
+              
+              if (queryNeeded) {
+                const qs = await queryUploadStatus(sessionUrl, file.size);
+                if (qs.status === 'completed') {
+                  chunkSuccess = true;
+                  driveFileId = qs.fileId;
+                } else if (qs.status === 'incomplete') {
+                  chunkSuccess = true;
+                  serverConfirmedOffset = qs.nextOffset; 
+                } else if (qs.status === 'session_expired') {
+                  throw new Error('RESTART_SESSION: HTTP 404 Session Expired dari Query');
+                }
+              }
+              
+              if (chunkSuccess && !driveFileId) {
+                 if (serverConfirmedOffset < offset) {
+                     stallCount = 0; 
+                 } else if (serverConfirmedOffset === offset) {
+                     stallCount++;
+                     if (stallCount >= MAX_STALL_COUNT) {
+                         throw new Error('FATAL: Upload tidak menunjukkan progres setelah beberapa kali pemeriksaan.');
+                     }
+                 } else {
+                     stallCount = 0; 
+                 }
+                 offset = serverConfirmedOffset; 
+              }
+              
             } catch(err) {
               statusEl.textContent = 'Retry ' + attempts;
-              if (err.message.includes('HTTP 404')) {
-                const initRes2 = await server('adminCreateMediaUploadSession', [{ name: file.name, mimeType: file.type || 'application/octet-stream', size: file.size }], 30000);
-                if (!initRes2 || !initRes2.sessionUrl) throw new Error('Gagal resume session.');
-                sessionUrl = initRes2.sessionUrl;
-                offset = 0; attempts = 0; continue;
+              
+              if (err.message.includes('FATAL')) {
+                throw err;
               }
-              if (attempts >= 4) throw new Error(err.message);
+              
+              if (err.message.includes('RESTART_SESSION')) {
+                recoveryCount++;
+                if (recoveryCount >= MAX_SESSION_RECOVERY) {
+                    throw new Error('FATAL: Upload dihentikan setelah beberapa kali session recovery.');
+                }
+                const initRes2 = await server('adminCreateMediaUploadSession', [{ name: file.name, mimeType: file.type || 'application/octet-stream', size: file.size }], 30000);
+                if (!initRes2 || !initRes2.sessionUrl) throw new Error('FATAL: Gagal mendapatkan session URL baru.');
+                sessionUrl = initRes2.sessionUrl;
+                offset = 0; 
+                attempts = 0; 
+                continue;
+              }
+              
+              if (attempts >= MAX_RETRIES) throw new Error('FATAL: ' + err.message);
               await new Promise(r => setTimeout(r, Math.pow(2, attempts) * 1000));
             }
           }
