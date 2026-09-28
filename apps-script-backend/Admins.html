@@ -2348,9 +2348,10 @@ window.uploadImage = async function(input) {
   const file = input.files[0];
   if (!file) return;
   const targetKey = input.dataset.imageTarget;
-  const urlInput = document.querySelector('[name="' + CSS.escape(targetKey) + '"]');
-  const isMultiple = urlInput.tagName.toLowerCase() === 'textarea' && urlInput.classList.contains('image-collection');
-  const previewList = document.getElementById(isMultiple ? 'photo-manager-' + targetKey : 'upload-preview-' + targetKey);
+  const parentForm = input.closest('form') || document;
+  const urlInput = parentForm.querySelector('[name="' + CSS.escape(targetKey) + '"]');
+  const isMultiple = urlInput && urlInput.tagName.toLowerCase() === 'textarea' && urlInput.classList.contains('image-collection');
+  const previewList = parentForm.querySelector('#' + CSS.escape(isMultiple ? 'photo-manager-' + targetKey : 'upload-preview-' + targetKey));
   
   let thumbUrl = '';
   try { thumbUrl = URL.createObjectURL(file); } catch(e){}
