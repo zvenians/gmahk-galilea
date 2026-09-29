@@ -3,6 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
+  <meta name="admin-build-commit" content="__ADMIN_BUILD_COMMIT__">
+  <meta name="admin-build-version" content="__ADMIN_BUILD_VERSION__">
   <meta name="theme-color" content="#f8f8f7" media="(prefers-color-scheme: light)">
   <meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
   <style>
@@ -1853,6 +1855,7 @@
       editor.addEventListener('blur',()=>textarea.value=sanitizeHtml(editor.innerHTML));
     }
     function initPhotoManagers(){
+      console.info('[GALILEA INIT PHOTO]',{build:document.querySelector('meta[name=admin-build-commit]')?.content||'NONE',collections:('.image-collection').length});
       $$('.image-collection').forEach(textarea=>{
         const key=textarea.name,manager=$('#photo-manager-'+CSS.escape(key));
         if(!manager)return;
@@ -1862,6 +1865,7 @@
     window.renderPhotoManager = renderPhotoManager;
     function renderPhotoManager(key){
       const textarea=$('[name="'+CSS.escape(key)+'"]'),manager=$('#photo-manager-'+CSS.escape(key));
+      console.info('[GALILEA PHOTO MANAGER]',{build:document.querySelector('meta[name=admin-build-commit]')?.content||'NONE',key:key,textareaFound:!!textarea,managerFound:!!manager});
       if(!textarea||!manager)return;
       const urls=textarea.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
       manager.className='photo-list';

@@ -85,6 +85,17 @@ jobs:
           # Modify manifest for Admin (USER_ACCESSING)
           jq '.webapp.executeAs = "USER_ACCESSING" | .webapp.access = "ANYONE"' apps-script-backend/appsscript.json > tmp.json && mv tmp.json apps-script-backend/appsscript.json
           
+          # Inject build markers
+          SHORT_SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
+          sed -i "s/__ADMIN_BUILD_COMMIT__/${SHORT_SHA}/g" apps-script-backend/Admins.html
+          echo "Build marker commit injected: $SHORT_SHA"
+          
+          # Compute pre-push hash
+          GITHUB_HASH=$(sha256sum apps-script-backend/Admins.html | awk '{print $1}')
+          GITHUB_SIZE=$(wc -c < apps-script-backend/Admins.html | tr -d ' ')
+          echo "GitHub Admins.html SHA256: $GITHUB_HASH"
+          echo "GitHub Admins.html size: $GITHUB_SIZE bytes"
+          
           echo "Pushing Admin Source..."
           clasp push --force
           
@@ -96,10 +107,20 @@ jobs:
             exit 1
           fi
           
+          # Inject version marker (for next push, stored in log)
+          echo "Admin Version: $VERSION"
+          sed -i "s/__ADMIN_BUILD_VERSION__/${VERSION}/g" apps-script-backend/Admins.html
+          echo "Build marker version injected: $VERSION"
+          
+          # Re-push with version marker
+          clasp push --force
+          
           echo "Deploying Admin to version $VERSION..."
           clasp deploy -i "$DEPLOYMENT_ID_ADMIN" -V "$VERSION" -d "Admin: GitHub $GITHUB_SHA"
           
-          echo "Verifying Admin Deployment..."
+          echo "═══════════════════════════════════════════"
+          echo "PHASE A: Verifying Admin Deployment..."
+          echo "═══════════════════════════════════════════"
           clasp deployments > deployments.txt
           cat deployments.txt
           
@@ -125,6 +146,71 @@ jobs:
             echo "Error: Description Mismatch! Expected $GITHUB_SHA"
             exit 1
           fi
+          
+          echo "═══════════════════════════════════════════"
+          echo "PHASE B: Remote Source Parity Check..."
+          echo "═══════════════════════════════════════════"
+          
+          # Pull remote source to temporary directory
+          mkdir -p /tmp/clasp-pull-verify
+          cp .clasp.json /tmp/clasp-pull-verify/.clasp.json
+          # Adjust rootDir for pull target
+          jq '.rootDir = "/tmp/clasp-pull-verify"' .clasp.json > /tmp/clasp-pull-verify/.clasp.json
+          cd /tmp/clasp-pull-verify
+          clasp pull
+          
+          echo "--- Remote files pulled ---"
+          ls -la /tmp/clasp-pull-verify/
+          
+          REMOTE_FILE="/tmp/clasp-pull-verify/Admins.html"
+          if [ ! -f "$REMOTE_FILE" ]; then
+            echo "Error: Admins.html NOT FOUND in pulled source!"
+            exit 1
+          fi
+          
+          REMOTE_HASH=$(sha256sum "$REMOTE_FILE" | awk '{print $1}')
+          REMOTE_SIZE=$(wc -c < "$REMOTE_FILE" | tr -d ' ')
+          echo "Remote Admins.html SHA256: $REMOTE_HASH"
+          echo "Remote Admins.html size: $REMOTE_SIZE bytes"
+          
+          # Key pattern checks on remote source
+          echo "--- Key Pattern Checks on REMOTE source ---"
+          grep -c "renderPhotoManager" "$REMOTE_FILE" | xargs -I{} echo "renderPhotoManager occurrences: {}"
+          grep -c "initPhotoManagers" "$REMOTE_FILE" | xargs -I{} echo "initPhotoManagers occurrences: {}"
+          grep -c "Belum ada foto" "$REMOTE_FILE" | xargs -I{} echo "Empty state text occurrences: {}"
+          grep -c "GALILEA PHOTO MANAGER" "$REMOTE_FILE" | xargs -I{} echo "Diagnostic log occurrences: {}"
+          grep -c "GALILEA INIT PHOTO" "$REMOTE_FILE" | xargs -I{} echo "Init diagnostic log occurrences: {}"
+          grep -c "admin-build-commit" "$REMOTE_FILE" | xargs -I{} echo "Build marker occurrences: {}"
+          
+          # Check fixed selector
+          if grep -q 'CSS.escape(key)+'"'"'"]'"'"')' "$REMOTE_FILE"; then
+            echo "Selector fix: PRESENT (correct bracket closure)"
+          else
+            echo "Selector fix: MISSING or DIFFERENT"
+          fi
+          
+          # Check PRIMARY logic
+          if grep -q 'arr.find.*PRIMARY:' "$REMOTE_FILE"; then
+            echo "PRIMARY find logic: PRESENT"
+          else
+            echo "PRIMARY find logic: MISSING"
+          fi
+          
+          echo "═══════════════════════════════════════════"
+          echo "PHASE B COMPLETE"
+          echo "GitHub hash:  $GITHUB_HASH"
+          echo "Remote hash:  $REMOTE_HASH"
+          echo "GitHub size:  $GITHUB_SIZE"
+          echo "Remote size:  $REMOTE_SIZE"
+          if [ "$GITHUB_HASH" = "$REMOTE_HASH" ]; then
+            echo "RESULT: IDENTICAL — remote source matches GitHub exactly"
+          else
+            echo "RESULT: MISMATCH — remote source DIFFERS from GitHub!"
+            echo "Running diff..."
+            cd "$GITHUB_WORKSPACE"
+            diff apps-script-backend/Admins.html "$REMOTE_FILE" | head -100 || true
+          fi
+          echo "═══════════════════════════════════════════"
         env:
           DEPLOYMENT_ID_ADMIN: ${{ secrets.DEPLOYMENT_ID_ADMIN }}
 
