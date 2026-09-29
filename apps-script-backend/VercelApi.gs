@@ -5,7 +5,7 @@
  */
 
 const GALILEA_VERCEL_API = Object.freeze({
-  VERSION: '16.0.0',
+  VERSION: '17.0.0',
   SECRET_PROPERTY: 'GALILEA_VERCEL_API_SECRET',
   MAX_ARGUMENT_BYTES: 180000
 });
@@ -76,14 +76,9 @@ function galileaVercelHandlers_() {
 /**
  * Public viewer adapter.
  *
- * Website.gs historically excluded activities dated today because it used
- * `dateValue < today`. That is correct for the old "already happened" archive
- * semantics, but it makes a news item published on the current date disappear
- * from the public viewer even though Admin correctly shows it as PUBLISH.
- *
- * We deliberately keep Website.gs untouched. This adapter starts from its
- * normal public payload, then reconciles `activities` directly from the same
- * public sheet using the viewer rule: PUBLISH + dated today or earlier.
+ * Adapter ini melakukan rekonsiliasi terakhir dari sheet publik agar berita
+ * bertanggal hari ini dan metadata media terbaru selalu sampai ke viewer.
+ * Hanya baris PUBLISH dengan tanggal hari ini atau sebelumnya yang dikirim.
  * No draft/admin-only data is exposed.
  */
 function galileaGetWebsiteDataForViewer_() {
@@ -98,7 +93,7 @@ function galileaGetWebsiteDataForViewer_() {
   }
 
   const count = sheet.getLastRow() - 1;
-  const width = Math.max(8, Math.min(sheet.getLastColumn(), 8));
+  const width = Math.max(9, Math.min(sheet.getLastColumn(), 9));
   const raw = sheet.getRange(2, 1, count, width).getValues();
   const display = sheet.getRange(2, 1, count, width).getDisplayValues();
   const today = new Date(Utilities.formatDate(new Date(), GW.TIMEZONE, 'yyyy-MM-dd') + 'T00:00:00' + GW.UTC_OFFSET).getTime();
@@ -106,6 +101,34 @@ function galileaGetWebsiteDataForViewer_() {
   data.activities = raw.map(function (row, index) {
     const date = gwParseDate_(row[0], display[index][0]);
     const photos = gwActivityPhotos_(display[index][6]);
+    const coverUrl = gwActivityCover_(display[index][6]);
+    let media = [];
+    try {
+      media = display[index][8] ? JSON.parse(display[index][8]) : [];
+      if (!Array.isArray(media)) media = [];
+    } catch (ignore) { media = []; }
+    media = media.map(function (item) {
+      if (!item || typeof item !== 'object') return null;
+      const mimeType = gwClean_(item.mimeType || 'application/octet-stream').toLowerCase();
+      const rawUrl = gwSafeUrl_(item.url);
+      const url = /^image\//.test(mimeType) ? galileaDirectDriveImageUrl_(rawUrl) : rawUrl;
+      if (!url) return null;
+      return {
+        id: gwClean_(item.id),
+        name: gwClean_(item.name || 'Media'),
+        mimeType: mimeType,
+        size: Math.max(0, Number(item.size) || 0),
+        url: url,
+        viewUrl: gwSafeUrl_(item.viewUrl),
+        downloadUrl: gwSafeUrl_(item.downloadUrl),
+        primary: Boolean(item.primary)
+      };
+    }).filter(Boolean).slice(0, 24);
+    if (!media.length && photos.length) {
+      media = photos.map(function (url) {
+        return { id: '', name: 'Foto berita', mimeType: 'image/jpeg', size: 0, url: url, primary: url === coverUrl };
+      });
+    }
     return {
       id: gwClean_(display[index][7]) || ('ACT-' + (index + 2)),
       dateValue: date ? date.getTime() : 0,
@@ -116,7 +139,8 @@ function galileaGetWebsiteDataForViewer_() {
       url: gwSafeUrl_(display[index][4]),
       status: gwNormalize_(display[index][5]),
       photos: photos,
-      coverUrl: gwActivityCover_(display[index][6]),
+      media: media,
+      coverUrl: coverUrl,
       photoCount: photos.length
     };
   }).filter(function (item) {
@@ -126,6 +150,21 @@ function galileaGetWebsiteDataForViewer_() {
   }).slice(0, 24);
 
   return data;
+}
+
+function galileaDirectDriveImageUrl_(value) {
+  const url = gwSafeUrl_(value);
+  if (!url) return '';
+  const patterns = [
+    /drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i,
+    /drive\.google\.com\/(?:uc|thumbnail)\?[^#]*\bid=([a-zA-Z0-9_-]+)/i,
+    /lh3\.googleusercontent\.com\/d\/([a-zA-Z0-9_-]+)/i
+  ];
+  for (let index = 0; index < patterns.length; index++) {
+    const match = url.match(patterns[index]);
+    if (match) return 'https://lh3.googleusercontent.com/d/' + match[1] + '=w1600';
+  }
+  return url;
 }
 
 function galileaParseVercelRequest_(e) {

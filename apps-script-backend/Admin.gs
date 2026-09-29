@@ -6,7 +6,7 @@
  */
 
 const GA = Object.freeze({
-  VERSION: '20.3.0',
+  VERSION: '21.0.0',
   SHEETS: Object.freeze({
     admins: 'Website Admin',
     workflow: 'Website Workflow',
@@ -395,6 +395,102 @@ function adminGetDashboardSummary() {
   };
 }
 
+/**
+ * Pemberitahuan operasional yang selalu dihitung dari data terbaru. Daftar ini
+ * tidak memakai angka rekaan atau status lokal browser: setiap item berasal
+ * dari workflow, layanan jemaat, atau hasil pemeriksaan sumber yang tersimpan.
+ */
+function adminGetNotifications() {
+  const user = gaRequireRole_('VIEWER');
+  const spreadsheet = gwSpreadsheet_();
+  const workflows = gaWorkflowRows_(spreadsheet);
+  const items = [];
+  let total = 0;
+
+  if (user.level >= GA.ROLES.APPROVER) {
+    const pending = workflows.filter(function (item) { return item.state === 'PENDING'; });
+    total += pending.length;
+    pending.slice(0, 6).forEach(function (item) {
+      items.push({
+        id: 'approval-' + item.id,
+        type: 'approval',
+        severity: 'warning',
+        route: 'approvals',
+        title: 'Persetujuan menunggu',
+        detail: gaEntityLabel_(item.entity) + ' · ' + (item.ownerName || item.ownerEmail),
+        time: item.updatedAt
+      });
+    });
+  }
+
+  if (user.level >= GA.ROLES.EDITOR) {
+    const revisions = workflows.filter(function (item) {
+      return item.state === 'REJECTED' && item.ownerEmail === user.email;
+    });
+    total += revisions.length;
+    revisions.slice(0, 6).forEach(function (item) {
+      items.push({
+        id: 'revision-' + item.id,
+        type: 'revision',
+        severity: 'danger',
+        route: item.entity,
+        title: 'Konten perlu direvisi',
+        detail: gaEntityLabel_(item.entity) + (item.note ? ' · ' + item.note : ''),
+        time: item.updatedAt
+      });
+    });
+
+    try {
+      const services = adminListServices().filter(function (item) {
+        return ['SELESAI', 'DITUTUP'].indexOf(String(item.status || '').toUpperCase()) < 0;
+      });
+      total += services.length;
+      services.slice(0, 4).forEach(function (item) {
+        items.push({
+          id: 'service-' + item.id,
+          type: 'service',
+          severity: item.status === 'BARU' ? 'warning' : 'info',
+          route: 'services',
+          title: item.status === 'BARU' ? 'Layanan jemaat baru' : 'Layanan sedang ditangani',
+          detail: (item.type || 'Layanan Jemaat') + ' · ' + (item.restricted ? 'Akses terbatas' : item.name),
+          time: item.updatedAt || item.receivedAt
+        });
+      });
+    } catch (ignore) {}
+  }
+
+  if (user.level >= GA.ROLES.EDITOR) {
+    const healthIssues = gaHealthSources_(spreadsheet).filter(function (item) {
+      return ['GANGGUAN', 'ERROR', 'LEWATI'].indexOf(String(item.status || '').toUpperCase()) >= 0;
+    });
+    total += healthIssues.length;
+    healthIssues.slice(0, 4).forEach(function (item, index) {
+      items.push({
+        id: 'health-' + index + '-' + item.source,
+        type: 'health',
+        severity: 'danger',
+        route: 'system',
+        title: 'Sumber perlu diperiksa',
+        detail: item.source + (item.note ? ' · ' + item.note : ''),
+        time: ''
+      });
+    });
+  }
+
+  return {
+    count: total,
+    checkedAt: gwFormatDateTime_(new Date()),
+    items: items.slice(0, 14)
+  };
+}
+
+function gaEntityLabel_(entity) {
+  if (entity === 'settings') return 'Identitas & Tampilan';
+  if (entity === 'schedule') return 'Jadwal Pelayanan';
+  const definition = gaEntityDefinitions_()[entity];
+  return definition ? definition.label : gwClean_(entity || 'Konten');
+}
+
 function adminGetDashboardActivity() {
   const user = gaRequireRole_('APPROVER');
   const spreadsheet = gwSpreadsheet_();
@@ -452,7 +548,7 @@ function adminListEntity(entityKey) {
   const sheet = spreadsheet.getSheetByName(definition.sheet);
   const records = [];
   if (sheet && sheet.getLastRow() > 1) {
-    const width = definition.idColumn + 1;
+    const width = gaEntityWidth_(definition);
     const raw = sheet.getRange(2, 1, sheet.getLastRow() - 1, width).getValues();
     const display = sheet.getRange(2, 1, sheet.getLastRow() - 1, width).getDisplayValues();
     display.forEach(function (row, index) {
@@ -645,9 +741,14 @@ function adminReviewWorkflow(workflowId, decision, note) {
     const nextState = selectedDecision === 'APPROVE' ? 'APPROVED' : 'REJECTED';
     sheet.getRange(row, 6).setValue(nextState);
     sheet.getRange(row, 11, 1, 3).setValues([[user.email, new Date(), reviewerNote]]);
-    gwRefreshWebsiteGalilea_();
+    let sync = null;
+    if (selectedDecision === 'APPROVE') {
+      SpreadsheetApp.flush();
+      gwRefreshWebsiteGalilea_();
+      sync = gaViewerSyncResult_(display[1], applied);
+    }
     gaAuditRaw_(spreadsheet, user.email, user.name, selectedDecision, display[1], display[2], reviewerNote || gaPayloadSummary_(JSON.parse(String(raw[4] || '{}'))));
-    return { ok: true, state: nextState, applied: applied, message: nextState === 'APPROVED' ? 'Perubahan disetujui dan sudah diterbitkan.' : 'Perubahan dikembalikan untuk direvisi.' };
+    return { ok: true, state: nextState, applied: applied, sync: sync, message: nextState === 'APPROVED' ? 'Perubahan disetujui dan sinkronisasi viewer sudah dipicu.' : 'Perubahan dikembalikan untuk direvisi.' };
   } finally { lock.releaseLock(); }
 }
 
@@ -662,9 +763,31 @@ function gaWorkflowRows_(spreadsheet) {
     return {
       id: row[0], entity: row[1], entityId: row[2], action: row[3], payload: payload,
       state: row[5], ownerEmail: gaNormalizeEmail_(row[6]), ownerName: row[7],
-      createdAt: row[8], updatedAt: row[9], reviewerEmail: row[10], reviewedAt: row[11], note: row[12]
+      createdAt: row[8], updatedAt: row[9], reviewerEmail: row[10], reviewedAt: row[11], note: row[12],
+      _updatedTime: raw[index][9] instanceof Date ? raw[index][9].getTime() : 0
     };
-  }).sort(function (a, b) { return String(b.updatedAt).localeCompare(String(a.updatedAt)); });
+  }).sort(function (a, b) { return b._updatedTime - a._updatedTime; }).map(function (item) {
+    delete item._updatedTime;
+    return item;
+  });
+}
+
+function gaEntityWidth_(definition) {
+  return Math.max.apply(null, [definition.idColumn + 1, definition.statusColumn + 1].concat(
+    definition.fields.map(function (field) { return field.column + 1; })
+  ));
+}
+
+function gaViewerSyncResult_(entity, applied) {
+  const revision = PropertiesService.getScriptProperties().getProperty(GW.CACHE_REVISION_PROPERTY) || '';
+  return {
+    status: 'READY',
+    entity: entity,
+    entityId: applied && applied.id ? applied.id : '',
+    cacheRevision: revision,
+    checkedAt: gwFormatDateTime_(new Date()),
+    message: 'Cache publik diperbarui. Viewer akan membaca revisi ' + (revision || 'terbaru') + '.'
+  };
 }
 
 /* -------------------------------------------------------------------------- */
@@ -687,7 +810,7 @@ function gaApplyWorkflow_(spreadsheet, entity, entityId, action, payload) {
   }
   const newId = /^NEW-/i.test(entityId) || !entityId ? gaId_(entity.slice(0, 3).toUpperCase()) : entityId;
   if (!row) row = sheet.getLastRow() + 1;
-  const maxWidth = Math.max.apply(null, [definition.idColumn + 1, definition.statusColumn + 1].concat(definition.fields.map(function(f) { return f.column + 1; })));
+  const maxWidth = gaEntityWidth_(definition);
   const existing = row <= sheet.getLastRow() ? sheet.getRange(row, 1, 1, maxWidth).getValues()[0] : new Array(maxWidth).fill('');
   definition.fields.forEach(function (field) { existing[field.column] = gaSheetValue_(field, payload[field.key]); });
   existing[definition.statusColumn] = 'PUBLISH';
@@ -833,6 +956,8 @@ function gaSanitizePayload_(entity, payload) {
       }).filter(Boolean);
       if (urls.length > 12) throw new Error('Maksimal 12 foto untuk satu kegiatan.');
       value = urls.join('\n');
+    } else if (field.type === 'media') {
+      value = gaSanitizeMedia_(value, field.label);
     } else {
       let rawStr = String(value == null ? '' : value).slice(0, field.type === 'textarea' ? 8000 : 1000).trim();
       if (field.type === 'textarea') {
@@ -844,6 +969,53 @@ function gaSanitizePayload_(entity, payload) {
     clean[field.key] = field.options.length ? String(value).toUpperCase() : value;
   });
   return clean;
+}
+
+function gaSanitizeMedia_(value, label) {
+  let input = value;
+  if (input == null || input === '') return '[]';
+  if (typeof input === 'string') {
+    if (!input.trim()) return '[]';
+    try { input = JSON.parse(input); }
+    catch (ignore) { throw new Error('Daftar “' + label + '” rusak. Hapus media yang gagal lalu unggah kembali.'); }
+  }
+  if (!Array.isArray(input)) throw new Error('Daftar “' + label + '” tidak valid.');
+  if (input.length > 24) throw new Error('Maksimal 24 media untuk satu berita.');
+
+  let primaryAssigned = false;
+  const clean = input.map(function (item, index) {
+    if (!item || typeof item !== 'object') throw new Error('Media nomor ' + (index + 1) + ' tidak valid.');
+    const originalUrl = gwClean_(item.url);
+    const url = gwSafeUrl_(originalUrl);
+    if (!url) throw new Error('Tautan media “' + (item.name || ('nomor ' + (index + 1))) + '” tidak valid.');
+    const mimeType = gwClean_(item.mimeType).slice(0, 120).toLowerCase();
+    if (mimeType && !/^[a-z0-9.+-]+\/[a-z0-9.+-]+$/.test(mimeType)) throw new Error('Jenis media nomor ' + (index + 1) + ' tidak valid.');
+    const isImage = /^image\//.test(mimeType);
+    const wantsPrimary = Boolean(item.primary) && isImage && !primaryAssigned;
+    if (wantsPrimary) primaryAssigned = true;
+    return {
+      id: gwClean_(item.id).slice(0, 180),
+      name: gwClean_(item.name || ('Media ' + (index + 1))).slice(0, 240),
+      mimeType: mimeType || 'application/octet-stream',
+      size: Math.max(0, Math.min(2147483647, Number(item.size) || 0)),
+      url: url,
+      viewUrl: item.viewUrl ? (gwSafeUrl_(item.viewUrl) || '') : '',
+      downloadUrl: item.downloadUrl ? (gwSafeUrl_(item.downloadUrl) || '') : '',
+      primary: wantsPrimary
+    };
+  });
+
+  if (!primaryAssigned) {
+    for (let index = 0; index < clean.length; index++) {
+      if (/^image\//.test(clean[index].mimeType)) {
+        clean[index].primary = true;
+        break;
+      }
+    }
+  }
+  const serialized = JSON.stringify(clean);
+  if (serialized.length > 45000) throw new Error('Total metadata media terlalu besar. Kurangi jumlah file atau nama file.');
+  return serialized;
 }
 
 function gaSheetValue_(field, value) {
@@ -908,7 +1080,7 @@ function adminUpdateServiceStatus(id, status, note) {
   if (!row) throw new Error('Permohonan layanan tidak ditemukan.');
   sheet.getRange(row, 9, 1, 3).setValues([[selected, gwClean_(note), new Date()]]);
   gaAudit_(user, 'UPDATE_SERVICE', 'services', id, selected + (note ? ' · ' + gwClean_(note) : ''));
-  return { ok: true, status: selected };
+  return { ok: true, status: selected, updatedAt: gwFormatDateTime_(new Date()), message: 'Status layanan diperbarui menjadi ' + selected + '.' };
 }
 
 function adminDeleteService(id) {

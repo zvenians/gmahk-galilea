@@ -27,5 +27,11 @@ assert.match(
   /\.slice\(0,\s*24\)/,
   'Viewer activity result must retain the existing public 24-item cap.'
 );
+assert.match(
+  source,
+  /const width = Math\.max\(9, Math\.min\(sheet\.getLastColumn\(\), 9\)\);/,
+  'Viewer adapter must read the media metadata column.'
+);
+assert.match(source, /media:\s*media,/, 'Viewer adapter must expose activity media.');
 
-console.log('OK - Public News Activities Viewer Reconciliation: 4/4 passed.');
+console.log('OK - Public News Activities Viewer Reconciliation: 6/6 passed.');
