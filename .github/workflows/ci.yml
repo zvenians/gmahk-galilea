@@ -138,6 +138,25 @@ jobs:
             echo "Error: Description Mismatch! Expected $GITHUB_SHA"
             exit 1
           fi
+
+          # Keep the historical admin URL in sync. Some administrators still
+          # have this Apps Script deployment bookmarked directly, so leaving it
+          # on an older version makes a successful release look unchanged.
+          LEGACY_ADMIN_DEPLOYMENT_ID=$(sed -n 's/^- \([^ ]*\) @[0-9][0-9]* - GALILEA_APPS_SCRIPT_ADMIN_URL$/\1/p' deployments.txt | head -1)
+          if [ -n "$LEGACY_ADMIN_DEPLOYMENT_ID" ] && [ "$LEGACY_ADMIN_DEPLOYMENT_ID" != "$DEPLOYMENT_ID_ADMIN" ]; then
+            echo "Synchronizing historical admin deployment to version $VERSION..."
+            clasp deploy -i "$LEGACY_ADMIN_DEPLOYMENT_ID" -V "$VERSION" -d "GALILEA_APPS_SCRIPT_ADMIN_URL"
+
+            clasp deployments > deployments-after-admin-sync.txt
+            LEGACY_DEPLOY_LINE=$(grep "$LEGACY_ADMIN_DEPLOYMENT_ID" deployments-after-admin-sync.txt || true)
+            if [ -z "$LEGACY_DEPLOY_LINE" ] || ! echo "$LEGACY_DEPLOY_LINE" | grep -q "@$VERSION"; then
+              echo "Error: Historical admin deployment did not update to @$VERSION"
+              exit 1
+            fi
+            echo "Historical admin deployment synchronized: $LEGACY_DEPLOY_LINE"
+          else
+            echo "No separate historical admin deployment requires synchronization."
+          fi
           
           echo "═══════════════════════════════════════════"
           echo "PHASE B: Remote Source Parity Check..."
