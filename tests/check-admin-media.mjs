@@ -51,4 +51,15 @@ const preview = window.document.querySelector('#media-manager-media img');
 assert.ok(preview, 'Thumbnail media harus dirender ketika berita diedit.');
 assert.equal(preview.getAttribute('src'), 'https://lh3.googleusercontent.com/d/FILE_123=w800');
 
+window.saveMediaField('media', [
+  {name: 'Foto utama', mimeType: 'image/jpeg', url: 'https://example.com/foto.jpg', primary: true},
+  {name: 'Video', mimeType: 'video/mp4', url: 'https://example.com/video.mp4', primary: false}
+]);
+assert.equal(
+  window.document.querySelector('[name="photos"]').value,
+  'PRIMARY:https://example.com/foto.jpg',
+  'Kolom foto lama hanya boleh menerima media gambar.'
+);
+assert.equal(JSON.parse(window.document.querySelector('[name="media"]').value).length, 2, 'Kolom media harus mempertahankan semua jenis file.');
+
 console.log('OK - Admin media runtime dan thumbnail Google Drive berfungsi.');

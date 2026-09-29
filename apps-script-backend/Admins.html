@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id" data-theme="light" data-build="GALILEA-ADMIN-PRO-50-0-0">
+<html lang="id" data-theme="light" data-build="GALILEA-ADMIN-CONTROL-CENTER-51-0-0">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
@@ -8,9 +8,8 @@
   <meta name="theme-color" content="#111110" media="(prefers-color-scheme: dark)">
   <style>
   /* ═══════════════════════════════════════════════════════════════════════
-     GMAHK GALILEA — ADMIN COMMAND CENTER v50.0
-     Visual Direction: Premium Editorial · Calm · Precise · Monochrome
-     No green. Dense information hierarchy. Desktop productivity feel.
+     GMAHK GALILEA — ADMIN CONTROL CENTER v51.0
+     Visual Direction: Editorial · Calm · Church identity · Operational clarity
      ═══════════════════════════════════════════════════════════════════════ */
 
   /* GALILEA-ADMIN-BOOTSTRAP-35-8-0 */
@@ -18,30 +17,32 @@
   /* ── 1. DESIGN TOKENS ──────────────────────────────────────────────── */
   :root {
     /* Foundation */
-    --bg:            #f8f8f7;
+    --bg:            #f4f6f0;
     --sidebar-bg:    #ffffff;
     --surface:       #ffffff;
-    --surface-2:     #f4f4f2;
-    --surface-3:     #ebebea;
-    --surface-hover: #f0f0ef;
-    --surface-translucent: rgba(248, 248, 247, 0.94);
+    --surface-2:     #f1f4ed;
+    --surface-3:     #e6ede2;
+    --surface-hover: #edf2e9;
+    --surface-translucent: rgba(244, 246, 240, 0.94);
 
     /* Typography */
-    --text:    #111110;
-    --soft:    #6b6b68;
-    --faint:   #9b9b97;
+    --text:    #0a100c;
+    --soft:    #354239;
+    --faint:   #5f6d64;
     --inverse: #ffffff;
 
     /* Structure */
-    --line:        #e4e4e1;
-    --line-subtle: rgba(228, 228, 225, 0.5);
-    --line-strong: #d0d0cc;
+    --line:        #dbe3d7;
+    --line-subtle: rgba(219, 227, 215, 0.55);
+    --line-strong: #bfccba;
 
     /* Accent — restrained indigo/slate */
-    --accent:          #3b3bfc;
-    --accent-hover:    #2929d9;
-    --accent-soft:     #f0f0ff;
-    --accent-text:     #1f1fcc;
+    --accent:          #1d5030;
+    --accent-hover:    #123821;
+    --accent-soft:     #e6f0e6;
+    --accent-text:     #123821;
+    --gold:            #a78024;
+    --gold-soft:       #f3ead2;
 
     /* Semantic */
     --danger:      #c0392b;
@@ -52,9 +53,9 @@
     --success-soft:#edf7f1;
 
     /* Buttons */
-    --btn-primary-bg:   #111110;
-    --btn-primary-text: #f8f8f7;
-    --btn-primary-hover:#2a2a28;
+    --btn-primary-bg:   #123821;
+    --btn-primary-text: #ffffff;
+    --btn-primary-hover:#1d5030;
 
     /* Elevation */
     --shadow-xs: 0 1px 2px rgba(0,0,0,0.05);
@@ -63,12 +64,12 @@
     --shadow-lg: 0 12px 40px rgba(0,0,0,0.13);
 
     /* Layout */
-    --sidebar: 220px;
-    --topbar:  52px;
+    --sidebar: 248px;
+    --topbar:  64px;
     --radius-sm: 7px;
-    --radius:    10px;
-    --radius-lg: 14px;
-    --radius-xl: 18px;
+    --radius:    12px;
+    --radius-lg: 16px;
+    --radius-xl: 22px;
 
     /* Motion */
     --ease: cubic-bezier(0.16, 1, 0.3, 1);
@@ -86,27 +87,29 @@
   }
 
   [data-theme="dark"] {
-    --bg:            #111110;
-    --sidebar-bg:    #0c0c0b;
-    --surface:       #161614;
-    --surface-2:     #1d1d1b;
-    --surface-3:     #252522;
-    --surface-hover: #1e1e1c;
-    --surface-translucent: rgba(12, 12, 11, 0.95);
+    --bg:            #08110b;
+    --sidebar-bg:    #071009;
+    --surface:       #0d1811;
+    --surface-2:     #132119;
+    --surface-3:     #192a20;
+    --surface-hover: #16251c;
+    --surface-translucent: rgba(7, 16, 9, 0.95);
 
-    --text:    #ededea;
-    --soft:    #a5a5a0;
-    --faint:   #6b6b66;
+    --text:    #f7f7f0;
+    --soft:    #ced7ce;
+    --faint:   #a7b4a9;
     --inverse: #111110;
 
-    --line:        #2a2a27;
-    --line-subtle: rgba(42, 42, 39, 0.5);
-    --line-strong: #333330;
+    --line:        #24372a;
+    --line-subtle: rgba(36, 55, 42, 0.5);
+    --line-strong: #395040;
 
-    --accent:       #5b5bff;
-    --accent-hover: #6e6eff;
-    --accent-soft:  #16163a;
-    --accent-text:  #8888ff;
+    --accent:       #a7c9a4;
+    --accent-hover: #bed8bb;
+    --accent-soft:  #183321;
+    --accent-text:  #cbe2c8;
+    --gold:         #ead597;
+    --gold-soft:    #332a14;
 
     --danger:      #e57373;
     --danger-soft: #2d1515;
@@ -115,9 +118,9 @@
     --success:     #4caf70;
     --success-soft:#152a1d;
 
-    --btn-primary-bg:   #ededea;
-    --btn-primary-text: #111110;
-    --btn-primary-hover:#d8d8d4;
+    --btn-primary-bg:   #a7c9a4;
+    --btn-primary-text: #07120b;
+    --btn-primary-hover:#bed8bb;
 
     --shadow-xs: 0 1px 2px rgba(0,0,0,0.5);
     --shadow-sm: 0 2px 6px rgba(0,0,0,0.6);
@@ -1445,7 +1448,89 @@
   }
   [data-theme="dark"] option { color: var(--text); background: var(--surface-2) }
 
-  /* ── 30. RESPONSIVE ────────────────────────────────────────────────── */
+  /* ── 30. OPERATIONAL UI ───────────────────────────────────────────── */
+  .brand { margin: 2px 4px 8px; padding: 10px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface) }
+  .brand::after { content: "LIVE"; margin-left: auto; padding: 3px 6px; border-radius: 999px; color: var(--success); background: var(--success-soft); font-size: .52rem; font-weight: 850; letter-spacing: .08em }
+  .sidebar { padding: 12px; background: color-mix(in srgb, var(--sidebar-bg) 94%, var(--accent-soft)); box-shadow: 12px 0 36px rgba(14, 44, 25, .035) }
+  .nav-item { min-height: 40px; padding: 0 12px; border-radius: 9px }
+  .nav-item.active { color: var(--accent-text); background: var(--accent-soft) }
+  .nav-item.active::before { left: -4px; top: 8px; bottom: 8px; width: 3px; background: var(--accent) }
+  .content { width: min(1440px, calc(100% - clamp(28px, 5vw, 84px))); padding-top: clamp(28px, 4vw, 54px) }
+  .topbar { border-bottom-color: color-mix(in srgb, var(--line) 80%, transparent); box-shadow: 0 10px 30px rgba(17, 55, 31, .035) }
+  .top-actions .icon-btn { background: var(--surface); border-color: var(--line) }
+  .page-head { margin-bottom: 22px; padding: clamp(20px, 3vw, 30px); border: 1px solid var(--line); border-radius: var(--radius-lg); background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--accent-soft) 45%, var(--surface))); box-shadow: var(--shadow-xs) }
+  .page-head h1 { color: var(--text) }
+  .eyebrow, .section-label, .welcome-eyebrow { color: var(--accent-text) }
+  .editorial-welcome { position: relative; padding: clamp(24px, 4vw, 42px); border: 1px solid var(--line); border-radius: var(--radius-xl); background: radial-gradient(circle at 92% 10%, color-mix(in srgb, var(--gold-soft) 62%, transparent), transparent 35%), linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--accent-soft) 55%, var(--surface))); box-shadow: var(--shadow-sm); overflow: hidden }
+  .editorial-welcome::before { position: absolute; inset: 0 auto 0 0; width: 5px; content: ""; background: linear-gradient(var(--accent), var(--gold)) }
+  .welcome-sub { max-width: 660px }
+  .dashboard-sync-strip { padding: 10px 12px; background: color-mix(in srgb, var(--surface) 75%, transparent) }
+  .metric-block { min-height: 118px; padding: 18px 20px }
+  .action-tile { min-height: 82px; padding: 16px; border-radius: var(--radius) }
+  .action-tile-icon { display: grid; place-items: center; width: 42px; height: 42px; border-radius: 11px; color: var(--accent-text); background: var(--accent-soft) }
+  .action-tile-icon .icon { width: 19px; height: 19px }
+  .record, .workflow-item, .approval-card, .service-card, .user-card { border-radius: var(--radius); transition: border-color var(--dur) var(--ease), transform var(--dur) var(--ease), box-shadow var(--dur) var(--ease) }
+  .record:hover, .workflow-item:hover, .approval-card:hover, .service-card:hover, .user-card:hover { transform: translateY(-1px); border-color: var(--line-strong); box-shadow: var(--shadow-sm) }
+
+  .operation-bar { position: sticky; top: var(--topbar); z-index: 42; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 10px; min-height: 48px; padding: 8px clamp(16px, 3vw, 40px); border-bottom: 1px solid var(--line); background: var(--surface-translucent); backdrop-filter: blur(18px) }
+  .operation-bar[hidden] { display: none }
+  .operation-bar.success { color: var(--success); background: color-mix(in srgb, var(--success-soft) 92%, transparent) }
+  .operation-bar.warning { color: var(--warning); background: color-mix(in srgb, var(--warning-soft) 92%, transparent) }
+  .operation-bar.error { color: var(--danger); background: color-mix(in srgb, var(--danger-soft) 92%, transparent) }
+  .operation-icon { display: grid; place-items: center; width: 28px; height: 28px; border-radius: 9px; background: color-mix(in srgb, currentColor 12%, transparent) }
+  .operation-copy { min-width: 0 }
+  .operation-copy strong, .operation-copy span { display: block }
+  .operation-copy strong { font-size: .76rem }
+  .operation-copy span { color: var(--soft); font-size: .68rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
+  .operation-close { color: currentColor }
+
+  .notif-wrap { position: relative }
+  .notification-panel { position: absolute; top: calc(100% + 10px); right: 0; z-index: 100; width: min(390px, calc(100vw - 28px)); max-height: min(620px, calc(100vh - 90px)); display: none; overflow: auto; padding: 0; border-radius: var(--radius-lg); box-shadow: var(--shadow-lg) }
+  .notification-panel.open { display: block }
+  .notification-head { position: sticky; top: 0; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 14px 16px; border-bottom: 1px solid var(--line); background: var(--surface) }
+  .notification-head strong, .notification-head span { display: block }
+  .notification-head span { margin-top: 2px; color: var(--faint); font-size: .64rem }
+  .notification-list { display: grid; padding: 7px }
+  .notification-item { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 10px; width: 100%; padding: 11px; border-radius: 10px; text-align: left }
+  .notification-item:hover { background: var(--surface-2) }
+  .notification-dot { width: 9px; height: 9px; margin-top: 5px; border-radius: 50%; background: var(--accent) }
+  .notification-item.warning .notification-dot { background: var(--warning) }
+  .notification-item.danger .notification-dot { background: var(--danger) }
+  .notification-item strong, .notification-item span, .notification-item small { display: block }
+  .notification-item strong { font-size: .77rem }
+  .notification-item span { margin-top: 2px; color: var(--soft); font-size: .7rem; line-height: 1.45 }
+  .notification-item small { margin-top: 4px; color: var(--faint); font-size: .61rem }
+  .notification-empty { padding: 28px 20px; color: var(--soft); text-align: center }
+
+  .toast { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: start; gap: 9px; min-width: min(380px, calc(100vw - 28px)); max-width: 430px; padding: 12px 13px; border-left: 4px solid var(--accent); border-radius: 10px }
+  .toast.success { border-left-color: var(--success) }
+  .toast.warning { border-left-color: var(--warning) }
+  .toast.error { border-left-color: var(--danger) }
+  .toast-icon { display: grid; place-items: center; width: 24px; height: 24px; border-radius: 7px; color: var(--accent-text); background: var(--accent-soft) }
+  .toast.success .toast-icon { color: var(--success); background: var(--success-soft) }
+  .toast.warning .toast-icon { color: var(--warning); background: var(--warning-soft) }
+  .toast.error .toast-icon { color: var(--danger); background: var(--danger-soft) }
+  .toast-copy strong, .toast-copy span { display: block }
+  .toast-copy strong { font-size: .75rem }
+  .toast-copy span { margin-top: 2px; color: var(--soft); font-size: .69rem; font-weight: 500 }
+  .toast-dismiss { padding: 2px; color: var(--faint) }
+  .toast-dismiss .icon { width: 14px; height: 14px }
+
+  .confirm-dialog { width: min(470px, calc(100% - 28px)) }
+  .confirm-dialog .modal-body { padding-top: 24px }
+  .confirm-mark { width: 44px; height: 44px; display: grid; place-items: center; margin-bottom: 16px; border-radius: 13px; color: var(--warning); background: var(--warning-soft) }
+  .confirm-mark.danger { color: var(--danger); background: var(--danger-soft) }
+  .confirm-mark .icon { width: 20px; height: 20px }
+  .confirm-dialog h2 { margin-bottom: 8px; font-size: 1.35rem }
+  .confirm-dialog p { margin: 0; color: var(--soft) }
+
+  .field-state { min-height: 18px; margin-top: 5px; color: var(--faint); font-size: .66rem }
+  .field.has-error :is(input, select, textarea) { border-color: var(--danger); box-shadow: 0 0 0 3px color-mix(in srgb, var(--danger) 12%, transparent) }
+  .field.has-error .field-state { color: var(--danger) }
+  .editor-unsaved { display: inline-flex; align-items: center; gap: 6px; color: var(--warning); font-size: .68rem; font-weight: 700 }
+  .editor-unsaved::before { width: 7px; height: 7px; border-radius: 50%; content: ""; background: currentColor }
+
+  /* ── 31. RESPONSIVE ────────────────────────────────────────────────── */
   /* responsive admin lock: iPhone, Android, tablet, dan desktop */
   @media (min-width: 851px) {
     .workspace { margin-left: 0 }
@@ -1491,6 +1576,9 @@
       border-radius: var(--radius-sm);
       border-bottom: 0;
     }
+    .operation-bar { top: calc(var(--topbar) + 5px); margin: 0 7px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 0 0 var(--radius-sm) var(--radius-sm) }
+    .operation-copy span { white-space: normal }
+    .notification-panel { position: fixed; top: calc(var(--topbar) + 12px); right: 7px; left: 7px; width: auto; max-height: calc(100dvh - var(--topbar) - 26px) }
     .crumb { min-width: 0 }
     .crumb strong { font-size: 0.82rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis }
     .crumb span { display: none }
@@ -1531,6 +1619,9 @@
     .footer-inner { flex-direction: column; align-items: flex-start; gap: 5px }
     .role-grid { grid-template-columns: repeat(2, minmax(0, 1fr)) }
     .workflow-guide { grid-template-columns: repeat(2, minmax(0, 1fr)) }
+    .toast-zone { right: 7px; left: 7px; bottom: calc(7px + env(safe-area-inset-bottom)) }
+    .toast { min-width: 0; width: 100% }
+    .page-head { padding: 18px }
   }
 
   /* ── 31. REDUCED MOTION ─────────────────────────────────────────────── */
@@ -1594,19 +1685,24 @@
   <dialog id="review-dialog"><div class="modal-head"><div><strong>Review Perubahan</strong><span class="small faint" id="review-caption">Periksa isi sebelum mengambil keputusan</span></div><button class="icon-btn" type="button" data-close="review-dialog"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="modal-body" id="review-body"></div><div class="modal-foot" id="review-actions"><button class="btn danger" type="button" data-review="REJECT">Minta revisi</button><button class="btn primary" type="button" data-review="APPROVE"><svg class="icon"><use href="#i-check"/></svg>Setujui &amp; Terbitkan</button></div></dialog>
   <dialog id="service-dialog"><div class="modal-head"><strong>Permohonan Jemaat</strong><button class="icon-btn" type="button" data-close="service-dialog"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="modal-body" id="service-body"></div><div class="modal-foot"><button class="btn" type="button" data-close="service-dialog">Tutup</button><button class="btn primary" type="button" id="save-service">Simpan Status</button></div></dialog>
   <dialog id="user-dialog"><form id="user-form"><div class="modal-head"><strong>Pengelola Portal</strong><button class="icon-btn" type="button" data-close="user-dialog"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="modal-body"><div class="form-grid"><input type="hidden" name="id"><div class="field full"><label>Nama</label><input name="name" required></div><div class="field full"><label>Email Google</label><input name="email" type="email" required></div><div class="field"><label>Peran</label><select name="role"><option>VIEWER</option><option>EDITOR</option><option>APPROVER</option><option>SUPERADMIN</option></select></div><div class="field"><label>Status</label><select name="status"><option>AKTIF</option><option>NONAKTIF</option></select></div></div></div><div class="modal-foot"><button class="btn" type="button" data-close="user-dialog">Batal</button><button class="btn primary" type="submit">Simpan Pengelola</button></div></form></dialog>
+  <dialog id="confirm-dialog" class="confirm-dialog"><div class="modal-body"><div class="confirm-mark" id="confirm-mark"><svg class="icon"><use href="#i-info"/></svg></div><h2 id="confirm-title">Konfirmasi tindakan</h2><p id="confirm-message"></p></div><div class="modal-foot"><button class="btn" type="button" id="confirm-cancel">Batal</button><button class="btn primary" type="button" id="confirm-accept">Lanjutkan</button></div></dialog>
 
 <script>
   (function(){
     'use strict';
     const APP_URL = <?!= JSON.stringify(appUrl || '') ?>;
     const $=(s,c)=>(c||document).querySelector(s), $$=(s,c)=>Array.from((c||document).querySelectorAll(s));
-    const state={boot:null,route:'dashboard',entity:null,entityData:null,search:'',status:'ALL',approvalStatus:'PENDING',approvals:[],approvalCache:{},currentEdit:null,currentReview:null,reviewMode:'',currentService:null,users:[],services:[],activity:null,searchTimer:null,dashboardRequest:0};
+    const state={boot:null,route:'dashboard',entity:null,entityData:null,search:'',status:'ALL',approvalStatus:'PENDING',approvals:[],approvalCache:{},currentEdit:null,currentReview:null,reviewMode:'',currentService:null,users:[],services:[],activity:null,notifications:{count:0,items:[],checkedAt:''},notificationTimer:null,searchTimer:null,dashboardRequest:0,editorDirty:false,confirmResolve:null};
     const icon=name=>'<svg class="icon"><use href="#i-'+name+'"/></svg>';
     const logoMark=className=>'<span class="theme-logo-pair '+attr(className||'brand-logo')+'" role="img" aria-label="Logo GMAHK Galilea"><img class="logo-light" src="https://gmahk-galilea.vercel.app/assets/logo-galilea-light.webp" alt=""><img class="logo-dark" src="https://gmahk-galilea.vercel.app/assets/logo-galilea-dark.webp" alt=""></span>';
     const esc=value=>String(value==null?'':value).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
     const attr=esc;
     function server(name,args,timeoutMs){return new Promise((resolve,reject)=>{let done=false;const timer=setTimeout(()=>{if(!done){done=true;reject(new Error('Server admin belum merespons. Coba kembali; data Anda tidak berubah.'))}},Math.max(8000,Number(timeoutMs)||25000));const finish=fn=>value=>{if(done)return;done=true;clearTimeout(timer);fn(value)};if(typeof google!=='undefined'&&google.script&&google.script.run&&typeof google.script.run[name]==='function'){const runner=google.script.run.withSuccessHandler(finish(resolve)).withFailureHandler(finish(error=>reject(new Error(error&&error.message?error.message:String(error)))));runner[name].apply(runner,args||[]);return}fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:name,args:args||[]})}).then(res=>{if(!res.ok){const ct=res.headers.get('content-type')||'';if(!ct.includes('application/json'))throw new Error('Server mengembalikan error '+res.status+'. Coba kembali.');}return res.json()}).then(payload=>{if(!payload||payload.ok===false){finish(error=>reject(new Error(error&&error.message?error.message:String(error))))(payload&&payload.error?payload.error:'Terjadi gangguan server admin.')}else{finish(resolve)(payload.data!==undefined?payload.data:payload)}}).catch(finish(error=>reject(new Error(error&&error.message?error.message:String(error)))))})}
-    function toast(message,undoFn,duration){const el=document.createElement('div');el.className='toast';if(undoFn){el.innerHTML='<span>'+esc(message)+'</span><button class="toast-undo">Urungkan</button>';el.querySelector('.toast-undo').addEventListener('click',()=>{undoFn();el.remove()})}else{el.textContent=message}$('#toasts').append(el);const t=setTimeout(()=>el.remove(),duration||4200);if(undoFn)el.querySelector('.toast-undo').addEventListener('click',()=>clearTimeout(t))}
+    function toast(message,typeOrUndo,duration){const undoFn=typeof typeOrUndo==='function'?typeOrUndo:null;const type=undoFn?'info':(['success','warning','error','info'].includes(typeOrUndo)?typeOrUndo:'info');const titles={success:'Berhasil',warning:'Perlu perhatian',error:'Proses gagal',info:'Informasi'};const icons={success:'check',warning:'info',error:'close',info:'info'};const el=document.createElement('div');el.className='toast '+type;el.setAttribute('role',type==='error'?'alert':'status');el.innerHTML='<span class="toast-icon">'+icon(icons[type])+'</span><span class="toast-copy"><strong>'+titles[type]+'</strong><span>'+esc(message)+'</span>'+(undoFn?'<button class="toast-undo">Urungkan</button>':'')+'</span><button class="toast-dismiss" aria-label="Tutup">'+icon('close')+'</button>';const remove=()=>el.remove();el.querySelector('.toast-dismiss').addEventListener('click',remove);if(undoFn)el.querySelector('.toast-undo').addEventListener('click',()=>{undoFn();remove()});$('#toasts').append(el);const timer=setTimeout(remove,duration||5200);el.addEventListener('mouseenter',()=>clearTimeout(timer),{once:true})}
+    function setOperation(type,title,detail){const bar=$('#operation-bar');if(!bar)return;bar.className='operation-bar '+(type||'info');bar.hidden=false;$('#operation-title').textContent=title||'Proses selesai';$('#operation-detail').textContent=detail||'';$('#operation-icon').innerHTML=icon(type==='success'?'check':type==='error'?'close':'info')}
+    function clearOperation(){const bar=$('#operation-bar');if(bar)bar.hidden=true}
+    function confirmAction(options){const config=typeof options==='string'?{message:options}:options||{};const dialog=$('#confirm-dialog');if(!dialog)return Promise.resolve(false);$('#confirm-title').textContent=config.title||'Konfirmasi tindakan';$('#confirm-message').textContent=config.message||'Lanjutkan tindakan ini?';const accept=$('#confirm-accept');accept.textContent=config.confirmLabel||'Lanjutkan';accept.className='btn '+(config.danger?'danger':'primary');$('#confirm-mark').classList.toggle('danger',Boolean(config.danger));if(dialog.open)dialog.close();dialog.showModal();return new Promise(resolve=>{state.confirmResolve=resolve})}
+    function finishConfirmation(value){const dialog=$('#confirm-dialog');if(dialog&&dialog.open)dialog.close();if(state.confirmResolve){const resolve=state.confirmResolve;state.confirmResolve=null;resolve(Boolean(value))}}
     function setBusy(button,busy,label){if(!button)return;button.disabled=busy;if(busy){button.dataset.old=button.innerHTML;button.textContent=label||'Memproses…'}else if(button.dataset.old){button.innerHTML=button.dataset.old;delete button.dataset.old}}
     function status(value){const raw=String(value||'DRAFT').toUpperCase(),key=raw.toLowerCase(),labels={DRAFT:'Draf',PENDING:'Menunggu Tinjauan',REVIEW:'Sedang Ditinjau',APPROVED:'Sudah Disetujui',PUBLISH:'Sudah Terbit',REJECTED:'Perlu Revisi'};return '<span class="status '+key+'" title="Status: '+attr(labels[raw]||raw)+'">'+esc(labels[raw]||raw)+'</span>'}
     function friendlyEntity(key){const item=(state.boot.entities||[]).find(e=>e.key===key);return item?item.label:key}
@@ -1617,7 +1713,7 @@
     function shell(){
       const user=state.boot.user, d=state.boot.dashboard;
       const entityNav=state.boot.entities.filter(e=>!['settings','schedule'].includes(e.key)).map(e=>nav(e.key,e.icon,e.label)).join('');
-      return '<div class="admin-shell"><div class="mobile-overlay" id="overlay"></div><aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard">'+logoMark('brand-logo')+'<span><strong>GMAHK Galilea</strong><span>Admin</span></span></a><div class="nav-scroll"><div class="nav-label">OVERVIEW</div>'+nav('dashboard','grid','Dashboard')+'<div class="nav-label">KONTEN</div>'+entityNav+nav('settings','settings','Pengaturan')+'<div class="nav-label">IBADAH</div>'+nav('schedule','calendar','Jadwal Pelayanan')+(user.permissions.edit?'<div class="nav-label">JEMAAT</div>'+nav('services','heart','Layanan Jemaat'):'')+(user.permissions.approve?nav('approvals','check','Persetujuan'):'')+(user.permissions.approve?nav('activity','clock','Aktivitas'):'')+(user.permissions.manageAdmins?nav('users','shield','Pengelola'):'')+(user.permissions.edit?nav('system','settings','Sistem'):'')+'</div><div class="sidebar-user"><div class="user-row"><span class="avatar">'+esc(initials(user.name))+'</span><span><strong>'+esc(user.name)+'</strong><span>'+esc(user.role)+'</span></span></div></div></aside><section class="workspace"><header class="topbar"><div class="button-row"><button class="icon-btn mobile-menu" id="mobile-menu" aria-label="Buka menu">'+icon('menu')+'</button><div class="crumb"><strong id="crumb-title">Dashboard</strong><span>GMAHK Galilea</span></div></div><div class="top-actions"><div style="position:relative"><button class="icon-btn" id="notif-toggle" aria-label="Notifikasi">'+icon('bell')+'<span class="count" id="notif-badge" style="position:absolute;top:-4px;right:-4px;padding:0 4px;font-size:10px" hidden>0</span></button><div id="notif-panel" class="card" style="position:absolute;top:100%;right:0;width:290px;display:none;flex-direction:column;gap:8px;padding:12px;z-index:100;box-shadow:var(--shadow-lg);margin-top:8px"></div></div><a class="icon-btn" href="'+attr(state.boot.publicSite.publicUrl||APP_URL)+'" target="_blank" rel="noopener" title="Buka website">'+icon('external')+'</a><button class="icon-btn" id="theme-toggle" aria-label="Ganti tema">'+icon(currentTheme()==='dark'?'sun':'moon')+'</button></div></header><main class="content" id="content"></main><footer class="admin-footer"><div class="footer-inner"><span>GMAHK Galilea Balikpapan</span><span class="faint">Google Sheets · Vercel Edge</span></div></footer></section></div>';
+      return '<div class="admin-shell"><div class="mobile-overlay" id="overlay"></div><aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard">'+logoMark('brand-logo')+'<span><strong>GMAHK Galilea</strong><span>Admin</span></span></a><div class="nav-scroll"><div class="nav-label">OVERVIEW</div>'+nav('dashboard','grid','Dashboard')+'<div class="nav-label">KONTEN</div>'+entityNav+nav('settings','settings','Pengaturan')+'<div class="nav-label">IBADAH</div>'+nav('schedule','calendar','Jadwal Pelayanan')+(user.permissions.edit?'<div class="nav-label">JEMAAT</div>'+nav('services','heart','Layanan Jemaat'):'')+(user.permissions.approve?nav('approvals','check','Persetujuan'):'')+(user.permissions.approve?nav('activity','clock','Aktivitas'):'')+(user.permissions.manageAdmins?nav('users','shield','Pengelola'):'')+(user.permissions.edit?nav('system','settings','Sistem'):'')+'</div><div class="sidebar-user"><div class="user-row"><span class="avatar">'+esc(initials(user.name))+'</span><span><strong>'+esc(user.name)+'</strong><span>'+esc(user.role)+'</span></span></div></div></aside><section class="workspace"><header class="topbar"><div class="button-row"><button class="icon-btn mobile-menu" id="mobile-menu" aria-label="Buka menu">'+icon('menu')+'</button><div class="crumb"><strong id="crumb-title">Dashboard</strong><span>GMAHK Galilea</span></div></div><div class="top-actions"><div class="notif-wrap"><button class="icon-btn" id="notif-toggle" aria-label="Notifikasi" aria-expanded="false">'+icon('bell')+'<span class="count" id="notif-badge" style="position:absolute;top:-4px;right:-4px;padding:0 4px;font-size:10px" hidden>0</span></button><div id="notif-panel" class="card notification-panel" aria-label="Pusat notifikasi"></div></div><a class="icon-btn" href="'+attr(state.boot.publicSite.publicUrl||APP_URL)+'" target="_blank" rel="noopener" title="Buka website">'+icon('external')+'</a><button class="icon-btn" id="theme-toggle" aria-label="Ganti tema">'+icon(currentTheme()==='dark'?'sun':'moon')+'</button></div></header><div class="operation-bar" id="operation-bar" hidden><span class="operation-icon" id="operation-icon">'+icon('info')+'</span><span class="operation-copy"><strong id="operation-title">Status operasi</strong><span id="operation-detail"></span></span><button class="icon-btn operation-close" type="button" data-operation-close aria-label="Tutup status">'+icon('close')+'</button></div><main class="content" id="content"></main><footer class="admin-footer"><div class="footer-inner"><span>GMAHK Galilea Balikpapan</span><span class="faint">Google Sheets · Vercel Edge</span></div></footer></section></div>';
     }
     function nav(route,iconName,label,count){const value=Math.max(0,Number(count)||0);return '<button class="nav-item" data-route="'+attr(route)+'">'+icon(iconName)+'<span>'+esc(label)+'</span><span class="count" data-nav-count="'+attr(route)+'" '+(value?'':'hidden')+'>'+esc(value)+'</span></button>'}
     function closeSidebar(){$('#sidebar')?.classList.remove('open');$('#overlay')?.classList.remove('open')}
@@ -1723,27 +1819,20 @@
     }
 
     function syncNotifications(){
-      if(!state.boot||!state.boot.dashboard)return;
-      const d=state.boot.dashboard;
-      const pending=Math.max(0,Number(d.pendingApprovals)||0);
-      const drafts=Math.max(0,Number(d.myDrafts)||0);
-      const services=Math.max(0,Number(d.serviceRequests)||0);
-      const total=pending+drafts+services;
+      const data=state.notifications||{count:0,items:[],checkedAt:''};
       const badge=$('#notif-badge');
-      if(badge){badge.textContent=total;badge.hidden=!total}
+      if(badge){badge.textContent=data.count>99?'99+':data.count;badge.hidden=!data.count}
       const panel=$('#notif-panel');
-      if(panel){
-        let html='<div style="font-weight:600;padding-bottom:8px;border-bottom:1px solid var(--line);margin-bottom:4px">Notifikasi</div>';
-        if(total===0)html+='<div class="muted small" style="padding:12px 0;text-align:center">Tidak ada pemberitahuan baru.</div>';
-        else{
-          if(pending>0)html+='<button class="nav-item" data-route="approvals" style="width:100%;justify-content:flex-start;height:auto;padding:8px">'+icon('check')+'<span style="white-space:normal;text-align:left">'+pending+' persetujuan menunggu</span></button>';
-          if(drafts>0)html+='<button class="nav-item" data-route="dashboard" style="width:100%;justify-content:flex-start;height:auto;padding:8px">'+icon('edit')+'<span style="white-space:normal;text-align:left">'+drafts+' draft perlu direvisi</span></button>';
-          if(services>0)html+='<button class="nav-item" data-route="services" style="width:100%;justify-content:flex-start;height:auto;padding:8px">'+icon('heart')+'<span style="white-space:normal;text-align:left">'+services+' layanan jemaat baru</span></button>';
-        }
-        panel.innerHTML=html;
-      }
+      if(!panel)return;
+      const items=Array.isArray(data.items)?data.items:[];
+      panel.innerHTML='<div class="notification-head"><div><strong>Pusat Notifikasi</strong><span>'+(data.checkedAt?'Diperiksa '+esc(data.checkedAt):'Mengambil data terbaru…')+'</span></div><button class="icon-btn" type="button" data-refresh-notifications aria-label="Perbarui notifikasi">'+icon('refresh')+'</button></div><div class="notification-list">'+(items.length?items.map(item=>'<button class="notification-item '+attr(item.severity||'info')+'" data-route="'+attr(item.route||'dashboard')+'"><span class="notification-dot"></span><span><strong>'+esc(item.title)+'</strong><span>'+esc(item.detail||'')+'</span>'+(item.time?'<small>'+esc(item.time)+'</small>':'')+'</span></button>').join(''):'<div class="notification-empty">'+icon('check')+'<p>Tidak ada tindakan yang perlu ditangani.</p></div>')+'</div>';
     }
-    async function loadDashboardSummary(showError){if(!state.boot)return;const request=++state.dashboardRequest;state.boot.dashboard.loading=true;state.boot.dashboard.error='';if(state.route==='dashboard')renderDashboard();try{const result=await server('adminGetDashboardSummary',[],32000);if(request!==state.dashboardRequest)return;if(result&&result.dashboard)state.boot.dashboard=Object.assign({},state.boot.dashboard,result.dashboard,{loading:false,error:''});if(result&&result.publicSite)state.boot.publicSite=Object.assign({},state.boot.publicSite,result.publicSite);syncNotifications();if(state.route==='dashboard')renderDashboard()}catch(error){if(request!==state.dashboardRequest)return;state.boot.dashboard.loading=false;state.boot.dashboard.error=cleanError(error.message);if(state.route==='dashboard')renderDashboard();if(showError)toast(state.boot.dashboard.error)}}
+    async function loadNotifications(showError){
+      if(!state.boot)return;
+      try{state.notifications=await server('adminGetNotifications',[],20000);syncNotifications()}
+      catch(error){if(showError)toast(cleanError(error.message),'error')}
+    }
+    async function loadDashboardSummary(showError){if(!state.boot)return;const request=++state.dashboardRequest;state.boot.dashboard.loading=true;state.boot.dashboard.error='';if(state.route==='dashboard')renderDashboard();try{const result=await server('adminGetDashboardSummary',[],32000);if(request!==state.dashboardRequest)return;if(result&&result.dashboard)state.boot.dashboard=Object.assign({},state.boot.dashboard,result.dashboard,{loading:false,error:''});if(result&&result.publicSite)state.boot.publicSite=Object.assign({},state.boot.publicSite,result.publicSite);if(state.route==='dashboard')renderDashboard()}catch(error){if(request!==state.dashboardRequest)return;state.boot.dashboard.loading=false;state.boot.dashboard.error=cleanError(error.message);if(state.route==='dashboard')renderDashboard();if(showError)toast(state.boot.dashboard.error,'error')}}
 
     async function loadActivity(){state.activity=await server('adminGetDashboardActivity',[]);const audit=state.activity.audit||[],health=state.activity.health||[];$('#content').innerHTML='<div class="page-head"><div><span class="eyebrow">JEJAK PERUBAHAN</span><h1>Audit & Aktivitas</h1><p>Riwayat tindakan pengelola dan hasil pemeriksaan sumber terakhir.</p></div><button class="btn" data-reload>'+icon('refresh')+'Muat ulang</button></div><div class="grid grid-2"><section><div class="section-head" style="margin-top:0"><h3>Aktivitas terbaru</h3></div><div class="activity-list">'+(audit.length?audit.map(activityHtml).join(''):emptyHtml('Belum ada aktivitas yang tercatat.'))+'</div></section><section><div class="section-head" style="margin-top:0"><h3>Status sumber terakhir</h3></div><div class="activity-list">'+(health.length?health.map(item=>'<article class="activity-row"><span class="activity-dot"></span><div><strong>'+esc(item.source)+'</strong><span>'+esc(item.note||'Tidak ada catatan.')+'</span></div>'+status(item.status)+'</article>').join(''):emptyHtml('Pemeriksaan sistem belum pernah dijalankan.'))+'</div></section></div>'}
     function activityHtml(item){return '<article class="activity-row"><span class="activity-dot"></span><div><strong>'+esc(item.name||item.email)+' · '+esc(item.action)+'</strong><span>'+esc(friendlyEntity(item.entity))+(item.detail?' · '+esc(item.detail):'')+'</span></div><time>'+esc(item.time)+'</time></article>'}
@@ -1920,6 +2009,7 @@
         urls[i]=u;
       }
       textarea.value=urls.join('\n');
+      textarea.dispatchEvent(new Event('input',{bubbles:true}));
       renderPhotoManager(key);
     };
     window.removePhoto=function(key,index){
@@ -1927,6 +2017,7 @@
       const urls=textarea.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
       urls.splice(index,1);
       textarea.value=urls.join('\n');
+      textarea.dispatchEvent(new Event('input',{bubbles:true}));
       renderPhotoManager(key);
     };
 
@@ -1941,6 +2032,8 @@
            });
         }
       }, 50);
+      state.editorDirty=false;
+      $('#editor-subtitle').classList.remove('editor-unsaved');
       $('#editor-dialog').showModal();
     }
     function editorSnapshot(){
@@ -1953,7 +2046,7 @@
     function editorValidation(snapshot){const entries=Object.entries(snapshot||{}),filled=entries.filter(item=>String(item[1]||'').trim()).length,issues=[];if(state.currentEdit&&state.currentEdit.entity==='schedule'){if(!snapshot.Tanggal)issues.push('Tanggal belum diisi.');const duties=entries.filter(item=>!['Jenis','Tanggal'].includes(item[0])&&String(item[1]||'').trim());if(!duties.length)issues.push('Belum ada petugas yang diisi.');if(duties.length>8)issues.push('Petugas akan dibagi otomatis menjadi beberapa layar agar tidak terpotong.');}else{const required=(state.entityData.fields||[]).filter(field=>field.required).filter(field=>!String(snapshot[field.label]||'').trim());required.forEach(field=>issues.push(field.label+' wajib diisi.'));}return{filled:filled,total:entries.length,issues:issues,ready:issues.filter(item=>/belum|wajib/i.test(item)).length===0}}
     function previewEditor(){const box=$('#editor-preview'),snapshot=editorSnapshot(),entries=Object.entries(snapshot),validation=editorValidation(snapshot);const checks='<div class="editor-validation"><div class="editor-validation-row '+(validation.ready?'ready':'warning')+'">'+icon(validation.ready?'check':'info')+'<strong>'+(validation.ready?'Isi utama siap diperiksa.':'Masih ada bagian yang perlu diperiksa.')+'</strong></div>'+validation.issues.map(issue=>'<div class="editor-validation-row warning">'+icon('info')+'<span>'+esc(issue)+'</span></div>').join('')+'</div>';let preview='';if(state.currentEdit&&state.currentEdit.entity==='schedule'){const section=(state.entityData.sections||[]).find(item=>item.id===snapshot.Jenis),label=section&&section.title||snapshot.Jenis||'Jenis Ibadah',duties=entries.filter(item=>!['Jenis','Tanggal'].includes(item[0])&&String(item[1]||'').trim()).slice(0,8);preview='<article class="editor-projector" aria-label="Pratinjau layar 16 banding 9"><div class="editor-projector-title"><small>PRATINJAU 16:9</small><strong>'+esc(label)+'</strong><span>'+esc(snapshot.Tanggal||'Tanggal belum diisi')+'</span></div><dl class="editor-projector-fields">'+(duties.length?duties.map(item=>'<div><dt>'+esc(item[0])+'</dt><dd>'+esc(item[1])+'</dd></div>').join(''):'<div><dt>Petugas</dt><dd>Belum diisi</dd></div>')+'</dl></article>';}else preview='<article class="editor-preview-card"><h3>'+esc(snapshot['Tema Ibadah']||snapshot.Judul||snapshot['Nama Kegiatan']||state.entityData.label)+'</h3><dl>'+entries.map(item=>{let val=item[1]; if(val.includes('<') && val.includes('>')) val='<div style="font-size:14px;line-height:1.5;">'+val+'</div>'; else val=esc(val); return '<div><dt>'+esc(item[0])+'</dt><dd>'+val+'</dd></div>';}).join('')+'</dl></article>';box.innerHTML='<div class="editor-preview-head"><div><span class="eyebrow">PRATINJAU SEBELUM DIAJUKAN</span><strong>'+(state.currentEdit&&state.currentEdit.entity==='schedule'?'Simulasi tampilan proyektor':'Pemeriksaan isi publik')+'</strong></div>'+status('DRAFT')+'</div>'+checks+preview;box.classList.add('show');box.scrollIntoView({behavior:'smooth',block:'nearest'})}
     function fieldHtml(field,value){
-      const full=['textarea','image','images','url'].includes(field.type)?' full':'';
+      const full=['textarea','image','images','media','url'].includes(field.type)?' full':'';
       let control;
       if(field.type==='textarea') {
         if(state.entityData.entity==='activities' && field.key==='description') {
@@ -1977,10 +2070,12 @@
     control = '<input name="'+attr(field.key)+'" type="'+attr(field.type)+'" value="'+attr(value)+'" '+(field.required?'required':'')+'>';
   }
 }
-      return '<div class="field'+full+'"><label>'+esc(field.label)+(field.required?' *':'')+'</label>'+control+(field.help?'<span class="help">'+esc(field.help)+'</span>':'')+'</div>';
+      return '<div class="field'+full+'"><label>'+esc(field.label)+(field.required?' *':'')+'</label>'+control+(field.help?'<span class="help">'+esc(field.help)+'</span>':'')+'<span class="field-state" aria-live="polite"></span></div>';
     }
     function openScheduleEditor(record,workflow){const data=state.entityData;if(!data.sections||!data.sections.length)return toast('Bagian jadwal belum ditemukan pada spreadsheet.');const sectionId=record&&((record.values&&record.values.sectionId)||record.sectionId)||data.sections[0].id||'';const section=data.sections.find(s=>s.id===sectionId)||data.sections[0];const values=record&&record.values||record||{};const fields=values.fields||{};const locked=Boolean(record&&record.id&&!/^NEW-/i.test(record.id));state.currentEdit={entity:'schedule',entityId:record&&record.id||'',workflowId:workflow&&workflow.id||'',action:workflow&&workflow.action||'UPSERT'};$('#editor-title').textContent=record?'Edit Jadwal':'Tambah Jadwal';$('#editor-subtitle').textContent=data.sheetName+(locked?' · Jenis ibadah dikunci untuk menjaga struktur sheet':'');$('#editor-workflow').innerHTML=workflowGuide(workflow&&workflow.state||'DRAFT');const sectionControl='<select '+(locked?'disabled':'name="sectionId"')+' id="schedule-section">'+data.sections.map(s=>'<option value="'+s.id+'" '+(s.id===section.id?'selected':'')+'>'+esc(s.title)+'</option>').join('')+'</select>'+(locked?'<input type="hidden" name="sectionId" value="'+attr(section.id)+'">':'');$('#editor-fields').innerHTML='<div class="field"><label>Jenis Ibadah *</label>'+sectionControl+'</div><div class="field"><label>Tanggal *</label><input type="date" name="isoDate" value="'+attr(values.isoDate||'')+'" required></div><div class="field full" id="schedule-fields">'+scheduleFieldsHtml(section,fields)+'</div>';$('#editor-preview').classList.remove('show');
       $('#editor-preview').innerHTML='';
+      state.editorDirty=false;
+      $('#editor-subtitle').classList.remove('editor-unsaved');
       $('#editor-dialog').showModal();
       if(state.currentEdit.entity==='activities') {
          setTimeout(() => {
@@ -1990,17 +2085,56 @@
     }
 
     function scheduleFieldsHtml(section,values){return '<div class="form-grid">'+section.fields.map(name=>'<div class="field"><label>'+esc(name)+'</label><input name="schedule:'+attr(name)+'" value="'+attr(values[name]||'')+'"></div>').join('')+'</div>'}
-    async function saveEditor(event){event.preventDefault();const button=event.submitter,intent=button&&button.value||'draft',form=event.currentTarget;if(!form.reportValidity())return;const snapshot=editorSnapshot(),validation=editorValidation(snapshot);
-      const pendingUploads = Object.values(window.mediaUploadStates || {}).filter(s => s && s !== 'DONE' && s !== 'ERROR');
-      if (pendingUploads.length > 0) {
-        toast('Masih ada media yang sedang diunggah.');
-        return;
+    function markEditorValidity(form){
+      $$('.field',form).forEach(field=>{field.classList.remove('has-error');const stateBox=$('.field-state',field);if(stateBox)stateBox.textContent=''});
+      const invalid=$$(':invalid',form);
+      invalid.forEach(control=>{const field=control.closest('.field');if(!field)return;field.classList.add('has-error');const stateBox=$('.field-state',field);if(stateBox)stateBox.textContent=control.validationMessage||'Periksa kembali isi kolom ini.'});
+      if(invalid[0])invalid[0].focus();
+      return invalid.length===0;
+    }
+    async function saveEditor(event){
+      event.preventDefault();
+      const button=event.submitter,intent=button&&button.value||'draft',form=event.currentTarget;
+      if(!markEditorValidity(form)||!form.reportValidity())return;
+      const snapshot=editorSnapshot(),validation=editorValidation(snapshot);
+      const pendingUploads=Object.values(window.mediaUploadStates||{}).filter(uploadState=>uploadState&&uploadState!=='DONE'&&uploadState!=='ERROR');
+      if(pendingUploads.length){setOperation('warning','Unggahan belum selesai',pendingUploads.length+' file masih diproses. Tunggu hingga seluruh progres selesai.');toast('Masih ada media yang sedang diunggah.','warning');return}
+      if(intent==='submit'&&!validation.ready){previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujuan.','warning');return}
+      const data=Object.fromEntries(new FormData(form).entries());
+      let payload;
+      if(state.currentEdit.entity==='schedule'){
+        payload={sectionId:data.sectionId,isoDate:data.isoDate,fields:{}};
+        Object.keys(data).filter(key=>key.startsWith('schedule:')).forEach(key=>payload.fields[key.slice(9)]=data[key]);
+      }else{
+        payload={};
+        (state.entityData.fields||[]).forEach(field=>payload[field.key]=data[field.key]||'');
       }
-      if(intent==='submit'&&!validation.ready){
-previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujuan.');return}const data=Object.fromEntries(new FormData(form).entries());let payload;if(state.currentEdit.entity==='schedule'){payload={sectionId:data.sectionId,isoDate:data.isoDate,fields:{}};Object.keys(data).filter(k=>k.startsWith('schedule:')).forEach(k=>payload.fields[k.slice(9)]=data[k])}else{payload={};(state.entityData.fields||[]).forEach(f=>payload[f.key]=data[f.key]||'')}const buttons=$$('button[type="submit"]',form);buttons.forEach(b=>b.disabled=true);setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:state.currentEdit.entity,entityId:state.currentEdit.entityId,workflowId:state.currentEdit.workflowId,action:state.currentEdit.action,payload:payload,submit:intent==='submit'}]);$('#editor-dialog').close();toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{buttons.forEach(b=>b.disabled=false);setBusy(button,false)}}
-    async function requestDelete(id,button){if(!confirm('Ajukan penghapusan konten ini untuk persetujuan?'))return;setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:state.entity,entityId:id,action:'DELETE',payload:{},submit:true}]);toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
-    async function resubmitWorkflow(id,button){const workflow=(state.entityData.workflows||[]).find(w=>w.id===id);if(!workflow)return;if(!confirm('Ajukan kembali permintaan '+(workflow.action==='DELETE'?'penghapusan':'perubahan')+' ini?'))return;setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:workflow.entity,entityId:workflow.entityId,workflowId:workflow.id,action:workflow.action,payload:workflow.payload||{},submit:true}]);toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
-    async function cancelWorkflow(id,button){if(!confirm('Tarik pengajuan ini kembali menjadi draft?'))return;setBusy(button,true);try{const result=await server('adminCancelWorkflow',[id]);toast(result.message);if(state.boot&&state.boot.dashboard)state.boot.dashboard.myDrafts=Number(state.boot.dashboard.myDrafts||0)+1;await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
+      const buttons=$$('button[type="submit"]',form);
+      buttons.forEach(item=>item.disabled=true);
+      setBusy(button,true,intent==='submit'?'Mengajukan…':'Menyimpan…');
+      setOperation('info',intent==='submit'?'Mengajukan konten':'Menyimpan draft','Jangan tutup halaman sampai proses selesai.');
+      try{
+        const result=await server('adminSaveWorkflow',[{entity:state.currentEdit.entity,entityId:state.currentEdit.entityId,workflowId:state.currentEdit.workflowId,action:state.currentEdit.action,payload:payload,submit:intent==='submit'}],45000);
+        state.editorDirty=false;
+        $('#editor-dialog').close();
+        const title=intent==='submit'?'Pengajuan berhasil dikirim':'Draft berhasil disimpan';
+        setOperation('success',title,result.message);
+        toast(result.message,'success');
+        await loadEntity(state.entity);
+        loadNotifications(false);
+        loadDashboardSummary(false);
+      }catch(error){
+        const message=cleanError(error.message);
+        setOperation('error','Konten belum tersimpan',message);
+        toast(message,'error',8000);
+      }finally{
+        buttons.forEach(item=>item.disabled=false);
+        setBusy(button,false);
+      }
+    }
+    async function requestDelete(id,button){if(!await confirmAction({title:'Ajukan penghapusan?',message:'Konten akan masuk ke daftar persetujuan dan baru dihapus setelah disetujui.',confirmLabel:'Ajukan penghapusan',danger:true}))return;setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:state.entity,entityId:id,action:'DELETE',payload:{},submit:true}]);setOperation('success','Pengajuan diperbarui',result.message);toast(result.message,'success');await loadEntity(state.entity);loadNotifications(false)}catch(error){const message=cleanError(error.message);setOperation('error','Proses gagal',message);toast(message,'error',8000)}finally{setBusy(button,false)}}
+    async function resubmitWorkflow(id,button){const workflow=(state.entityData.workflows||[]).find(w=>w.id===id);if(!workflow)return;if(!await confirmAction({title:'Ajukan kembali?',message:'Permintaan '+(workflow.action==='DELETE'?'penghapusan':'perubahan')+' akan dikirim kembali kepada peninjau.',confirmLabel:'Ajukan kembali'}))return;setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:workflow.entity,entityId:workflow.entityId,workflowId:workflow.id,action:workflow.action,payload:workflow.payload||{},submit:true}]);setOperation('success','Pengajuan diperbarui',result.message);toast(result.message,'success');await loadEntity(state.entity);loadNotifications(false)}catch(error){const message=cleanError(error.message);setOperation('error','Proses gagal',message);toast(message,'error',8000)}finally{setBusy(button,false)}}
+    async function cancelWorkflow(id,button){if(!await confirmAction({title:'Tarik pengajuan?',message:'Pengajuan akan kembali menjadi draft dan dapat diedit lagi.',confirmLabel:'Tarik menjadi draft'}))return;setBusy(button,true);try{const result=await server('adminCancelWorkflow',[id]);setOperation('success','Pengajuan ditarik',result.message);toast(result.message,'success');loadNotifications(false);if(state.boot&&state.boot.dashboard)state.boot.dashboard.myDrafts=Number(state.boot.dashboard.myDrafts||0)+1;await loadEntity(state.entity)}catch(error){const message=cleanError(error.message);setOperation('error','Proses gagal',message);toast(message,'error',8000)}finally{setBusy(button,false)}}
 
     function adminImageUrl(url) {
       const value=String(url||'').trim();
@@ -2016,9 +2150,9 @@ previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujua
     function approvalHtml(item){const reviewer=item.reviewerEmail?'<span class="small faint">'+esc(item.reviewerEmail+' · '+item.reviewedAt)+'</span>':'';const primary=item.state==='PENDING'?'<button class="btn primary" data-open-review="'+attr(item.id)+'">Tinjau sekarang '+icon('check')+'</button>':reviewer;const remove='<button class="btn danger" data-delete-approval="'+attr(item.id)+'" aria-label="Hapus catatan persetujuan">'+icon('trash')+'Hapus</button>';return '<article class="card approval-card"><div><div class="approval-meta">'+status(item.state)+'<span>'+esc(friendlyEntity(item.entity))+'</span><span>'+esc(item.ownerName)+'</span><span>'+esc(item.updatedAt)+'</span></div><h3 style="margin-top:16px">'+esc(item.action==='DELETE'?'Penghapusan konten':'Perubahan '+friendlyEntity(item.entity))+'</h3>'+payloadHtml(item.payload)+(item.note?'<p class="workflow-note">Catatan reviewer: '+esc(item.note)+'</p>':'')+'</div><div class="button-row">'+primary+remove+'</div></article>'}
     function payloadHtml(payload){const entries=Object.keys(payload||{});if(!entries.length)return'<div class="payload"><div><small>Perubahan</small><strong>Konten akan dihapus setelah disetujui.</strong></div></div>';return '<div class="payload">'+entries.map(key=>{const value=payload[key];if(value&&typeof value==='object')return'<div class="payload-wide"><small>'+esc(key)+'</small><strong>'+Object.keys(value).map(child=>esc(child)+': '+esc(value[child])).join('<br>')+'</strong></div>';return'<div><small>'+esc(key)+'</small><strong>'+esc(value)+'</strong></div>'}).join('')+'</div>'}
     function openReview(id){const item=(state.approvals||[]).find(x=>x.id===id);if(!item)return toast('Pengajuan ini sudah diproses. Muat ulang daftar.');state.currentReview=item;state.reviewMode='';$('#review-caption').textContent='Periksa isi sebelum mengambil keputusan';const isDelete=item.action==='DELETE';const warningHtml=isDelete?'<div class="editor-validation-row warning" style="margin-top:16px;color:var(--danger);border-color:var(--danger)">'+icon('trash')+'<strong>Konten ini akan dihapus permanen setelah disetujui.</strong></div>':'';$('#review-body').innerHTML=workflowGuide('REVIEW')+'<div class="approval-meta">'+status(item.state)+'<span>'+esc(friendlyEntity(item.entity))+'</span><span>'+esc(item.ownerName)+'</span></div><h2 class="review-title">'+esc(isDelete?'Konfirmasi penghapusan':'Periksa sebelum diterbitkan')+'</h2>'+payloadHtml(item.payload)+warningHtml+'<section class="review-reason" id="review-reason" aria-hidden="true"><div class="reason-head">'+icon('edit')+'<div><strong>Alasan revisi</strong><span>Jelaskan bagian yang harus diperbaiki. Catatan ini langsung terlihat oleh editor.</span></div></div><textarea id="review-note" minlength="4" placeholder="Contoh: Perbaiki tanggal kegiatan dan tambahkan lokasi yang lengkap."></textarea><span class="reason-help" id="reason-help">Minimal 4 karakter.</span></section>';const reject=$('[data-review="REJECT"]');reject.innerHTML='Minta revisi';reject.classList.remove('primary');reject.classList.add('danger');const approve=$('[data-review="APPROVE"]');if(isDelete){approve.innerHTML=icon('trash')+'Setujui Penghapusan';approve.classList.remove('primary');approve.classList.add('danger');}else{approve.innerHTML=icon('check')+'Setujui & Terbitkan';approve.classList.remove('danger');approve.classList.add('primary');}$('#review-dialog').showModal()}
-    async function review(decision){if(!state.currentReview)return;const reason=$('#review-reason'),note=$('#review-note')?$('#review-note').value.trim():'';if(decision==='REJECT'&&state.reviewMode!=='reject'){state.reviewMode='reject';reason.classList.add('show');reason.setAttribute('aria-hidden','false');$('#review-caption').textContent='Tuliskan alasan revisi sebelum dikirim';const reject=$('[data-review="REJECT"]');reject.innerHTML=icon('send')+'Kirim untuk revisi';reject.classList.remove('danger');reject.classList.add('primary');requestAnimationFrame(()=>{$('#review-note').focus();reason.scrollIntoView({behavior:'smooth',block:'nearest'})});return}if(decision==='REJECT'&&note.length<4){$('#review-note').focus();$('#reason-help').classList.add('error');return}const buttons=$$('[data-review]'),button=$('[data-review="'+decision+'"]'),reviewed=state.currentReview;buttons.forEach(b=>b.disabled=true);setBusy(button,true,decision==='REJECT'?'Mengirim revisi…':'Menerbitkan…');try{const result=await server('adminReviewWorkflow',[reviewed.id,decision,note],30000);$('#review-dialog').close();toast(result.message);if(state.boot&&state.boot.dashboard)state.boot.dashboard.pendingApprovals=Math.max(0,Number(state.boot.dashboard.pendingApprovals||0)-1);state.approvalCache.PENDING={time:Date.now(),items:(state.approvalCache.PENDING&&state.approvalCache.PENDING.items||state.approvals).filter(item=>item.id!==reviewed.id)};const target=decision==='APPROVE'?'APPROVED':'REJECTED';const moved=Object.assign({},reviewed,{state:result.state,note:note,reviewerEmail:state.boot.user.email,reviewedAt:'Baru saja'});const existing=state.approvalCache[target]&&state.approvalCache[target].items||[];state.approvalCache[target]={time:Date.now(),items:[moved].concat(existing.filter(item=>item.id!==moved.id))};state.currentReview=null;state.reviewMode='';await loadApprovals(target,false)}catch(error){toast(cleanError(error.message))}finally{buttons.forEach(b=>b.disabled=false);setBusy(button,false)}}
+    async function review(decision){if(!state.currentReview)return;const reason=$('#review-reason'),note=$('#review-note')?$('#review-note').value.trim():'';if(decision==='REJECT'&&state.reviewMode!=='reject'){state.reviewMode='reject';reason.classList.add('show');reason.setAttribute('aria-hidden','false');$('#review-caption').textContent='Tuliskan alasan revisi sebelum dikirim';const reject=$('[data-review="REJECT"]');reject.innerHTML=icon('send')+'Kirim untuk revisi';reject.classList.remove('danger');reject.classList.add('primary');requestAnimationFrame(()=>{$('#review-note').focus();reason.scrollIntoView({behavior:'smooth',block:'nearest'})});return}if(decision==='REJECT'&&note.length<4){$('#review-note').focus();$('#reason-help').classList.add('error');return}const buttons=$$('[data-review]'),button=$('[data-review="'+decision+'"]'),reviewed=state.currentReview;buttons.forEach(b=>b.disabled=true);setBusy(button,true,decision==='REJECT'?'Mengirim revisi…':'Menerbitkan…');try{const result=await server('adminReviewWorkflow',[reviewed.id,decision,note],45000);$('#review-dialog').close();setOperation('success',decision==='APPROVE'?'Konten sudah diterbitkan':'Permintaan revisi terkirim',result.sync&&result.sync.message?result.sync.message:result.message);toast(result.message,'success');loadNotifications(false);loadDashboardSummary(false);if(state.boot&&state.boot.dashboard)state.boot.dashboard.pendingApprovals=Math.max(0,Number(state.boot.dashboard.pendingApprovals||0)-1);state.approvalCache.PENDING={time:Date.now(),items:(state.approvalCache.PENDING&&state.approvalCache.PENDING.items||state.approvals).filter(item=>item.id!==reviewed.id)};const target=decision==='APPROVE'?'APPROVED':'REJECTED';const moved=Object.assign({},reviewed,{state:result.state,note:note,reviewerEmail:state.boot.user.email,reviewedAt:'Baru saja'});const existing=state.approvalCache[target]&&state.approvalCache[target].items||[];state.approvalCache[target]={time:Date.now(),items:[moved].concat(existing.filter(item=>item.id!==moved.id))};state.currentReview=null;state.reviewMode='';await loadApprovals(target,false)}catch(error){const message=cleanError(error.message);setOperation('error','Proses gagal',message);toast(message,'error',8000)}finally{buttons.forEach(b=>b.disabled=false);setBusy(button,false)}}
 
-    async function deleteApproval(id){const item=(state.approvals||[]).find(entry=>entry.id===id);if(!item)return;const published=item.state==='APPROVED';const warning=published?'Riwayat persetujuan akan dihapus, tetapi konten yang sudah terbit tetap tampil.':'Pengajuan ini akan dihapus dari daftar persetujuan.';if(!confirm(warning+' Tindakan ini tidak dapat dibatalkan.'))return;const button=$('[data-delete-approval="'+CSS.escape(id)+'"]');setBusy(button,true,'Menghapus…');try{const result=await server('adminDeleteApproval',[id]);if(item.state==='PENDING'&&state.boot&&state.boot.dashboard)state.boot.dashboard.pendingApprovals=Math.max(0,Number(state.boot.dashboard.pendingApprovals||0)-1);state.approvals=state.approvals.filter(entry=>entry.id!==id);state.approvalCache[state.approvalStatus]={time:Date.now(),items:state.approvals};toast(result.message||'Catatan persetujuan dihapus.');renderApprovalsCurrent()}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
+    async function deleteApproval(id){const item=(state.approvals||[]).find(entry=>entry.id===id);if(!item)return;const published=item.state==='APPROVED';const warning=published?'Riwayat persetujuan akan dihapus. Konten yang sudah terbit tetap tampil.':'Pengajuan akan dihapus dari daftar persetujuan.';if(!await confirmAction({title:'Hapus catatan persetujuan?',message:warning+' Tindakan ini tidak dapat dibatalkan.',confirmLabel:'Hapus permanen',danger:true}))return;const button=$('[data-delete-approval="'+CSS.escape(id)+'"]');setBusy(button,true,'Menghapus…');try{const result=await server('adminDeleteApproval',[id]);if(item.state==='PENDING'&&state.boot&&state.boot.dashboard)state.boot.dashboard.pendingApprovals=Math.max(0,Number(state.boot.dashboard.pendingApprovals||0)-1);state.approvals=state.approvals.filter(entry=>entry.id!==id);state.approvalCache[state.approvalStatus]={time:Date.now(),items:state.approvals};setOperation('success','Catatan dihapus',result.message||'Catatan persetujuan dihapus.');toast(result.message||'Catatan persetujuan dihapus.','success');renderApprovalsCurrent();loadNotifications(false)}catch(error){const message=cleanError(error.message);setOperation('error','Proses gagal',message);toast(message,'error',8000)}finally{setBusy(button,false)}}
     function renderApprovalsCurrent(){const items=state.approvals,labels={PENDING:'Menunggu',APPROVED:'Diterbitkan',REJECTED:'Perlu revisi'};const list=$('.approval-list'),badge=$('.page-head>.status');if(list)list.innerHTML=items.length?items.map(approvalHtml).join(''):emptyHtml('Belum ada item pada status ini.');if(badge)badge.textContent=items.length+' '+(labels[state.approvalStatus]||state.approvalStatus)}
 
     async function loadServices(){state.services=await server('adminListServices',[]);renderServices()}
@@ -2028,18 +2162,18 @@ previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujua
     function sharePrayer(id){const item=state.services.find(entry=>entry.id===id);if(!item||item.restricted)return;const text='Permohonan doa anonim\n\n'+item.message+'\n\nMohon dukungan doa dari Jemaat Galilea.';window.open('https://wa.me/?text='+encodeURIComponent(text),'_blank','noopener')}
     function serviceWhatsAppUrl(item){const phone=String(item.phone||'').replace(/\D/g,'').replace(/^0/,'62');return'https://wa.me/'+phone+'?text='+encodeURIComponent('Shalom '+(item.name||'')+', kami dari GMAHK Galilea menindaklanjuti permohonan '+(item.type||'pelayanan')+'.')}
     function openService(id){const item=state.services.find(x=>x.id===id);if(!item)return;state.currentService=item;if(item.restricted){$('#service-body').innerHTML='<span class="eyebrow">AKSES TERBATAS</span><h2>Permohonan untuk Gembala</h2><p class="muted">Isi, identitas, dan kontak disembunyikan untuk menjaga pilihan privasi jemaat. APPROVER atau SUPERADMIN dapat menindaklanjuti.</p>';$('#save-service').hidden=true;return $('#service-dialog').showModal()}$('#save-service').hidden=false;$('#service-body').innerHTML='<span class="eyebrow">'+esc(item.type)+'</span><h2>'+esc(item.name)+'</h2><p class="muted">'+esc(item.message)+'</p><p><span class="privacy-chip">'+esc(privacyLabel(item.privacy))+'</span></p><div class="grid grid-2"><div class="field"><label>WhatsApp</label><input value="'+attr(item.phone)+'" readonly></div><div class="field"><label>Status</label><select id="service-edit-status">'+['BARU','DIPROSES','MENUNGGU','SELESAI','DITUTUP'].map(s=>'<option '+(item.status===s?'selected':'')+'>'+s+'</option>').join('')+'</select></div></div><div class="field" style="margin-top:17px"><label>Catatan internal</label><textarea id="service-note">'+esc(item.adminNote||'')+'</textarea></div>';$('#service-dialog').showModal()}
-    async function saveService(){if(!state.currentService)return;const button=$('#save-service');setBusy(button,true);try{await server('adminUpdateServiceStatus',[state.currentService.id,$('#service-edit-status').value,$('#service-note').value]);$('#service-dialog').close();toast('Status layanan diperbarui.');await loadServices()}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
-    async function deleteService(id){const item=state.services.find(entry=>entry.id===id);if(!item)return;if(!confirm('Hapus pengajuan “'+(item.type||'Layanan Jemaat')+'” dari '+(item.name||'jemaat')+' secara permanen? Tindakan ini tidak dapat dibatalkan.'))return;const button=$('[data-delete-service="'+CSS.escape(id)+'"]');setBusy(button,true);try{const result=await server('adminDeleteService',[id]);if($('#service-dialog')?.open&&state.currentService?.id===id)$('#service-dialog').close();toast(result.message||'Pengajuan berhasil dihapus.');await loadServices()}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
+    async function saveService(){if(!state.currentService)return;const button=$('#save-service');setBusy(button,true);try{const result=await server('adminUpdateServiceStatus',[state.currentService.id,$('#service-edit-status').value,$('#service-note').value]);$('#service-dialog').close();setOperation('success','Layanan diperbarui',result.message||'Status layanan berhasil disimpan.');toast(result.message||'Status layanan diperbarui.','success');await loadServices();loadNotifications(false)}catch(error){const message=cleanError(error.message);setOperation('error','Proses gagal',message);toast(message,'error',8000)}finally{setBusy(button,false)}}
+    async function deleteService(id){const item=state.services.find(entry=>entry.id===id);if(!item)return;if(!await confirmAction({title:'Hapus pengajuan layanan?',message:'Pengajuan “'+(item.type||'Layanan Jemaat')+'” dari '+(item.name||'jemaat')+' akan dihapus permanen.',confirmLabel:'Hapus permanen',danger:true}))return;const button=$('[data-delete-service="'+CSS.escape(id)+'"]');setBusy(button,true);try{const result=await server('adminDeleteService',[id]);if($('#service-dialog')?.open&&state.currentService?.id===id)$('#service-dialog').close();setOperation('success','Pengajuan dihapus',result.message||'Pengajuan berhasil dihapus.');toast(result.message||'Pengajuan berhasil dihapus.','success');await loadServices();loadNotifications(false)}catch(error){const message=cleanError(error.message);setOperation('error','Proses gagal',message);toast(message,'error',8000)}finally{setBusy(button,false)}}
 
     async function loadUsers(){state.users=await server('adminListUsers',[]);$('#content').innerHTML='<div class="page-head"><div><span class="eyebrow">KONTROL AKSES</span><h1>Pengelola Portal</h1><p>Atur akun Google dan batas kewenangan setiap pengurus.</p></div><button class="btn primary" data-new-user>'+icon('plus')+'Tambah Pengelola</button></div><div class="role-grid">'+roleCard('VIEWER','Melihat data tanpa mengubah.')+roleCard('EDITOR','Membuat draft dan mengelola layanan.')+roleCard('APPROVER','Meninjau serta menerbitkan konten.')+roleCard('SUPERADMIN','Kontrol penuh termasuk akun dan backup.')+'</div><div class="user-list">'+(state.users.length?state.users.map(userHtml).join(''):emptyHtml('Belum ada pengelola portal.'))+'</div>'}
     function roleCard(role,copy){return'<article class="role-card"><strong>'+esc(role)+'</strong><span>'+esc(copy)+'</span></article>'}
     function userHtml(user){return '<article class="card user-card"><div class="user-row"><span class="avatar">'+esc(initials(user.name))+'</span><div><strong>'+esc(user.name)+'</strong><span class="muted small">'+esc(user.email)+' · '+esc(user.role)+' · '+esc(user.status)+'</span></div></div><div class="button-row"><button class="btn" data-edit-user="'+attr(user.id)+'">'+icon('edit')+'Edit</button><button class="btn danger" data-delete-user="'+attr(user.id)+'">'+icon('trash')+'</button></div></article>'}
     function openUser(id){const user=state.users.find(x=>x.id===id)||{id:'',name:'',email:'',role:'VIEWER',status:'AKTIF'};const form=$('#user-form');form.reset();Object.keys(user).forEach(key=>{if(form.elements[key])form.elements[key].value=user[key]});$('#user-dialog').showModal()}
-    async function saveUser(event){event.preventDefault();const button=event.submitter,set=Object.fromEntries(new FormData(event.currentTarget).entries());setBusy(button,true);try{const result=await server('adminSaveUser',[set]);$('#user-dialog').close();toast(result.message||'Data pengelola disimpan.');await loadUsers()}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
-    async function deleteUser(id,button){if(!confirm('Hapus pengelola ini dari portal?'))return;setBusy(button,true);try{await server('adminDeleteUser',[id]);toast('Pengelola dihapus.');await loadUsers()}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
+    async function saveUser(event){event.preventDefault();const button=event.submitter,set=Object.fromEntries(new FormData(event.currentTarget).entries());setBusy(button,true);try{const result=await server('adminSaveUser',[set]);$('#user-dialog').close();setOperation('success','Pengelola disimpan',result.message||'Data pengelola disimpan.');toast(result.message||'Data pengelola disimpan.','success');await loadUsers()}catch(error){const message=cleanError(error.message);setOperation('error','Proses gagal',message);toast(message,'error',8000)}finally{setBusy(button,false)}}
+    async function deleteUser(id,button){if(!await confirmAction({title:'Hapus pengelola?',message:'Akun akan kehilangan akses ke portal dan sumber data yang dikelola.',confirmLabel:'Hapus akses',danger:true}))return;setBusy(button,true);try{await server('adminDeleteUser',[id]);setOperation('success','Akses pengelola dihapus','Daftar pengelola sudah diperbarui.');toast('Pengelola dihapus.','success');await loadUsers()}catch(error){const message=cleanError(error.message);setOperation('error','Proses gagal',message);toast(message,'error',8000)}finally{setBusy(button,false)}}
 
     function renderSystem(){const canBackup=state.boot.user.permissions.backup;$('#content').innerHTML='<div class="page-head"><div><span class="eyebrow">SYSTEM OPERATIONS</span><h1>Sistem, arsip & backup</h1><p>Perawatan website dilakukan tanpa mengubah isi sumber API.</p></div><span class="status publish">V'+esc(state.boot.version)+'</span></div><div class="grid grid-4"><article class="card card-pad"><span class="metric-icon">'+icon('refresh')+'</span><h3 style="margin-top:24px">Perbarui Cache</h3><p class="muted">Paksa viewer membaca perubahan spreadsheet terbaru.</p><button class="btn primary" data-system="refresh">Jalankan sekarang</button></article><article class="card card-pad"><span class="metric-icon">'+icon('check')+'</span><h3 style="margin-top:24px">Pemeriksaan Sumber</h3><p class="muted">Periksa materi, video, Alkitab, dan layanan.</p><button class="btn" data-system="health">Periksa sistem</button></article><article class="card card-pad"><span class="metric-icon">'+icon('download')+'</span><h3 style="margin-top:24px">Arsip PDF Publik</h3><p class="muted">Bangun ulang PDF Alkitab dan Lagu Sion lengkap untuk viewer.</p><button class="btn" data-system="archives" '+(canBackup?'':'disabled')+'>Bangun arsip</button></article><article class="card card-pad"><span class="metric-icon">'+icon('download')+'</span><h3 style="margin-top:24px">Backup Data</h3><p class="muted">Buat salinan spreadsheet dan layanan jemaat di Drive.</p><button class="btn" data-system="backup" '+(canBackup?'':'disabled')+'>Buat backup</button></article></div><div id="system-result" style="margin-top:20px"></div><article class="card card-pad" style="margin-top:22px"><span class="eyebrow">KEAMANAN DEPLOYMENT</span><h3>Portal admin memakai deployment khusus.</h3><p class="muted">Buka alamat Vercel <strong>/admin</strong>. Vercel akan meneruskan Anda ke deployment admin yang berjalan sebagai <strong>User accessing the web app</strong> sehingga email Google dapat diverifikasi.</p></article>'}
-    async function runSystem(action,button){const label=action==='backup'?'Membuat backup…':action==='archives'?'Menyusun PDF lengkap…':'Memproses…';setBusy(button,true,label);try{const result=await server('adminRunSystemAction',[action],action==='archives'?110000:22000);$('#system-result').innerHTML='<article class="card card-pad"><span class="status approved">BERHASIL</span><pre style="white-space:pre-wrap;color:var(--soft);overflow-wrap:anywhere">'+esc(typeof result==='string'?result:JSON.stringify(result,null,2))+'</pre></article>';toast(action==='archives'?'Arsip PDF siap digunakan di viewer.':'Aksi sistem selesai.')}catch(error){$('#system-result').innerHTML=errorBox(error.message)}finally{setBusy(button,false)}}
+    async function runSystem(action,button){const label=action==='backup'?'Membuat backup…':action==='archives'?'Menyusun PDF lengkap…':'Memproses…';setBusy(button,true,label);setOperation('info','Operasi sistem berjalan',label);try{const result=await server('adminRunSystemAction',[action],action==='archives'?110000:30000);$('#system-result').innerHTML='<article class="card card-pad"><span class="status approved">BERHASIL</span><pre style="white-space:pre-wrap;color:var(--soft);overflow-wrap:anywhere">'+esc(typeof result==='string'?result:JSON.stringify(result,null,2))+'</pre></article>';const message=action==='archives'?'Arsip PDF siap digunakan di viewer.':'Aksi sistem selesai.';setOperation('success','Operasi sistem selesai',message);toast(message,'success');loadNotifications(false);loadDashboardSummary(false)}catch(error){const message=cleanError(error.message);$('#system-result').innerHTML=errorBox(message);setOperation('error','Operasi sistem gagal',message);toast(message,'error',8000)}finally{setBusy(button,false)}}
 
     function emptyHtml(message){return '<div class="empty">'+icon('info')+'<p>'+esc(message)+'</p></div>'}
     async function refreshBootstrap(){state.boot=await server('adminGetBootstrap',[],30000);$('#root').innerHTML=shell();bindShell();applyTheme(currentTheme());$$('.nav-item').forEach(button=>button.classList.toggle('active',button.dataset.route===state.route));const crumb=$('#crumb-title');if(crumb)crumb.textContent=routeTitle();loadDashboardSummary(false)}
@@ -2055,6 +2189,16 @@ previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujua
       $('#loader').classList.add('hidden');
       $('#root').innerHTML='<main class="gate"><article class="gate-card">'+logoMark('gate-logo')+'<span class="eyebrow">'+eyebrow+'</span><h1>'+title+'</h1><p class="muted gate-message">'+esc(message)+'</p><div class="steps">'+steps+'</div><button class="btn primary" onclick="location.reload()">Muat ulang portal</button></article></main>';
     }
+    async function closeDialogSafely(id){
+      const dialog=$('#'+id);
+      if(!dialog)return;
+      if(id==='editor-dialog'&&state.editorDirty){
+        const discard=await confirmAction({title:'Buang perubahan?',message:'Perubahan pada formulir belum disimpan. Jika ditutup, perubahan tersebut akan hilang.',confirmLabel:'Buang perubahan',danger:true});
+        if(!discard)return;
+        state.editorDirty=false;
+      }
+      dialog.close();
+    }
     function bindShell(){
       $('#mobile-menu')?.addEventListener('click',()=>{$('#sidebar').classList.toggle('open');$('#overlay').classList.toggle('open')});
       $('#overlay')?.addEventListener('click',closeSidebar);
@@ -2062,18 +2206,55 @@ previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujua
       $('#notif-toggle')?.addEventListener('click',(e)=>{
         e.stopPropagation();
         const p=$('#notif-panel');
-        if(p)p.style.display=p.style.display==='none'?'flex':'none';
+        if(p){p.classList.toggle('open');e.currentTarget.setAttribute('aria-expanded',String(p.classList.contains('open')))}
       });
       document.addEventListener('click',(e)=>{
-        if(!e.target.closest('#notif-panel')){
+        if(!e.target.closest('.notif-wrap')){
           const p=$('#notif-panel');
-          if(p)p.style.display='none';
+          if(p)p.classList.remove('open');
+          $('#notif-toggle')?.setAttribute('aria-expanded','false');
         }
       });
+      syncNotifications();
     }
-    document.addEventListener('click',event=>{const route=event.target.closest('[data-route]');if(route)return navigate(route.dataset.route);const close=event.target.closest('[data-close]');if(close)return $('#'+close.dataset.close).close();if(event.target.closest('[data-preview-editor]'))return previewEditor();if(event.target.closest('[data-new-record]'))return openNewRecord();const edit=event.target.closest('[data-edit-record]');if(edit)return openRecord(edit.dataset.editRecord);const duplicate=event.target.closest('[data-duplicate-schedule]');if(duplicate)return duplicateSchedule(duplicate.dataset.duplicateSchedule);const del=event.target.closest('[data-delete-record]');if(del)return requestDelete(del.dataset.deleteRecord,del);const ew=event.target.closest('[data-edit-workflow]');if(ew)return openWorkflow(ew.dataset.editWorkflow);const rw=event.target.closest('[data-resubmit-workflow]');if(rw)return resubmitWorkflow(rw.dataset.resubmitWorkflow,rw);const cw=event.target.closest('[data-cancel-workflow]');if(cw)return cancelWorkflow(cw.dataset.cancelWorkflow,cw);const dw=event.target.closest('[data-delete-workflow]');if(dw){if(!confirm('Hapus draft ini secara permanen?'))return;setBusy(dw,true);return server('adminDeleteWorkflow',[dw.dataset.deleteWorkflow]).then(()=>{toast('Draft dihapus.');loadEntity(state.entity)}).catch(e=>toast(cleanError(e.message))).finally(()=>setBusy(dw,false))}if(event.target.closest('[data-dashboard-refresh]'))return loadDashboardSummary(true);if(event.target.closest('[data-reload]')||event.target.closest('[data-retry]'))return renderRoute();const approvalTab=event.target.closest('[data-approval-status]');if(approvalTab)return loadApprovals(approvalTab.dataset.approvalStatus);const reviewButton=event.target.closest('[data-open-review]');if(reviewButton)return openReview(reviewButton.dataset.openReview);const reviewAction=event.target.closest('[data-review]');if(reviewAction)return review(reviewAction.dataset.review);const deleteApprovalButton=event.target.closest('[data-delete-approval]');if(deleteApprovalButton)return deleteApproval(deleteApprovalButton.dataset.deleteApproval);const service=event.target.closest('[data-open-service]');if(service)return openService(service.dataset.openService);const deleteServiceButton=event.target.closest('[data-delete-service]');if(deleteServiceButton)return deleteService(deleteServiceButton.dataset.deleteService);const sharePrayerButton=event.target.closest('[data-share-prayer]');if(sharePrayerButton)return sharePrayer(sharePrayerButton.dataset.sharePrayer);if(event.target.closest('[data-new-user]'))return openUser('');const eu=event.target.closest('[data-edit-user]');if(eu)return openUser(eu.dataset.editUser);const du=event.target.closest('[data-delete-user]');if(du)return deleteUser(du.dataset.deleteUser,du);const sys=event.target.closest('[data-system]');if(sys)return runSystem(sys.dataset.system,sys)});
+    document.addEventListener('click',async event=>{
+      const route=event.target.closest('[data-route]');if(route)return navigate(route.dataset.route);
+      const close=event.target.closest('[data-close]');if(close)return closeDialogSafely(close.dataset.close);
+      if(event.target.closest('[data-operation-close]'))return clearOperation();
+      if(event.target.closest('[data-refresh-notifications]'))return loadNotifications(true);
+      if(event.target.closest('[data-preview-editor]'))return previewEditor();
+      if(event.target.closest('[data-new-record]'))return openNewRecord();
+      const edit=event.target.closest('[data-edit-record]');if(edit)return openRecord(edit.dataset.editRecord);
+      const duplicate=event.target.closest('[data-duplicate-schedule]');if(duplicate)return duplicateSchedule(duplicate.dataset.duplicateSchedule);
+      const del=event.target.closest('[data-delete-record]');if(del)return requestDelete(del.dataset.deleteRecord,del);
+      const editWorkflow=event.target.closest('[data-edit-workflow]');if(editWorkflow)return openWorkflow(editWorkflow.dataset.editWorkflow);
+      const resubmit=event.target.closest('[data-resubmit-workflow]');if(resubmit)return resubmitWorkflow(resubmit.dataset.resubmitWorkflow,resubmit);
+      const cancel=event.target.closest('[data-cancel-workflow]');if(cancel)return cancelWorkflow(cancel.dataset.cancelWorkflow,cancel);
+      const deleteWorkflow=event.target.closest('[data-delete-workflow]');
+      if(deleteWorkflow){
+        if(!await confirmAction({title:'Hapus draft?',message:'Draft akan dihapus permanen dan tidak dapat dipulihkan.',confirmLabel:'Hapus draft',danger:true}))return;
+        setBusy(deleteWorkflow,true);
+        try{await server('adminDeleteWorkflow',[deleteWorkflow.dataset.deleteWorkflow]);toast('Draft dihapus.','success');setOperation('success','Draft dihapus','Daftar konten sudah diperbarui.');await loadEntity(state.entity);loadNotifications(false)}
+        catch(error){const message=cleanError(error.message);setOperation('error','Draft belum dihapus',message);toast(message,'error',8000)}
+        finally{setBusy(deleteWorkflow,false)}
+        return;
+      }
+      if(event.target.closest('[data-dashboard-refresh]')){loadDashboardSummary(true);loadNotifications(false);return}
+      if(event.target.closest('[data-reload]')||event.target.closest('[data-retry]'))return renderRoute();
+      const approvalTab=event.target.closest('[data-approval-status]');if(approvalTab)return loadApprovals(approvalTab.dataset.approvalStatus);
+      const reviewButton=event.target.closest('[data-open-review]');if(reviewButton)return openReview(reviewButton.dataset.openReview);
+      const reviewAction=event.target.closest('[data-review]');if(reviewAction)return review(reviewAction.dataset.review);
+      const deleteApprovalButton=event.target.closest('[data-delete-approval]');if(deleteApprovalButton)return deleteApproval(deleteApprovalButton.dataset.deleteApproval);
+      const service=event.target.closest('[data-open-service]');if(service)return openService(service.dataset.openService);
+      const deleteServiceButton=event.target.closest('[data-delete-service]');if(deleteServiceButton)return deleteService(deleteServiceButton.dataset.deleteService);
+      const sharePrayerButton=event.target.closest('[data-share-prayer]');if(sharePrayerButton)return sharePrayer(sharePrayerButton.dataset.sharePrayer);
+      if(event.target.closest('[data-new-user]'))return openUser('');
+      const editUser=event.target.closest('[data-edit-user]');if(editUser)return openUser(editUser.dataset.editUser);
+      const deleteUserButton=event.target.closest('[data-delete-user]');if(deleteUserButton)return deleteUser(deleteUserButton.dataset.deleteUser,deleteUserButton);
+      const systemButton=event.target.closest('[data-system]');if(systemButton)return runSystem(systemButton.dataset.system,systemButton);
+    });
     function queueSearch(render,inputId){clearTimeout(state.searchTimer);state.searchTimer=setTimeout(()=>{render();requestAnimationFrame(()=>{const input=$('#'+inputId);if(!input)return;input.focus();const end=input.value.length;input.setSelectionRange(end,end)})},180)}
-    document.addEventListener('input',event=>{if(event.target.id==='entity-search'){state.search=event.target.value;queueSearch(renderEntity,'entity-search')}if(event.target.id==='service-search'){state.search=event.target.value;queueSearch(renderServices,'service-search')}});
+    document.addEventListener('input',event=>{if(event.target.id==='entity-search'){state.search=event.target.value;queueSearch(renderEntity,'entity-search')}if(event.target.id==='service-search'){state.search=event.target.value;queueSearch(renderServices,'service-search')}if(event.target.closest('#editor-form')){state.editorDirty=true;$('#editor-subtitle')?.classList.add('editor-unsaved');const field=event.target.closest('.field');if(field){field.classList.remove('has-error');const fieldState=$('.field-state',field);if(fieldState)fieldState.textContent=''}}});
     document.addEventListener('change',event=>{
     if(event.target.id==='entity-status'){state.status=event.target.value;renderEntity()}
     if(event.target.id==='service-status'){state.status=event.target.value;renderServices()}
@@ -2089,9 +2270,11 @@ previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujua
     }
   });
     $('#editor-form').addEventListener('submit',saveEditor);$('#user-form').addEventListener('submit',saveUser);$('#save-service').addEventListener('click',saveService);
+    $('#confirm-cancel').addEventListener('click',()=>finishConfirmation(false));$('#confirm-accept').addEventListener('click',()=>finishConfirmation(true));$('#confirm-dialog').addEventListener('cancel',event=>{event.preventDefault();finishConfirmation(false)});
+    window.addEventListener('beforeunload',event=>{if(!state.editorDirty)return;event.preventDefault();event.returnValue=''});
     window.addEventListener('hashchange',()=>{const route=location.hash.slice(1);if(route&&route!==state.route)navigate(route)});
-    window.GALILEA_ADMIN_RUNTIME=Object.freeze({query:$,queryAll:$$,escapeText:esc,escapeAttribute:attr,server:server,cleanError:cleanError});
-    async function boot(){applyTheme(currentTheme());try{state.boot=await server('adminGetBootstrap',[],30000);$('#root').innerHTML=shell();bindShell();const route=location.hash.slice(1)||'dashboard';navigate(route);$('#loader').classList.add('hidden');loadDashboardSummary(false)}catch(error){showGate(error)}}
+    window.GALILEA_ADMIN_RUNTIME=Object.freeze({query:$,queryAll:$$,escapeText:esc,escapeAttribute:attr,server:server,cleanError:cleanError,confirmAction:confirmAction,toast:toast,markEditorDirty:()=>{state.editorDirty=true;$('#editor-subtitle')?.classList.add('editor-unsaved')}});
+    async function boot(){applyTheme(currentTheme());try{state.boot=await server('adminGetBootstrap',[],30000);$('#root').innerHTML=shell();bindShell();const route=location.hash.slice(1)||'dashboard';navigate(route);$('#loader').classList.add('hidden');loadDashboardSummary(false);loadNotifications(false);clearInterval(state.notificationTimer);state.notificationTimer=setInterval(()=>loadNotifications(false),60000)}catch(error){showGate(error)}}
     boot();
   })();
   </script>
@@ -2108,6 +2291,9 @@ const esc = adminMediaRuntime.escapeText;
 const attr = adminMediaRuntime.escapeAttribute;
 const server = adminMediaRuntime.server;
 const cleanError = adminMediaRuntime.cleanError;
+const confirmAction = adminMediaRuntime.confirmAction;
+const mediaToast = adminMediaRuntime.toast;
+const markEditorDirty = adminMediaRuntime.markEditorDirty;
 
 const MEDIA_STATE = {
   QUEUED: 'QUEUED',
@@ -2164,13 +2350,18 @@ function parseMediaField(mediaValue, photosValue) {
 
 function saveMediaField(targetKey, mediaArray) {
   const mediaInput = $('[name="'+CSS.escape(targetKey)+'"]');
-  const photosInput = $('[name="photos"]'); // Hardcoded mapping back to photos for legacy
+  const photosInput = $('[name="photos"]');
+  const images = mediaArray.filter(item => String(item.mimeType || '').toLowerCase().startsWith('image/'));
+  if (images.length && !images.some(item => item.primary)) images[0].primary = true;
+  mediaArray.forEach(item => { if (!String(item.mimeType || '').toLowerCase().startsWith('image/')) item.primary = false; });
   
   if (mediaInput) mediaInput.value = JSON.stringify(mediaArray);
   if (photosInput) {
-    const urls = mediaArray.map(m => (m.primary ? 'PRIMARY:' : '') + m.url);
+    const urls = images.map(m => (m.primary ? 'PRIMARY:' : '') + m.url);
     photosInput.value = urls.join('\n');
   }
+  if (typeof markEditorDirty === 'function') markEditorDirty();
+  if (mediaInput) mediaInput.dispatchEvent(new Event('input', { bubbles: true }));
 }
 
 function renderMediaManager(targetKey) {
@@ -2215,8 +2406,8 @@ window.setPrimaryMedia = function(targetKey, index) {
   renderMediaManager(targetKey);
 };
 
-window.removeMedia = function(targetKey, index) {
-  if (!confirm('Hapus media ini?')) return;
+window.removeMedia = async function(targetKey, index) {
+  if (!await confirmAction({title:'Hapus media?',message:'Media akan dilepas dari berita ini. File yang sudah diunggah tetap aman di Google Drive.',confirmLabel:'Hapus dari berita',danger:true})) return;
   const mediaInput = $('[name="'+CSS.escape(targetKey)+'"]');
   const photosInput = $('[name="photos"]');
   let media = parseMediaField(mediaInput.value, photosInput ? photosInput.value : '');
@@ -2690,11 +2881,13 @@ window.uploadImage = async function(input) {
             urls.push(normalizeDriveUrl(finalRes.url));
           }
           urlInput.value = urls.join('\n');
+          urlInput.dispatchEvent(new Event('input', { bubbles: true }));
           // Remove pending item and refresh photo grid
           li.remove();
           if (typeof renderPhotoManager === 'function') renderPhotoManager(targetKey);
         } else {
           urlInput.value = normalizeDriveUrl(finalRes.url);
+          urlInput.dispatchEvent(new Event('input', { bubbles: true }));
           const removeBtn = document.createElement('button');
           removeBtn.type = 'button';
           removeBtn.className = 'btn small soft error-text';
@@ -2717,6 +2910,7 @@ window.uploadImage = async function(input) {
         errorDetail.textContent = typeof cleanError === 'function' ? cleanError(err.message) : err.message;
         
         li.querySelector('.upload-info').appendChild(errorDetail);
+        mediaToast('Gambar “'+file.name+'” gagal diunggah: '+errorDetail.textContent,'error',8000);
       }
     })();
   }
@@ -2727,24 +2921,22 @@ window.uploadMediaEngine = async function(input) {
   if (!files.length) return;
   const targetKey = input.dataset.mediaTarget;
   input.value = '';
-  for (const file of files) {
-    const p = uploadMediaFile(file, targetKey);
-    p.then((mediaObj) => {
-      if (mediaObj) {
-        const mediaInput = $('[name="'+CSS.escape(targetKey)+'"]');
-        const photosInput = $('[name="photos"]');
-        let mediaArr = parseMediaField(mediaInput.value, photosInput ? photosInput.value : '');
-        mediaArr.push(mediaObj);
-        saveMediaField(targetKey, mediaArr);
-        
-        // Only render if all uploads for this target are DONE or ERROR
-        const hasActiveUploads = Object.values(window.mediaUploadStates).some(state => state && state !== 'DONE' && state !== 'ERROR');
-        if (!hasActiveUploads) {
-          renderMediaManager(targetKey);
-        }
-      }
-    });
+  if (typeof markEditorDirty === 'function') markEditorDirty();
+  const results = await Promise.all(files.map(file => uploadMediaFile(file, targetKey)));
+  const completed = results.filter(Boolean);
+  if (completed.length) {
+    const mediaInput = $('[name="'+CSS.escape(targetKey)+'"]');
+    const photosInput = $('[name="photos"]');
+    const mediaArr = parseMediaField(mediaInput.value, photosInput ? photosInput.value : '').concat(completed);
+    saveMediaField(targetKey, mediaArr);
   }
+  renderMediaManager(targetKey);
+  const failed = files.length - completed.length;
+  if (failed) mediaToast(failed+' dari '+files.length+' media gagal diunggah. Detail tersedia pada daftar unggahan.','error',8000);
+  else mediaToast(completed.length+' media berhasil diunggah dan siap disimpan.','success');
+  Object.keys(window.mediaUploadStates).forEach(id => {
+    if (window.mediaUploadStates[id] === 'DONE' || window.mediaUploadStates[id] === 'ERROR') delete window.mediaUploadStates[id];
+  });
 };
 ;
 </script>
