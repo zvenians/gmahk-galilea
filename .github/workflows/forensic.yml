@@ -1,0 +1,109 @@
+name: Forensic Version Pull
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to pull'
+        required: true
+        default: '160'
+
+jobs:
+  forensic:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+
+      - name: Install clasp
+        run: npm install -g @google/clasp
+
+      - name: Create Secrets
+        run: |
+          echo "$CLASPRC_JSON" > ~/.clasprc.json
+          echo "$CLASP_JSON" > .clasp.json
+        env:
+          CLASPRC_JSON: ${{ secrets.CLASPRC_JSON }}
+          CLASP_JSON: ${{ secrets.CLASP_JSON }}
+
+      - name: Task 4 - Version Metadata
+        run: |
+          echo "=================================================="
+          echo "TASK 4 — VERSION METADATA"
+          echo "=================================================="
+          clasp versions > versions.txt
+          cat versions.txt
+          echo "--- Extracting Version ${{ github.event.inputs.version }} ---"
+          grep -E "^${{ github.event.inputs.version }} " versions.txt || true
+
+      - name: Task 5 - Deployment
+        run: |
+          echo "=================================================="
+          echo "TASK 5 — DEPLOYMENT"
+          echo "=================================================="
+          clasp deployments > deployments.txt
+          cat deployments.txt
+          echo "--- Extracting DEPLOYMENT_ID_ADMIN ($DEPLOYMENT_ID_ADMIN) ---"
+          grep "$DEPLOYMENT_ID_ADMIN" deployments.txt || true
+        env:
+          DEPLOYMENT_ID_ADMIN: ${{ secrets.DEPLOYMENT_ID_ADMIN }}
+
+      - name: Task 1 - Pull Version
+        run: |
+          echo "=================================================="
+          echo "TASK 1 — PULL VERSION ${{ github.event.inputs.version }}"
+          echo "=================================================="
+          mkdir -p /tmp/clasp-version-pull
+          cp .clasp.json /tmp/clasp-version-pull/.clasp.json
+          jq '.rootDir = "/tmp/clasp-version-pull"' .clasp.json > /tmp/clasp-version-pull/.clasp.json
+          cd /tmp/clasp-version-pull
+          clasp pull --versionNumber ${{ github.event.inputs.version }}
+          echo "Files pulled:"
+          ls -la
+
+      - name: Task 2 & 3 - Check Exact Content and Hash
+        run: |
+          echo "=================================================="
+          echo "TASK 2 — CHECK EXACT CONTENT"
+          echo "=================================================="
+          cd /tmp/clasp-version-pull
+          FILE="Admins.html"
+          if [ ! -f "$FILE" ]; then
+            echo "Error: Admins.html NOT FOUND in pulled version!"
+            exit 1
+          fi
+          
+          echo "--- 1. meta name=admin-build-commit ---"
+          grep -n "meta name=\"admin-build-commit\"" "$FILE" || true
+          
+          echo "--- 2. renderPhotoManager ---"
+          grep -c "renderPhotoManager" "$FILE" || true
+          
+          echo "--- 3. initPhotoManagers ---"
+          grep -c "initPhotoManagers" "$FILE" || true
+          
+          echo "--- 4. [GALILEA INIT PHOTO] ---"
+          grep -n "GALILEA INIT PHOTO" "$FILE" || true
+          
+          echo "--- 5. [GALILEA PHOTO MANAGER] ---"
+          grep -n "GALILEA PHOTO MANAGER" "$FILE" || true
+          
+          echo "--- 6. Belum ada foto ---"
+          grep -n "Belum ada foto" "$FILE" || true
+          
+          echo "--- 7. selector [name=...+CSS.escape(key)+...] ---"
+          grep -n "CSS.escape(key)+'\"]'" "$FILE" || true
+          
+          echo "--- 8. PRIMARY extraction ---"
+          grep -n "arr.find.*PRIMARY:" "$FILE" || true
+          
+          echo "=================================================="
+          echo "TASK 3 — HASH VERSION ${{ github.event.inputs.version }}"
+          echo "=================================================="
+          SHA=$(sha256sum "$FILE" | awk '{print $1}')
+          echo "SHA256 version ${{ github.event.inputs.version }} = $SHA"
