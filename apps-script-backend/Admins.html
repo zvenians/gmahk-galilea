@@ -1773,7 +1773,7 @@
         } catch(e) {}
       }
       if (thumbSrc) {
-        thumb = '<div class="record-thumb" style="width:100%;height:140px;background:#f5f5f5;border-radius:8px 8px 0 0;overflow:hidden;margin:-16px -18px 12px;width:calc(100% + 36px)"><img src="'+attr(thumbSrc)+'" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.style.display=\'none\'"></div>';
+        thumb = '<div class="record-thumb" style="width:100%;height:140px;background:#f5f5f5;border-radius:8px 8px 0 0;overflow:hidden;margin:-16px -18px 12px;width:calc(100% + 36px)"><img src="'+attr(adminImageUrl(thumbSrc))+'" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.style.display=\'none\'"></div>';
       }
       
       return '<article class="card record">'+thumb+'<div class="record-main"><div class="record-top">'+status(record.status||(isSchedule?'PUBLISH':'DRAFT'))+'<span class="small faint">'+esc(record.group||record.sectionTitle||'')+'</span></div><h3 style="white-space:normal;word-break:break-word;margin:4px 0">'+esc(record.title||'Tanpa judul')+'</h3><p class="record-summary" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;line-height:1.4">'+esc(summary||'Belum ada keterangan.')+'</p></div><div class="record-actions" style="margin-top:auto;padding-top:12px;border-top:1px solid #ddd;display:flex;gap:8px;flex-wrap:wrap">'+(state.boot.user.permissions.edit?'<button class="btn" data-edit-record="'+attr(record.id)+'">'+icon('edit')+'Edit</button>'+(isSchedule?'<button class="btn soft" data-duplicate-schedule="'+attr(record.id)+'">'+icon('plus')+'Duplikat</button>':'')+(canDelete?'<button class="btn danger" data-delete-record="'+attr(record.id)+'">'+icon('trash')+'</button>':''):'')+'</div></article>';
@@ -1867,7 +1867,7 @@
           ? '<span class="photo-primary-badge">&#9733; FOTO UTAMA</span>'
           : '<button type="button" class="btn-set-primary-row" onclick="setPrimaryPhoto(\'' + esc(key) + '\',' + idx + ')">Jadikan Utama</button>';
         return '<div class="upload-item success' + (isPrimary ? ' is-primary' : '') + '" style="justify-content:flex-start">' +
-          '<div class="media-thumb sq-64"><img src="' + attr(cleanUrl) + '" loading="lazy" onerror="this.parentElement.textContent=\'\u26a0\'"></div>' +
+          '<div class="media-thumb sq-64"><img src="' + attr(adminImageUrl(cleanUrl)) + '" loading="lazy" onerror="this.parentElement.textContent=\'\u26a0\'"></div>' +
           '<div class="upload-info" style="flex:1;min-width:0;margin-left:10px">' +
           '<span class="upload-name">' + esc(fname) + '</span>' +
           '<span class="upload-status" style="color:var(--success)">&#10003; Tersimpan</span>' +
@@ -1900,7 +1900,7 @@
         let fname='Foto '+(idx+1);try{fname=decodeURIComponent(rawName)}catch(e){fname=rawName}
         const pBtn=isPrimary?'<span class="photo-primary-badge">&#9733; FOTO UTAMA</span>':'<button type="button" class="btn-set-primary-row" onclick="setPrimaryPhoto(\''+attr(key)+'\','+idx+')">Jadikan Utama</button>';
         return '<div class="upload-item success'+(isPrimary?' is-primary':'')+'" style="justify-content:flex-start">'+
-          '<div class="media-thumb sq-64"><img src="'+attr(cleanUrl)+'" loading="lazy" onerror="this.parentElement.textContent=\'\u26a0\'"></div>'+
+          '<div class="media-thumb sq-64"><img src="'+attr(adminImageUrl(cleanUrl))+'" loading="lazy" onerror="this.parentElement.textContent=\'\u26a0\'"></div>'+
           '<div class="upload-info" style="flex:1;min-width:0;margin-left:10px">'+
           '<span class="upload-name">'+esc(fname)+'</span>'+
           '<span class="upload-status" style="color:var(--success)">&#10003; Tersimpan</span>'+
@@ -1969,7 +1969,7 @@
       else if(field.type==='select') control='<select name="'+attr(field.key)+'" '+(field.required?'required':'')+'>'+field.options.map(o=>'<option '+(String(value)===o?'selected':'')+'>'+esc(o)+'</option>').join('')+'</select>';
       else {
   if (field.type === 'image') {
-    const existingPreview = value ? '<li class="upload-item success" style="justify-content:flex-start; margin-bottom: 8px;"><div class="media-thumb sq-64"><img src="'+attr(value)+'" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>⚠️</div>\'"></div><div class="upload-info"><span class="upload-name">'+attr(value.split('/').pop())+'</span></div><button type="button" class="btn small soft error-text" onclick="document.querySelector(\'[name=\\\"'+attr(field.key)+'\\\"]\').value=\'\'; document.getElementById(\'upload-preview-'+attr(field.key)+'\').innerHTML=\'\'">Hapus</button></li>' : '';
+    const existingPreview = value ? '<li class="upload-item success" style="justify-content:flex-start; margin-bottom: 8px;"><div class="media-thumb sq-64"><img src="'+attr(adminImageUrl(value))+'" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>⚠️</div>\'"></div><div class="upload-info"><span class="upload-name">'+attr(value.split('/').pop())+'</span></div><button type="button" class="btn small soft error-text" onclick="document.querySelector(\'[name=\\\"'+attr(field.key)+'\\\"]\').value=\'\'; document.getElementById(\'upload-preview-'+attr(field.key)+'\').innerHTML=\'\'">Hapus</button></li>' : '';
     control = '<input name="'+attr(field.key)+'" type="url" value="'+attr(value)+'" '+(field.required?'required':'')+'>'+
               '<ul class="upload-preview-list" id="upload-preview-'+attr(field.key)+'">'+existingPreview+'</ul>'+
               '<div class="button-row"><label class="btn soft">'+icon('upload')+'Unggah gambar<input class="image-file sr-only" type="file" accept="image/png,image/jpeg,image/webp,image/gif" data-image-target="'+attr(field.key)+'"></label></div>';
@@ -2002,10 +2002,12 @@ previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujua
     async function resubmitWorkflow(id,button){const workflow=(state.entityData.workflows||[]).find(w=>w.id===id);if(!workflow)return;if(!confirm('Ajukan kembali permintaan '+(workflow.action==='DELETE'?'penghapusan':'perubahan')+' ini?'))return;setBusy(button,true);try{const result=await server('adminSaveWorkflow',[{entity:workflow.entity,entityId:workflow.entityId,workflowId:workflow.id,action:workflow.action,payload:workflow.payload||{},submit:true}]);toast(result.message);await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
     async function cancelWorkflow(id,button){if(!confirm('Tarik pengajuan ini kembali menjadi draft?'))return;setBusy(button,true);try{const result=await server('adminCancelWorkflow',[id]);toast(result.message);if(state.boot&&state.boot.dashboard)state.boot.dashboard.myDrafts=Number(state.boot.dashboard.myDrafts||0)+1;await loadEntity(state.entity)}catch(error){toast(cleanError(error.message))}finally{setBusy(button,false)}}
 
-        function normalizeDriveUrl(url) {
-      const match = url.match(/drive\.google\.com\/uc\?export=view&id=([^&]+)/);
-      if (match) return 'https://lh3.googleusercontent.com/d/' + match[1] + '=w800';
-      return url;
+    function adminImageUrl(url) {
+      const value=String(url||'').trim();
+      const match=value.match(/drive\.google\.com\/uc\?(?:[^#]*&)?id=([a-zA-Z0-9_-]+)/i)
+        || value.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i)
+        || value.match(/drive\.google\.com\/open\?(?:[^#]*&)?id=([a-zA-Z0-9_-]+)/i);
+      return match?'https://lh3.googleusercontent.com/d/'+match[1]+'=w800':value;
     }
 
     
@@ -2088,16 +2090,25 @@ previewEditor();toast('Lengkapi bagian penting sebelum diajukan untuk persetujua
   });
     $('#editor-form').addEventListener('submit',saveEditor);$('#user-form').addEventListener('submit',saveUser);$('#save-service').addEventListener('click',saveService);
     window.addEventListener('hashchange',()=>{const route=location.hash.slice(1);if(route&&route!==state.route)navigate(route)});
+    window.GALILEA_ADMIN_RUNTIME=Object.freeze({query:$,queryAll:$$,escapeText:esc,escapeAttribute:attr,server:server,cleanError:cleanError});
     async function boot(){applyTheme(currentTheme());try{state.boot=await server('adminGetBootstrap',[],30000);$('#root').innerHTML=shell();bindShell();const route=location.hash.slice(1)||'dashboard';navigate(route);$('#loader').classList.add('hidden');loadDashboardSummary(false)}catch(error){showGate(error)}}
     boot();
   })();
   </script>
 
-</html>
 <script>
 /* -------------------------------------------------------------------------- */
 /* NEW MEDIA UPLOAD ENGINE (Resumable Upload)                                 */
 /* -------------------------------------------------------------------------- */
+const adminMediaRuntime = window.GALILEA_ADMIN_RUNTIME;
+if (!adminMediaRuntime) throw new Error('Runtime admin media tidak tersedia.');
+const $ = adminMediaRuntime.query;
+const $$ = adminMediaRuntime.queryAll;
+const esc = adminMediaRuntime.escapeText;
+const attr = adminMediaRuntime.escapeAttribute;
+const server = adminMediaRuntime.server;
+const cleanError = adminMediaRuntime.cleanError;
+
 const MEDIA_STATE = {
   QUEUED: 'QUEUED',
   INITIALIZING: 'INITIALIZING',
@@ -2116,9 +2127,11 @@ function revokeAllMediaUrls() {
 }
 
 function normalizeDriveUrl(url) {
-  const match = url.match(/drive\.google\.com\/uc\?export=view&id=([^&]+)/);
-  if (match) return 'https://lh3.googleusercontent.com/d/' + match[1] + '=w800';
-  return url;
+  const value = String(url || '').trim();
+  const match = value.match(/drive\.google\.com\/uc\?(?:[^#]*&)?id=([a-zA-Z0-9_-]+)/i)
+    || value.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i)
+    || value.match(/drive\.google\.com\/open\?(?:[^#]*&)?id=([a-zA-Z0-9_-]+)/i);
+  return match ? 'https://lh3.googleusercontent.com/d/' + match[1] + '=w800' : value;
 }
 
 function parseMediaField(mediaValue, photosValue) {
@@ -2174,7 +2187,7 @@ function renderMediaManager(targetKey) {
     const isAudio = m.mimeType.startsWith('audio/');
     
     let previewHtml = '';
-    if (isImage) previewHtml = '<div class="media-thumb sq-64"><img src="'+attr(m.url)+'" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>⚠️</div>\'"></div>';
+    if (isImage) previewHtml = '<div class="media-thumb sq-64"><img src="'+attr(normalizeDriveUrl(m.url))+'" loading="lazy" onerror="this.outerHTML=\'<div class=\\\'media-thumb-broken\\\'>⚠️</div>\'"></div>';
     else if (isVideo) previewHtml = '<div class="media-thumb sq-64" style="background:#333;color:#fff;font-size:24px;">🎞️</div>';
     else if (isAudio) previewHtml = '<div class="media-thumb sq-64" style="background:#333;color:#fff;font-size:24px;">🎵</div>';
     else previewHtml = '<div class="media-thumb sq-64" style="font-size:24px;">📄</div>';
@@ -2405,7 +2418,7 @@ async function uploadMediaFile(file, targetKey) {
       name: finalRes.name,
       mimeType: finalRes.mimeType,
       size: finalRes.size,
-      url: finalRes.url, 
+      url: isImage ? normalizeDriveUrl(finalRes.url) : finalRes.url,
       viewUrl: finalRes.viewUrl,
       downloadUrl: finalRes.downloadUrl,
       primary: false
@@ -2672,16 +2685,16 @@ window.uploadImage = async function(input) {
           let urls = urlInput.value.split(/\n/).map(u=>u.trim()).filter(Boolean);
           const hasPrimary = urls.some(u => u.toUpperCase().startsWith('PRIMARY:'));
           if (!hasPrimary) {
-            urls.push('PRIMARY:' + finalRes.url);
+            urls.push('PRIMARY:' + normalizeDriveUrl(finalRes.url));
           } else {
-            urls.push(finalRes.url);
+            urls.push(normalizeDriveUrl(finalRes.url));
           }
           urlInput.value = urls.join('\n');
           // Remove pending item and refresh photo grid
           li.remove();
           if (typeof renderPhotoManager === 'function') renderPhotoManager(targetKey);
         } else {
-          urlInput.value = finalRes.url;
+          urlInput.value = normalizeDriveUrl(finalRes.url);
           const removeBtn = document.createElement('button');
           removeBtn.type = 'button';
           removeBtn.className = 'btn small soft error-text';
@@ -2735,3 +2748,4 @@ window.uploadMediaEngine = async function(input) {
 };
 ;
 </script>
+</html>
