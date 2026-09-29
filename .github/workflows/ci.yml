@@ -107,14 +107,6 @@ jobs:
             exit 1
           fi
           
-          # Inject version marker (for next push, stored in log)
-          echo "Admin Version: $VERSION"
-          sed -i "s/__ADMIN_BUILD_VERSION__/${VERSION}/g" apps-script-backend/Admins.html
-          echo "Build marker version injected: $VERSION"
-          
-          # Re-push with version marker
-          clasp push --force
-          
           echo "Deploying Admin to version $VERSION..."
           clasp deploy -i "$DEPLOYMENT_ID_ADMIN" -V "$VERSION" -d "Admin: GitHub $GITHUB_SHA"
           
@@ -203,9 +195,10 @@ jobs:
           echo "GitHub size:  $GITHUB_SIZE"
           echo "Remote size:  $REMOTE_SIZE"
           if [ "$GITHUB_HASH" = "$REMOTE_HASH" ]; then
-            echo "RESULT: IDENTICAL — remote source matches GitHub exactly"
+            echo "RESULT: IDENTICAL — remote source (@HEAD) matches GitHub exactly."
+            echo "NOTE: clasp pull reads current project source, not the specific snapshot version."
           else
-            echo "RESULT: MISMATCH — remote source DIFFERS from GitHub!"
+            echo "RESULT: MISMATCH — remote source (@HEAD) DIFFERS from GitHub!"
             echo "Running diff..."
             cd "$GITHUB_WORKSPACE"
             diff apps-script-backend/Admins.html "$REMOTE_FILE" | head -100 || true
