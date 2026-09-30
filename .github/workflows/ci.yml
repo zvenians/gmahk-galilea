@@ -145,8 +145,15 @@ jobs:
           LEGACY_ADMIN_DEPLOYMENT_ID=$(sed -n 's/^- \([^ ]*\) @[0-9][0-9]* - GALILEA_APPS_SCRIPT_ADMIN_URL$/\1/p' deployments.txt | head -1)
           if [ -n "$LEGACY_ADMIN_DEPLOYMENT_ID" ] && [ "$LEGACY_ADMIN_DEPLOYMENT_ID" != "$DEPLOYMENT_ID_ADMIN" ]; then
             echo "Synchronizing historical admin deployment to version $VERSION..."
+            set +e
             clasp deploy -i "$LEGACY_ADMIN_DEPLOYMENT_ID" -V "$VERSION" -d "GALILEA_APPS_SCRIPT_ADMIN_URL"
-            echo "Legacy deployment sync completed (best-effort, non-blocking)."
+            LEGACY_EXIT_CODE=$?
+            set -e
+            if [ $LEGACY_EXIT_CODE -eq 0 ]; then
+              echo "Legacy deployment sync completed successfully (best-effort)."
+            else
+              echo "::warning::Legacy deployment sync failed with exit code $LEGACY_EXIT_CODE. This is non-fatal."
+            fi
           else
             echo "No separate historical admin deployment requires synchronization."
           fi
