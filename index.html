@@ -1476,16 +1476,11 @@
     .cinematic-pending{position:relative;min-height:360px;overflow:hidden;border-radius:36px;background:var(--surface);display:grid;place-items:center;text-align:center}.cinematic-pending h3{font-size:clamp(2rem,4vw,4rem)}.pending-halo{position:absolute;width:300px;aspect-ratio:1;border:1px solid var(--line);border-radius:50%;box-shadow:0 0 0 50px color-mix(in srgb,var(--brand) 4%,transparent),0 0 0 100px color-mix(in srgb,var(--brand) 3%,transparent)}
     .journal-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:18px}.journal-grid>*{grid-column:span 4}.journal-grid .activity-film:first-child{grid-column:span 8;grid-row:span 2}.journal-note{min-height:290px;display:flex;flex-direction:column;align-items:flex-start;padding:30px;border-top:1px solid var(--line);background:transparent}.journal-note h3{margin:24px 0 10px;font-size:1.55rem}.journal-note .link-arrow{margin-top:auto}
     .activity-cinema-grid{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:20px}.activity-film{position:relative;grid-column:span 4;min-height:520px;overflow:hidden;border-radius:30px;color:#fff;background:#102017;isolation:isolate}.activity-film.featured{grid-column:span 8;min-height:650px}.activity-film-hit{position:absolute;inset:0;z-index:6;width:100%;border:0;background:transparent;cursor:pointer}.activity-film-media,.activity-film-media img,.film-shade{position:absolute;inset:0;width:100%;height:100%}.activity-film-media img{object-fit:cover;transition:transform 1.1s var(--ease),filter .8s var(--ease)}.film-shade{background:linear-gradient(180deg,transparent 20%,rgba(2,11,6,.28) 48%,rgba(2,9,5,.96) 100%)}.activity-film:hover .activity-film-media img{transform:scale(1.06);filter:saturate(1.08)}.activity-film-placeholder{position:absolute;inset:0;display:grid;place-items:center;color:rgba(255,255,255,.48);background:radial-gradient(circle at 70% 20%,#6c8168,#0c2115 70%)}.activity-film-placeholder .icon{width:58px;height:58px}.activity-film-copy{position:absolute;inset:auto 0 0;z-index:3;padding:34px;pointer-events:none}.film-meta{display:flex;flex-wrap:wrap;gap:10px;color:#d8c58f;font-size:.72rem;font-weight:800;letter-spacing:.08em;text-transform:uppercase}.activity-film-copy h3{max-width:760px;margin:16px 0 10px;color:#fff;font-size:clamp(2rem,3.6vw,4.2rem);line-height:.92}.activity-film:not(.featured) .activity-film-copy h3{font-size:clamp(1.7rem,2.6vw,2.7rem)}.activity-film-copy p{display:-webkit-box;overflow:hidden;max-width:650px;color:rgba(245,248,241,.72);-webkit-line-clamp:3;-webkit-box-orient:vertical}.film-cta{display:flex;align-items:center;gap:10px;margin-top:24px;color:#fff;font-weight:800}.film-cta small{margin-left:auto;color:rgba(255,255,255,.58)}
+    .media-discovery{margin-bottom:34px;padding:26px;border:1px solid var(--line);border-radius:28px;background:linear-gradient(135deg,color-mix(in srgb,var(--surface) 96%,transparent),color-mix(in srgb,var(--brand-soft) 65%,var(--surface)));box-shadow:var(--shadow-sm)}
+    .media-discovery-head{display:flex;align-items:flex-end;justify-content:space-between;gap:22px;margin-bottom:20px}.media-discovery-head h3{margin:5px 0 0;font-size:clamp(1.55rem,3vw,2.5rem)}.media-discovery-head p{max-width:580px;margin:0}.media-discovery-form{display:grid;grid-template-columns:minmax(220px,1.7fr) repeat(2,minmax(150px,.7fr)) auto;gap:12px;align-items:end}.media-discovery-field{display:grid;gap:7px}.media-discovery-field span{font-size:.72rem;font-weight:850;letter-spacing:.1em;text-transform:uppercase;color:var(--text-faint)}.media-discovery-field input,.media-discovery-field select{width:100%;min-height:48px;padding:0 14px;border:1px solid var(--line);border-radius:14px;color:var(--text);background:var(--surface)}.media-discovery-note{display:flex;align-items:center;gap:9px;margin-top:16px;color:var(--text-faint);font-size:.82rem}.media-discovery-note .icon{flex:0 0 auto}
     .activity-story{max-width:1100px;margin:auto}.activity-story-heading{display:flex;align-items:end;justify-content:space-between;gap:20px}.activity-story-heading h2{max-width:780px;font-size:clamp(2.6rem,6vw,6rem);line-height:.92}
-    .activity-slideshow{position:relative;margin:34px 0;background:var(--surface-2);border-radius:24px;overflow:hidden;min-height:min(60vh,600px);display:flex;align-items:center;justify-content:center}
-    .slideshow-stage{width:100%;height:100%;position:absolute;inset:0;display:flex;transition:transform 0.5s var(--ease)}
-    .slideshow-slide{flex:0 0 100%;width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:#0d120f}
-    .slideshow-slide img{width:100%;height:100%;object-fit:cover}
-    .slideshow-nav{position:absolute;inset:0;display:flex;justify-content:space-between;align-items:center;padding:16px;pointer-events:none}
-    .slideshow-btn{pointer-events:auto;width:48px;height:48px;border-radius:50%;background:rgba(0,0,0,0.5);color:#fff;border:none;display:grid;place-items:center;cursor:pointer;backdrop-filter:blur(4px);transition:background var(--dur);opacity:0}
-    .activity-slideshow:hover .slideshow-btn{opacity:1}
-    .slideshow-btn:hover{background:rgba(0,0,0,0.8)}
-    .slideshow-counter{position:absolute;bottom:16px;right:16px;background:rgba(0,0,0,0.6);color:#fff;padding:6px 14px;border-radius:99px;font-size:0.8rem;font-weight:600;letter-spacing:0.04em;backdrop-filter:blur(4px)}
+    .journal-deck{position:relative;margin:34px 0 20px;min-height:min(72vh,720px);overflow:hidden;border-radius:32px;color:#fff;background:radial-gradient(circle at 50% 18%,#214d69 0,#0b263b 38%,#04131f 100%);perspective:1400px;touch-action:pan-y;isolation:isolate}.journal-deck::before{position:absolute;inset:0;content:"";background:linear-gradient(115deg,rgba(255,255,255,.045),transparent 35%,rgba(255,255,255,.025));pointer-events:none}.journal-deck-stage{position:absolute;inset:26px 70px 84px;transform-style:preserve-3d}.journal-card{position:absolute;inset:0;margin:auto;width:min(72vw,610px);height:100%;overflow:hidden;border:1px solid rgba(255,255,255,.16);border-radius:24px;background:#07121a;box-shadow:0 28px 80px rgba(0,0,0,.52);opacity:0;pointer-events:none;transform:translate3d(0,20px,-260px) scale(.72);transition:transform .62s var(--ease),opacity .4s ease,filter .5s ease}.journal-card.is-active{z-index:5;opacity:1;pointer-events:auto;transform:translate3d(0,0,90px) rotateY(0) scale(1)}.journal-card.is-prev{z-index:3;opacity:.72;transform:translate3d(-44%,-1%,-90px) rotateY(18deg) scale(.82);filter:saturate(.72)}.journal-card.is-next{z-index:3;opacity:.72;transform:translate3d(44%,-1%,-90px) rotateY(-18deg) scale(.82);filter:saturate(.72)}.journal-card.is-far-prev{z-index:2;opacity:.3;transform:translate3d(-67%,-1%,-190px) rotateY(25deg) scale(.67)}.journal-card.is-far-next{z-index:2;opacity:.3;transform:translate3d(67%,-1%,-190px) rotateY(-25deg) scale(.67)}.journal-card-media{width:100%;height:100%;display:grid;place-items:center;background:#02080d}.journal-card-media img,.journal-card-media video{width:100%;height:100%;object-fit:contain}.journal-card-media audio{width:min(86%,520px)}.journal-file{display:grid;place-items:center;align-content:center;gap:14px;padding:32px;text-align:center}.journal-file .icon{width:64px;height:64px}.journal-file h3{max-width:100%;overflow-wrap:anywhere;color:#fff}.journal-card-bar{position:absolute;inset:auto 0 0;z-index:2;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:42px 18px 16px;background:linear-gradient(transparent,rgba(1,7,11,.94))}.journal-card-name{min-width:0}.journal-card-name strong,.journal-card-name span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.journal-card-name span{margin-top:3px;color:rgba(255,255,255,.62);font-size:.76rem}.journal-card-actions{display:flex;gap:8px}.journal-action{width:42px;height:42px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.22);border-radius:50%;color:#fff;background:rgba(6,18,27,.72);cursor:pointer;backdrop-filter:blur(12px)}.journal-action:hover{background:#fff;color:#07121a}.journal-deck-nav{position:absolute;inset:0;display:flex;align-items:center;justify-content:space-between;padding:18px;pointer-events:none}.journal-deck-nav .journal-action{width:50px;height:50px;pointer-events:auto}.journal-deck-nav .next{transform:rotate(180deg)}.journal-deck-footer{position:absolute;inset:auto 0 0;display:flex;align-items:center;justify-content:center;gap:15px;height:74px;color:rgba(255,255,255,.72);font-size:.82rem}.journal-dots{display:flex;gap:6px}.journal-dot{width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.28);transition:width .3s,background .3s}.journal-dot.active{width:22px;border-radius:9px;background:#fff}
+    button.journal-card-media{padding:0;border:0;color:#fff;cursor:zoom-in}
     .activity-story-content{max-width:820px;margin:36px auto}
     .activity-story-content p{margin-bottom:1.2em;font-size:1.1rem;line-height:1.7}
     .activity-story-content ul, .activity-story-content ol{margin-bottom:1.2em;padding-left:1.5em;font-size:1.1rem;line-height:1.7}
@@ -1504,8 +1499,8 @@
     @keyframes cinema-loader-ring{0%,100%{transform:scale(.92);opacity:.45}50%{transform:scale(1.08);opacity:1}}
     ::view-transition-old(root){animation:cinema-out .28s ease both}::view-transition-new(root){animation:cinema-page-in .62s var(--ease) both}
     @keyframes cinema-out{to{opacity:0;transform:scale(.992);filter:blur(4px)}}
-    @media(max-width:1000px){.devotional-cinema{grid-template-columns:1fr}.devotional-date{min-height:260px;border-right:0;border-bottom:1px solid rgba(255,255,255,.12)}.journal-grid>*{grid-column:span 6}.journal-grid .activity-film:first-child{grid-column:1/-1}.activity-film,.activity-film.featured{grid-column:span 6;min-height:560px}.hero-content>*{max-width:92vw}}
-    @media(max-width:760px){.site-header{height:82px;padding:7px 0}.header-row{height:68px;border-radius:17px}.hero{width:calc(100% - 16px);min-height:calc(100svh - 92px);border-radius:28px}.hero-content{padding:94px 24px 64px}.hero-content>*{max-width:100%}.hero h1{font-size:clamp(3.5rem,17vw,6rem)}.hero .lead{font-size:1rem}.hero-stats{width:calc(100% - 34px);margin-top:-28px}.hero-stat{min-height:95px;padding:22px}.section{padding:62px 0}.page-head{min-height:340px;padding:110px 0 52px;border-radius:0 0 30px 30px}.page-head h1,.section-head h2{font-size:clamp(2.8rem,13vw,4.8rem)}.devotional-cinema{min-height:0;border-radius:28px}.devotional-date{padding:34px;min-height:240px}.devotional-cinema .devotional-body{padding:34px}.devotional-cinema .devotional-title{font-size:clamp(2.2rem,11vw,3.5rem)}.journal-grid{grid-template-columns:1fr}.journal-grid>*,.journal-grid .activity-film:first-child{grid-column:1}.activity-cinema-grid{grid-template-columns:1fr}.activity-film,.activity-film.featured{grid-column:1;min-height:520px;border-radius:24px}.activity-film-copy{padding:26px}.activity-story-heading{display:block}.activity-story-gallery{grid-template-columns:1fr}.story-photo,.story-photo-main{grid-column:1;min-height:330px}.footer-main{padding:62px 0 38px}.site-footer{border-radius:30px 30px 0 0}.image-upload-panel{align-items:flex-start;flex-direction:column}}
+    @media(max-width:1000px){.devotional-cinema{grid-template-columns:1fr}.devotional-date{min-height:260px;border-right:0;border-bottom:1px solid rgba(255,255,255,.12)}.journal-grid>*{grid-column:span 6}.journal-grid .activity-film:first-child{grid-column:1/-1}.activity-film,.activity-film.featured{grid-column:span 6;min-height:560px}.hero-content>*{max-width:92vw}.media-discovery-form{grid-template-columns:1fr 1fr}.media-discovery-form .btn{width:100%}}
+    @media(max-width:760px){.site-header{height:82px;padding:7px 0}.header-row{height:68px;border-radius:17px}.hero{width:calc(100% - 16px);min-height:calc(100svh - 92px);border-radius:28px}.hero-content{padding:94px 24px 64px}.hero-content>*{max-width:100%}.hero h1{font-size:clamp(3.5rem,17vw,6rem)}.hero .lead{font-size:1rem}.hero-stats{width:calc(100% - 34px);margin-top:-28px}.hero-stat{min-height:95px;padding:22px}.section{padding:62px 0}.page-head{min-height:340px;padding:110px 0 52px;border-radius:0 0 30px 30px}.page-head h1,.section-head h2{font-size:clamp(2.8rem,13vw,4.8rem)}.devotional-cinema{min-height:0;border-radius:28px}.devotional-date{padding:34px;min-height:240px}.devotional-cinema .devotional-body{padding:34px}.devotional-cinema .devotional-title{font-size:clamp(2.2rem,11vw,3.5rem)}.journal-grid{grid-template-columns:1fr}.journal-grid>*,.journal-grid .activity-film:first-child{grid-column:1}.activity-cinema-grid{grid-template-columns:1fr}.activity-film,.activity-film.featured{grid-column:1;min-height:520px;border-radius:24px}.activity-film-copy{padding:26px}.activity-story-heading{display:block}.activity-story-gallery{grid-template-columns:1fr}.story-photo,.story-photo-main{grid-column:1;min-height:330px}.media-discovery{padding:20px;border-radius:22px}.media-discovery-head{display:block}.media-discovery-head p{margin-top:10px}.media-discovery-form{grid-template-columns:1fr}.journal-deck{min-height:66svh;border-radius:22px}.journal-deck-stage{inset:18px 18px 78px}.journal-card{width:82vw;border-radius:18px}.journal-card.is-prev{transform:translate3d(-58%,-1%,-90px) rotateY(14deg) scale(.76)}.journal-card.is-next{transform:translate3d(58%,-1%,-90px) rotateY(-14deg) scale(.76)}.journal-deck-nav{padding:8px}.journal-deck-nav .journal-action{width:44px;height:44px}.journal-card-bar{padding:40px 12px 12px}.journal-card-name{max-width:52%}.footer-main{padding:62px 0 38px}.site-footer{border-radius:30px 30px 0 0}.image-upload-panel{align-items:flex-start;flex-direction:column}}
     @media(prefers-reduced-motion:reduce){.hero-media img,.hero::after,.loader-ring{animation:none!important}.view{animation:none!important}}
 
     /* ====================================================================== */
@@ -3623,6 +3618,8 @@
         faqQuery: '',
         faqCategory: 'Semua',
         activityYear: 'Semua',
+        activityQuery: '',
+        activityMediaType: 'Semua',
         galleryYear: 'Semua',
         galleryCategory: 'Semua',
         favorites: [],
@@ -4232,7 +4229,7 @@
           '<section class="cinema-chapter"><div class="shell cinema-chapter-grid"><div><div class="chapter-heading"><h2>Jadwal minggu ini.</h2><p>Seluruh nama dan pembagian tugas tersedia langsung dari spreadsheet jemaat.</p></div>' + renderNotices() + '<button class="schedule-cue" type="button" data-route="schedule"><span class="schedule-cue-icon">' + icon('calendar') + '</span><span class="schedule-cue-copy"><small>Ibadah terdekat</small><strong>Buka pembagian pelayanan</strong><span>' + esc(scheduleDate) + '</span></span><span class="schedule-cue-arrow">' + icon('arrow') + '</span></button></div></div></section>' +
           
           // BERITA JEMAAT DIPINDAHKAN KE SINI (LANGSUNG SETELAH SCHEDULE)
-          '<section class="cinema-chapter journal-stage"><div class="shell cinema-chapter-grid"><div><div class="chapter-heading"><h2>Kabar dari Galilea.</h2><p>Berita kegiatan yang sudah berlangsung ditampilkan sebagai cerita visual dan dapat memuat beberapa foto.</p></div><div class="journal-grid">' + (journal || emptyText('Belum ada kabar yang dipublikasikan.')) + '</div><div class="button-row" style="margin-top:36px"><button class="btn primary" type="button" data-route="activities">Seluruh Berita Jemaat' + icon('arrow') + '</button><button class="btn" type="button" data-route="announcements">Agenda dan Pengumuman</button></div></div></div></section>' +
+          '<section class="cinema-chapter journal-stage"><div class="shell cinema-chapter-grid"><div><div class="chapter-heading"><h2>Kabar dari Galilea.</h2><p>Berita kegiatan yang sudah berlangsung ditampilkan sebagai cerita visual dan dapat memuat beberapa foto.</p></div>' + mediaDiscoveryHtml(true) + '<div class="journal-grid">' + (journal || emptyText('Belum ada kabar yang dipublikasikan.')) + '</div><div class="button-row" style="margin-top:36px"><button class="btn primary" type="button" data-route="activities">Seluruh Berita Jemaat' + icon('arrow') + '</button><button class="btn" type="button" data-route="announcements">Agenda dan Pengumuman</button></div></div></div></section>' +
           
           '<section class="word-stage"><div class="word-stage-heading"><p class="eyebrow">Renungan Pagi</p><h2>Mulai hari bersama firman.</h2><p>Bacaan teks harian dari sumber resmi Advent, dicocokkan dengan tanggal WITA, tanpa video.</p></div><div id="home-devotional">' + loadingBox('Menyiapkan renungan pagi','Mencocokkan bacaan dengan tanggal hari ini…') + '</div></section>' +
           '<section class="instagram-stage" aria-labelledby="instagram-stage-title"><div class="shell"><header class="instagram-stage-head"><div><p class="eyebrow">Instagram Galilea</p><h2 id="instagram-stage-title">Reel terbaru, langsung dari jemaat.</h2></div><a class="instagram-profile-link" href="https://www.instagram.com/advent.galilea/" target="_blank" rel="noopener">'+brandIcon('instagram')+'@advent.galilea'+icon('external')+'</a></header><div id="home-instagram-reel">'+loadingBox('Menghubungkan Instagram Galilea','Mencari Reel terbaru dari @advent.galilea…')+'</div></div></section>'+
@@ -5537,10 +5534,39 @@
         return pageHead('Bacaan Pribadi','Tersimpan & terakhir dibaca','Favorit disimpan hanya pada perangkat ini—tanpa akun dan tanpa mengirim data pribadi.')+'<section class="section"><div class="shell grid"><div><div class="section-head"><div><p class="eyebrow">Favorit</p><h2>Tersimpan</h2></div></div>'+renderList(state.favorites)+'</div><div><div class="section-head"><div><p class="eyebrow">Riwayat lokal</p><h2>Terakhir dibaca</h2></div></div>'+renderList(state.recents)+'</div></div></section>';
       }
 
+      function activityMediaSlides(item) {
+        const slides=[], seen=new Set();
+        const add=slide=>{const key=safeUrl(slide.url);if(!key||seen.has(key))return;seen.add(key);slides.push(Object.assign({},slide,{url:key,downloadUrl:safeUrl(slide.downloadUrl)||key}));};
+        const photos=(item.photos||[]).filter(Boolean), cover=String(item.coverUrl||'');
+        if(cover)add({type:'image',url:cover,downloadUrl:cover,name:item.title+' · sampul'});
+        photos.forEach((url,index)=>add({type:'image',url:url,downloadUrl:url,name:item.title+' · foto '+(index+1)}));
+        (item.media||[]).slice().sort((a,b)=>Number(b.primary||0)-Number(a.primary||0)).forEach(media=>{
+          const mime=String(media.mimeType||''), type=mime.startsWith('image/')?'image':mime.startsWith('video/')?'video':mime.startsWith('audio/')?'audio':'file';
+          add({type:type,url:safeUrl(type==='file'?(media.viewUrl||media.url):(media.url||media.downloadUrl)),downloadUrl:safeUrl(media.downloadUrl||media.url||media.viewUrl),name:media.name||item.title,size:Number(media.size||0)});
+        });
+        return slides;
+      }
+
+      function filteredActivities() {
+        const query=String(state.activityQuery||'').trim().toLowerCase();
+        return (state.data.activities||[]).filter(item=>{
+          if(state.activityYear!=='Semua'&&archiveYear(item)!==state.activityYear)return false;
+          const slides=activityMediaSlides(item);
+          if(state.activityMediaType!=='Semua'&&!slides.some(slide=>slide.type===state.activityMediaType))return false;
+          if(query&&!activityExcerptText([item.title,item.description,item.location,item.dateLabel].join(' ')).toLowerCase().includes(query))return false;
+          return true;
+        });
+      }
+
+      function mediaDiscoveryHtml(compact) {
+        const all=state.data.activities||[], years=['Semua'].concat(Array.from(new Set(all.map(archiveYear).filter(Boolean))).sort().reverse());
+        const types=[['Semua','Semua media'],['image','Foto'],['video','Video'],['audio','Audio'],['file','Dokumen']];
+        return '<section class="media-discovery" aria-label="Cari media Berita Jemaat"><div class="media-discovery-head"><div><p class="eyebrow">Arsip Media</p><h3>'+esc(compact?'Cari foto dan dokumentasi.':'Temukan media yang Anda perlukan.')+'</h3></div><p>'+esc(compact?'Gunakan filter, lalu buka arsip untuk melihat, membagikan, atau mengunduh media.':'Pilih berita, buka Journal, lalu gunakan tombol download atau bagikan pada media yang aktif.')+'</p></div><form class="media-discovery-form" data-media-finder="'+(compact?'home':'archive')+'"><label class="media-discovery-field"><span>Kata kunci</span><input name="query" type="search" value="'+attr(state.activityQuery)+'" placeholder="Nama kegiatan atau lokasi"></label><label class="media-discovery-field"><span>Tahun</span><select name="year">'+years.map(year=>'<option value="'+attr(year)+'" '+(state.activityYear===year?'selected':'')+'>'+esc(year)+'</option>').join('')+'</select></label><label class="media-discovery-field"><span>Jenis media</span><select name="mediaType">'+types.map(type=>'<option value="'+attr(type[0])+'" '+(state.activityMediaType===type[0]?'selected':'')+'>'+esc(type[1])+'</option>').join('')+'</select></label><button class="btn primary" type="submit">'+icon('search')+(compact?'Cari media':'Terapkan filter')+'</button></form><div class="media-discovery-note">'+icon('info')+'<span>Unggah dan publikasi dilakukan pengelola melalui <a href="/admin" target="_blank" rel="noopener">Admin</a>. Arsip publik ini khusus untuk mencari, melihat, download, dan share.</span></div></section>';
+      }
+
       function renderActivities() {
-        const all = state.data.activities, years=['Semua'].concat(Array.from(new Set(all.map(archiveYear))).sort().reverse());
-        const items=state.activityYear==='Semua'?all:all.filter(item=>archiveYear(item)===state.activityYear);
-        return pageHead('Kehidupan Jemaat', 'Berita Jemaat', 'Cerita dan dokumentasi kegiatan yang sudah berlangsung. Bagian ini tidak dimasukkan ke Warta Jemaat.') + '<section class="section activity-archive"><div class="shell"><div class="v18-toolbar"><strong>'+esc(items.length)+' berita</strong><div class="v18-filter">'+years.map(year=>'<button class="tab '+(state.activityYear===year?'active':'')+'" type="button" data-activity-year="'+attr(year)+'">'+esc(year)+'</button>').join('')+'</div></div><div class="activity-cinema-grid">' + (items.length ? items.map((item,index) => activityCardHtml(item,index===0)).join('') : '<div class="v18-empty">Belum ada Berita Jemaat pada tahun ini.</div>') + '</div></div></section>';
+        const items=filteredActivities();
+        return pageHead('Kehidupan Jemaat', 'Berita Jemaat', 'Cerita dan dokumentasi kegiatan yang sudah berlangsung. Cari media, buka Journal, lalu download atau bagikan.') + '<section class="section activity-archive"><div class="shell">'+mediaDiscoveryHtml(false)+'<div class="v18-toolbar"><strong>'+esc(items.length)+' berita ditemukan</strong>'+(state.activityQuery||state.activityYear!=='Semua'||state.activityMediaType!=='Semua'?'<button class="btn soft" type="button" data-reset-activity-filter>Hapus filter</button>':'')+'</div><div class="activity-cinema-grid">' + (items.length ? items.map((item,index) => activityCardHtml(item,index===0)).join('') : '<div class="v18-empty">Tidak ada media yang cocok. Coba hapus sebagian filter.</div>') + '</div></div></section>';
       }
 
       function activityExcerptText(value) {
@@ -5577,53 +5603,26 @@
         document.title=item.title+' — GMAHK Galilea';
         
         
-        const photos = (item.photos || []).filter(Boolean);
-        const media = item.media || [];
-        
-        let mergedSlides = [];
-        // Add legacy photos first
-        if (photos.length) {
-          const sortedPhotos = [...photos];
-          if (item.coverUrl && sortedPhotos.indexOf(item.coverUrl) > 0) {
-            sortedPhotos.splice(sortedPhotos.indexOf(item.coverUrl), 1);
-            sortedPhotos.unshift(item.coverUrl);
-          }
-          sortedPhotos.forEach(url => {
-            mergedSlides.push({ type: 'image', url: url });
-          });
-        }
-        
-        // Add new media
-        if (media.length) {
-          const sortedMedia = [...media].sort((a, b) => b.primary - a.primary);
-          sortedMedia.forEach(m => {
-            if (m.mimeType.startsWith('image/')) {
-               mergedSlides.push({ type: 'image', url: m.url });
-            } else if (m.mimeType.startsWith('video/')) {
-               mergedSlides.push({ type: 'video', url: m.downloadUrl || m.url });
-            } else if (m.mimeType.startsWith('audio/')) {
-               mergedSlides.push({ type: 'audio', url: m.downloadUrl || m.url, name: m.name });
-            } else {
-               mergedSlides.push({ type: 'file', url: m.viewUrl || m.url, name: m.name, size: m.size });
-            }
-          });
-        }
-        
+        const mergedSlides=activityMediaSlides(item);
         let gallery='';
         if(mergedSlides.length){
-          gallery='<div class="activity-slideshow" data-slide-index="0" data-slide-count="'+mergedSlides.length+'"><div class="slideshow-stage">' +
+          gallery='<div class="journal-deck" data-journal-index="0" data-journal-count="'+mergedSlides.length+'" aria-label="Journal media '+attr(item.title)+'"><div class="journal-deck-stage">' +
             mergedSlides.map((slide, index) => {
+               const stateClass=index===0?' is-active':index===1?' is-next':index===mergedSlides.length-1?' is-prev':'';
+               const label=slide.type==='image'?'Foto':slide.type==='video'?'Video':slide.type==='audio'?'Audio':'Dokumen';
+               let mediaHtml='';
                if (slide.type === 'image') {
-                 return '<div class="slideshow-slide" data-story-photo="' + attr(slide.url) + '"><img src="' + attr(slide.url) + '" alt="' + attr(item.title) + ' · media ' + (index+1) + '" loading="lazy" decoding="async"></div>';
+                 mediaHtml='<button class="journal-card-media" type="button" data-story-photo="'+attr(slide.url)+'" aria-label="Perbesar '+attr(slide.name)+'"><img src="'+attr(slide.url)+'" alt="'+attr(slide.name)+'" loading="lazy" decoding="async"></button>';
                } else if (slide.type === 'video') {
-                 return '<div class="slideshow-slide"><div style="padding:16px;background:#111;height:100%;display:flex;align-items:center"><video controls playsinline preload="metadata" src="' + attr(slide.url) + '" style="width:100%;max-height:100%"></video></div></div>';
+                 mediaHtml='<div class="journal-card-media"><video controls playsinline preload="metadata" src="'+attr(slide.url)+'"></video></div>';
                } else if (slide.type === 'audio') {
-                 return '<div class="slideshow-slide"><div style="padding:32px;background:#f5f5f5;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center"><h3>'+esc(slide.name)+'</h3><audio controls preload="metadata" src="' + attr(slide.url) + '" style="width:100%;margin-top:16px"></audio></div></div>';
+                 mediaHtml='<div class="journal-card-media journal-file">'+icon('music')+'<h3>'+esc(slide.name)+'</h3><audio controls preload="metadata" src="'+attr(slide.url)+'"></audio></div>';
                } else {
-                 return '<div class="slideshow-slide"><div style="padding:32px;background:#f5f5f5;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center"><div style="font-size:48px;color:#666">📄</div><h3 style="margin:16px 0 8px;text-align:center;word-break:break-all">'+esc(slide.name)+'</h3><p style="color:#666;margin-bottom:16px">'+(slide.size ? Math.round(slide.size/1024)+' KB' : '')+'</p><a href="'+attr(slide.url)+'" target="_blank" class="btn soft">Buka File</a></div></div>';
+                 mediaHtml='<div class="journal-card-media journal-file">'+icon('file')+'<h3>'+esc(slide.name)+'</h3><p>'+(slide.size?esc(Math.round(slide.size/1024)+' KB'):'Dokumen kegiatan')+'</p><a href="'+attr(slide.url)+'" target="_blank" rel="noopener" class="btn soft">Buka dokumen</a></div>';
                }
+               return '<article class="journal-card'+stateClass+'" data-journal-card="'+index+'">'+mediaHtml+'<div class="journal-card-bar"><div class="journal-card-name"><strong>'+esc(slide.name)+'</strong><span>'+label+' · '+(index+1)+' dari '+mergedSlides.length+'</span></div><div class="journal-card-actions"><a class="journal-action" href="'+attr(slide.downloadUrl||slide.url)+'" target="_blank" rel="noopener" download aria-label="Download '+attr(slide.name)+'">'+icon('download')+'</a><button class="journal-action" type="button" data-share-media data-media-title="'+attr(slide.name)+'" data-media-url="'+attr(slide.url)+'" aria-label="Bagikan '+attr(slide.name)+'">'+icon('share')+'</button></div></div></article>';
             }).join('') +
-            '</div>' + (mergedSlides.length>1?'<div class="slideshow-nav"><button class="slideshow-btn" type="button" aria-label="Sebelumnya" onclick="prevSlide(this)">'+icon('chevron')+'</button><button class="slideshow-btn" type="button" aria-label="Selanjutnya" onclick="nextSlide(this)" style="transform:rotate(180deg)">'+icon('chevron')+'</button></div><div class="slideshow-counter">1 / '+mergedSlides.length+'</div>':'') +
+            '</div>' + (mergedSlides.length>1?'<div class="journal-deck-nav"><button class="journal-action" type="button" data-journal-nav="-1" aria-label="Media sebelumnya">'+icon('chevron')+'</button><button class="journal-action next" type="button" data-journal-nav="1" aria-label="Media selanjutnya">'+icon('chevron')+'</button></div>':'')+'<div class="journal-deck-footer"><span data-journal-counter>1 / '+mergedSlides.length+'</span><div class="journal-dots">'+mergedSlides.map((_,index)=>'<span class="journal-dot '+(index===0?'active':'')+'" data-journal-dot="'+index+'"></span>').join('')+'</div><span>Geser untuk menjelajah</span></div>'+
             '</div>';
         } else {
           gallery='<div class="activity-story-empty">'+icon('image')+'<span>Media kegiatan belum ditambahkan.</span></div>';
@@ -5633,24 +5632,20 @@
         openReader(item.title,'<article class="activity-story"><header><p class="eyebrow">Berita Jemaat · '+esc(item.dateLabel)+'</p><div class="activity-story-heading"><h2>'+esc(item.title)+'</h2><div class="meta"><span>'+icon('map')+esc(item.location||'GMAHK Galilea Balikpapan')+'</span></div></div></header>'+gallery+'<div class="activity-story-content">'+activityBodyHtml(item.description||'')+actions+'</div></article>');
       }
       
-      window.nextSlide = function(btn) {
-        const wrap = btn.closest('.activity-slideshow');
-        let idx = parseInt(wrap.dataset.slideIndex);
-        const count = parseInt(wrap.dataset.slideCount);
-        idx = (idx + 1) % count;
-        wrap.dataset.slideIndex = idx;
-        wrap.querySelector('.slideshow-stage').style.transform = 'translateX(-' + (idx * 100) + '%)';
-        wrap.querySelector('.slideshow-counter').textContent = (idx + 1) + ' / ' + count;
-      };
-      window.prevSlide = function(btn) {
-        const wrap = btn.closest('.activity-slideshow');
-        let idx = parseInt(wrap.dataset.slideIndex);
-        const count = parseInt(wrap.dataset.slideCount);
-        idx = (idx - 1 + count) % count;
-        wrap.dataset.slideIndex = idx;
-        wrap.querySelector('.slideshow-stage').style.transform = 'translateX(-' + (idx * 100) + '%)';
-        wrap.querySelector('.slideshow-counter').textContent = (idx + 1) + ' / ' + count;
-      };
+      function updateJournalDeck(wrap,index) {
+        if(!wrap)return;
+        const count=Number(wrap.dataset.journalCount||0);if(!count)return;
+        const active=(Number(index)+count)%count;wrap.dataset.journalIndex=String(active);
+        wrap.querySelectorAll('[data-journal-card]').forEach(card=>{
+          const cardIndex=Number(card.dataset.journalCard),forward=(cardIndex-active+count)%count,backward=(active-cardIndex+count)%count;
+          card.classList.remove('is-active','is-prev','is-next','is-far-prev','is-far-next');
+          if(cardIndex===active)card.classList.add('is-active');else if(forward===1)card.classList.add('is-next');else if(backward===1)card.classList.add('is-prev');else if(forward===2)card.classList.add('is-far-next');else if(backward===2)card.classList.add('is-far-prev');
+          card.querySelectorAll('video,audio').forEach(media=>{if(cardIndex!==active)media.pause();});
+        });
+        wrap.querySelectorAll('[data-journal-dot]').forEach(dot=>dot.classList.toggle('active',Number(dot.dataset.journalDot)===active));
+        const counter=wrap.querySelector('[data-journal-counter]');if(counter)counter.textContent=(active+1)+' / '+count;
+      }
+      function shiftJournalDeck(wrap,step){if(wrap)updateJournalDeck(wrap,Number(wrap.dataset.journalIndex||0)+Number(step||0));}
       const ANNOUNCEMENT_GROUPS = [
         {id:'RABU MALAM',label:'Rabu Malam',hint:'Informasi ibadah doa dan pelayanan Rabu malam.'},
         {id:'IBADAH KHOTBAH',label:'Ibadah Khotbah',hint:'Informasi Kebaktian Khotbah, Perjamuan Kudus, dan Ibadah Sabat.'},
@@ -5726,6 +5721,15 @@
         if (state.route === 'sabbath') loadSabbath();
         if (state.route === 'bible') loadBibleBooks();
         if (state.route === 'hymnal') loadHymnal();
+
+        $('[data-media-finder]')?.addEventListener('submit', event => {
+          event.preventDefault();
+          const values=Object.fromEntries(new FormData(event.currentTarget).entries());
+          state.activityQuery=String(values.query||'').trim();
+          state.activityYear=String(values.year||'Semua');
+          state.activityMediaType=String(values.mediaType||'Semua');
+          if(event.currentTarget.dataset.mediaFinder==='home')navigate('activities');else render();
+        });
 
         $('#member-form')?.addEventListener('submit', async event => {
           event.preventDefault();
@@ -6172,6 +6176,11 @@
         if(storyPhoto){const image=$('#photo-dialog-image');image.src=storyPhoto.dataset.storyPhoto;$('#photo-dialog').showModal();return;}
         const activityShare=event.target.closest('[data-share-activity]');
         if(activityShare){const item=(state.data.activities||[]).find(activity=>String(activity.id)===String(activityShare.dataset.shareActivity));if(item)return shareWhatsApp(activityShareText(item),location.origin+'/berita/'+encodeURIComponent(item.id));}
+        const mediaShare=event.target.closest('[data-share-media]');
+        if(mediaShare)return shareText(mediaShare.dataset.mediaTitle||'Media Berita Jemaat','Dokumentasi GMAHK Galilea Balikpapan',mediaShare.dataset.mediaUrl||location.href);
+        const journalNav=event.target.closest('[data-journal-nav]');
+        if(journalNav)return shiftJournalDeck(journalNav.closest('.journal-deck'),Number(journalNav.dataset.journalNav));
+        if(event.target.closest('[data-reset-activity-filter]')){state.activityQuery='';state.activityYear='Semua';state.activityMediaType='Semua';render();return;}
         const announcementPresentation=event.target.closest('[data-present-announcements]');
         if(announcementPresentation)return openAnnouncementPresentation(announcementPresentation.dataset.presentAnnouncements);
         if(event.target.closest('[data-present-schedule-summary]'))return openScheduleSummaryPresentation();
@@ -6180,7 +6189,6 @@
         if(event.target.closest('[data-open-screen-check]'))return openScreenCheck();
         const announcementShare=event.target.closest('[data-share-announcement]');
         if(announcementShare){const item=(state.data.announcements||[]).find(entry=>String(entry.id)===String(announcementShare.dataset.shareAnnouncement));if(item)return shareWhatsApp(announcementShareText(item),location.href.split('#')[0]+'#announcements');}
-        const activityYear=event.target.closest('[data-activity-year]');if(activityYear){state.activityYear=activityYear.dataset.activityYear;render();return;}
         const galleryYear=event.target.closest('[data-gallery-year]');if(galleryYear){state.galleryYear=galleryYear.dataset.galleryYear;render();return;}
         const galleryCategory=event.target.closest('[data-gallery-category]');if(galleryCategory){state.galleryCategory=galleryCategory.dataset.galleryCategory;render();return;}
         const favorite=event.target.closest('[data-favorite-item]');if(favorite){try{return toggleFavorite(JSON.parse(favorite.dataset.favoriteItem));}catch(_){return toast('Item belum dapat disimpan.');}}
@@ -6358,15 +6366,15 @@
       let touchStartX = 0;
       let touchEndX = 0;
       document.addEventListener('touchstart', e => {
-        if (!e.target.closest('.activity-slideshow')) return;
+        if (!e.target.closest('.journal-deck')) return;
         touchStartX = e.changedTouches[0].screenX;
       }, {passive: true});
       document.addEventListener('touchend', e => {
-        const wrap = e.target.closest('.activity-slideshow');
+        const wrap = e.target.closest('.journal-deck');
         if (!wrap) return;
         touchEndX = e.changedTouches[0].screenX;
-        if (touchEndX < touchStartX - 50) window.nextSlide(wrap.querySelector('.slideshow-btn'));
-        if (touchEndX > touchStartX + 50) window.prevSlide(wrap.querySelector('.slideshow-btn'));
+        if (touchEndX < touchStartX - 50) shiftJournalDeck(wrap,1);
+        if (touchEndX > touchStartX + 50) shiftJournalDeck(wrap,-1);
       }, {passive: true});
 
       document.addEventListener('click',handleClick);
@@ -6391,12 +6399,12 @@
       document.addEventListener('keydown',event => { 
         if (event.key === 'Escape' && $('#mobile-panel').classList.contains('open')) closeMobile();
         if (event.key === 'ArrowRight') {
-          const wrap = document.querySelector('.activity-slideshow');
-          if (wrap && window.nextSlide) window.nextSlide(wrap.querySelector('.slideshow-btn'));
+          const wrap = document.querySelector('.journal-deck');
+          if (wrap) shiftJournalDeck(wrap,1);
         }
         if (event.key === 'ArrowLeft') {
-          const wrap = document.querySelector('.activity-slideshow');
-          if (wrap && window.prevSlide) window.prevSlide(wrap.querySelector('.slideshow-btn'));
+          const wrap = document.querySelector('.journal-deck');
+          if (wrap) shiftJournalDeck(wrap,-1);
         }
       });
       $('#theme-options').addEventListener('click',event => { const button=event.target.closest('[data-theme-value]'); if(button) applyTheme(button.dataset.themeValue); });
