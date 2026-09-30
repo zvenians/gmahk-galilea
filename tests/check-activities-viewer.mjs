@@ -41,5 +41,6 @@ assert.match(viewer, /data-media-finder=/, 'Dashboard and archive must expose th
 assert.match(viewer, /data-share-media/, 'Every journal media item must expose share mode.');
 assert.match(viewer, /download aria-label="Download/, 'Every journal media item must expose download mode.');
 assert.match(viewer, /function shiftJournalDeck\(wrap,step\)/, 'Journal deck must support navigation and swipe handling.');
+assert.equal((viewer.match(/server\('getWebsiteData',\[\],50000\)/g)||[]).length, 2, 'Initial load and refresh must allow the real Apps Script response window.');
 
-console.log('OK - Public News Activities Viewer Reconciliation: 13/13 passed.');
+console.log('OK - Public News Activities Viewer Reconciliation: 14/14 passed.');
