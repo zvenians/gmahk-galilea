@@ -6297,7 +6297,7 @@
           history.replaceState({route:state.route},'','#' + (beritaMatch ? 'berita/' + beritaMatch[1] : state.route));
           const cached = cacheGet('v1800-bootstrap') || cacheGet('v1700-bootstrap') || cachePeek('v1800-bootstrap') || cachePeek('v1700-bootstrap');
           if (cached) { state.data = cached; setShellData(); render(); releaseStartupLoader(); }
-          const fresh = await server('getWebsiteData',[]);
+          const fresh = await server('getWebsiteData',[],50000);
           state.data = fresh; cacheSet('v1800-bootstrap',fresh,60000); setShellData(); render();
           if (!state.translationObserver) {
             state.translationObserver = new MutationObserver(() => scheduleTranslation(260));
@@ -6348,7 +6348,7 @@
           cacheRemove('v1700-bootstrap');
           cacheRemove('v1800-bootstrap');
           try {
-            const fresh = await server('getWebsiteData',[]);
+            const fresh = await server('getWebsiteData',[],50000);
             state.data = fresh;
             cacheSet('v1800-bootstrap',fresh,60000);
             setShellData();
