@@ -6,7 +6,7 @@
  */
 
 const GA = Object.freeze({
-  VERSION: '21.0.0',
+  VERSION: '21.1.0',
   SHEETS: Object.freeze({
     admins: 'Website Admin',
     workflow: 'Website Workflow',
@@ -1332,7 +1332,98 @@ function adminCreateMediaUploadSession(payload) {
   if (!sessionUrl) {
     throw new Error('Session URL tidak ditemukan dari respons Google Drive.');
   }
-  return { ok: true, sessionUrl: sessionUrl, folderId: folderId };
+  const uploadId = Utilities.getUuid().replace(/-/g, '');
+  PropertiesService.getUserProperties().setProperty('GA_MEDIA_UPLOAD_' + uploadId, JSON.stringify({
+    sessionUrl: sessionUrl,
+    folderId: folderId,
+    name: metadata.name,
+    mimeType: mimeType,
+    size: Math.max(0, Number(data.size) || 0),
+    nextOffset: 0,
+    createdAt: Date.now()
+  }));
+  return { ok: true, uploadId: uploadId, folderId: folderId, chunkSize: 2 * 1024 * 1024 };
+}
+
+/**
+ * Proxy chunk upload melalui Apps Script. Browser tidak lagi melakukan PUT
+ * lintas-domain langsung ke googleapis.com, yang sebelumnya memicu retry
+ * berulang ketika sandbox browser memblokir CORS atau menyembunyikan Range.
+ */
+function adminUploadMediaChunk(payload) {
+  gaRequireRole_('EDITOR');
+  const data = payload && typeof payload === 'object' ? payload : {};
+  const uploadId = String(data.uploadId || '');
+  if (!/^[a-f0-9]{32}$/i.test(uploadId)) throw new Error('Sesi upload tidak valid. Pilih ulang file.');
+
+  const properties = PropertiesService.getUserProperties();
+  const propertyKey = 'GA_MEDIA_UPLOAD_' + uploadId;
+  const stored = properties.getProperty(propertyKey);
+  if (!stored) throw new Error('Sesi upload sudah berakhir. Pilih ulang file.');
+
+  let session;
+  try { session = JSON.parse(stored); }
+  catch (ignore) { properties.deleteProperty(propertyKey); throw new Error('Data sesi upload rusak. Pilih ulang file.'); }
+
+  if (Date.now() - Number(session.createdAt || 0) > 6 * 60 * 60 * 1000) {
+    properties.deleteProperty(propertyKey);
+    throw new Error('Sesi upload sudah kedaluwarsa. Pilih ulang file.');
+  }
+
+  const offset = Math.max(0, Number(data.offset) || 0);
+  const total = Math.max(0, Number(data.total) || 0);
+  if (!total || total !== Number(session.size || 0)) throw new Error('Ukuran file berubah selama upload.');
+  if (offset !== Number(session.nextOffset || 0)) {
+    return { ok: true, completed: false, nextOffset: Number(session.nextOffset || 0), recovered: true };
+  }
+
+  const encoded = String(data.dataBase64 || '');
+  if (!encoded || encoded.length > 3 * 1024 * 1024) throw new Error('Potongan file kosong atau terlalu besar.');
+  let bytes;
+  try { bytes = Utilities.base64Decode(encoded); }
+  catch (ignore) { throw new Error('Potongan file tidak dapat dibaca.'); }
+  if (!bytes.length || bytes.length > 2 * 1024 * 1024) throw new Error('Ukuran potongan file tidak valid.');
+
+  const end = offset + bytes.length - 1;
+  if (end >= total) throw new Error('Rentang upload melebihi ukuran file.');
+  const response = UrlFetchApp.fetch(session.sessionUrl, {
+    method: 'put',
+    contentType: session.mimeType || 'application/octet-stream',
+    headers: {
+      Authorization: 'Bearer ' + ScriptApp.getOAuthToken(),
+      'Content-Range': 'bytes ' + offset + '-' + end + '/' + total
+    },
+    payload: bytes,
+    followRedirects: false,
+    muteHttpExceptions: true
+  });
+
+  const code = response.getResponseCode();
+  if (code === 200 || code === 201) {
+    let result = {};
+    try { result = JSON.parse(response.getContentText() || '{}'); } catch (ignore) {}
+    if (!result.id) throw new Error('Google Drive menyelesaikan upload tanpa ID file.');
+    properties.deleteProperty(propertyKey);
+    return { ok: true, completed: true, fileId: result.id, nextOffset: total };
+  }
+
+  if (code === 308) {
+    const headers = response.getHeaders();
+    const range = String(headers.Range || headers.range || '');
+    const match = range.match(/bytes=0-(\d+)/i);
+    const nextOffset = match ? Number(match[1]) + 1 : offset + bytes.length;
+    if (nextOffset <= offset || nextOffset > total) throw new Error('Google Drive mengirim progres upload yang tidak valid.');
+    session.nextOffset = nextOffset;
+    properties.setProperty(propertyKey, JSON.stringify(session));
+    return { ok: true, completed: false, nextOffset: nextOffset };
+  }
+
+  if (code === 404 || code === 410) {
+    properties.deleteProperty(propertyKey);
+    throw new Error('Sesi Google Drive berakhir. Pilih ulang file untuk memulai sesi baru.');
+  }
+  const detail = response.getContentText().slice(0, 300);
+  throw new Error('Google Drive menolak potongan file (HTTP ' + code + ')' + (detail ? ': ' + detail : '.'));
 }
 
 function adminFinalizeMediaUpload(payload) {

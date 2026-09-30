@@ -14,6 +14,9 @@ assert.match(admin, /const width = gaEntityWidth_\(definition\);/, 'Daftar entit
 assert.match(admin, /else if \(field\.type === 'media'\) \{\s*value = gaSanitizeMedia_\(value, field\.label\);/, 'Media harus memakai sanitizer khusus.');
 assert.match(admin, /function adminGetNotifications\(\)/, 'Backend harus menyediakan notifikasi aktual.');
 assert.match(admin, /cacheRevision: revision/, 'Hasil publikasi harus menyertakan revisi sinkronisasi viewer.');
+assert.match(admin, /function adminUploadMediaChunk\(payload\)/, 'Upload media harus diproksikan melalui Apps Script.');
+assert.match(admin, /PropertiesService\.getUserProperties\(\)/, 'Sesi upload harus terisolasi per pengguna.');
+assert.match(admin, /'Content-Range': 'bytes '/, 'Backend harus mengirim rentang chunk ke Google Drive.');
 
 const mediaStart = admin.indexOf('function gaSanitizeMedia_(');
 const mediaEnd = admin.indexOf('\nfunction gaSheetValue_', mediaStart);
@@ -44,6 +47,8 @@ assert.match(html, /server\('adminGetNotifications'/, 'UI harus mengambil notifi
 assert.match(html, /setInterval\(\(\)=>loadNotifications\(false\),60000\)/, 'Notifikasi harus diperbarui berkala.');
 assert.match(html, /beforeunload/, 'Editor harus memperingatkan perubahan yang belum disimpan.');
 assert.doesNotMatch(html, /\bconfirm\s*\(/, 'UI tidak boleh memakai dialog confirm bawaan browser.');
+assert.match(html, /server\('adminUploadMediaChunk'/, 'Browser harus mengirim chunk melalui backend admin.');
+assert.match(html, /const sessionId = initRes\.uploadId;/, 'Browser tidak boleh bergantung pada session URL Drive langsung.');
 
 assert.match(bridge, /item\.dateValue <= today/, 'Berita hari ini harus tampil pada viewer.');
 assert.match(bridge, /function galileaDirectDriveImageUrl_\(value\)/, 'Viewer harus menormalkan URL gambar Google Drive.');
