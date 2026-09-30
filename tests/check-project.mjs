@@ -311,17 +311,48 @@ assert.equal(forwarded.body.method, 'getWebsiteData');
 assert.equal(forwarded.body.secret, process.env.GALILEA_API_SECRET);
 
 const {default: adminHandler} = await import('../api/admin.js');
+
+// TEST 1: Full URL → valid 307 redirect with ?page=admin
+process.env.GALILEA_APPS_SCRIPT_ADMIN_URL = 'https://script.google.com/macros/s/AKfycbTEST_FULL_URL/exec';
+response = mockResponse();
+adminHandler({method: 'GET', query: {open: '1'}}, response);
+assert.equal(response.statusCode, 307, 'Full URL harus menghasilkan redirect 307');
+assert.match(response.body, /page=admin/, 'Redirect harus menyertakan ?page=admin');
+assert.match(response.body, /AKfycbTEST_FULL_URL/, 'Redirect harus mengarah ke deployment yang dikonfigurasi');
+
+// TEST 2: Bare deployment ID → valid 307 redirect
+process.env.GALILEA_APPS_SCRIPT_ADMIN_URL = 'AKfycbTEST_BARE_ID';
+response = mockResponse();
+adminHandler({method: 'GET', query: {open: '1'}}, response);
+assert.equal(response.statusCode, 307, 'Bare deployment ID harus menghasilkan redirect 307');
+assert.match(response.body, /page=admin/, 'Redirect dari bare ID harus menyertakan ?page=admin');
+assert.match(response.body, /AKfycbTEST_BARE_ID/, 'Redirect dari bare ID harus mengarah ke deployment yang dikonfigurasi');
+
+// TEST 3: Missing env → 503 error, tidak fallback diam-diam
 delete process.env.GALILEA_APPS_SCRIPT_ADMIN_URL;
 response = mockResponse();
 adminHandler({method: 'GET', query: {open: '1'}}, response);
-assert.equal(response.statusCode, 307);
-assert.match(response.body, /page=admin/);
+assert.equal(response.statusCode, 503, 'Missing env harus menghasilkan error 503, bukan fallback diam-diam');
 
+// TEST 4: Invalid URL → 503 error
+process.env.GALILEA_APPS_SCRIPT_ADMIN_URL = 'https://evil.example.com/attack';
+response = mockResponse();
+adminHandler({method: 'GET', query: {open: '1'}}, response);
+assert.equal(response.statusCode, 503, 'URL invalid harus menghasilkan error 503');
+
+// TEST 5: Restore valid env for subsequent tests
 process.env.GALILEA_APPS_SCRIPT_ADMIN_URL = 'https://script.google.com/macros/s/DEPLOYMENT_ID/exec';
 response = mockResponse();
 adminHandler({method: 'GET', query: {open: '1'}}, response);
 assert.equal(response.statusCode, 307);
 assert.match(response.body, /page=admin/);
+
+// TEST 7: No stale hardcoded deployment ID in api/admin.js source
+const adminSource = read('api/admin.js');
+assert.doesNotMatch(adminSource, /AKfycbxOkCVxWcipB8IY6Y9ToTuWfJ/, 'api/admin.js tidak boleh mengandung hardcoded deployment ID');
+assert.doesNotMatch(adminSource, /AKfycbzcZfVYt2IfLh8raFPGsZqzNyIbLrfyDrDd0Xh6KeOlqxwHrxvEPi8PqlWJsykugNN6qg/, 'api/admin.js tidak boleh mengandung legacy deployment ID');
+assert.doesNotMatch(adminSource, /AKfycbyQcY5P0e_tcLdFhrTdjEHvO15zeiMXcJ8KZFXiIN0PNCOW/, 'api/admin.js tidak boleh mengandung stale Vercel deployment ID');
+assert.match(adminSource, /process\.env\.GALILEA_APPS_SCRIPT_ADMIN_URL/, 'api/admin.js harus membaca dari environment variable');
 
 const {default: quarterlyHandler} = await import('../api/quarterly-pdf.js');
 globalThis.fetch = async () => ({

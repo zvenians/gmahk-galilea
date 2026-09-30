@@ -9,16 +9,43 @@ const __dirname = path.dirname(__filename);
 const BUILD = 'GALILEA-VERCEL-ADMIN-21.0.0';
 
 function resolveAdminUrl() {
-  const raw = 'https://script.google.com/macros/s/AKfycbxOkCVxWcipB8IY6Y9ToTuWfJ-XQAM5VBJLx33qeuuUU8jmaVJjCitgimo50Mq15n_68Q/exec';
+  const raw = process.env.GALILEA_APPS_SCRIPT_ADMIN_URL || '';
+  if (!raw) {
+    throw new Error(
+      'GALILEA_APPS_SCRIPT_ADMIN_URL belum dikonfigurasi. ' +
+      'Set environment variable ini ke URL Apps Script Admin atau deployment ID-nya.'
+    );
+  }
+
+  // Accept either a full URL or a bare deployment ID (AKfycb...)
+  let url;
+  if (/^https?:\/\//.test(raw)) {
+    url = raw;
+  } else if (/^AKfycb/.test(raw)) {
+    url = 'https://script.google.com/macros/s/' + raw + '/exec';
+  } else {
+    throw new Error(
+      'GALILEA_APPS_SCRIPT_ADMIN_URL format tidak dikenali: harus berupa full URL atau deployment ID (AKfycb...). Nilai saat ini: ' +
+      raw.slice(0, 30) + '...'
+    );
+  }
+
   let target;
   try {
-    target = new URL(raw);
+    target = new URL(url);
   } catch (_) {
-    throw new Error('URL backend admin tidak valid.');
+    throw new Error('GALILEA_APPS_SCRIPT_ADMIN_URL bukan URL valid: ' + url.slice(0, 60));
   }
+
   const validHost = target.protocol === 'https:' && target.hostname === 'script.google.com';
   const validPath = /^\/macros\/s\/[^/]+\/exec$/.test(target.pathname);
-  if (!validHost || !validPath) throw new Error('URL backend admin belum dikonfigurasi dengan benar.');
+  if (!validHost || !validPath) {
+    throw new Error(
+      'GALILEA_APPS_SCRIPT_ADMIN_URL tidak mengarah ke Apps Script deployment. ' +
+      'Harus: https://script.google.com/macros/s/<DEPLOYMENT_ID>/exec'
+    );
+  }
+
   target.searchParams.set('page', 'admin');
   return target;
 }
@@ -292,10 +319,13 @@ export default async function handler(request, response) {
   if (request.method === 'GET' || request.method === 'HEAD') {
     try {
       const target = resolveAdminUrl();
-      console.info('[api/admin] redirecting to authenticated Apps Script Admin UI');
+      const deploymentId = target.pathname.split('/')[3] || 'unknown';
+      console.info('[api/admin] redirecting to authenticated Apps Script Admin UI:', deploymentId.slice(0, 12) + '...');
+      response.setHeader('X-Galilea-Admin-Deployment', deploymentId.slice(0, 12) + '...');
       return response.redirect(307, target.toString());
     } catch (err) {
-      return response.status(503).send('URL Apps Script admin belum siap.');
+      console.error('[api/admin] resolveAdminUrl failed:', err.message);
+      return response.status(503).send('Konfigurasi Admin belum siap: ' + err.message);
     }
   }
 
