@@ -6,6 +6,7 @@ import {fileURLToPath} from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const source = fs.readFileSync(path.join(root, 'apps-script-backend/VercelApi.gs'), 'utf8');
+const viewer = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 
 assert.match(
   source,
@@ -33,5 +34,12 @@ assert.match(
   'Viewer adapter must read the media metadata column.'
 );
 assert.match(source, /media:\s*media,/, 'Viewer adapter must expose activity media.');
+assert.match(viewer, /function activityMediaSlides\(item\)/, 'Viewer must normalize activity photos and media into one journal.');
+assert.match(viewer, /class="journal-deck"/, 'Viewer must render the 3D Journal deck.');
+assert.match(viewer, /object-fit:contain/, 'Journal media must preserve the original aspect ratio.');
+assert.match(viewer, /data-media-finder=/, 'Dashboard and archive must expose the media filter flow.');
+assert.match(viewer, /data-share-media/, 'Every journal media item must expose share mode.');
+assert.match(viewer, /download aria-label="Download/, 'Every journal media item must expose download mode.');
+assert.match(viewer, /function shiftJournalDeck\(wrap,step\)/, 'Journal deck must support navigation and swipe handling.');
 
-console.log('OK - Public News Activities Viewer Reconciliation: 6/6 passed.');
+console.log('OK - Public News Activities Viewer Reconciliation: 13/13 passed.');
