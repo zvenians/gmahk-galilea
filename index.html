@@ -369,7 +369,7 @@
     .song-row:hover { border-color: var(--line-strong); transform: translateY(-2px); box-shadow: var(--shadow-sm); }
     .song-number { min-width: 42px; color: var(--brand-strong); font-weight: 820; }
     .lyrics { white-space: pre-wrap; font-family: Georgia,"Times New Roman",serif; font-size: 1.05rem; line-height: 1.85; }
-    .song-reader-hero { position: relative; overflow: hidden; margin: calc(clamp(22px,4vw,42px) * -1) calc(clamp(22px,4vw,42px) * -1) 34px; padding: clamp(38px,7vw,76px); color: #fff; background: linear-gradient(135deg,#142d20,#526d5a); }
+    .song-reader-hero { position: relative; overflow: hidden; margin: 0; min-width: 0; padding: clamp(38px,7vw,76px); color: #fff; background: linear-gradient(135deg,#142d20,#526d5a); }
     .song-reader-hero::after { position: absolute; right: -90px; top: -120px; width: 330px; height: 330px; border: 1px solid rgba(255,255,255,.18); border-radius: 50%; content: ""; box-shadow: 0 0 0 60px rgba(255,255,255,.03); }
     .song-reader-number { color: #d9c28b; font-size: .78rem; font-weight: 850; letter-spacing: .14em; text-transform: uppercase; }
     .song-reader-hero h2 { position: relative; z-index: 1; max-width: 780px; margin: 14px 0 0; color: #fff; font-size: clamp(2.5rem,6vw,5.2rem); }
@@ -1991,7 +1991,7 @@
     #reader-dialog .modal-head strong{min-width:0;color:var(--text)!important;line-height:1.25}
     #reader-dialog .modal-head .icon-button{flex:0 0 auto}
     #reader-dialog .modal-body{
-      min-width:0;flex:1 1 auto;overflow:auto;overscroll-behavior:contain;
+      min-width:0;min-height:0;flex:1 1 auto;overflow:auto;overscroll-behavior:contain;
       -webkit-overflow-scrolling:touch;color:var(--text)!important
     }
     #reader-dialog .reader-content{max-width:76ch;margin-inline:auto;color:var(--text)!important}
@@ -3414,6 +3414,25 @@
 .book-picker-empty{padding:38px 18px;text-align:center;color:var(--text-faint);font-size:.88rem}
 .book-picker-empty strong{display:block;margin-bottom:4px;color:var(--text-soft);font-size:1.05rem}
 @media(prefers-reduced-motion:reduce){.book-picker-panel,.book-picker-backdrop{transition:none!important}}
+/* Reader controls stay in normal flow, including wrapped buttons and long titles. */
+#reader-dialog .song-reader-shell{grid-template-columns:minmax(0,1fr)}
+#reader-dialog .song-reader-shell>*{min-width:0}
+#reader-dialog :is(.v18-reader-tools,.v18-reader-tools-main){min-width:0;max-width:100%;row-gap:12px}
+#reader-dialog .v18-reader-tools .btn{max-width:100%;white-space:normal}
+#reader-dialog .song-size-group{flex-shrink:0}
+#reader-dialog :is(.modal-head strong,.song-reader-hero h2){overflow-wrap:anywhere!important}
+
+/* Lagu layar penuh: satu ayat atau reff per slide; header dan latar tetap. */
+.presentation-song-layout.lyrics-slide{display:block;width:100%;max-width:none;min-height:0}
+.lyrics-slide .presentation-copy{font-size:calc(clamp(2rem,5.2vw,6.2rem) * var(--present-scale));line-height:1.2;text-wrap:balance}
+.presentation-shell[data-presentation-kind="song"] .presentation-stage.is-fitting{align-content:start}
+.presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-title{animation:none!important}
+.presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]).presentation-enter-next .presentation-stage{animation:lyricsSoftNext .36s cubic-bezier(.22,.78,.22,1) both}
+.presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]).presentation-enter-prev .presentation-stage{animation:lyricsSoftPrev .36s cubic-bezier(.22,.78,.22,1) both}
+@keyframes lyricsSoftNext{from{opacity:0;transform:translate3d(0,8px,0)}to{opacity:1;transform:none}}
+@keyframes lyricsSoftPrev{from{opacity:0;transform:translate3d(0,-8px,0)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.presentation-stage{animation:none!important}}
+html[data-motion="reduced"] .presentation-stage{animation:none!important}
 </style>
 </head>
 <body>
@@ -5083,7 +5102,16 @@
         const dialog=$('#presentation-dialog'),shell=$('#presentation-shell'),stage=$('#presentation-stage'),view=state.presentation;
         if(!dialog||!dialog.open||!shell||!stage||!view||!view.type)return;
         let fitted=clampPresentationScale(view.scale);stage.classList.add('is-fitting');shell.style.setProperty('--present-scale',String(fitted));
-        for(let attempt=0;attempt<8;attempt++){
+        if(shell.dataset.presentationKind==='song'){
+          // Measure top-aligned content so centered overflow cannot hide above the stage.
+          let low=.05,high=fitted*2;
+          for(let attempt=0;attempt<12;attempt++){
+            const candidate=(low+high)/2;shell.style.setProperty('--present-scale',String(candidate));
+            if(stage.scrollHeight<=stage.clientHeight+1&&stage.scrollWidth<=stage.clientWidth+1)low=candidate;
+            else high=candidate;
+          }
+          fitted=low;shell.style.setProperty('--present-scale',String(fitted));
+        }else for(let attempt=0;attempt<8;attempt++){
           const available=Math.max(1,stage.clientHeight),needed=Math.max(1,stage.scrollHeight);
           if(needed<=available+2)break;
           const ratio=Math.max(.85,Math.min(.96,(available/needed)*.96));
@@ -5169,7 +5197,44 @@
       function openPresentation(type){
         if(type==='bible'&&!state.bibleReader)return toast('Pilih ayat Alkitab terlebih dahulu.');
         if(type==='song'&&!(state.hymnalReader&&state.hymnalReader.song))return toast('Pilih lagu terlebih dahulu.');
-        launchPresentation({type:type,index:type==='bible'?Number(state.bibleReader.index||0):Number(state.hymnalReader.verseIndex||0),scale:storedPresentationScale(type),fittedScale:1,item:type==='bible'?state.bibleReader:state.hymnalReader.song,blackout:false,projector:safeStorage.get('galilea:presentation-projector','0')==='1',theme:storedPresentationTheme()});
+        const songSlides=type==='song'?songPresentationSlides(state.hymnalReader.song):[];
+        if(type==='song'&&!songSlides.length)return toast('Lirik lagu belum tersedia.');
+        const index=type==='bible'?Number(state.bibleReader.index||0):Math.max(0,songSlides.findIndex(slide=>!slide.isChorus&&slide.verseIndex===Number(state.hymnalReader.verseIndex||0)));
+        launchPresentation({type:type,index:index,scale:storedPresentationScale(type),fittedScale:1,item:type==='bible'?state.bibleReader:state.hymnalReader.song,blackout:false,projector:safeStorage.get('galilea:presentation-projector','0')==='1',theme:storedPresentationTheme()});
+      }
+      function songPresentationSlides(song){
+        const parts=Array.isArray(song&&song.lyrics)?song.lyrics:[];
+        const isChorus=part=>/(chorus|refrain|reff?|koor)/i.test(part.type||'');
+        const hasLines=part=>Array.isArray(part.lines)&&part.lines.some(line=>String(line||'').trim());
+        const choruses=parts.filter(part=>part&&isChorus(part)&&hasLines(part));
+        const slides=[];let verseIndex=-1;
+        parts.forEach((verse,partIndex)=>{
+          if(!verse||isChorus(verse))return;
+          verseIndex+=1;
+          if(!hasLines(verse))return;
+          slides.push({kind:'song',verseLabel:'AYAT '+String(verse.index||verseIndex+1),lines:verse.lines,verseIndex:verseIndex,isChorus:false});
+          // Imported songs may already interleave each verse with its own refrain.
+          // A single refrain at the end is shared by verses without an explicit one.
+          const following=[];
+          for(let index=partIndex+1;index<parts.length;index++){
+            const part=parts[index];if(!part)continue;
+            if(!isChorus(part))break;
+            if(hasLines(part))following.push(part);
+          }
+          (following.length?following:choruses.slice(0,1)).forEach(chorus=>slides.push({kind:'song',verseLabel:'REFF / KOOR',lines:chorus.lines,verseIndex:verseIndex,isChorus:true}));
+        });
+        if(!slides.length)choruses.forEach(chorus=>slides.push({kind:'song',verseLabel:'REFF / KOOR',lines:chorus.lines,verseIndex:0,isChorus:true}));
+        return slides;
+      }
+      function songPresentationMarkup(slide){
+        return '<div class="presentation-song-layout lyrics-slide"><div class="presentation-song-verse"><span class="presentation-verse-label">'+esc(slide.verseLabel)+'</span><div class="presentation-copy">'+slide.lines.map(esc).join('<br>')+'</div></div></div>';
+      }
+      function normalizeOperatorSongSlides(slides){
+        // Older offline playlists stored the chorus alongside each verse.
+        return slides.flatMap(slide=>{
+          if(slide.kind!=='song'||!Array.isArray(slide.chorus)||!slide.chorus.length)return[slide];
+          return[{...slide,chorus:[]},{...slide,chorus:[],verseLabel:'REFF / KOOR',lines:slide.chorus,isChorus:true}];
+        });
       }
       function openAnnouncementPresentation(category){
         const normalized=announcementGroupMeta(String(category||'UMUM').toUpperCase()).id;
@@ -5205,7 +5270,7 @@
           else if(slide.kind==='agenda')stage.innerHTML='<article class="presentation-operator-panel"><span class="presentation-verse-label">URUTAN IBADAH'+(slide.part>1?' · BAGIAN '+esc(slide.part):'')+'</span><h2>'+esc(slide.title)+'</h2><ol class="presentation-operator-agenda">'+(slide.items||[]).map(item=>'<li>'+esc(item)+'</li>').join('')+'</ol></article>';
           else if(slide.kind==='bible')stage.innerHTML='<span class="presentation-verse-label">'+esc(slide.label)+'</span><div class="presentation-copy bible">'+esc(slide.text)+'</div>';
           else if(slide.kind==='scripture')stage.innerHTML='<article class="presentation-operator-panel"><span class="presentation-verse-label">AYAT UTAMA</span><h2>'+esc(slide.reference)+'</h2><p class="presentation-announcement-copy">Buka teks Alkitab melalui menu Alkitab apabila ayat lengkap belum tersimpan.</p></article>';
-          else if(slide.kind==='song')stage.innerHTML='<div class="presentation-song-layout'+((slide.chorus||[]).length?' has-refrain':' single-verse')+'"><div class="presentation-song-verse"><span class="presentation-verse-label">'+esc(slide.verseLabel)+'</span><div class="presentation-copy">'+(slide.lines||[]).map(esc).join('<br>')+'</div></div>'+((slide.chorus||[]).length?'<div class="presentation-song-refrain"><div class="presentation-refrain"><span class="presentation-refrain-tag">REFF / KOOR</span>'+(slide.chorus||[]).map(esc).join('<br>')+'</div></div>':'')+'</div>';
+          else if(slide.kind==='song')stage.innerHTML=songPresentationMarkup(slide);
           else if(slide.kind==='song-reference')stage.innerHTML='<article class="presentation-operator-panel"><span class="presentation-verse-label">LAGU PUJIAN</span><h2>'+esc(slide.title)+'</h2></article>';
           else if(slide.kind==='service')stage.innerHTML='<article class="presentation-operator-service"><aside class="presentation-operator-service-title"><span class="presentation-verse-label">PELAYANAN</span><h2>'+esc(slide.title)+'</h2><p>'+esc(slide.dateLabel)+' · '+esc(slide.time)+'</p></aside><dl class="presentation-operator-fields">'+(slide.fields||[]).map(field=>'<div class="presentation-operator-field"><dt>'+esc(field.label)+'</dt><dd>'+esc(field.value||'—')+'</dd></div>').join('')+'</dl></article>';
           else if(slide.kind==='announcement')stage.innerHTML='<article class="presentation-announcement"><div class="presentation-announcement-meta"><span class="presentation-verse-label">'+esc(slide.dateLabel)+'</span><span class="presentation-announcement-priority">'+esc(slide.priority)+'</span></div><h2 class="presentation-announcement-title">'+esc(slide.title)+'</h2><p class="presentation-announcement-copy">'+esc(slide.summary||'Informasi selengkapnya tersedia pada website.')+'</p></article>';
@@ -5264,20 +5329,19 @@
           $('[data-presentation-prev]').disabled=view.index===0;$('[data-presentation-next]').disabled=view.index>=verses.length-1;
           finishPresentationRender();return;
         }
-        const song=state.hymnalReader&&state.hymnalReader.song,parts=song&&song.lyrics||[];
-        const verses=parts.filter(part=>!/(chorus|refrain)/i.test(part.type)),chorus=parts.find(part=>/(chorus|refrain)/i.test(part.type));if(!verses.length)return;
-        view.index=Math.max(0,Math.min(verses.length-1,Number(view.index)||0));const verse=verses[view.index],isTheme=Boolean(state.hymnalReader.isTheme||song.isTheme);
+        const song=state.hymnalReader&&state.hymnalReader.song,slides=songPresentationSlides(song);if(!slides.length)return;
+        view.index=Math.max(0,Math.min(slides.length-1,Number(view.index)||0));const slide=slides[view.index],isTheme=Boolean(state.hymnalReader.isTheme||song.isTheme);
         setPresentationOrnament('song',song,view.index);
-        kicker.textContent=isTheme?'LAGU TEMA · GMAHK GALILEA BALIKPAPAN':'LAGU SION · NOMOR '+song.number;title.textContent=song.title;setPresentationNavigationLabels('Ayat');
-        stage.innerHTML='<div class="presentation-song-layout'+(chorus?' has-refrain':' single-verse')+'"><div class="presentation-song-verse"><span class="presentation-verse-label">AYAT '+esc(verse.index||view.index+1)+'</span><div class="presentation-copy">'+verse.lines.map(esc).join('<br>')+'</div></div>'+(chorus?'<div class="presentation-song-refrain"><div class="presentation-refrain"><span class="presentation-refrain-tag">REFF / KOOR</span>'+chorus.lines.map(esc).join('<br>')+'</div></div>':'')+'</div>';
-        counter.textContent='Ayat '+(view.index+1)+' / '+verses.length;counter.setAttribute('aria-label','Ayat '+(view.index+1)+' dari '+verses.length);
-        $('[data-presentation-prev]').disabled=view.index===0;$('[data-presentation-next]').disabled=view.index>=verses.length-1;
+        kicker.textContent=isTheme?'LAGU TEMA · GMAHK GALILEA BALIKPAPAN':'LAGU SION · NOMOR '+song.number;title.textContent=song.title;setPresentationNavigationLabels('Slide');
+        stage.innerHTML=songPresentationMarkup(slide);
+        counter.textContent=(view.index+1)+' / '+slides.length;counter.setAttribute('aria-label',slide.verseLabel+', slide '+(view.index+1)+' dari '+slides.length);
+        $('[data-presentation-prev]').disabled=view.index===0;$('[data-presentation-next]').disabled=view.index>=slides.length-1;
         finishPresentationRender();
       }
       function movePresentation(direction){
         const view=state.presentation;if(!view||!view.type)return;
         const previous=Math.max(0,Number(view.index)||0);view.index=previous+(direction<0?-1:1);renderPresentation();
-        if(view.type==='song')state.hymnalReader.verseIndex=view.index;
+        if(view.type==='song')state.hymnalReader.verseIndex=(songPresentationSlides(state.hymnalReader.song)[view.index]||{}).verseIndex||0;
         else if(view.type==='bible'&&state.bibleReader)state.bibleReader.index=view.index;
         if(view.index!==previous)animatePresentationTransition(direction);
       }
@@ -5285,7 +5349,8 @@
         const shell=$('#presentation-shell');if(!shell||document.documentElement.dataset.motion==='reduced'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
         const nextClass=direction<0?'presentation-enter-prev':'presentation-enter-next';
         shell.classList.remove('presentation-enter-next','presentation-enter-prev');void shell.offsetWidth;shell.classList.add(nextClass);
-        window.clearTimeout(presentationTransitionTimer);presentationTransitionTimer=window.setTimeout(()=>shell.classList.remove('presentation-enter-next','presentation-enter-prev'),430);
+        const duration=/^(song|bible)$/.test(shell.dataset.presentationKind||'')?400:680;
+        window.clearTimeout(presentationTransitionTimer);presentationTransitionTimer=window.setTimeout(()=>shell.classList.remove('presentation-enter-next','presentation-enter-prev'),duration);
       }
       function resizePresentation(delta){
         const view=state.presentation;if(!view||!view.type)return;
@@ -5448,8 +5513,7 @@
           if(isTheme&&state.data.themeSong)song=state.data.themeSong;
           else{const number=(String(label).match(/\d{1,3}/)||[])[0];if(number)try{song=await cachedResource('song-'+number,()=>server('getHymnalSong',[Number(number)]),21600000);}catch(_){} }
           if(!song){slides.push({kind:'song-reference',title:String(label)});continue;}
-          const parts=song.lyrics||[],verses=parts.filter(part=>!/(chorus|refrain)/i.test(part.type)),chorus=parts.find(part=>/(chorus|refrain)/i.test(part.type));
-          verses.forEach((verse,index)=>slides.push({kind:'song',title:song.title,number:song.isTheme?'Lagu Tema':('Lagu Sion · '+song.number),verseLabel:'AYAT '+String(verse.index||index+1),lines:verse.lines||[],chorus:chorus&&chorus.lines||[]}));
+          songPresentationSlides(song).forEach(slide=>slides.push({...slide,title:song.title,number:isTheme||song.isTheme?'Lagu Tema':('Lagu Sion · '+song.number)}));
         }
         readiness.services.forEach(service=>{const fields=service.fields||[],parts=Math.max(1,Math.ceil(fields.length/8));for(let index=0;index<fields.length;index+=8)slides.push({kind:'service',title:service.title+(parts>1?' · '+(Math.floor(index/8)+1)+'/'+parts:''),dateLabel:plan.dateLabel||'',time:String(plan.time||'').replace(':','.')+' WITA',fields:fields.slice(index,index+8)});});
         slides.push(...worshipClosingSlides(plan));
@@ -5465,7 +5529,7 @@
         const plan=selectedWorshipPlan();if(!plan)return toast('Susunan ibadah belum tersedia.');
         const button=$('[data-start-worship-operator]');if(button){button.disabled=true;button.setAttribute('aria-busy','true');}
         try{
-          const cached=cachePeek(worshipOfflineKey(plan));const slides=navigator.onLine===false&&cached&&cached.slides?cached.slides:await buildWorshipOperatorSlides();
+          const cached=cachePeek(worshipOfflineKey(plan));const slides=normalizeOperatorSongSlides(navigator.onLine===false&&cached&&cached.slides?cached.slides:await buildWorshipOperatorSlides());
           if(!slides.length)throw new Error('Materi ibadah belum lengkap.');cacheSet(worshipOfflineKey(plan),{plan:plan,slides:slides,savedAt:Date.now()},604800000);
           launchPresentation({type:'operator',index:0,scale:storedPresentationScale('operator'),fittedScale:1,item:slides,blackout:false,projector:safeStorage.get('galilea:presentation-projector','0')==='1',theme:storedPresentationTheme()});
         }catch(error){toast(error.message);}finally{if(button){button.disabled=false;button.removeAttribute('aria-busy');}}
