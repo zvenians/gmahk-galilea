@@ -5207,11 +5207,21 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         const isChorus=part=>/(chorus|refrain|reff?|koor)/i.test(part.type||'');
         const hasLines=part=>Array.isArray(part.lines)&&part.lines.some(line=>String(line||'').trim());
         const choruses=parts.filter(part=>part&&isChorus(part)&&hasLines(part));
-        const slides=[];
-        parts.filter(part=>part&&!isChorus(part)).forEach((verse,verseIndex)=>{
+        const slides=[];let verseIndex=-1;
+        parts.forEach((verse,partIndex)=>{
+          if(!verse||isChorus(verse))return;
+          verseIndex+=1;
           if(!hasLines(verse))return;
           slides.push({kind:'song',verseLabel:'AYAT '+String(verse.index||verseIndex+1),lines:verse.lines,verseIndex:verseIndex,isChorus:false});
-          choruses.forEach(chorus=>slides.push({kind:'song',verseLabel:'REFF / KOOR',lines:chorus.lines,verseIndex:verseIndex,isChorus:true}));
+          // Imported songs may already interleave each verse with its own refrain.
+          // A single refrain at the end is shared by verses without an explicit one.
+          const following=[];
+          for(let index=partIndex+1;index<parts.length;index++){
+            const part=parts[index];if(!part)continue;
+            if(!isChorus(part))break;
+            if(hasLines(part))following.push(part);
+          }
+          (following.length?following:choruses.slice(0,1)).forEach(chorus=>slides.push({kind:'song',verseLabel:'REFF / KOOR',lines:chorus.lines,verseIndex:verseIndex,isChorus:true}));
         });
         if(!slides.length)choruses.forEach(chorus=>slides.push({kind:'song',verseLabel:'REFF / KOOR',lines:chorus.lines,verseIndex:0,isChorus:true}));
         return slides;

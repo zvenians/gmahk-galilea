@@ -65,6 +65,11 @@ for(const isTheme of [false,true]){
   assert.equal($('#presentation-title').textContent,song.title);
 }
 assert.equal(JSON.stringify(song),original,'Source song is never modified');
+const interleaved={lyrics:[song.lyrics[0],song.lyrics[2],song.lyrics[1],{type:'refrain',lines:['Reff kedua']} ]};
+const ordered=context.songPresentationSlides(interleaved);
+assert.equal(ordered.length,4,'Already-interleaved refrains must not be multiplied');
+assert.equal(ordered[1].lines[0],'Reff bersama');
+assert.equal(ordered[3].lines[0],'Reff kedua','Preserve verse-specific refrain');
 assert.equal(context.songPresentationSlides({lyrics:song.lyrics.slice(0,2)}).length,2);
 assert.equal(context.songPresentationSlides({lyrics:[song.lyrics[2]]}).length,1);
 assert.equal(context.songPresentationSlides({lyrics:[]}).length,0);
