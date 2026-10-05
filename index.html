@@ -3425,7 +3425,10 @@
 /* Lagu layar penuh: satu ayat atau reff per slide; header dan latar tetap. */
 .presentation-song-layout.lyrics-slide{display:block;width:100%;max-width:none;min-height:0}
 .lyrics-slide .presentation-copy{width:100%;font-size:calc(clamp(2rem,5.2vw,6.2rem) * var(--present-scale));line-height:1.2;text-align:left;white-space:normal;text-wrap:wrap}
-.presentation-shell[data-presentation-kind="song"] .presentation-stage.is-fitting{align-content:start}
+.presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-main{padding-bottom:var(--presentation-footer-reserve,120px)!important}
+.presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-stage{overflow:hidden}
+.presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-stage.is-fitting{align-content:start}
+.presentation-shell.is-projector .presentation-frame{min-height:0}
 .presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-title{animation:none!important}
 .presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]).presentation-enter-next .presentation-stage{animation:lyricsSoftNext .36s cubic-bezier(.22,.78,.22,1) both}
 .presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]).presentation-enter-prev .presentation-stage{animation:lyricsSoftPrev .36s cubic-bezier(.22,.78,.22,1) both}
@@ -5192,16 +5195,27 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       function fitPresentationText(){
         const dialog=$('#presentation-dialog'),shell=$('#presentation-shell'),stage=$('#presentation-stage'),view=state.presentation;
         if(!dialog||!dialog.open||!shell||!stage||!view||!view.type)return;
+        const textSlide=/^(song|bible)$/.test(shell.dataset.presentationKind||'');
+        if(textSlide){
+          const frame=$('#presentation-frame'),footer=$('.presentation-footer');
+          if(frame&&footer){
+            const frameBox=frame.getBoundingClientRect(),footerBox=footer.getBoundingClientRect();
+            if(frameBox.height>0&&footerBox.height>0)shell.style.setProperty('--presentation-footer-reserve',Math.max(0,frameBox.bottom-footerBox.top+16)+'px');
+          }
+        }
+        if(stage.clientHeight<=0||stage.clientWidth<=0)return;
         let fitted=clampPresentationScale(view.scale);stage.classList.add('is-fitting');shell.style.setProperty('--present-scale',String(fitted));
-        if(shell.dataset.presentationKind==='song'){
-          // Measure top-aligned content so centered overflow cannot hide above the stage.
-          let low=.05,high=fitted*2;
-          for(let attempt=0;attempt<12;attempt++){
+        if(textSlide){
+          // Determine a stable ceiling independent of A+/A-. The user's scale
+          // then selects a proportion of that ceiling, so A- stays smaller.
+          let low=.001,high=2.7;
+          for(let attempt=0;attempt<14;attempt++){
             const candidate=(low+high)/2;shell.style.setProperty('--present-scale',String(candidate));
-            if(stage.scrollHeight<=stage.clientHeight+1&&stage.scrollWidth<=stage.clientWidth+1)low=candidate;
+            if(stage.scrollHeight<=stage.clientHeight&&stage.scrollWidth<=stage.clientWidth)low=candidate;
             else high=candidate;
           }
-          fitted=low;shell.style.setProperty('--present-scale',String(fitted));
+          view.maxFittedScale=low;
+          fitted=low*clampPresentationScale(view.scale)/1.35;shell.style.setProperty('--present-scale',String(fitted));
         }else for(let attempt=0;attempt<8;attempt++){
           const available=Math.max(1,stage.clientHeight),needed=Math.max(1,stage.scrollHeight);
           if(needed<=available+2)break;
@@ -5212,6 +5226,9 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         }
         stage.classList.remove('is-fitting');stage.scrollTop=0;view.fittedScale=fitted;
         shell.dataset.fit=fitted<clampPresentationScale(view.scale)-.015?'fitted':'preferred';
+        const smaller=$('[data-presentation-smaller]'),larger=$('[data-presentation-larger]');
+        if(smaller)smaller.disabled=clampPresentationScale(view.scale)<=.7001;
+        if(larger){larger.disabled=clampPresentationScale(view.scale)>=1.3499;larger.title=larger.disabled&&textSlide?'Batas maksimum di atas copyright':'Perbesar teks';}
       }
       function schedulePresentationFit(){
         window.cancelAnimationFrame(presentationFitFrame);window.clearTimeout(presentationFitTimer);
@@ -5446,7 +5463,8 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       function resizePresentation(delta){
         const view=state.presentation;if(!view||!view.type)return;
         view.scale=clampPresentationScale(Number(view.scale||1)+delta);safeStorage.set(presentationScaleKey(view.type),view.scale.toFixed(2));
-        renderPresentation();announcePresentation('Ukuran teks '+Math.round(view.scale*100)+' persen');
+        fitPresentationText();showPresentationControls(true);
+        announcePresentation(view.scale>=1.35&&/^(song|bible)$/.test($('#presentation-shell').dataset.presentationKind||'')?'Ukuran maksimum yang muat di atas copyright':'Ukuran teks '+Math.round(view.scale*100)+' persen');
       }
       function togglePresentationTheme(){
         const view=state.presentation;if(!view||!view.type)return;view.theme=view.theme==='light'?'dark':'light';safeStorage.set('galilea:presentation-theme',view.theme);

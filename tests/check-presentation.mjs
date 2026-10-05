@@ -19,18 +19,19 @@ const renderStart=html.indexOf('      function render() {');
 assert.match(html.slice(renderStart,renderStart+240),/if\(!state\.data\)return;/,'Navigation must not render before bootstrap');
 assert.match(html,/if\(state\.data\)syncSeoMetadata\(next,state\.data\.site\);/);
 assert.match(html,/server\('getWebsiteData',\[\],60000\)/,'Initial load waits for the existing 55-second backend timeout');
-let reduced=false,timerDelay=0;
+let reduced=false,timerDelay=0,savedScale=null;
 const context=vm.createContext({
   document,state,$,console,
   window:{clearTimeout(){},setTimeout(fn,delay){timerDelay=delay;return 1;}},
   matchMedia:()=>({matches:reduced}),
-  safeStorage:{get:()=> '0'},
+  safeStorage:{get:()=> '0',set:(key,value)=>{savedScale={key,value};}},
   storedPresentationScale:()=>1,storedPresentationTheme:()=> 'dark',
   toast:message=>{throw new Error(message);},
   esc:value=>String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char])),
   launchPresentation:view=>{state.presentation=view;},
   setPresentationOrnament:kind=>{$('#presentation-shell').dataset.presentationKind=kind;},
   setPresentationNavigationLabels:()=>{},finishPresentationRender:()=>{},
+  showPresentationControls:()=>{},announcePresentation:()=>{},
   presentationTransitionTimer:0
 });
 vm.runInContext(html.slice(renderStart,html.indexOf('\n      function ',renderStart+1)),context);
@@ -38,7 +39,7 @@ const initialMarkup=$('#app').innerHTML;
 assert.doesNotThrow(()=>context.render(),'Rendering before bootstrap must be safe');
 assert.equal($('#app').innerHTML,initialMarkup,'Keep the loading/error message visible');
 // Execute the actual production functions, without starting unrelated site/network code.
-for(const name of ['clampPresentationScale','songPresentationSlides','songPresentationMarkup','normalizeOperatorSongSlides','openPresentation','renderPresentation','movePresentation','animatePresentationTransition','fitPresentationText']){
+for(const name of ['clampPresentationScale','presentationScaleKey','songPresentationSlides','songPresentationMarkup','normalizeOperatorSongSlides','openPresentation','renderPresentation','movePresentation','animatePresentationTransition','fitPresentationText','resizePresentation']){
   const start=html.indexOf('      function '+name+'(');
   assert.ok(start>=0,name+' exists');
   const end=html.indexOf('\n      function ',start+1);
@@ -134,5 +135,35 @@ const small=state.presentation.fittedScale;width=1920;height=1000;
 context.fitPresentationText();assert.ok(state.presentation.fittedScale>small);
 assert.ok(stage.scrollHeight<=height+1&&stage.scrollWidth<=width+1);
 assert.ok(!stage.classList.contains('is-fitting'));
+
+// Controls must visibly resize a fitted slide and remain stable after refitting.
+// Simulate desktop and letterboxed/mobile copyright positions independently of
+// content size, so the safe boundary follows the real footer rather than viewport.
+let frameBottom=1000,footerTop=920;
+$('#presentation-frame').getBoundingClientRect=()=>({bottom:frameBottom,height:frameBottom});
+$('.presentation-footer').getBoundingClientRect=()=>({top:footerTop,height:27});
+for(const kind of ['song','bible']){
+  shell.dataset.presentationKind=kind;state.presentation={type:kind,scale:1};
+  context.fitPresentationText();
+  assert.equal(shell.style.getPropertyValue('--presentation-footer-reserve'),'96px');
+  const initial=state.presentation.fittedScale;
+  context.resizePresentation(-.1);
+  const smaller=state.presentation.fittedScale;
+  assert.ok(smaller<initial*.95,'A- visibly shrinks even a previously fitted slide');
+  context.fitPresentationText();assert.equal(state.presentation.fittedScale,smaller,'Delayed/resize fit must not undo A-');
+  context.resizePresentation(.1);assert.ok(Math.abs(state.presentation.fittedScale-initial)<.0001,'A+ restores size');
+  assert.equal(savedScale.value,'1.00','User preference is persisted');
+  for(let i=0;i<10;i++)context.resizePresentation(.1);
+  assert.ok($('[data-presentation-larger]').disabled,'Upper bound disables A+');
+  assert.ok(stage.scrollHeight<=height&&stage.scrollWidth<=width,'Maximum text stays inside safe area');
+  assert.ok(Math.abs(state.presentation.fittedScale-state.presentation.maxFittedScale)<.0001);
+  context.resizePresentation(-.1);assert.ok(!$('[data-presentation-larger]').disabled);
+  for(let i=0;i<10;i++)context.resizePresentation(-.1);
+  assert.ok($('[data-presentation-smaller]').disabled,'Lower bound disables A-');
+  context.resizePresentation(.1);assert.ok(!$('[data-presentation-smaller]').disabled);
+  frameBottom=700;footerTop=610;context.fitPresentationText();
+  assert.equal(shell.style.getPropertyValue('--presentation-footer-reserve'),'106px','Copyright reserve follows changed frame');
+  frameBottom=1000;footerTop=920;
+}
 dom.window.close();
 console.log('Presentation verified: verse/reff ordering, theme songs, navigation, operator/offline, Bible, reduced motion and fitting.');
