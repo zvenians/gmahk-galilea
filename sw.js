@@ -1,4 +1,4 @@
-const CACHE='galilea-v35-10-rollback';
+const CACHE='galilea-v35-11-lyrics-slides';
 const SHELL=['/','/index.html','/manifest.webmanifest','/assets/logo-galilea-light.webp','/assets/logo-galilea-dark.webp','/assets/logo-galilea-icon-192.png','/assets/presentation/schedule.webp','/assets/presentation/bible.webp','/assets/presentation/hymnal.webp'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
