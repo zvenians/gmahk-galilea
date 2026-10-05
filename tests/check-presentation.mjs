@@ -55,12 +55,18 @@ for(const isTheme of [false,true]){
   context.openPresentation('song');context.renderPresentation();
   assert.equal($('#presentation-counter').textContent,'1 / 4');
   assert.equal($('#presentation-stage .presentation-verse-label').textContent,'AYAT 1');
+  const lyric=$('#presentation-stage .presentation-copy');
+  assert.equal(lyric.textContent,'Ayat satu Tetap utuh','Source lines flow into one paragraph');
+  assert.equal(lyric.querySelector('br'),null,'No forced line break in lyrics');
+  assert.equal(dom.window.getComputedStyle(lyric).textAlign,'left');
+  assert.equal(dom.window.getComputedStyle(lyric).textWrap,'wrap','Fill available width rather than balancing lines');
   assert.ok(!$('#presentation-stage').textContent.includes('Reff bersama'));
   assert.ok($('[data-presentation-prev]').disabled);
   context.movePresentation(1);
   assert.equal($('#presentation-stage .presentation-verse-label').textContent,'REFF / KOOR');
   assert.equal(state.hymnalReader.verseIndex,0);
   assert.equal($('#presentation-stage b'),null,'Lyrics must be escaped');
+  assert.equal($('#presentation-stage .presentation-copy').textContent,'Reff bersama <b>Bukan markup</b>');
   context.movePresentation(1);
   assert.equal($('#presentation-stage .presentation-verse-label').textContent,'AYAT 2');
   assert.equal(state.hymnalReader.verseIndex,1);

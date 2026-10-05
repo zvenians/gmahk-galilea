@@ -3424,7 +3424,7 @@
 
 /* Lagu layar penuh: satu ayat atau reff per slide; header dan latar tetap. */
 .presentation-song-layout.lyrics-slide{display:block;width:100%;max-width:none;min-height:0}
-.lyrics-slide .presentation-copy{font-size:calc(clamp(2rem,5.2vw,6.2rem) * var(--present-scale));line-height:1.2;text-wrap:balance}
+.lyrics-slide .presentation-copy{width:100%;font-size:calc(clamp(2rem,5.2vw,6.2rem) * var(--present-scale));line-height:1.2;text-align:left;white-space:normal;text-wrap:wrap}
 .presentation-shell[data-presentation-kind="song"] .presentation-stage.is-fitting{align-content:start}
 .presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-title{animation:none!important}
 .presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]).presentation-enter-next .presentation-stage{animation:lyricsSoftNext .36s cubic-bezier(.22,.78,.22,1) both}
@@ -5318,7 +5318,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         return slides;
       }
       function songPresentationMarkup(slide){
-        return '<div class="presentation-song-layout lyrics-slide"><div class="presentation-song-verse"><span class="presentation-verse-label">'+esc(slide.verseLabel)+'</span><div class="presentation-copy">'+slide.lines.map(esc).join('<br>')+'</div></div></div>';
+        return '<div class="presentation-song-layout lyrics-slide"><div class="presentation-song-verse"><span class="presentation-verse-label">'+esc(slide.verseLabel)+'</span><div class="presentation-copy">'+esc(slide.lines.join(' ').replace(/\s+/g,' ').trim())+'</div></div></div>';
       }
       function normalizeOperatorSongSlides(slides){
         // Older offline playlists stored the chorus alongside each verse.
