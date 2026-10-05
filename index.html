@@ -3824,10 +3824,17 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         }
       }
 
+      const WORSHIP_CACHE_TTL = 3 * 60 * 60 * 1000;
+      const resourceLoads = new Map();
+      // Public reading data stays fresh for an entire service. Live broadcasts and
+      // date-sensitive devotionals retain their existing, shorter refresh policy.
+      function resourceTtl(key, ttl) {
+        return /awr|discussion|devotional/.test(key) ? (ttl || 900000) : Math.max(WORSHIP_CACHE_TTL,ttl || 0);
+      }
       function cacheGet(key) {
         try {
           const item = JSON.parse(safeStorage.get('galilea:' + key,'null') || 'null');
-          return item && Date.now() - item.time < item.ttl ? item.value : null;
+          return item && Number.isFinite(item.time) && Date.now() >= item.time && Date.now() - item.time < resourceTtl(key,item.ttl) ? item.value : null;
         } catch (_) { return null; }
       }
       function cachePeek(key) {
@@ -3839,21 +3846,100 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       async function cachedResource(key, loader, ttl) {
         const fresh = cacheGet(key);
         if (fresh != null) return fresh;
-        try {
-          const value = await loader();
-          cacheSet(key,value,ttl);
-          return value;
-        } catch (error) {
-          const stored = cachePeek(key);
-          if (stored != null) return stored;
-          throw error;
+        const stored = cachePeek(key);
+        if (navigator.onLine === false && stored != null) return stored;
+        if (!resourceLoads.has(key)) {
+          const pending = Promise.resolve().then(loader).then(value => {
+            cacheSet(key,value,ttl);return value;
+          }).finally(() => resourceLoads.delete(key));
+          resourceLoads.set(key,pending);
         }
+        const pending = resourceLoads.get(key);
+        // Expired data is still useful: never block a service waiting for refresh.
+        if (stored != null) { pending.catch(() => {}); return stored; }
+        return pending;
       }
       function cacheSet(key, value, ttl) {
-        try { safeStorage.set('galilea:' + key, JSON.stringify({time:Date.now(),ttl:ttl || 900000,value:value})); } catch (_) {}
+        try { safeStorage.set('galilea:' + key, JSON.stringify({time:Date.now(),ttl:resourceTtl(key,ttl),value:value})); } catch (_) {}
       }
       function cacheRemove(key) {
         try { safeStorage.remove('galilea:' + key); } catch (_) {}
+      }
+
+      // Same public dataset used by getHymnalCatalog/getHymnalSong on the existing
+      // backend. One download replaces 525 per-song round trips; API stays intact.
+      const HYMNAL_PACK_KEY = 'hymnal-pack-v1';
+      const HYMNAL_PACK_URL = 'https://raw.githubusercontent.com/PaulTitto/LaguSion-indo/main/sda-hymnal-db-in.json';
+      let hymnalPack = null, hymnalPackPromise = null, hymnalPackLastAttempt = 0;
+      let hymnalPackStatus = 'idle', hymnalPackPersistent = false, songOpenSequence = 0;
+      function normalizeHymnalPack(rows) {
+        if (!Array.isArray(rows) || rows.length !== 525) throw new Error('Paket Lagu Sion belum lengkap.');
+        const clean = value => { const text=String(value==null?'':value).replace(/\s+/g,' ').trim();return text==='-'?'—':text; };
+        const numbers = new Set();
+        const songs = rows.map(row => {
+          const number=Number(row.number), title=clean(row.title);
+          if (!Number.isInteger(number) || number<1 || number>525 || numbers.has(number) || !title || !Array.isArray(row.lyrics)) throw new Error('Paket Lagu Sion tidak valid.');
+          numbers.add(number);
+          const lyrics=row.lyrics.map(part=>({type:clean(part.type||'verse'),index:Number(part.index)||1,lines:(Array.isArray(part.lines)?part.lines:[]).map(clean).filter(Boolean)}));
+          if (!lyrics.some(part=>part.lines.length)) throw new Error('Lirik Lagu Sion belum lengkap.');
+          return {number,index:clean(row.index),title,lyrics,source:'LaguSion-indo',sourceUrl:'https://github.com/PaulTitto/LaguSion-indo'};
+        });
+        return {songs};
+      }
+      function hymnCacheStatusHtml() {
+        let message='Menyiapkan unduhan otomatis seluruh Lagu Sion…';
+        if(hymnalPackStatus==='loading')message=hymnalPack?'Lagu tersimpan siap dipakai. Memperbarui paket di latar belakang…':'Mengunduh 525 Lagu Sion di latar belakang. Anda tetap bisa memilih lagu.';
+        if(hymnalPackStatus==='ready')message=hymnalPackPersistent?'525 Lagu Sion tersimpan di perangkat · cache minimal 3 jam · siap saat reload.':'525 Lagu Sion siap di tab ini. Penyimpanan browser tidak tersedia; reload membutuhkan unduhan ulang.';
+        if(hymnalPackStatus==='error')message=hymnalPack?'Pembaruan tertunda. 525 lagu dari simpanan terakhir tetap siap dipakai.':'Paket lagu belum tersimpan. Periksa koneksi; lagu yang dipilih tetap dicoba melalui layanan biasa.';
+        return '<div class="notice" data-hymnal-cache-status><div class="notice-copy"><strong>Persiapan Lagu Sion</strong><span role="status" aria-live="polite">'+esc(message)+'</span>'+(hymnalPackStatus==='error'?'<button class="btn soft" type="button" data-retry-hymnal-cache>Coba unduh lagi</button>':'')+'</div></div>';
+      }
+      function updateHymnalCacheStatus() {
+        $$('[data-hymnal-cache-status]').forEach(box=>{box.outerHTML=hymnCacheStatusHtml();});
+      }
+      function ensureHymnalPack(retry) {
+        if (hymnalPackPromise) return hymnalPackPromise;
+        const fresh=cacheGet(HYMNAL_PACK_KEY), saved=fresh||cachePeek(HYMNAL_PACK_KEY);
+        if (!hymnalPack && saved) {
+          try { hymnalPack=normalizeHymnalPack(saved.songs);hymnalPackPersistent=true; } catch (_) { cacheRemove(HYMNAL_PACK_KEY); }
+        }
+        if (fresh && hymnalPack) { hymnalPackStatus='ready';updateHymnalCacheStatus();return Promise.resolve(hymnalPack); }
+        if (!retry && hymnalPackLastAttempt && Date.now()-hymnalPackLastAttempt<60000) return hymnalPack?Promise.resolve(hymnalPack):Promise.reject(new Error('Unduhan akan dicoba kembali saat koneksi tersedia.'));
+        hymnalPackLastAttempt=Date.now();
+        hymnalPackStatus='loading';updateHymnalCacheStatus();
+        hymnalPackPromise=(async()=>{
+          const controller=new AbortController(),timer=window.setTimeout(()=>controller.abort(),15000);
+          try {
+            const response=await fetch(HYMNAL_PACK_URL,{signal:controller.signal,credentials:'omit',cache:'no-cache'});
+            if(!response.ok)throw new Error('Paket Lagu Sion belum dapat diunduh.');
+            const pack=normalizeHymnalPack(await response.json());
+            hymnalPack=pack;
+            // Do not report "saved" when a private/quota-limited browser rejected it.
+            const record=JSON.stringify({time:Date.now(),ttl:WORSHIP_CACHE_TTL,value:pack});
+            try { window.localStorage.setItem('galilea:'+HYMNAL_PACK_KEY,record);hymnalPackPersistent=window.localStorage.getItem('galilea:'+HYMNAL_PACK_KEY)===record; }
+            catch (_) { hymnalPackPersistent=false; }
+            hymnalPackStatus='ready';return pack;
+          } catch(error) { hymnalPackStatus='error';if(hymnalPack)return hymnalPack;throw error; }
+          finally { window.clearTimeout(timer);hymnalPackPromise=null;updateHymnalCacheStatus(); }
+        })();
+        return hymnalPackPromise;
+      }
+      function cachedHymnalSong(number) {
+        return (hymnalPack&&hymnalPack.songs.find(song=>song.number===Number(number))) || cacheGet('song-'+number) || cachePeek('song-'+number);
+      }
+      async function getViewerHymnalSong(number) {
+        const saved=cachedHymnalSong(number);if(saved)return saved;
+        // The selected song may win from either source; never wait for a failed
+        // bulk transfer before starting the existing API fallback.
+        return Promise.any([
+          ensureHymnalPack().then(pack=>{const song=pack.songs.find(item=>item.number===Number(number));if(!song)throw new Error('Lagu tidak ditemukan.');return song;}),
+          cachedResource('song-'+number,()=>server('getHymnalSong',[Number(number)]),21600000)
+        ]).catch(()=>{throw new Error('Lagu belum tersimpan dan koneksi belum tersedia. Silakan coba lagi.');});
+      }
+      async function getViewerHymnalCatalog() {
+        const catalog=pack=>({count:pack.songs.length,songs:pack.songs.map(({number,index,title})=>({number,index,title})),source:'LaguSion-indo',sourceUrl:'https://github.com/PaulTitto/LaguSion-indo'});
+        if(hymnalPack)return catalog(hymnalPack);
+        const saved=cacheGet('hymnal-catalog')||cachePeek('hymnal-catalog');if(saved)return saved;
+        return Promise.any([ensureHymnalPack().then(catalog),cachedResource('hymnal-catalog',()=>server('getHymnalCatalog',[]),21600000)]).catch(()=>{throw new Error('Daftar lagu belum tersimpan. Periksa koneksi lalu coba lagi.');});
       }
 
       const VIEWER_LANGUAGES = ['id','en','ms','zh-CN','es'];
@@ -5016,11 +5102,11 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
             '<div class="field-control"><label for="hymnal-select">Pilih lagu</label><select id="hymnal-select"><option value="">Memuat daftar lagu…</option></select></div>'+
             '<div class="field-control"><label for="hymnal-search">Cari Lagu Sion</label><div class="hymnal-search-box"><input id="hymnal-search" type="search" placeholder="Nomor atau judul lagu…"><button class="btn" type="button" id="random-song">Lagu acak' + icon('music') + '</button></div></div>'+
             '<div class="hymnal-actions"><span class="chip hymnal-count" id="song-count">Memuat…</span><button class="btn soft" type="button" data-download-archive="hymnal">' + icon('download') + 'Unduh PDF lengkap</button></div>'+
-          '</div><div id="hymnal-content">' + loadingBox() + '</div></div></section>';
+          '</div>'+hymnCacheStatusHtml()+'<div id="hymnal-content">' + loadingBox() + '</div></div></section>';
       }
       async function loadHymnal() {
         try {
-          state.hymnal = await cachedResource('hymnal-catalog',()=>server('getHymnalCatalog',[]),21600000);
+          state.hymnal = await getViewerHymnalCatalog();
           if (!$('#hymnal-content')) return;
           $('#song-count').textContent = state.hymnal.count + ' lagu';
           const selector=$('#hymnal-select');
@@ -5036,16 +5122,19 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       }
       async function openSong(number) {
         if(String(number)==='theme')return openThemeSong();
-        openReader('Memuat lagu…',loadingBox());
+        const saved=cachedHymnalSong(number);
+        openReader(saved?saved.title:'Memuat lagu…',saved?'':loadingBox());
+        const sequence=songOpenSequence;
         try {
-          const key = 'song-' + number;
-          const song = await cachedResource(key,()=>server('getHymnalSong',[Number(number)]),21600000);
+          const song = saved || await getViewerHymnalSong(number);
+          if(sequence!==songOpenSequence || !$('#reader-dialog').open)return;
           state.hymnalReader = {song:song,verseIndex:0,isTheme:false};
           renderSongReader();
-        } catch (error) { $('#reader-body').innerHTML = errorBox(error.message); }
+        } catch (error) { if(sequence===songOpenSequence && $('#reader-dialog').open)$('#reader-body').innerHTML = errorBox(error.message); }
       }
 
       function openThemeSong(){
+        ++songOpenSequence;
         const song=state.data&&state.data.themeSong;if(!song)return toast('Lagu Tema belum diterbitkan oleh pengurus.');
         openReader(song.title,loadingBox());state.hymnalReader={song:song,verseIndex:0,isTheme:true};renderSongReader();
       }
@@ -5513,7 +5602,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         for(const label of (plan.songs||[]).slice(0,10)){
           let song=null,isTheme=/lagu\s*tema/i.test(String(label));
           if(isTheme&&state.data.themeSong)song=state.data.themeSong;
-          else{const number=(String(label).match(/\d{1,3}/)||[])[0];if(number)try{song=await cachedResource('song-'+number,()=>server('getHymnalSong',[Number(number)]),21600000);}catch(_){} }
+          else{const number=(String(label).match(/\d{1,3}/)||[])[0];if(number)try{song=await getViewerHymnalSong(number);}catch(_){} }
           if(!song){slides.push({kind:'song-reference',title:String(label)});continue;}
           songPresentationSlides(song).forEach(slide=>slides.push({...slide,title:song.title,number:isTheme||song.isTheme?'Lagu Tema':('Lagu Sion · '+song.number)}));
         }
@@ -5845,6 +5934,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       }
 
       function openReader(title, html) {
+        ++songOpenSequence;
         $('#reader-title').textContent = title;
         $('#reader-body').innerHTML = html;
         $('#reader-dialog').showModal();
@@ -6224,6 +6314,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           return;
         }
         if (!event.target.closest('.nav-drop')) $$('.nav-drop.open').forEach(item=>{item.classList.remove('open');item.querySelector('[data-nav-toggle]')?.setAttribute('aria-expanded','false');});
+        if(event.target.closest('[data-retry-hymnal-cache]'))return ensureHymnalPack(true).catch(()=>{});
         const youtube = event.target.closest('[data-youtube-play]');
         if (youtube) return playYouTube(youtube);
         const routeButton = event.target.closest('[data-route]');
@@ -6346,6 +6437,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
 
       async function boot() {
         try {
+          ensureHymnalPack().catch(()=>{});
           initPreferences(); buildMobileNav();
           state.favorites=readStoredList('galilea:favorites');state.recents=readStoredList('galilea:recents');
           if ($('#language-select')) $('#language-select').value = VIEWER_LANGUAGES.includes(state.language) ? state.language : 'id';
@@ -6361,10 +6453,14 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
             state.route = ROUTES.includes(initialRoute) ? initialRoute : 'home';
           }
           history.replaceState({route:state.route},'','#' + (beritaMatch ? 'berita/' + beritaMatch[1] : state.route));
-          const cached = cacheGet('v1800-bootstrap') || cacheGet('v1700-bootstrap') || cachePeek('v1800-bootstrap') || cachePeek('v1700-bootstrap');
+          const freshCache = cacheGet('v1800-bootstrap') || cacheGet('v1700-bootstrap');
+          const cached = freshCache || cachePeek('v1800-bootstrap') || cachePeek('v1700-bootstrap');
           if (cached) { state.data = cached; setShellData(); render(); releaseStartupLoader(); }
-          const fresh = await server('getWebsiteData',[],60000);
-          state.data = fresh; cacheSet('v1800-bootstrap',fresh,60000); setShellData(); render();
+          if (!freshCache && !(cached && navigator.onLine===false)) {
+            const fresh = await server('getWebsiteData',[],60000);
+            state.data = fresh; cacheSet('v1800-bootstrap',fresh,WORSHIP_CACHE_TTL); setShellData();
+            if(!document.querySelector('dialog[open]'))render();
+          }
           if (!state.translationObserver) {
             state.translationObserver = new MutationObserver(() => scheduleTranslation(260));
             state.translationObserver.observe(document.body,{subtree:true,childList:true});
@@ -6412,13 +6508,14 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           cacheRemove('v1401-bootstrap');
           cacheRemove('v1500-bootstrap');
           cacheRemove('v1700-bootstrap');
-          cacheRemove('v1800-bootstrap');
+          // A service crossing midnight must keep its still-fresh local data.
+          if(cacheGet('v1800-bootstrap'))return;
           try {
             const fresh = await server('getWebsiteData',[]);
             state.data = fresh;
-            cacheSet('v1800-bootstrap',fresh,60000);
+            cacheSet('v1800-bootstrap',fresh,WORSHIP_CACHE_TTL);
             setShellData();
-            render();
+            if(!document.querySelector('dialog[open]'))render();
             toast('Konten hari ini sudah diperbarui otomatis.');
           } catch (_) {
             if ($('#home-devotional')) {
@@ -6493,7 +6590,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       document.addEventListener('fullscreenchange',()=>{if($('#presentation-dialog')?.open)schedulePresentationFit();});
       document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if($('#presentation-dialog')?.open){requestPresentationWakeLock();schedulePresentationFit();}if(state.route==='home'&&state.async.devotional&&state.async.devotional.requestedDate!==witaDateKey())loadDevotionalHome(true);}else releasePresentationWakeLock();});
       window.addEventListener('beforeinstallprompt',event => { event.preventDefault(); state.deferredInstall=event; });
-      window.addEventListener('online',()=>{updateNetworkStatus();toast('Koneksi kembali tersedia.');});
+      window.addEventListener('online',()=>{updateNetworkStatus();ensureHymnalPack(true).catch(()=>{});toast('Koneksi kembali tersedia.');});
       window.addEventListener('offline',updateNetworkStatus);
       window.addEventListener('popstate',() => {
         const route = location.hash.replace('#','');
