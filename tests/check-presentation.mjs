@@ -15,6 +15,10 @@ assert.equal(dom.window.getComputedStyle(readerHero).marginTop,'0px');
 assert.equal(dom.window.getComputedStyle(readerHero).marginLeft,'0px');
 readerHero.remove();
 const state={presentation:null,hymnalReader:null,bibleReader:null};
+const renderStart=html.indexOf('      function render() {');
+assert.match(html.slice(renderStart,renderStart+240),/if\(!state\.data\)return;/,'Navigation must not render before bootstrap');
+assert.match(html,/if\(state\.data\)syncSeoMetadata\(next,state\.data\.site\);/);
+assert.match(html,/server\('getWebsiteData',\[\],60000\)/,'Initial load waits for the existing 55-second backend timeout');
 let reduced=false,timerDelay=0;
 const context=vm.createContext({
   document,state,$,console,
@@ -29,6 +33,10 @@ const context=vm.createContext({
   setPresentationNavigationLabels:()=>{},finishPresentationRender:()=>{},
   presentationTransitionTimer:0
 });
+vm.runInContext(html.slice(renderStart,html.indexOf('\n      function ',renderStart+1)),context);
+const initialMarkup=$('#app').innerHTML;
+assert.doesNotThrow(()=>context.render(),'Rendering before bootstrap must be safe');
+assert.equal($('#app').innerHTML,initialMarkup,'Keep the loading/error message visible');
 // Execute the actual production functions, without starting unrelated site/network code.
 for(const name of ['clampPresentationScale','songPresentationSlides','songPresentationMarkup','normalizeOperatorSongSlides','openPresentation','renderPresentation','movePresentation','animatePresentationTransition','fitPresentationText']){
   const start=html.indexOf('      function '+name+'(');

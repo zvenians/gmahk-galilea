@@ -4184,12 +4184,14 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         const paint=()=>{render();window.scrollTo({top:0,behavior:'auto'});};
         if(document.startViewTransition&&document.documentElement.dataset.motion!=='reduced')document.startViewTransition(paint);
         else paint();
-        syncSeoMetadata(next,state.data.site);
+        if(state.data)syncSeoMetadata(next,state.data.site);
         document.querySelectorAll('[data-route]').forEach(button => button.classList.toggle('active', button.dataset.route === next));
         track('page_view',{page_title:routeTitle(next),page_location:location.href});
       }
 
       function render() {
+        // Keep the loading/error view intact until bootstrap data is available.
+        if(!state.data)return;
         const renderers = {
           home: renderHome, today: renderToday, church: renderChurch, aboutsite: renderAboutSite, leaders: renderLeaders, schedule: renderSchedule,
           bulletin: renderBulletin, sabbath: renderSabbath, bible: renderBible, hymnal: renderHymnal,
@@ -6361,7 +6363,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           history.replaceState({route:state.route},'','#' + (beritaMatch ? 'berita/' + beritaMatch[1] : state.route));
           const cached = cacheGet('v1800-bootstrap') || cacheGet('v1700-bootstrap') || cachePeek('v1800-bootstrap') || cachePeek('v1700-bootstrap');
           if (cached) { state.data = cached; setShellData(); render(); releaseStartupLoader(); }
-          const fresh = await server('getWebsiteData',[]);
+          const fresh = await server('getWebsiteData',[],60000);
           state.data = fresh; cacheSet('v1800-bootstrap',fresh,60000); setShellData(); render();
           if (!state.translationObserver) {
             state.translationObserver = new MutationObserver(() => scheduleTranslation(260));
