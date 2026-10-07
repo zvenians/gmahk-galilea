@@ -192,7 +192,8 @@ function gaEnsureEntityIds_(spreadsheet, onlyKey) {
     const sheet = spreadsheet.getSheetByName(definition.sheet);
     if (!sheet) return;
     const idColumn = definition.idColumn + 1;
-    if (sheet.getMaxColumns() < idColumn) sheet.insertColumnsAfter(sheet.getMaxColumns(), idColumn - sheet.getMaxColumns());
+    const width=gaEntityWidth_(definition);
+    if (sheet.getMaxColumns() < width) sheet.insertColumnsAfter(sheet.getMaxColumns(), width - sheet.getMaxColumns());
     sheet.getRange(1, idColumn).setValue('Admin ID');
     if (sheet.getLastRow() < 2) return;
     const rows = sheet.getRange(2, 1, sheet.getLastRow() - 1, idColumn).getDisplayValues();
@@ -786,7 +787,7 @@ function gaViewerSyncResult_(entity, applied) {
     entityId: applied && applied.id ? applied.id : '',
     cacheRevision: revision,
     checkedAt: gwFormatDateTime_(new Date()),
-    message: 'Cache publik diperbarui. Viewer akan membaca revisi ' + (revision || 'terbaru') + '.'
+    message: 'Data publik tersimpan. Viewer online memeriksa pembaruan setiap dua menit; layar bacaan aktif diperbarui setelah ditutup.'
   };
 }
 
@@ -939,7 +940,7 @@ function gaSanitizePayload_(entity, payload) {
       const original = gwClean_(value);
       value = original ? (gwSafeUrl_(original) || '') : '';
       if (original && !value) throw new Error('Tautan pada kolom “' + field.label + '” harus menggunakan alamat HTTPS yang valid.');
-    } else if (field.type === 'images') {
+    } else if (field.type === 'images' || (entity === 'activities' && field.key === 'photos')) {
       let hasPrimary = false;
       const urls = String(value == null ? '' : value).split(/[\n,;]+/).map(function (item) {
         const original = item.trim();
@@ -954,7 +955,7 @@ function gaSanitizePayload_(entity, payload) {
         }
         return safeUrl;
       }).filter(Boolean);
-      if (urls.length > 12) throw new Error('Maksimal 12 foto untuk satu kegiatan.');
+      if (urls.length > 24) throw new Error('Maksimal 24 foto untuk satu kegiatan.');
       value = urls.join('\n');
     } else if (field.type === 'media') {
       value = gaSanitizeMedia_(value, field.label);
@@ -968,6 +969,10 @@ function gaSanitizePayload_(entity, payload) {
     if (field.options.length && value && field.options.indexOf(String(value).toUpperCase()) < 0) throw new Error('Pilihan “' + field.label + '” tidak valid.');
     clean[field.key] = field.options.length ? String(value).toUpperCase() : value;
   });
+  if(entity==='activities'){
+    const media=JSON.parse(clean.media||'[]');
+    if(media.length)clean.photos=media.filter(function(item){return /^image\//.test(item.mimeType);}).map(function(item){return (item.primary?'PRIMARY:':'')+item.url;}).join('\n');
+  }
   return clean;
 }
 
@@ -997,7 +1002,7 @@ function gaSanitizeMedia_(value, label) {
       id: gwClean_(item.id).slice(0, 180),
       name: gwClean_(item.name || ('Media ' + (index + 1))).slice(0, 240),
       mimeType: mimeType || 'application/octet-stream',
-      size: Math.max(0, Math.min(2147483647, Number(item.size) || 0)),
+      size: Math.max(0, Math.min(Number.MAX_SAFE_INTEGER, Number(item.size) || 0)),
       url: url,
       viewUrl: item.viewUrl ? (gwSafeUrl_(item.viewUrl) || '') : '',
       downloadUrl: item.downloadUrl ? (gwSafeUrl_(item.downloadUrl) || '') : '',
@@ -1304,6 +1309,12 @@ function adminCreateMediaUploadSession(payload) {
   const name = String(data.name || 'media').trim();
   const mimeType = String(data.mimeType || 'application/octet-stream');
   const safeName = name.replace(/[^\p{L}\p{N}._ -]/gu, '-').slice(0, 200);
+  if (!Number.isSafeInteger(Number(data.size)) || Number(data.size) <= 0) throw new Error('File kosong atau ukurannya tidak valid.');
+  const uploadProperties=PropertiesService.getUserProperties();
+  const oldSessions=uploadProperties.getProperties();
+  Object.keys(oldSessions).filter(function(key){return key.indexOf('GA_MEDIA_UPLOAD_')===0;}).forEach(function(key){
+    try { if(Date.now()-JSON.parse(oldSessions[key]).createdAt>6*60*60*1000)uploadProperties.deleteProperty(key); } catch(ignore){uploadProperties.deleteProperty(key);}
+  });
   const folder = gaImageFolder_();
   const folderId = folder.getId();
   const token = ScriptApp.getOAuthToken();
@@ -1370,6 +1381,24 @@ function adminUploadMediaChunk(payload) {
     throw new Error('Sesi upload sudah kedaluwarsa. Pilih ulang file.');
   }
 
+  if (session.fileId) return {ok:true, completed:true, fileId:session.fileId, nextOffset:session.size};
+
+  if (data.recover === true) {
+    const status=UrlFetchApp.fetch(session.sessionUrl,{method:'put',headers:{Authorization:'Bearer '+ScriptApp.getOAuthToken(),'Content-Range':'bytes */'+session.size},payload:'',followRedirects:false,muteHttpExceptions:true});
+    const code=status.getResponseCode();
+    if(code===200||code===201){
+      const result=JSON.parse(status.getContentText());
+      if(!result.id)throw new Error('Google Drive belum mengirim ID file.');
+      session.fileId=result.id;session.nextOffset=session.size;
+      properties.setProperty(propertyKey,JSON.stringify(session));
+      return {ok:true,completed:true,fileId:result.id,nextOffset:session.size};
+    }
+    if(code===308){
+      const headers=status.getHeaders(),match=String(headers.Range||headers.range||'').match(/bytes=0-(\d+)/i);
+      session.nextOffset=match?Number(match[1])+1:0;
+      properties.setProperty(propertyKey,JSON.stringify(session));
+    }else throw new Error('Status unggahan belum dapat diperiksa (HTTP '+code+').');
+  }
   const offset = Math.max(0, Number(data.offset) || 0);
   const total = Math.max(0, Number(data.total) || 0);
   if (!total || total !== Number(session.size || 0)) throw new Error('Ukuran file berubah selama upload.');
@@ -1403,7 +1432,8 @@ function adminUploadMediaChunk(payload) {
     let result = {};
     try { result = JSON.parse(response.getContentText() || '{}'); } catch (ignore) {}
     if (!result.id) throw new Error('Google Drive menyelesaikan upload tanpa ID file.');
-    properties.deleteProperty(propertyKey);
+    session.fileId=result.id;session.nextOffset=total;
+    properties.setProperty(propertyKey, JSON.stringify(session));
     return { ok: true, completed: true, fileId: result.id, nextOffset: total };
   }
 
@@ -1411,7 +1441,7 @@ function adminUploadMediaChunk(payload) {
     const headers = response.getHeaders();
     const range = String(headers.Range || headers.range || '');
     const match = range.match(/bytes=0-(\d+)/i);
-    const nextOffset = match ? Number(match[1]) + 1 : offset + bytes.length;
+    const nextOffset = match ? Number(match[1]) + 1 : 0;
     if (nextOffset <= offset || nextOffset > total) throw new Error('Google Drive mengirim progres upload yang tidak valid.');
     session.nextOffset = nextOffset;
     properties.setProperty(propertyKey, JSON.stringify(session));

@@ -3642,8 +3642,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         activityYear: 'Semua',
         activityQuery: '',
         activityMediaType: 'Semua',
-        galleryYear: 'Semua',
-        galleryCategory: 'Semua',
         favorites: [],
         recents: [],
         deferredInstall: null,
@@ -4068,7 +4066,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       }
       function startupFailureHtml(error) {
         const detail = error && error.message ? error.message : 'Koneksi data belum berhasil.';
-        return '<section class="startup-failure"><article class="startup-failure-card"><div class="startup-failure-mark"><span class="theme-logo-pair"><img class="logo-light" src="/assets/logo-galilea-light.webp" alt=""><img class="logo-dark" src="/assets/logo-galilea-dark.webp" alt=""></span></div><p class="eyebrow">KONEKSI GALILEA</p><h1>Data belum tersambung.</h1><p class="lead">Website tetap aman. Muat ulang setelah deployment terbaru selesai dipasang.</p><details><summary>Lihat detail teknis</summary><code>' + esc(detail) + '</code></details><div class="button-row"><button class="btn primary" type="button" onclick="location.reload()">Muat ulang website' + icon('arrow') + '</button></div></article></section>';
+        return '<section class="startup-failure"><article class="startup-failure-card"><div class="startup-failure-mark"><span class="theme-logo-pair"><img class="logo-light" src="/assets/logo-galilea-light.webp" alt=""><img class="logo-dark" src="/assets/logo-galilea-dark.webp" alt=""></span></div><p class="eyebrow">KONEKSI GALILEA</p><h1>Data belum tersambung.</h1><p class="lead">Data belum dapat dimuat. Periksa koneksi lalu coba lagi.</p><details><summary>Lihat detail teknis</summary><code>' + esc(detail) + '</code></details><div class="button-row"><button class="btn primary" type="button" onclick="location.reload()">Muat ulang website' + icon('arrow') + '</button></div></article></section>';
       }
       function faithLoader(label, note) {
         return '<div class="faith-loader" role="status" aria-live="polite"><div class="faith-loader-visual" aria-hidden="true"><span class="faith-orbit orbit-one"><i></i></span><span class="faith-orbit orbit-two"><i></i></span><span class="theme-logo-pair"><img class="logo-light" src="/assets/logo-galilea-light.webp" alt=""><img class="logo-dark" src="/assets/logo-galilea-dark.webp" alt=""></span></div><strong>' + esc(label || 'Menyiapkan halaman') + '</strong><p>' + esc(note || 'Menghubungkan materi terbaru untuk jemaat…') + '</p><span class="faith-progress"><i></i></span></div>';
@@ -5858,9 +5856,8 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         return pageHead('Informasi Ibadah','Agenda dan Pengumuman','Perjamuan Kudus, rapat, perubahan jadwal, dan informasi aktif jemaat. Setiap kategori dapat ditampilkan satu per satu dalam Mode Layar.')+'<section class="section"><div class="shell">'+announcementSummaryHtml(items)+(sections?'<div class="announcement-groups">'+sections+'</div>':emptyText('Belum ada Agenda dan Pengumuman yang dipublikasikan.'))+'</div></section>';
       }
       function renderGallery() {
-        const all=state.data.gallery,years=['Semua'].concat(Array.from(new Set(all.map(archiveYear))).sort().reverse()),categories=['Semua'].concat(Array.from(new Set(all.map(archiveCategory))).sort());
-        const items=all.filter(item=>(state.galleryYear==='Semua'||archiveYear(item)===state.galleryYear)&&(state.galleryCategory==='Semua'||archiveCategory(item)===state.galleryCategory));
-        return pageHead('Galilea dalam Gambar', 'Galeri', 'Momen ibadah, persekutuan, dan pelayanan jemaat.') + '<section class="section"><div class="shell"><div class="v18-toolbar"><div class="v18-filter">'+years.map(year=>'<button class="tab '+(state.galleryYear===year?'active':'')+'" type="button" data-gallery-year="'+attr(year)+'">'+esc(year)+'</button>').join('')+'</div><div class="v18-filter">'+categories.map(category=>'<button class="tab '+(state.galleryCategory===category?'active':'')+'" type="button" data-gallery-category="'+attr(category)+'">'+esc(category)+'</button>').join('')+'</div></div>' + (items.length ? '<div class="gallery-grid">' + items.map(item => '<figure class="card gallery-item lift"><button type="button" class="activity-film-hit" data-story-photo="'+attr(item.imageUrl)+'" aria-label="Perbesar '+attr(item.title||'foto')+'"></button><img src="' + attr(item.imageUrl) + '" alt="' + attr(item.title || 'Galeri Galilea') + '" loading="lazy"><figcaption><strong>' + esc(item.title || '') + '</strong><br>' + esc(item.caption || '') + '<span class="v18-gallery-meta"><span class="chip">'+esc(archiveYear(item))+'</span><span class="chip">'+esc(archiveCategory(item))+'</span></span></figcaption></figure>').join('') + '</div>' : '<div class="v18-empty">Belum ada foto pada filter ini.</div>') + '</div></section>';
+        const items=state.data.gallery||[];
+        return pageHead('Galilea dalam Gambar', 'Galeri', 'Momen ibadah, persekutuan, dan pelayanan jemaat.') + '<section class="section"><div class="shell">' + (items.length ? '<div class="gallery-grid">' + items.map(item => '<figure class="card gallery-item lift"><button type="button" class="activity-film-hit" data-story-photo="'+attr(item.imageUrl)+'" aria-label="Perbesar '+attr(item.title||'foto')+'"></button><img src="' + attr(item.imageUrl) + '" alt="' + attr(item.title || 'Galeri Galilea') + '" loading="lazy"><figcaption><strong>' + esc(item.title || '') + '</strong><br>' + esc(item.caption || '') + '</figcaption></figure>').join('') + '</div>' : '<div class="v18-empty">Belum ada foto yang diterbitkan.</div>') + '</div></section>';
       }
 
       function renderServices() {
@@ -6364,8 +6361,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         if(event.target.closest('[data-open-screen-check]'))return openScreenCheck();
         const announcementShare=event.target.closest('[data-share-announcement]');
         if(announcementShare){const item=(state.data.announcements||[]).find(entry=>String(entry.id)===String(announcementShare.dataset.shareAnnouncement));if(item)return shareWhatsApp(announcementShareText(item),location.href.split('#')[0]+'#announcements');}
-        const galleryYear=event.target.closest('[data-gallery-year]');if(galleryYear){state.galleryYear=galleryYear.dataset.galleryYear;render();return;}
-        const galleryCategory=event.target.closest('[data-gallery-category]');if(galleryCategory){state.galleryCategory=galleryCategory.dataset.galleryCategory;render();return;}
         const favorite=event.target.closest('[data-favorite-item]');if(favorite){try{return toggleFavorite(JSON.parse(favorite.dataset.favoriteItem));}catch(_){return toast('Item belum dapat disimpan.');}}
         const saved=event.target.closest('[data-open-saved]');if(saved){const item=state.favorites.concat(state.recents).find(entry=>entry.key===saved.dataset.openSaved);if(!item)return;if(item.type==='hymnal'){navigate('hymnal');return setTimeout(()=>openSong(item.id),350);}if(item.type==='bible'){const parts=item.id.split('-');navigate('bible');return setTimeout(()=>{if($('#bible-book')){$('#bible-book').value=parts[0];fillBibleChapters();$('#bible-chapter').value=parts[1]||'1';openBibleChapter();}},500);}return navigate(item.route||'home');}
         const scheduleTab = event.target.closest('[data-schedule-tab]');
@@ -6453,6 +6448,47 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         else if(event.key==='Escape'){event.preventDefault();closePresentation();}
       });
 
+      // Keep the three-hour offline copy; check a small revision response in the background.
+      let websiteSyncPromise=null,websiteSyncLastAttempt=0;
+      function websiteUpdateIsBusy() {
+        return Boolean(document.querySelector('dialog[open]') || state.route==='services' || document.activeElement?.matches?.('input,textarea,select,[contenteditable="true"]'));
+      }
+      function applyWebsiteUpdate() {
+        if(!state.pendingWebsiteData || websiteUpdateIsBusy())return;
+        state.data=state.pendingWebsiteData;state.pendingWebsiteData=null;
+        setShellData();render();
+      }
+      async function checkWebsiteUpdates(force) {
+        if(!state.data || navigator.onLine===false || document.visibilityState==='hidden')return;
+        if(websiteSyncPromise)return websiteSyncPromise;
+        if(!force && Date.now()-websiteSyncLastAttempt<60000)return;
+        websiteSyncLastAttempt=Date.now();
+        websiteSyncPromise=(async()=>{
+          const revision=await server('getWebsiteData',[{revisionOnly:true}],60000);
+          const current=state.pendingWebsiteData||state.data;
+          const fullResponse=revision&&revision.site;
+          if(!fullResponse && revision && revision.cacheRevision===current.cacheRevision && revision.dayKey===current.dayKey)return;
+          const fresh=fullResponse?revision:await server('getWebsiteData',[],60000);
+          if(!fresh||!fresh.site||!Array.isArray(fresh.activities))throw new Error('Data pembaruan belum lengkap.');
+          cacheSet('v1800-bootstrap',fresh,WORSHIP_CACHE_TTL);
+          state.pendingWebsiteData=fresh;
+          if(document.querySelector('dialog[open]')){
+            toast('Konten terbaru sudah diterima. Tampilan diperbarui setelah layar bacaan ditutup.');
+          }else applyWebsiteUpdate();
+        })().catch(()=>{
+          // Preserve the known-good copy and retry on the next online/visible interval.
+        }).finally(()=>{websiteSyncPromise=null;});
+        return websiteSyncPromise;
+      }
+      function startWebsiteSync() {
+        if(state.websiteSyncTimer)return;
+        checkWebsiteUpdates(false);
+        state.websiteSyncTimer=window.setInterval(()=>{applyWebsiteUpdate();checkWebsiteUpdates(false);},120000);
+        window.addEventListener('online',()=>checkWebsiteUpdates(true));
+        document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkWebsiteUpdates(false);});
+        document.addEventListener('close',()=>applyWebsiteUpdate(),true);
+      }
+
       async function boot() {
         try {
           ensureHymnalPack().catch(()=>{});
@@ -6499,6 +6535,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           releaseStartupLoader();
           if('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
           updateNetworkStatus();
+          if(state.data)startWebsiteSync();
         }
       }
 
@@ -6526,8 +6563,8 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           cacheRemove('v1401-bootstrap');
           cacheRemove('v1500-bootstrap');
           cacheRemove('v1700-bootstrap');
-          // A service crossing midnight must keep its still-fresh local data.
-          if(cacheGet('v1800-bootstrap'))return;
+          // Date-bound content must roll over even while the three-hour copy is fresh.
+          if(state.data){checkWebsiteUpdates(true);if(state.route==='home')loadDevotionalHome(true);return;}
           try {
             const fresh = await server('getWebsiteData',[]);
             state.data = fresh;

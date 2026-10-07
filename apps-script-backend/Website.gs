@@ -339,14 +339,16 @@ function gwRefreshDailyDevotional_() {
 }
 
 /** Data awal website. Hanya data berstatus publik yang dikirim ke browser. */
-function getWebsiteData() {
+function getWebsiteData(options) {
+  const revision = PropertiesService.getScriptProperties().getProperty(GW.CACHE_REVISION_PROPERTY) || '0';
+  if (options && options.revisionOnly === true) return {cacheRevision: revision, dayKey: Utilities.formatDate(new Date(), GW.TIMEZONE, 'yyyy-MM-dd')};
   const cache = CacheService.getScriptCache();
   const cacheKey = gwCacheKey_('bootstrap');
   const cached = cache.get(cacheKey);
   if (cached) return JSON.parse(cached);
 
   const spreadsheet = gwSpreadsheet_();
-  gwEnsureSettingsSheet_(spreadsheet);
+  // Settings have defaults; public reads must not reformat the whole sheet.
   gwEnsureV200ContentSchemas_(spreadsheet);
   const scheduleSheet = gwChooseScheduleSheet_(spreadsheet);
   if (!scheduleSheet) {
@@ -373,6 +375,8 @@ function getWebsiteData() {
   settings.schedule_spreadsheet_url = gwSafeUrl_(settings.schedule_spreadsheet_url) || spreadsheet.getUrl();
   const payload = {
     version: GW.VERSION,
+    cacheRevision: revision,
+    dayKey: Utilities.formatDate(now, GW.TIMEZONE, 'yyyy-MM-dd'),
     site: gwPublicSettings_(settings),
     scheduleSheet: scheduleSheet.getName(),
     periodLabel: gwPeriodLabel_(now),
@@ -1138,7 +1142,7 @@ function gwReadActivities_(spreadsheet, now) {
       photoCount: photos.length
     };
   }).filter(function (item) {
-    return item.status === 'publish' && item.title && item.dateValue < today;
+    return item.status === 'publish' && item.title && item.dateValue <= today;
   }).sort(function (a, b) {
     return b.dateValue - a.dateValue;
   }).slice(0, 24);

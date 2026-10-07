@@ -64,7 +64,10 @@ function galileaVercelHandlers_() {
     getSabbathResourceDetail: function (args) { return getSabbathResourceDetail.apply(null, args); },
     getSabbathResources: function (args) { return getSabbathResources.apply(null, args); },
     getSabbathSchoolLibrary: function (args) { return getSabbathSchoolLibrary.apply(null, args); },
-    getWebsiteData: function (args) { return galileaGetWebsiteDataForViewer_(); },
+    getWebsiteData: function (args) {
+      if (args[0] && args[0].revisionOnly === true) return getWebsiteData(args[0]);
+      return galileaGetWebsiteDataForViewer_();
+    },
     searchWebsite: function (args) { return searchWebsite.apply(null, args); },
     submitServiceRequest: function (args) { return submitServiceRequest.apply(null, args); },
     translateViewerTexts: function (args) { return translateViewerTexts.apply(null, args); },

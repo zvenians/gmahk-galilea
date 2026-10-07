@@ -404,19 +404,20 @@ runTest('TEST NEW 6: resumable session function exists', () => {
   assert.match(adminGs, /uploadType=resumable/);
 });
 
-runTest('TEST NEW 7: browser upload uses direct session URL', () => {
+runTest('TEST NEW 7: browser upload uses authenticated chunk RPC', () => {
   const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
-  assert.match(adminsHtml, /xhr\.open\('PUT', sessionUrl, true\)/);
+  assert.match(adminsHtml, /server\('adminUploadMediaChunk'/);
+  assert.doesNotMatch(adminsHtml, /xhr\.open\('PUT'/);
 });
 
 runTest('TEST NEW 8: Content-Range digunakan', () => {
   const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
-  assert.match(adminsHtml, /xhr\.setRequestHeader\('Content-Range'/);
+  assert.match(adminCode, /'Content-Range': 'bytes '/);
 });
 
 runTest('TEST NEW 9: HTTP 308 ditangani', () => {
   const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
-  assert.match(adminsHtml, /xhr\.status === 308/);
+  assert.match(adminCode, /code === 308/);
 });
 
 runTest('TEST NEW 10: preview menggunakan URL.createObjectURL()', () => {
@@ -444,12 +445,12 @@ runTest('TEST NEW 24: Tidak boleh ada unconditional offset = end setelah HTTP 30
   assert.equal(hasBug, false, 'Ditemukan bug override offset = end secara tidak bersyarat');
   
   // We can also ensure our status query pattern exists
-  assert.match(adminsHtml, /Content-Range['"],\s*['"]bytes \*\//, 'Harus query status sebelum retry dengan bytes */TOTAL');
+  assert.match(fs.readFileSync('apps-script-backend/Admin.gs','utf8'), /Content-Range['"]:\s*['"]bytes \*\//, 'Harus query status sebelum retry dengan bytes */TOTAL');
 });
 
 runTest('TEST NEW 25: JSON Parsing pada response Drive Final', () => {
   const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
-  assert.match(adminsHtml, /JSON\.parse\((xhr|qxhr)\.responseText\)/, 'Harus mem-parse ID file dari JSON response Drive secara langsung saat 200/201');
+  assert.match(fs.readFileSync('apps-script-backend/Admin.gs','utf8'), /JSON\.parse\(response\.getContentText\(\)/, 'Harus mem-parse ID file dari JSON response Drive secara langsung saat 200/201');
 });
 
 console.log('OK - News System Overhaul Tests: ' + passed + '/' + total + ' passed.');
@@ -465,12 +466,12 @@ runTest('TEST NEW 24: Tidak boleh ada unconditional offset = end setelah HTTP 30
   const adminCode = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
   const hasBug = adminCode.includes('if (success && offset === end - 1) offset = end;\n      else offset = end;');
   assert.equal(hasBug, false, 'Ditemukan bug override offset = end secara tidak bersyarat');
-  assert.match(adminCode, /Content-Range['"],\s*['"]bytes \*\//, 'Harus query status sebelum retry dengan bytes */TOTAL');
+  assert.match(fs.readFileSync('apps-script-backend/Admin.gs','utf8'), /Content-Range['"]:\s*['"]bytes \*\//, 'Harus query status sebelum retry dengan bytes */TOTAL');
 });
 
 runTest('TEST NEW 25: JSON Parsing pada response Drive Final', () => {
   const adminCode = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
-  assert.match(adminCode, /JSON\.parse\((xhr|qxhr)\.responseText\)/, 'Harus mem-parse ID file dari JSON response Drive secara langsung saat 200/201');
+  assert.match(fs.readFileSync('apps-script-backend/Admin.gs','utf8'), /JSON\.parse\(response\.getContentText\(\)/, 'Harus mem-parse ID file dari JSON response Drive secara langsung saat 200/201');
 });
 
 console.log('OK - News System Overhaul Tests: ' + passed + '/' + total + ' passed.');
