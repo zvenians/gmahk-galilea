@@ -1,4 +1,5 @@
 import {appsScriptApiUrl} from './_apps-script.js';
+import {callAppsScript} from './_gas-transport.js';
 
 const PUBLIC_METHODS = new Set([
   'downloadQuarterlySchedulePdf',
@@ -25,7 +26,7 @@ const PUBLIC_METHODS = new Set([
   'translateViewerTexts'
 ]);
 
-const BUILD = 'GALILEA-VERCEL-BRIDGE-17.4.0';
+const BUILD = 'GALILEA-VERCEL-BRIDGE-17.5.0';
 const MAX_REQUEST_BYTES = 180000;
 
 function reply(response, status, body, cacheControl) {
@@ -598,35 +599,7 @@ export default async function handler(request, response) {
     const secret = String(process.env.GALILEA_API_SECRET || '');
     if (secret.length < 32) throw new Error('GALILEA_API_SECRET belum dipasang atau terlalu pendek.');
 
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), 55000);
-    let upstream;
-    try {
-      upstream = await fetch(configuredUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'text/plain; charset=utf-8',
-          'Accept': 'application/json',
-          'User-Agent': BUILD
-        },
-        body: JSON.stringify({secret, method, args}),
-        redirect: 'follow',
-        signal: controller.signal
-      });
-    } finally {
-      clearTimeout(timer);
-    }
-
-    const text = await upstream.text();
-    let payload;
-    try {
-      payload = JSON.parse(text);
-    } catch (_) {
-      const looksLikeHtml = /^\s*</.test(text);
-      throw new Error(looksLikeHtml
-        ? 'Backend Apps Script mengirim halaman HTML. Pasang VercelApi.gs lalu deploy versi terbaru.'
-        : 'Respons backend tidak dapat dibaca.');
-    }
+    const {response: upstream, payload} = await callAppsScript(configuredUrl, {secret, method, args});
 
     if (!upstream.ok || !payload || payload.ok !== true) {
       return reply(response, upstream.ok ? 502 : upstream.status, {

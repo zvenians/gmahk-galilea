@@ -1,0 +1,101 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import vm from 'node:vm';
+import {JSDOM} from 'jsdom';
+import {callAppsScript} from '../api/_gas-transport.js';
+
+// Exercise network boundaries without sending writes to production.
+const json=value=>new Response(JSON.stringify(value),{status:200});
+const sent=[];
+const responses=[new Response('',{status:302,headers:{location:'https://script.googleusercontent.com/macros/echo?key=example'}}),new Response('<html>temporary Google error</html>'),new Response('',{status:302,headers:{location:'https://script.googleusercontent.com/macros/echo?key=retry'}}),json({ok:true,data:{site:{}}})];
+const result=await callAppsScript('https://script.google.com/macros/s/test/exec',{secret:'server-only',method:'getWebsiteData',args:[]},{fetcher:async(url,options)=>{sent.push({url,options});return responses.shift();}});
+assert.equal(result.payload.ok,true);
+assert.equal(sent.length,4);
+assert.equal(sent[1].options.method,'GET');
+assert.equal(sent[1].options.body,undefined,'Never forward the secret to a redirect');
+let writes=0;
+await assert.rejects(callAppsScript('https://script.google.com/macros/s/test/exec',{method:'submitServiceRequest'},{fetcher:async()=>{writes++;return new Response('<html>failed</html>');}}));
+assert.equal(writes,1,'Do not replay a write whose result is unknown');
+await assert.rejects(callAppsScript('https://script.google.com/macros/s/test/exec',{method:'getWebsiteData'},{fetcher:async()=>new Response('',{status:302,headers:{location:'https://accounts.google.com/login'}})}),/meminta login/);
+let aborted=false;
+await assert.rejects(callAppsScript('https://script.google.com/macros/s/test/exec',{method:'getWebsiteData'},{timeoutMs:15,fetcher:async(url,options)=>({status:200,text:()=>new Promise((_,reject)=>options.signal.addEventListener('abort',()=>{aborted=true;reject(new DOMException('timeout','AbortError'));}))})}));
+assert.equal(aborted,true,'Timeout covers the body, not just response headers');
+
+const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const syncCode=html.slice(html.indexOf('      let websiteSyncPromise='),html.indexOf('      async function boot()'));
+let clock=2000000000000,open=false,revision='1',dataCalls=0,renders=0,fail=false;
+class Clock extends Date {static now(){return clock;}}
+const sync=vm.createContext({Date:Clock,Promise,Error,Array,navigator:{onLine:true},document:{visibilityState:'visible',querySelector:()=>open?{}:null},state:{data:{site:{},activities:[],cacheRevision:'1',dayKey:'2026-10-07'}},server:async(name,args)=>{if(fail)throw new Error('offline');if(args[0]?.revisionOnly)return {cacheRevision:revision,dayKey:'2026-10-07'};dataCalls++;return {site:{},activities:[{title:'New news'}],cacheRevision:revision,dayKey:'2026-10-07'};},cacheSet(){},WORSHIP_CACHE_TTL:10800000,setShellData(){},render(){renders++;},toast(){}});
+vm.runInContext(syncCode,sync);
+await sync.checkWebsiteUpdates(true);
+assert.equal(dataCalls,0,'Unchanged content does not download the bootstrap again');
+revision='2';open=true;
+await sync.checkWebsiteUpdates(true);
+assert.equal(dataCalls,1);assert.equal(renders,0,'Do not disrupt an active worship slide');
+assert.equal(sync.state.data.cacheRevision,'1');
+open=false;sync.state.route='services';sync.applyWebsiteUpdate();
+assert.equal(renders,0,'Do not erase a service form being filled');
+sync.state.route='home';sync.applyWebsiteUpdate();
+assert.equal(sync.state.data.cacheRevision,'2');assert.equal(renders,1);
+fail=true;await sync.checkWebsiteUpdates(true);
+assert.equal(sync.state.data.cacheRevision,'2','Keep usable data when refresh fails');
+
+const admin=fs.readFileSync(new URL('../apps-script-backend/Admins.html',import.meta.url),'utf8');
+const engine=admin.slice(admin.indexOf('const adminMediaRuntime'),admin.lastIndexOf('</script>'));
+const dom=new JSDOM('<form><input name="imageUrl"><ul id="upload-preview-imageUrl"></ul><textarea name="media"></textarea><input name="photos"><div id="media-manager-media"></div></form>',{runScripts:'outside-only'});
+const w=dom.window,requests=[];
+w.CSS.escape=value=>value;
+w.URL.createObjectURL=()=> 'blob:test';w.URL.revokeObjectURL=()=>{};
+w.GALILEA_ADMIN_RUNTIME={query:(s,c)=>(c||w.document).querySelector(s),queryAll:(s,c)=>Array.from((c||w.document).querySelectorAll(s)),escapeText:String,escapeAttribute:String,cleanError:String,toast(){},markEditorDirty(){},server:async(name,args)=>{
+ requests.push({name,args});
+ if(name==='adminCreateMediaUploadSession')return {ok:true,uploadId:'test',chunkSize:262144};
+ if(name==='adminUploadMediaChunk')return {ok:true,completed:true,nextOffset:3,fileId:'file-test'};
+ if(name==='adminFinalizeMediaUpload')return {ok:true,id:'file-test',mimeType:'image/jpeg',size:3,name:'test.jpg',url:'https://drive.google.com/uc?id=file-test'};
+ throw new Error(name);
+}};
+vm.runInContext(engine,dom.getInternalVMContext());
+const file={name:'test.jpg',type:'image/jpeg',size:3,slice:()=>({arrayBuffer:async()=>new Uint8Array([1,2,3]).buffer})};
+await w.uploadImage({files:[file],dataset:{imageTarget:'imageUrl'},closest:()=>w.document.querySelector('form'),value:''});
+assert.equal(w.document.querySelector('[name="imageUrl"]').value,'https://lh3.googleusercontent.com/d/file-test=w800');
+assert.equal(requests.filter(r=>r.name==='adminFinalizeMediaUpload').length,1);
+await w.uploadMediaEngine({files:[file,file],dataset:{mediaTarget:'media'},value:''});
+assert.equal(JSON.parse(w.document.querySelector('[name="media"]').value).length,2);
+assert.equal(requests.filter(r=>r.name==='adminFinalizeMediaUpload').length,3);
+const legacy=w.parseMediaField('', 'PRIMARY:https://example.com/new.png\nhttps://example.com/another.png');
+assert.equal(legacy.length,2,'Legacy URLs must split on newlines, not the letter n');
+assert.equal(legacy[0].url,'https://example.com/new.png');
+const error=w.document.createElement('div');error.className='upload-item error';error.textContent='Upload failed';
+w.document.querySelector('#media-manager-media').append(error);
+w.renderMediaManager('media');
+assert.equal(w.document.querySelector('.upload-item.error').textContent,'Upload failed','Retain the reason a file failed after re-render');
+dom.window.close();
+
+// Actual Apps Script readers + writer against an isolated in-memory sheet.
+const backend=fs.readFileSync(new URL('../apps-script-backend/Website.gs',import.meta.url),'utf8');
+const adminBackend=fs.readFileSync(new URL('../apps-script-backend/Admin.gs',import.meta.url),'utf8');
+const rows=[['Date','Title','Location','Description','URL','Status','Photos','Admin ID','Media']];
+const sheet={getLastRow:()=>rows.length,getLastColumn:()=>9,getRange(row,col,n=1,width=1){return {getValues:()=>rows.slice(row-1,row-1+n).map(r=>r.slice(col-1,col-1+width)),getDisplayValues:()=>rows.slice(row-1,row-1+n).map(r=>r.slice(col-1,col-1+width).map(v=>v instanceof Date?v.toISOString():String(v??''))),setValues(values){values.forEach((r,i)=>{rows[row-1+i]||=[];r.forEach((v,j)=>rows[row-1+i][col-1+j]=v);});},deleteRow:r=>rows.splice(r-1,1)};}};
+const spreadsheet={getSheetByName:()=>sheet};
+const properties=new Map([['GALILEA_CACHE_REVISION_V2000','r1']]);
+const gas=vm.createContext({console,Date,JSON,Math,Number,String,Array,PropertiesService:{getScriptProperties:()=>({getProperty:k=>properties.get(k),setProperty:(k,v)=>properties.set(k,v)})},Utilities:{formatDate:(date,tz,format)=>format==='yyyy-MM-dd'?new Date(date.getTime()+8*3600000).toISOString().slice(0,10):'7 Oktober 2026',getUuid:()=> 'test-fixture-id'},CacheService:{getScriptCache:()=>({get(){return null;},put(){}})}});
+vm.runInContext(backend+'\n'+adminBackend,gas);
+gas.gaFindRowByValue_=()=>0;
+const media=Array.from({length:18},(_,i)=>({name:'Photo '+i,mimeType:'image/jpeg',url:'https://example.com/'+('name'.repeat(20))+i+'.jpg',primary:i===0}));
+const payload=gas.gaSanitizePayload_('activities',{date:'2026-10-07',title:'Test only',description:'Body',photos:media.map(x=>x.url).join('\n'),media:JSON.stringify(media)});
+assert.ok(payload.photos.length>1000,'Keep long media collections intact');
+gas.gaApplyWorkflow_(spreadsheet,'activities','NEW-TEST','UPSERT',payload);
+const visible=gas.gwReadActivities_(spreadsheet,new Date('2026-10-07T05:00:00Z'));
+assert.equal(visible.length,1,'News approved today is visible today');
+assert.equal(visible[0].media.length,18);
+assert.equal(rows[1][5],'PUBLISH');
+gas.gwRefreshWebsiteGalilea_();
+const stamp=gas.getWebsiteData({revisionOnly:true});
+assert.notEqual(stamp.cacheRevision,'r1');
+// No Sheets or CacheService calls are needed to return this stamp.
+const props=new Map([['GA_MEDIA_UPLOAD_'+('a'.repeat(32)),JSON.stringify({size:3,createdAt:Date.now(),fileId:'done',nextOffset:3})]]);
+gas.gaRequireRole_=()=>({email:'test@example.com'});
+gas.PropertiesService.getUserProperties=()=>({getProperty:k=>props.get(k),setProperty:(k,v)=>props.set(k,v),deleteProperty:k=>props.delete(k)});
+const recovered=gas.adminUploadMediaChunk({uploadId:'a'.repeat(32),offset:0,total:3,dataBase64:'AQID'});
+assert.equal(recovered.completed,true);assert.equal(recovered.fileId,'done','A lost final response can be replayed without uploading twice');
+rows.length=0;props.clear();properties.clear();
+console.log('Admin/viewer regression passed: redirects, safe retries, revisions, presentation deferral, upload paths, recovery, publication, and fixture cleanup.');

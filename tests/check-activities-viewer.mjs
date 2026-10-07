@@ -10,7 +10,7 @@ const viewer = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
 
 assert.match(
   source,
-  /getWebsiteData:\s*function\s*\(args\)\s*\{\s*return\s+galileaGetWebsiteDataForViewer_\(\);/,
+  /getWebsiteData:\s*function\s*\(args\)[\s\S]*?return\s+galileaGetWebsiteDataForViewer_\(\);/,
   'Public getWebsiteData handler must use the viewer reconciliation adapter.'
 );
 assert.match(

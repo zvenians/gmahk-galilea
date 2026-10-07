@@ -81,7 +81,7 @@ assert.doesNotMatch(index, /Siap ditampilkan/i);
 assert.doesNotMatch(index, /theme-song-preview/);
 assert.match(index, /id="presentation-offline"/);
 assert.match(index, /async function cachedResource/);
-assert.match(worker, /galilea-v35-14-bounded-text-size/);
+assert.match(worker, /galilea-v35-15-admin-viewer-sync/);
 assert.match(index, /GALILEA-DUAL-BRAND-31-0-0/);
 assert.match(index, /assets\/logo-galilea-light\.webp/);
 assert.match(index, /assets\/logo-galilea-dark\.webp/);
@@ -215,7 +215,7 @@ assert.match(index, /Bagian yang belum diterbitkan tidak diisi dengan perkiraan/
 assert.match(index, /record\.timestamp\|\|\(record\.isoDate\+'T'\+record\.time\+'\:00\+08\:00'\)/);
 assert.match(website, /gwReadThemeSong_/);
 assert.match(website, /gwEnsureV200ContentSchemas_/);
-assert.match(website, /item\.dateValue < today/);
+assert.match(website, /item\.dateValue <= today/);
 const adminScripts = [...adminHtml.replace(/<\?!=\s*JSON\.stringify\(appUrl\s*\|\|\s*''\)\s*\?>/g, "''").matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(match => match[1]);
 assert.ok(adminScripts.length > 0, 'Tidak ditemukan blok JavaScript pada Admins.html.');
 for (const [position, source] of adminScripts.entries()) {

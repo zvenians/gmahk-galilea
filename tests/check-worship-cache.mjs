@@ -90,7 +90,7 @@ assert.equal((await resource.context.cachedResource('example',async()=>{throw ne
 const boot=runtime(first.storage);let renders=0;
 boot.context.cacheSet('v1800-bootstrap',{site:{name:'Galilea'}},10800000);
 Object.assign(boot.context,{
-  initPreferences(){},buildMobileNav(){},readStoredList:()=>[],startDayRolloverWatcher(){},witaDateKey:()=> '2026-10-05',
+  startWebsiteSync(){},initPreferences(){},buildMobileNav(){},readStoredList:()=>[],startDayRolloverWatcher(){},witaDateKey:()=> '2026-10-05',
   VIEWER_LANGUAGES:['id'],ROUTES:['home','hymnal'],location:{hash:'#home'},history:{replaceState(){}},
   setShellData(){},render(){renders++;},releaseStartupLoader(){},setLanguage(){},updateNetworkStatus(){},clearTimeout(){},startupGuard:0,
   MutationObserver:class {observe(){}},document:{body:{},querySelector:()=>null},
