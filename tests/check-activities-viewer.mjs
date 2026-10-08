@@ -37,7 +37,7 @@ assert.match(source, /media:\s*media,/, 'Viewer adapter must expose activity med
 assert.match(viewer, /function activityMediaSlides\(item\)/, 'Viewer must normalize activity photos and media into one journal.');
 assert.match(viewer, /class="journal-deck"/, 'Viewer must render the 3D Journal deck.');
 assert.match(viewer, /object-fit:contain/, 'Journal media must preserve the original aspect ratio.');
-assert.match(viewer, /data-media-finder=/, 'Dashboard and archive must expose the media filter flow.');
+assert.doesNotMatch(viewer, /data-media-finder=|data-reset-activity-filter|mediaDiscoveryHtml/, 'Home and archive must not display media filters.');
 assert.match(viewer, /data-share-media/, 'Every journal media item must expose share mode.');
 assert.match(viewer, /download aria-label="Download/, 'Every journal media item must expose download mode.');
 assert.match(viewer, /function shiftJournalDeck\(wrap,step\)/, 'Journal deck must support navigation and swipe handling.');

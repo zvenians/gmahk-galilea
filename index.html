@@ -3639,9 +3639,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         archives: null,
         faqQuery: '',
         faqCategory: 'Semua',
-        activityYear: 'Semua',
-        activityQuery: '',
-        activityMediaType: 'Semua',
         favorites: [],
         recents: [],
         deferredInstall: null,
@@ -4337,7 +4334,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           '<section class="cinema-chapter"><div class="shell cinema-chapter-grid"><div><div class="chapter-heading"><h2>Jadwal minggu ini.</h2><p>Seluruh nama dan pembagian tugas tersedia langsung dari spreadsheet jemaat.</p></div>' + renderNotices() + '<button class="schedule-cue" type="button" data-route="schedule"><span class="schedule-cue-icon">' + icon('calendar') + '</span><span class="schedule-cue-copy"><small>Ibadah terdekat</small><strong>Buka pembagian pelayanan</strong><span>' + esc(scheduleDate) + '</span></span><span class="schedule-cue-arrow">' + icon('arrow') + '</span></button></div></div></section>' +
           
           // BERITA JEMAAT DIPINDAHKAN KE SINI (LANGSUNG SETELAH SCHEDULE)
-          '<section class="cinema-chapter journal-stage"><div class="shell cinema-chapter-grid"><div><div class="chapter-heading"><h2>Kabar dari Galilea.</h2><p>Berita kegiatan yang sudah berlangsung ditampilkan sebagai cerita visual dan dapat memuat beberapa foto.</p></div>' + mediaDiscoveryHtml(true) + '<div class="journal-grid">' + (journal || emptyText('Belum ada kabar yang dipublikasikan.')) + '</div><div class="button-row" style="margin-top:36px"><button class="btn primary" type="button" data-route="activities">Seluruh Berita Jemaat' + icon('arrow') + '</button><button class="btn" type="button" data-route="announcements">Agenda dan Pengumuman</button></div></div></div></section>' +
+          '<section class="cinema-chapter journal-stage"><div class="shell cinema-chapter-grid"><div><div class="chapter-heading"><h2>Kabar dari Galilea.</h2><p>Berita kegiatan yang sudah berlangsung ditampilkan sebagai cerita visual dan dapat memuat beberapa foto.</p></div>' + '<div class="journal-grid">' + (journal || emptyText('Belum ada kabar yang dipublikasikan.')) + '</div><div class="button-row" style="margin-top:36px"><button class="btn primary" type="button" data-route="activities">Seluruh Berita Jemaat' + icon('arrow') + '</button><button class="btn" type="button" data-route="announcements">Agenda dan Pengumuman</button></div></div></div></section>' +
           
           '<section class="word-stage"><div class="word-stage-heading"><p class="eyebrow">Renungan Pagi</p><h2>Mulai hari bersama firman.</h2><p>Bacaan teks harian dari sumber resmi Advent, dicocokkan dengan tanggal WITA, tanpa video.</p></div><div id="home-devotional">' + loadingBox('Menyiapkan renungan pagi','Mencocokkan bacaan dengan tanggal hari ini…') + '</div></section>' +
           '<section class="instagram-stage" aria-labelledby="instagram-stage-title"><div class="shell"><header class="instagram-stage-head"><div><p class="eyebrow">Instagram Galilea</p><h2 id="instagram-stage-title">Reel terbaru, langsung dari jemaat.</h2></div><a class="instagram-profile-link" href="https://www.instagram.com/advent.galilea/" target="_blank" rel="noopener">'+brandIcon('instagram')+'@advent.galilea'+icon('external')+'</a></header><div id="home-instagram-reel">'+loadingBox('Menghubungkan Instagram Galilea','Mencari Reel terbaru dari @advent.galilea…')+'</div></div></section>'+
@@ -5718,26 +5715,9 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         return slides;
       }
 
-      function filteredActivities() {
-        const query=String(state.activityQuery||'').trim().toLowerCase();
-        return (state.data.activities||[]).filter(item=>{
-          if(state.activityYear!=='Semua'&&archiveYear(item)!==state.activityYear)return false;
-          const slides=activityMediaSlides(item);
-          if(state.activityMediaType!=='Semua'&&!slides.some(slide=>slide.type===state.activityMediaType))return false;
-          if(query&&!activityExcerptText([item.title,item.description,item.location,item.dateLabel].join(' ')).toLowerCase().includes(query))return false;
-          return true;
-        });
-      }
-
-      function mediaDiscoveryHtml(compact) {
-        const all=state.data.activities||[], years=['Semua'].concat(Array.from(new Set(all.map(archiveYear).filter(Boolean))).sort().reverse());
-        const types=[['Semua','Semua media'],['image','Foto'],['video','Video'],['audio','Audio'],['file','Dokumen']];
-        return '<section class="media-discovery" aria-label="Cari media Berita Jemaat"><div class="media-discovery-head"><div><p class="eyebrow">Arsip Media</p><h3>'+esc(compact?'Cari foto dan dokumentasi.':'Temukan media yang Anda perlukan.')+'</h3></div><p>'+esc(compact?'Gunakan filter, lalu buka arsip untuk melihat, membagikan, atau mengunduh media.':'Pilih berita, buka Journal, lalu gunakan tombol download atau bagikan pada media yang aktif.')+'</p></div><form class="media-discovery-form" data-media-finder="'+(compact?'home':'archive')+'"><label class="media-discovery-field"><span>Kata kunci</span><input name="query" type="search" value="'+attr(state.activityQuery)+'" placeholder="Nama kegiatan atau lokasi"></label><label class="media-discovery-field"><span>Tahun</span><select name="year">'+years.map(year=>'<option value="'+attr(year)+'" '+(state.activityYear===year?'selected':'')+'>'+esc(year)+'</option>').join('')+'</select></label><label class="media-discovery-field"><span>Jenis media</span><select name="mediaType">'+types.map(type=>'<option value="'+attr(type[0])+'" '+(state.activityMediaType===type[0]?'selected':'')+'>'+esc(type[1])+'</option>').join('')+'</select></label><button class="btn primary" type="submit">'+icon('search')+(compact?'Cari media':'Terapkan filter')+'</button></form><div class="media-discovery-note">'+icon('info')+'<span>Unggah dan publikasi dilakukan pengelola melalui <a href="/admin" target="_blank" rel="noopener">Admin</a>. Arsip publik ini khusus untuk mencari, melihat, download, dan share.</span></div></section>';
-      }
-
       function renderActivities() {
-        const items=filteredActivities();
-        return pageHead('Kehidupan Jemaat', 'Berita Jemaat', 'Cerita dan dokumentasi kegiatan yang sudah berlangsung. Cari media, buka Journal, lalu download atau bagikan.') + '<section class="section activity-archive"><div class="shell">'+mediaDiscoveryHtml(false)+'<div class="v18-toolbar"><strong>'+esc(items.length)+' berita ditemukan</strong>'+(state.activityQuery||state.activityYear!=='Semua'||state.activityMediaType!=='Semua'?'<button class="btn soft" type="button" data-reset-activity-filter>Hapus filter</button>':'')+'</div><div class="activity-cinema-grid">' + (items.length ? items.map((item,index) => activityCardHtml(item,index===0)).join('') : '<div class="v18-empty">Tidak ada media yang cocok. Coba hapus sebagian filter.</div>') + '</div></div></section>';
+        const items=state.data.activities||[];
+        return pageHead('Kehidupan Jemaat', 'Berita Jemaat', 'Cerita dan dokumentasi kegiatan yang sudah berlangsung. Cari media, buka Journal, lalu download atau bagikan.') + '<section class="section activity-archive"><div class="shell"><div class="v18-toolbar"><strong>'+esc(items.length)+' berita ditemukan</strong>'+'</div><div class="activity-cinema-grid">' + (items.length ? items.map((item,index) => activityCardHtml(item,index===0)).join('') : '<div class="v18-empty">Belum ada berita yang diterbitkan.</div>') + '</div></div></section>';
       }
 
       function activityExcerptText(value) {
@@ -5891,15 +5871,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         if (state.route === 'sabbath') loadSabbath();
         if (state.route === 'bible') loadBibleBooks();
         if (state.route === 'hymnal') loadHymnal();
-
-        $('[data-media-finder]')?.addEventListener('submit', event => {
-          event.preventDefault();
-          const values=Object.fromEntries(new FormData(event.currentTarget).entries());
-          state.activityQuery=String(values.query||'').trim();
-          state.activityYear=String(values.year||'Semua');
-          state.activityMediaType=String(values.mediaType||'Semua');
-          if(event.currentTarget.dataset.mediaFinder==='home')navigate('activities');else render();
-        });
 
         $('#member-form')?.addEventListener('submit', async event => {
           event.preventDefault();
@@ -6352,7 +6323,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         if(mediaShare)return shareText(mediaShare.dataset.mediaTitle||'Media Berita Jemaat','Dokumentasi GMAHK Galilea Balikpapan',mediaShare.dataset.mediaUrl||location.href);
         const journalNav=event.target.closest('[data-journal-nav]');
         if(journalNav)return shiftJournalDeck(journalNav.closest('.journal-deck'),Number(journalNav.dataset.journalNav));
-        if(event.target.closest('[data-reset-activity-filter]')){state.activityQuery='';state.activityYear='Semua';state.activityMediaType='Semua';render();return;}
         const announcementPresentation=event.target.closest('[data-present-announcements]');
         if(announcementPresentation)return openAnnouncementPresentation(announcementPresentation.dataset.presentAnnouncements);
         if(event.target.closest('[data-present-schedule-summary]'))return openScheduleSummaryPresentation();
