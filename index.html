@@ -3436,6 +3436,32 @@
 @keyframes lyricsSoftPrev{from{opacity:0;transform:translate3d(0,-8px,0)}to{opacity:1;transform:none}}
 @media(prefers-reduced-motion:reduce){.presentation-stage{animation:none!important}}
 html[data-motion="reduced"] .presentation-stage{animation:none!important}
+
+/* Homepage news: one lead story, supporting stories, then announcements. */
+.journal-stage .home-news-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px;align-items:stretch}
+.journal-stage .home-news-grid>.activity-film{grid-column:auto;grid-row:auto;min-width:0;min-height:290px;border-radius:22px;display:flex;align-items:flex-end}
+.journal-stage .home-news-grid>.activity-film:first-child{grid-column:1;grid-row:span 2;min-height:600px}
+.journal-stage .home-news-grid.news-count-1>.activity-film{grid-column:1/-1;grid-row:auto;min-height:500px}
+.journal-stage .home-news-grid.news-count-2>.activity-film{grid-row:auto;min-height:480px}
+.journal-stage .home-news-grid .activity-film-copy{position:relative;inset:auto;width:100%;padding:28px}
+.journal-stage .home-news-grid .activity-film-copy h3{font-size:clamp(1.5rem,2.2vw,2.25rem);line-height:1.14;overflow-wrap:anywhere;margin:12px 0}
+.journal-stage .home-news-grid>.activity-film:first-child h3{font-size:clamp(2.2rem,3.8vw,3.8rem);line-height:1.06}
+.journal-stage .home-news-grid .activity-film-copy p{-webkit-line-clamp:2;font-size:.92rem;line-height:1.6}
+.journal-stage .home-news-grid .film-cta{margin-top:18px;font-size:.84rem}
+.journal-stage .home-news-grid .film-shade{background:linear-gradient(180deg,rgba(2,9,5,.05),rgba(2,9,5,.5) 35%,rgba(2,9,5,.96))}
+.journal-stage .home-announcements{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;margin-top:28px;padding-top:28px;border-top:1px solid var(--line)}
+.journal-stage .home-announcements .journal-note{min-width:0;min-height:0;padding:24px;border:1px solid var(--line);border-radius:18px;gap:14px}
+.journal-stage .home-announcements h3{margin:0;font-size:1.35rem;line-height:1.25;overflow-wrap:anywhere}
+.journal-stage .home-announcements p{margin:0;font-size:.9rem;line-height:1.65}
+.journal-stage .home-announcements .journal-note>.button-row:last-child{margin-top:auto;padding-top:12px}
+@media(max-width:760px){
+.journal-stage .home-news-grid{grid-template-columns:minmax(0,1fr);gap:16px}
+.journal-stage .home-news-grid>.activity-film,.journal-stage .home-news-grid>.activity-film:first-child,.journal-stage .home-news-grid.news-count-1>.activity-film,.journal-stage .home-news-grid.news-count-2>.activity-film{grid-column:1;grid-row:auto;min-height:360px;border-radius:18px}
+.journal-stage .home-news-grid>.activity-film:first-child{min-height:440px}
+.journal-stage .home-news-grid .activity-film-copy{padding:24px}
+.journal-stage .home-news-grid>.activity-film:first-child h3{font-size:2.3rem}
+.journal-stage .home-announcements{grid-template-columns:minmax(0,1fr);gap:14px}
+}
 </style>
 </head>
 <body>
@@ -3639,9 +3665,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         archives: null,
         faqQuery: '',
         faqCategory: 'Semua',
-        activityYear: 'Semua',
-        activityQuery: '',
-        activityMediaType: 'Semua',
         favorites: [],
         recents: [],
         deferredInstall: null,
@@ -4325,7 +4348,8 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         const activities = data.activities.slice(0,3);
         const scheduleDate = data.nextSabbath ? (data.nextSabbath.dateLabel + ' · ' + (data.nextSabbath.time || '09.00 WITA')) : 'Jadwal terdekat akan tampil dari spreadsheet';
         const liveStatus=eventStatus(data.nextSabbath);
-        const journal = activities.map(item => activityCardHtml(item,true)).join('') + announcements.map(item => {const meta=announcementGroupMeta(announcementCategory(item));return '<article class="journal-note"><div class="button-row"><span class="chip brand">'+esc(meta.label)+'</span><span class="chip">'+esc(item.dateLabel||'Pengumuman')+'</span></div><h3>'+esc(item.title)+'</h3><p>'+esc(item.summary||'Informasi selengkapnya tersedia pada halaman Agenda dan Pengumuman.')+'</p><div class="button-row"><span class="chip '+(item.priority==='PENTING'?'gold':'')+'">'+esc(item.priority||'NORMAL')+'</span><button class="link-arrow" type="button" data-route="announcements">Baca pengumuman'+icon('arrow')+'</button></div></article>';}).join('');
+        const journal = activities.map((item,index) => activityCardHtml(item,index===0)).join('');
+        const homeAnnouncements = announcements.map(item => {const meta=announcementGroupMeta(announcementCategory(item));return '<article class="journal-note"><div class="button-row"><span class="chip brand">'+esc(meta.label)+'</span><span class="chip">'+esc(item.dateLabel||'Pengumuman')+'</span></div><h3>'+esc(item.title)+'</h3><p>'+esc(item.summary||'Informasi selengkapnya tersedia pada halaman Agenda dan Pengumuman.')+'</p><div class="button-row"><span class="chip '+(item.priority==='PENTING'?'gold':'')+'">'+esc(item.priority||'NORMAL')+'</span><button class="link-arrow" type="button" data-route="announcements">Baca pengumuman'+icon('arrow')+'</button></div></article>';}).join('');
         
         return '<section class="film-hero">' +
           '<div class="film-hero-media"></div><div class="film-hero-shade" aria-hidden="true"></div><div class="film-hero-lines" aria-hidden="true"></div><span class="film-cross-light" aria-hidden="true"></span>' +
@@ -4337,7 +4361,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           '<section class="cinema-chapter"><div class="shell cinema-chapter-grid"><div><div class="chapter-heading"><h2>Jadwal minggu ini.</h2><p>Seluruh nama dan pembagian tugas tersedia langsung dari spreadsheet jemaat.</p></div>' + renderNotices() + '<button class="schedule-cue" type="button" data-route="schedule"><span class="schedule-cue-icon">' + icon('calendar') + '</span><span class="schedule-cue-copy"><small>Ibadah terdekat</small><strong>Buka pembagian pelayanan</strong><span>' + esc(scheduleDate) + '</span></span><span class="schedule-cue-arrow">' + icon('arrow') + '</span></button></div></div></section>' +
           
           // BERITA JEMAAT DIPINDAHKAN KE SINI (LANGSUNG SETELAH SCHEDULE)
-          '<section class="cinema-chapter journal-stage"><div class="shell cinema-chapter-grid"><div><div class="chapter-heading"><h2>Kabar dari Galilea.</h2><p>Berita kegiatan yang sudah berlangsung ditampilkan sebagai cerita visual dan dapat memuat beberapa foto.</p></div>' + mediaDiscoveryHtml(true) + '<div class="journal-grid">' + (journal || emptyText('Belum ada kabar yang dipublikasikan.')) + '</div><div class="button-row" style="margin-top:36px"><button class="btn primary" type="button" data-route="activities">Seluruh Berita Jemaat' + icon('arrow') + '</button><button class="btn" type="button" data-route="announcements">Agenda dan Pengumuman</button></div></div></div></section>' +
+          '<section class="cinema-chapter journal-stage"><div class="shell cinema-chapter-grid"><div><div class="chapter-heading"><h2>Kabar dari Galilea.</h2><p>Berita kegiatan yang sudah berlangsung ditampilkan sebagai cerita visual dan dapat memuat beberapa foto.</p></div>' + '<div class="journal-grid home-news-grid news-count-'+activities.length+'">' + (journal || emptyText('Belum ada kabar yang dipublikasikan.')) + '</div>' + (homeAnnouncements ? '<div class="home-announcements" aria-label="Pengumuman terbaru">'+homeAnnouncements+'</div>' : '') + '<div class="button-row" style="margin-top:36px"><button class="btn primary" type="button" data-route="activities">Seluruh Berita Jemaat' + icon('arrow') + '</button><button class="btn" type="button" data-route="announcements">Agenda dan Pengumuman</button></div></div></div></section>' +
           
           '<section class="word-stage"><div class="word-stage-heading"><p class="eyebrow">Renungan Pagi</p><h2>Mulai hari bersama firman.</h2><p>Bacaan teks harian dari sumber resmi Advent, dicocokkan dengan tanggal WITA, tanpa video.</p></div><div id="home-devotional">' + loadingBox('Menyiapkan renungan pagi','Mencocokkan bacaan dengan tanggal hari ini…') + '</div></section>' +
           '<section class="instagram-stage" aria-labelledby="instagram-stage-title"><div class="shell"><header class="instagram-stage-head"><div><p class="eyebrow">Instagram Galilea</p><h2 id="instagram-stage-title">Reel terbaru, langsung dari jemaat.</h2></div><a class="instagram-profile-link" href="https://www.instagram.com/advent.galilea/" target="_blank" rel="noopener">'+brandIcon('instagram')+'@advent.galilea'+icon('external')+'</a></header><div id="home-instagram-reel">'+loadingBox('Menghubungkan Instagram Galilea','Mencari Reel terbaru dari @advent.galilea…')+'</div></div></section>'+
@@ -5718,26 +5742,9 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         return slides;
       }
 
-      function filteredActivities() {
-        const query=String(state.activityQuery||'').trim().toLowerCase();
-        return (state.data.activities||[]).filter(item=>{
-          if(state.activityYear!=='Semua'&&archiveYear(item)!==state.activityYear)return false;
-          const slides=activityMediaSlides(item);
-          if(state.activityMediaType!=='Semua'&&!slides.some(slide=>slide.type===state.activityMediaType))return false;
-          if(query&&!activityExcerptText([item.title,item.description,item.location,item.dateLabel].join(' ')).toLowerCase().includes(query))return false;
-          return true;
-        });
-      }
-
-      function mediaDiscoveryHtml(compact) {
-        const all=state.data.activities||[], years=['Semua'].concat(Array.from(new Set(all.map(archiveYear).filter(Boolean))).sort().reverse());
-        const types=[['Semua','Semua media'],['image','Foto'],['video','Video'],['audio','Audio'],['file','Dokumen']];
-        return '<section class="media-discovery" aria-label="Cari media Berita Jemaat"><div class="media-discovery-head"><div><p class="eyebrow">Arsip Media</p><h3>'+esc(compact?'Cari foto dan dokumentasi.':'Temukan media yang Anda perlukan.')+'</h3></div><p>'+esc(compact?'Gunakan filter, lalu buka arsip untuk melihat, membagikan, atau mengunduh media.':'Pilih berita, buka Journal, lalu gunakan tombol download atau bagikan pada media yang aktif.')+'</p></div><form class="media-discovery-form" data-media-finder="'+(compact?'home':'archive')+'"><label class="media-discovery-field"><span>Kata kunci</span><input name="query" type="search" value="'+attr(state.activityQuery)+'" placeholder="Nama kegiatan atau lokasi"></label><label class="media-discovery-field"><span>Tahun</span><select name="year">'+years.map(year=>'<option value="'+attr(year)+'" '+(state.activityYear===year?'selected':'')+'>'+esc(year)+'</option>').join('')+'</select></label><label class="media-discovery-field"><span>Jenis media</span><select name="mediaType">'+types.map(type=>'<option value="'+attr(type[0])+'" '+(state.activityMediaType===type[0]?'selected':'')+'>'+esc(type[1])+'</option>').join('')+'</select></label><button class="btn primary" type="submit">'+icon('search')+(compact?'Cari media':'Terapkan filter')+'</button></form><div class="media-discovery-note">'+icon('info')+'<span>Unggah dan publikasi dilakukan pengelola melalui <a href="/admin" target="_blank" rel="noopener">Admin</a>. Arsip publik ini khusus untuk mencari, melihat, download, dan share.</span></div></section>';
-      }
-
       function renderActivities() {
-        const items=filteredActivities();
-        return pageHead('Kehidupan Jemaat', 'Berita Jemaat', 'Cerita dan dokumentasi kegiatan yang sudah berlangsung. Cari media, buka Journal, lalu download atau bagikan.') + '<section class="section activity-archive"><div class="shell">'+mediaDiscoveryHtml(false)+'<div class="v18-toolbar"><strong>'+esc(items.length)+' berita ditemukan</strong>'+(state.activityQuery||state.activityYear!=='Semua'||state.activityMediaType!=='Semua'?'<button class="btn soft" type="button" data-reset-activity-filter>Hapus filter</button>':'')+'</div><div class="activity-cinema-grid">' + (items.length ? items.map((item,index) => activityCardHtml(item,index===0)).join('') : '<div class="v18-empty">Tidak ada media yang cocok. Coba hapus sebagian filter.</div>') + '</div></div></section>';
+        const items=state.data.activities||[];
+        return pageHead('Kehidupan Jemaat', 'Berita Jemaat', 'Cerita dan dokumentasi kegiatan yang sudah berlangsung. Cari media, buka Journal, lalu download atau bagikan.') + '<section class="section activity-archive"><div class="shell"><div class="v18-toolbar"><strong>'+esc(items.length)+' berita ditemukan</strong>'+'</div><div class="activity-cinema-grid">' + (items.length ? items.map((item,index) => activityCardHtml(item,index===0)).join('') : '<div class="v18-empty">Belum ada berita yang diterbitkan.</div>') + '</div></div></section>';
       }
 
       function activityExcerptText(value) {
@@ -5891,15 +5898,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         if (state.route === 'sabbath') loadSabbath();
         if (state.route === 'bible') loadBibleBooks();
         if (state.route === 'hymnal') loadHymnal();
-
-        $('[data-media-finder]')?.addEventListener('submit', event => {
-          event.preventDefault();
-          const values=Object.fromEntries(new FormData(event.currentTarget).entries());
-          state.activityQuery=String(values.query||'').trim();
-          state.activityYear=String(values.year||'Semua');
-          state.activityMediaType=String(values.mediaType||'Semua');
-          if(event.currentTarget.dataset.mediaFinder==='home')navigate('activities');else render();
-        });
 
         $('#member-form')?.addEventListener('submit', async event => {
           event.preventDefault();
@@ -6352,7 +6350,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         if(mediaShare)return shareText(mediaShare.dataset.mediaTitle||'Media Berita Jemaat','Dokumentasi GMAHK Galilea Balikpapan',mediaShare.dataset.mediaUrl||location.href);
         const journalNav=event.target.closest('[data-journal-nav]');
         if(journalNav)return shiftJournalDeck(journalNav.closest('.journal-deck'),Number(journalNav.dataset.journalNav));
-        if(event.target.closest('[data-reset-activity-filter]')){state.activityQuery='';state.activityYear='Semua';state.activityMediaType='Semua';render();return;}
         const announcementPresentation=event.target.closest('[data-present-announcements]');
         if(announcementPresentation)return openAnnouncementPresentation(announcementPresentation.dataset.presentAnnouncements);
         if(event.target.closest('[data-present-schedule-summary]'))return openScheduleSummaryPresentation();
