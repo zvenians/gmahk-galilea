@@ -9,7 +9,7 @@ new vm.Script(source);
 assert.match(html,/page-turn\.css/);assert.match(html,/page-turn\.js/);
 assert.ok(html.indexOf('/vendor/page-flip-2.0.7.js')<html.indexOf('<script src="/page-turn.js'),'Load the soft-page engine before its adapter');
 assert.match(html,/window\.GalileaPageTurn\?\.capture\(\)/);
-assert.match(html,/view\.index!==previous&&!window\.GalileaPageTurn\?\.play/);
+assert.match(html,/if\(view\.index!==previous\)\{\s*fitPresentationText\(\);\s*if\(!window\.GalileaPageTurn\?\.play/,'Fit new text before capturing the incoming page');
 const dom=new JSDOM(html,{url:'https://gmahk-galilea.vercel.app',pretendToBeVisual:true,runScripts:'outside-only'});
 const {window}=dom,{document}=window;
 let systemReduced=false;
@@ -47,6 +47,7 @@ assert.match(layer.querySelectorAll('.page-turn-sheet')[1].textContent,/Ayat ber
 await new Promise(resolve=>window.requestAnimationFrame(resolve));
 assert.equal(engines.at(-1).direction,'next');assert.equal(engines.at(-1).corner,'bottom');
 turn.cancel();assert.equal(document.querySelector('.page-turn-layer'),null);
+assert.equal(shell.classList.contains('page-turn-active'),false,'Original text is visible again after cleanup');
 assert.equal(engines.at(-1).renderer.galileaDisposed,true,'Closing stops the renderer loop');
 assert.equal(engines.at(-1).destroyed,true);
 window.innerWidth=390;assert.equal(turn.play(turn.capture(),-1),true);layer=document.querySelector('.page-turn-layer');

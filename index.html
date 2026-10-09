@@ -3474,7 +3474,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
 .journal-stage .home-announcements{grid-template-columns:minmax(0,1fr);gap:14px}
 }
 </style>
-  <link rel="stylesheet" href="/page-turn.css?v=22-soft">
+  <link rel="stylesheet" href="/page-turn.css?v=23-clear">
 </head>
 <body>
   <svg class="sr-only" aria-hidden="true">
@@ -5486,7 +5486,10 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         const previous=Math.max(0,Number(view.index)||0);view.index=previous+(direction<0?-1:1);renderPresentation();
         if(view.type==='song')state.hymnalReader.verseIndex=(songPresentationSlides(state.hymnalReader.song)[view.index]||{}).verseIndex||0;
         else if(view.type==='bible'&&state.bibleReader)state.bibleReader.index=view.index;
-        if(view.index!==previous&&!window.GalileaPageTurn?.play(page,direction))animatePresentationTransition(direction);
+        if(view.index!==previous){
+          fitPresentationText();
+          if(!window.GalileaPageTurn?.play(page,direction))animatePresentationTransition(direction);
+        }
       }
       function animatePresentationTransition(direction){
         const shell=$('#presentation-shell');if(!shell||document.documentElement.dataset.motion==='reduced'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -6674,6 +6677,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
     }());
   </script>
   <script src="/vendor/page-flip-2.0.7.js" defer></script>
-  <script src="/page-turn.js?v=22-soft" defer></script>
+  <script src="/page-turn.js?v=23-clear" defer></script>
 </body>
 </html>

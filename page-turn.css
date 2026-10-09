@@ -1,8 +1,11 @@
-.page-turn-layer{position:absolute;z-index:8;pointer-events:none;overflow:hidden;--turn-paper:#102619;--turn-shade:rgba(0,0,0,.3)}
-.presentation-shell.is-light .page-turn-layer{--turn-paper:#f3f1e7;--turn-shade:rgba(35,38,23,.18)}
+.page-turn-layer{position:absolute;z-index:3;pointer-events:none;overflow:hidden;background:transparent}
 .page-turn-book{width:100%;height:100%}
-.page-turn-sheet{position:relative;overflow:hidden;background:var(--turn-paper)}
-.page-turn-layer .page-turn-page{position:absolute!important;max-width:none!important;min-width:0!important;margin:0!important;transform:none!important;animation:none!important;pointer-events:none}
+.page-turn-sheet{position:relative;overflow:hidden;background:transparent}
+.page-turn-active .presentation-frame>.presentation-main{visibility:hidden}
+.page-turn-layer .page-turn-page{position:absolute!important;max-width:none!important;min-width:0!important;margin:0!important;transform:none!important;animation:none!important;pointer-events:none;visibility:visible;background:transparent!important}
 .page-turn-layer :is(.presentation-title,.presentation-stage){animation:none!important;transition:none!important}
 @media(prefers-reduced-motion:reduce){html:not([data-motion="full"]) .page-turn-layer{display:none!important}}
 html[data-motion="reduced"] .page-turn-layer{display:none!important}
+.presentation-shell .presentation-brand{display:grid!important;grid-template-columns:max-content auto;align-items:center;gap:13px;width:max-content;max-width:calc(100% - 24px)!important}
+.presentation-shell .presentation-brand .presentation-brand-copy{min-width:0;max-width:none!important;width:auto;position:static}
+.presentation-shell .presentation-brand .presentation-logo{position:relative;min-width:0;max-width:none!important}

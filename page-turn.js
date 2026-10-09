@@ -7,6 +7,7 @@
     if(!active)return;
     const previous=active;active=null;
     clearTimeout(previous.timer);cancelAnimationFrame(previous.startFrame);
+    previous.shell.classList.remove('page-turn-active');
     previous.engine.getRender().galileaDisposed=true;previous.engine.destroy();previous.layer.remove();
   }
   function capture(){
@@ -49,7 +50,8 @@
     const sheets=backwards?[newSheet,oldSheet]:[oldSheet,newSheet];sheets.forEach(sheet=>book.append(sheet));shell.append(layer);
     const duration=innerWidth<=700?1200:1500;
     const engine=new window.St.PageFlip(book,{width,height,size:'fixed',usePortrait:true,autoSize:false,showCover:false,startPage:backwards?1:0,drawShadow:true,maxShadowOpacity:.55,flippingTime:duration,useMouseEvents:false,showPageCorners:false,mobileScrollSupport:false,disableFlipByClick:false});
-    const current={layer,engine,timer:0,startFrame:0,turning:false};active=current;
+    const current={shell,layer,engine,timer:0,startFrame:0,turning:false};active=current;
+    shell.classList.add('page-turn-active');
     const finish=()=>{if(active===current)cancel();};
     engine.on('changeState',event=>{if(event.data==='read'&&current.turning)finish();});
     try{
