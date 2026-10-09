@@ -173,5 +173,22 @@ for(const kind of ['song','bible']){
   assert.equal(shell.style.getPropertyValue('--presentation-footer-reserve'),'106px','Copyright reserve follows changed frame');
   frameBottom=1000;footerTop=920;
 }
+const consistentStage=stage.cloneNode(false);stage.replaceWith(consistentStage);
+shell.dataset.presentationKind='bible';state.presentation={type:'bible',scale:1};
+state.bibleReader={verses:[{number:1,text:'Singkat'},{number:2,text:'Ayat lebih panjang '.repeat(40)}]};
+const slideMarkup=verse=>'<span class="presentation-verse-label">AYAT '+verse.number+'</span><div class="presentation-copy bible">'+verse.text+'</div>';
+Object.defineProperties(consistentStage,{
+  clientHeight:{get:()=>400},clientWidth:{get:()=>800},
+  scrollHeight:{get:()=>Math.max(400,scale()*consistentStage.textContent.length*3)},
+  scrollWidth:{get:()=>800}
+});
+consistentStage.innerHTML=slideMarkup(state.bibleReader.verses[0]);context.fitPresentationText();
+const sharedScale=state.presentation.fittedScale;
+consistentStage.innerHTML=slideMarkup(state.bibleReader.verses[1]);context.fitPresentationText();
+assert.equal(state.presentation.fittedScale,sharedScale,'Short and long verses use one font size before, during and after the fold');
+assert.ok(consistentStage.scrollHeight<=400,'The shared size still respects the reading boundary');
+context.resizePresentation(-.1);const reducedSharedScale=state.presentation.fittedScale;
+consistentStage.innerHTML=slideMarkup(state.bibleReader.verses[0]);context.fitPresentationText();
+assert.equal(state.presentation.fittedScale,reducedSharedScale,'User text-size changes remain consistent across verses');
 dom.window.close();
 console.log('Presentation verified: verse/reff ordering, theme songs, navigation, operator/offline, Bible, reduced motion and fitting.');

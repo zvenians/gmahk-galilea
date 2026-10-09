@@ -1,5 +1,13 @@
 # Fullscreen soft-page fold preview
 
+## Revision 24
+
+Flat page surfaces are transparent. The vendored HTML renderer marks a surface as `fold` only while its soft-page angle is nonzero; CSS gives that clipped, lifted region an opaque theme-colored paper background. Simple and bottom pages are marked `flat`. This preserves the background photograph beneath the flat plane without making the lifted paper transparent.
+
+Bible chapters and songs now use one common safe typography ceiling, measured against every verse or verse/refrain slide in the open item. The resulting profile is cached by content, available dimensions, projector state and font-loading status. Navigation retains the common scale; A+/A- changes its proportion. Both snapshots therefore share the same size and the incoming text keeps it after the fold, including delayed fitting. Longer slides remain bounded above copyright.
+
+Regression tests cover the real renderer's surface roles in both directions, equal scale across short and long verses, safe bounds, and persistent user resizing. No backend release is needed.
+
 Scope: Bible and Lagu Sion presentation navigation. The requested motion is a diagonal paper corner fold, replacing the rigid rectangular rotation. Existing reading layout, content, controls, text fitting, and copyright bounds stay in place.
 
 ## Implementation

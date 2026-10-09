@@ -78,9 +78,11 @@ const tick=time=>{const batch=[...frames.values()];frames.clear();batch.forEach(
 const softTurn=direction=>{
   const snapshot=rw.GalileaPageTurn.capture();rt.querySelector('.presentation-copy').textContent='Lirik baru';
   assert.equal(rw.GalileaPageTurn.play(snapshot,direction),true);tick(0);tick(450);
-  const sheet=rd.querySelector('.page-turn-sheet[style*="polygon"]');
+  const sheet=rd.querySelector('.page-turn-sheet[data-page-turn-surface="fold"][style*="polygon"]');
   assert.ok(sheet,'The real engine draws a clipped, folded soft page');
   assert.match(sheet.style.transform,/rotate\(/,'Paper folds diagonally instead of rotating as a rigid cover');
+  assert.equal(sheet.dataset.pageTurnSurface,'fold','The lifted paper is marked as opaque');
+  assert.ok(rd.querySelector('.page-turn-sheet[data-page-turn-surface="flat"]'),'The underlying flat page remains a separate transparent surface');
   assert.ok(rd.querySelector('.stf__outerShadow').style.transform,'The fold has a moving shadow');
   rw.GalileaPageTurn.cancel();tick(500);assert.equal(frames.size,0,'Canceled real renderer stops scheduling frames');
 };

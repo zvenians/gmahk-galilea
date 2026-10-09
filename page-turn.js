@@ -42,7 +42,7 @@
     Object.assign(layer.style,{left:left+'px',top:top+'px',width:width+'px',height:height+'px'});
     const book=document.createElement('div');book.className='page-turn-book';layer.append(book);
     const makeSheet=snapshot=>{
-      const sheet=document.createElement('div');sheet.className='page-turn-sheet';sheet.dataset.density='soft';
+      const sheet=document.createElement('div');sheet.className='page-turn-sheet';sheet.dataset.density='soft';sheet.dataset.pageTurnSurface='flat';
       snapshot.copy.style.left=snapshot.copyLeft+'px';snapshot.copy.style.setProperty('top',snapshot.copyTop+'px','important');
       sheet.append(snapshot.copy);return sheet;
     };

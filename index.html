@@ -3474,7 +3474,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
 .journal-stage .home-announcements{grid-template-columns:minmax(0,1fr);gap:14px}
 }
 </style>
-  <link rel="stylesheet" href="/page-turn.css?v=23-clear">
+  <link rel="stylesheet" href="/page-turn.css?v=24-fold">
 </head>
 <body>
   <svg class="sr-only" aria-hidden="true">
@@ -5240,13 +5240,26 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         if(stage.clientHeight<=0||stage.clientWidth<=0)return;
         let fitted=clampPresentationScale(view.scale);stage.classList.add('is-fitting');shell.style.setProperty('--present-scale',String(fitted));
         if(textSlide){
-          // Determine a stable ceiling independent of A+/A-. The user's scale
-          // then selects a proportion of that ceiling, so A- stays smaller.
-          let low=.001,high=2.7;
-          for(let attempt=0;attempt<14;attempt++){
-            const candidate=(low+high)/2;shell.style.setProperty('--present-scale',String(candidate));
-            if(stage.scrollHeight<=stage.clientHeight&&stage.scrollWidth<=stage.clientWidth)low=candidate;
-            else high=candidate;
+          // All slides share the longest slide's safe ceiling. A+/A- selects
+          // a proportion of it without changing size during navigation.
+          const samples=view.type==='song'?songPresentationSlides(state.hymnalReader?.song).map(songPresentationMarkup):view.type==='bible'?(state.bibleReader?.verses||[]).map(verse=>'<span class="presentation-verse-label">AYAT '+esc(verse.number)+'</span><div class="presentation-copy bible">'+esc(verse.text)+'</div>'):[];
+          const profileKey=JSON.stringify([stage.clientWidth,stage.clientHeight,document.documentElement.clientWidth,shell.classList.contains('is-projector'),document.fonts?.status,samples]);
+          let low=view.textFitProfile?.key===profileKey?view.textFitProfile.ceiling:null;
+          if(low===null){
+            const originalNodes=[...stage.childNodes];low=2.7;
+            try{
+              for(const markup of samples.length?samples:[null]){
+                if(markup!==null)stage.innerHTML=markup;
+                let sampleLow=.001,high=2.7;
+                for(let attempt=0;attempt<14;attempt++){
+                  const candidate=(sampleLow+high)/2;shell.style.setProperty('--present-scale',String(candidate));
+                  if(stage.scrollHeight<=stage.clientHeight&&stage.scrollWidth<=stage.clientWidth)sampleLow=candidate;
+                  else high=candidate;
+                }
+                low=Math.min(low,sampleLow);
+              }
+            }finally{stage.replaceChildren(...originalNodes);}
+            view.textFitProfile={key:profileKey,ceiling:low};
           }
           view.maxFittedScale=low;
           fitted=low*clampPresentationScale(view.scale)/1.35;shell.style.setProperty('--present-scale',String(fitted));
@@ -6676,7 +6689,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       boot();
     }());
   </script>
-  <script src="/vendor/page-flip-2.0.7.js" defer></script>
-  <script src="/page-turn.js?v=23-clear" defer></script>
+  <script src="/vendor/page-flip-2.0.7.js?v=24-fold" defer></script>
+  <script src="/page-turn.js?v=24-fold" defer></script>
 </body>
 </html>
