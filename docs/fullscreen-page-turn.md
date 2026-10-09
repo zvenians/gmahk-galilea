@@ -2,7 +2,8 @@
 
 ## Revision 26
 
-Shared fitting measures actual content rectangles instead of relying on scroll
+Shared fitting measures the lyric and verse-label rectangles instead of the
+clipped song wrapper or relying on scroll
 dimensions when browser layout is available. The final lyric font is assigned
 directly in pixels, with an 18px readability floor. During a turn, the original
 page uses opacity instead of inherited visibility; renderer disposal always

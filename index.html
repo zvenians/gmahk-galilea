@@ -5256,7 +5256,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
                 let sampleLow=.001,high=2.7;
                 for(let attempt=0;attempt<14;attempt++){
                   const candidate=(sampleLow+high)/2;shell.style.setProperty('--present-scale',String(candidate));
-                  const bounds=stage.getBoundingClientRect(),blocks=[...stage.children].map(node=>node.getBoundingClientRect());
+                  const bounds=stage.getBoundingClientRect(),blocks=[...stage.querySelectorAll('.presentation-copy,.presentation-verse-label')].map(node=>node.getBoundingClientRect());
                   // Measure content boxes so rounded scroll dimensions cannot hide text.
                   const fits=bounds.height>0&&blocks.some(box=>box.height>0)
                     ?blocks.every(box=>box.bottom<=bounds.bottom+2&&box.right<=bounds.right+2)

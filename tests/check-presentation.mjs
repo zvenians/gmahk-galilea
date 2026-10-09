@@ -216,6 +216,17 @@ state.presentation={type:'bible',scale:1};context.fitPresentationText();
 assert.ok(state.presentation.fittedScale>.1,'Content geometry must remain readable even when scroll dimensions never fit');
 assert.match(geometryStage.querySelector('.presentation-copy').style.fontSize,/px$/,'Original text has an explicit pixel size');
 assert.ok(parseFloat(geometryStage.querySelector('.presentation-copy').style.fontSize)>=18,'Text cannot shrink to an invisible size');
+state.hymnalReader={song:{lyrics:[{type:'verse',index:1,lines:['Lirik panjang '.repeat(14)]}]}};
+state.presentation={type:'song',scale:1};shell.dataset.presentationKind='song';
+geometryStage.innerHTML=context.songPresentationMarkup(context.songPresentationSlides(state.hymnalReader.song)[0]);
+dom.window.HTMLElement.prototype.getBoundingClientRect=function(){
+  if(!geometryStage.contains(this))return nativeBox.call(this);
+  const copy=this.matches('.presentation-copy'),label=this.matches('.presentation-verse-label');
+  const height=copy?scale()*this.textContent.length*3:label?40:400,top=copy?40:0;
+  return {left:0,top,right:800,bottom:top+height,width:800,height};
+};
+context.fitPresentationText();
+assert.ok(state.presentation.fittedScale>.1&&state.presentation.fittedScale<1,'Fit the lyric bounds even when its wrapper clips overflowing text');
 dom.window.HTMLElement.prototype.getBoundingClientRect=nativeBox;
 dom.window.close();
 console.log('Presentation verified: verse/reff ordering, theme songs, navigation, operator/offline, Bible, reduced motion and fitting.');
