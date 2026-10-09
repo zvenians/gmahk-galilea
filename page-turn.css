@@ -1,6 +1,6 @@
-.page-turn-layer{position:absolute;z-index:8;pointer-events:none;perspective:2200px;perspective-origin:50% 45%;overflow:clip;contain:layout style;--turn-paper:#102619;--turn-back:#172c1e;--turn-shade:rgba(0,0,0,.3)}
+.page-turn-layer{position:absolute;z-index:8;pointer-events:none;perspective:2200px;perspective-origin:50% 45%;overflow:visible;--turn-paper:#102619;--turn-back:#172c1e;--turn-shade:rgba(0,0,0,.3)}
 .presentation-shell.is-light .page-turn-layer{--turn-paper:#f3f1e7;--turn-back:#e5e2d4;--turn-shade:rgba(35,38,23,.18)}
-.page-turn-segment{position:absolute;top:0;height:100%;transform-style:preserve-3d;will-change:transform}
+.page-turn-segment{position:absolute;top:0;height:100%;transform-style:preserve-3d;will-change:transform;left:0}
 .page-turn-layer[data-direction="next"] .page-turn-segment{transform-origin:left center}
 .page-turn-layer[data-direction="prev"] .page-turn-segment{transform-origin:right center}
 .page-turn-front,.page-turn-back{position:absolute;inset:0;overflow:hidden;background:var(--turn-paper);backface-visibility:hidden;-webkit-backface-visibility:hidden}
