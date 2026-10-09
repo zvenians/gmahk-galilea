@@ -35,6 +35,8 @@ Craftsmanship & Quality Locks PASS: regression tests cover constrained projector
 
 ## Motion preference correction
 
-The previous JS gate and CSS media rule suppressed the paper layer even when the reader explicitly chose full motion. Both now honor that choice. A stronger page fold and a longer transition make the fold easier to see. Asset revision 20 replaces cached JS/CSS. No backend release is needed.
+The previous JS gate and CSS media rule suppressed the paper layer even when the reader explicitly chose full motion. Both now honor that choice. A stronger page fold and a longer transition make the fold easier to see. Asset revision 21 replaces cached JS/CSS. No backend release is needed.
 
 Chrome render uses a single front/back sheet with directional perspective, skew, and shading instead of nested backface-hidden strips. This avoids fragmented nested 3D compositing and keeps the actual text on one stable snapshot.
+
+Live Chrome verification captured the rotating front sheet and new lyrics simultaneously. The outer layer clips perspective expansion to the reading bounds, keeping copyright and controls unobscured. Local regression and CI passed; frontend-only deployment skipped Apps Script.

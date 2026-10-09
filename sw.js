@@ -1,5 +1,5 @@
-const CACHE='galilea-v35-20-chrome-page-turn';
-const SHELL=['/','/index.html','/page-turn.css?v=20','/page-turn.js?v=20','/manifest.webmanifest','/assets/logo-galilea-light.webp','/assets/logo-galilea-dark.webp','/assets/logo-galilea-icon-192.png','/assets/presentation/schedule.webp','/assets/presentation/bible.webp','/assets/presentation/hymnal.webp'];
+const CACHE='galilea-v35-21-bounded-page-turn';
+const SHELL=['/','/index.html','/page-turn.css?v=21','/page-turn.js?v=21','/manifest.webmanifest','/assets/logo-galilea-light.webp','/assets/logo-galilea-dark.webp','/assets/logo-galilea-icon-192.png','/assets/presentation/schedule.webp','/assets/presentation/bible.webp','/assets/presentation/hymnal.webp'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{
