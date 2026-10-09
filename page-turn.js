@@ -2,11 +2,12 @@
   const reduced=matchMedia('(prefers-reduced-motion: reduce)');
   let active=null;
   const motionAllowed=()=>document.documentElement.dataset.motion==='full'||(!reduced.matches&&document.documentElement.dataset.motion!=='reduced');
-  const allowed=()=>motionAllowed()&&!document.hidden&&typeof Element.prototype.animate==='function'&&window.CSS?.supports('transform-style','preserve-3d');
+  const allowed=()=>motionAllowed()&&!document.hidden&&typeof window.St?.PageFlip==='function'&&typeof requestAnimationFrame==='function';
   function cancel(){
     if(!active)return;
     const previous=active;active=null;
-    clearTimeout(previous.timer);previous.animations.forEach(animation=>animation.cancel());previous.layer.remove();
+    clearTimeout(previous.timer);cancelAnimationFrame(previous.startFrame);
+    previous.engine.getRender().galileaDisposed=true;previous.engine.destroy();previous.layer.remove();
   }
   function capture(){
     cancel();
@@ -33,30 +34,33 @@
   function play(page,direction){
     if(!page||!allowed())return false;
     cancel();
-    const {shell,copy,width,height,left,top,copyLeft,copyTop}=page;
+    const next=capture();if(!next)return false;
+    const {shell,width,height,left,top}=page;
     shell.classList.remove('presentation-enter-next','presentation-enter-prev');
     const layer=document.createElement('div');layer.className='page-turn-layer';layer.dataset.direction=direction<0?'prev':'next';layer.setAttribute('aria-hidden','true');layer.inert=true;
     Object.assign(layer.style,{left:left+'px',top:top+'px',width:width+'px',height:height+'px'});
-    const shadow=document.createElement('div');shadow.className='page-turn-shadow';layer.append(shadow);
-    const sign=direction<0?1:-1,duration=innerWidth<=700?900:1100;
-    const sheet=document.createElement('div');sheet.className='page-turn-segment';sheet.style.width=width+'px';
-    sheet.style.setProperty('--turn-width',width+'px');sheet.style.setProperty('--turn-offset','0px');
-    const front=document.createElement('div');front.className='page-turn-front';
-    const back=document.createElement('div');back.className='page-turn-back';
-    copy.style.left=copyLeft+'px';copy.style.setProperty('top',copyTop+'px','important');front.append(copy);
-    sheet.append(front,back);layer.append(sheet);shell.append(layer);
-    const options={duration,easing:'cubic-bezier(.35,.05,.2,1)',fill:'forwards'};
-    const animations=[sheet.animate([
-      {transform:'rotateY(0deg)',offset:0},
-      {transform:`rotateY(${sign*35}deg) skewY(${sign*2}deg)`,offset:.35},
-      {transform:`rotateY(${sign*105}deg) skewY(${sign*1}deg)`,offset:.7},
-      {transform:`rotateY(${sign*178}deg)`,offset:1}
-    ],options)];
-    animations.push(shadow.animate([{opacity:0},{opacity:.6,offset:.4},{opacity:0}],options));
-    const current={layer,animations,timer:0};active=current;
+    const book=document.createElement('div');book.className='page-turn-book';layer.append(book);
+    const makeSheet=snapshot=>{
+      const sheet=document.createElement('div');sheet.className='page-turn-sheet';sheet.dataset.density='soft';
+      snapshot.copy.style.left=snapshot.copyLeft+'px';snapshot.copy.style.setProperty('top',snapshot.copyTop+'px','important');
+      sheet.append(snapshot.copy);return sheet;
+    };
+    const backwards=direction<0,oldSheet=makeSheet(page),newSheet=makeSheet(next);
+    const sheets=backwards?[newSheet,oldSheet]:[oldSheet,newSheet];sheets.forEach(sheet=>book.append(sheet));shell.append(layer);
+    const duration=innerWidth<=700?1200:1500;
+    const engine=new window.St.PageFlip(book,{width,height,size:'fixed',usePortrait:true,autoSize:false,showCover:false,startPage:backwards?1:0,drawShadow:true,maxShadowOpacity:.55,flippingTime:duration,useMouseEvents:false,showPageCorners:false,mobileScrollSupport:false,disableFlipByClick:false});
+    const current={layer,engine,timer:0,startFrame:0,turning:false};active=current;
     const finish=()=>{if(active===current)cancel();};
-    current.timer=setTimeout(finish,duration+120);
-    Promise.all(animations.map(animation=>animation.finished)).then(finish,finish);
+    engine.on('changeState',event=>{if(event.data==='read'&&current.turning)finish();});
+    try{
+      engine.loadFromHTML(sheets);
+      current.startFrame=requestAnimationFrame(()=>{
+        if(active!==current)return;
+        current.turning=true;
+        if(backwards)engine.flipPrev('bottom');else engine.flipNext('bottom');
+      });
+      current.timer=setTimeout(finish,duration+900);
+    }catch(_){finish();return false;}
     return true;
   }
   window.GalileaPageTurn=Object.freeze({capture,play,cancel});

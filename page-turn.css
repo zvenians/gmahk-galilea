@@ -1,15 +1,8 @@
-.page-turn-layer{position:absolute;z-index:8;pointer-events:none;perspective:2200px;perspective-origin:50% 45%;overflow:clip;--turn-paper:#102619;--turn-back:#172c1e;--turn-shade:rgba(0,0,0,.3)}
-.presentation-shell.is-light .page-turn-layer{--turn-paper:#f3f1e7;--turn-back:#e5e2d4;--turn-shade:rgba(35,38,23,.18)}
-.page-turn-segment{position:absolute;top:0;height:100%;transform-style:preserve-3d;will-change:transform;left:0}
-.page-turn-layer[data-direction="next"] .page-turn-segment{transform-origin:left center}
-.page-turn-layer[data-direction="prev"] .page-turn-segment{transform-origin:right center}
-.page-turn-front,.page-turn-back{position:absolute;inset:0;overflow:hidden;background:var(--turn-paper);backface-visibility:hidden;-webkit-backface-visibility:hidden}
-.page-turn-back{background:var(--turn-back);transform:rotateY(180deg)}
-.page-turn-front::after,.page-turn-back::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 30%,var(--turn-shade) 90%);background-size:var(--turn-width) 100%;background-position:var(--turn-offset) 0;opacity:.5}
-.page-turn-layer[data-direction="prev"] :is(.page-turn-front,.page-turn-back)::after{transform:scaleX(-1)}
-.page-turn-layer .page-turn-page{position:absolute!important;top:0!important;max-width:none!important;min-width:0!important;margin:0!important;transform:none!important;animation:none!important;pointer-events:none}
+.page-turn-layer{position:absolute;z-index:8;pointer-events:none;overflow:hidden;--turn-paper:#102619;--turn-shade:rgba(0,0,0,.3)}
+.presentation-shell.is-light .page-turn-layer{--turn-paper:#f3f1e7;--turn-shade:rgba(35,38,23,.18)}
+.page-turn-book{width:100%;height:100%}
+.page-turn-sheet{position:relative;overflow:hidden;background:var(--turn-paper)}
+.page-turn-layer .page-turn-page{position:absolute!important;max-width:none!important;min-width:0!important;margin:0!important;transform:none!important;animation:none!important;pointer-events:none}
 .page-turn-layer :is(.presentation-title,.presentation-stage){animation:none!important;transition:none!important}
-.page-turn-shadow{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.3),transparent 65%);pointer-events:none}
-.page-turn-layer[data-direction="prev"] .page-turn-shadow{transform:scaleX(-1)}
 @media(prefers-reduced-motion:reduce){html:not([data-motion="full"]) .page-turn-layer{display:none!important}}
 html[data-motion="reduced"] .page-turn-layer{display:none!important}

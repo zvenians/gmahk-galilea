@@ -1,42 +1,21 @@
-# Fullscreen page-turn release check
+# Fullscreen soft-page fold preview
 
-Scope: Bible and Lagu Sion presentation navigation only. The existing deployed layout, navigation, reader, content sources, and controls are preserved. Direction follows the requested book-page metaphor: Next turns left; Previous turns right.
+Scope: Bible and Lagu Sion presentation navigation. The requested motion is a diagonal paper corner fold, replacing the rigid rectangular rotation. Existing reading layout, content, controls, text fitting, and copyright bounds stay in place.
 
-Design read: retain Galilea's current typography, green palette, reading hierarchy, and spacing. ENERGY 3 / RHYTHM 3 remain inherited; MOTION 2 is scoped to this short, user-triggered transition. No new visual assets or invented content.
+## Implementation
 
-## Delivery gate
+StPageFlip 2.0.7 is vendored with its MIT license. Both snapshots use `data-density="soft"`, and `showCover` stays false so neither page becomes a rigid cover. The bottom corner folds with a changing clipped polygon and moving inner/outer shadows. Desktop duration is 1500 ms; mobile is 1200 ms. Previous starts on page 1 and flips backward; Next starts on page 0 and flips forward.
 
-- Hard Gate PASS: actual verse/lyric snapshots, no new copy, navigation, or controls; Chromium click-through covered keyboard, swipe, both themes, mobile, and close cleanup. Existing contrast tests passed. The layer is inert, hidden from screen readers, and ends above copyright and controls. The site’s reduced-motion choice disables it. An explicit full-motion choice overrides the system preference; without a site choice, the system preference applies.
-- Purpose-Gate PASS: paper curvature and directional rotation connect the old reading page to the new one. A continuous lighting gradient conveys curvature, while a transient shadow conveys depth. No global decoration, font changes, or unrelated animations were added.
-- Liveliness PASS: declared dials follow the existing product. The verse or lyric remains the focal point; the original spacing and accent are retained. The specific book-turn gesture appears only during reading navigation.
-- Craftsmanship & Quality Locks PASS: all regression checks passed with `npm run check`; actual Chromium tests exercised Bible Next/Previous in light and dark, rapid navigation, both reduced-motion settings, modal cleanup, song navigation, mobile eight-segment rendering, swipe, end boundary, theme and text sizing. No duplicate IDs or browser page errors occurred.
+The engine has no mouse handlers: the existing presentation controls trigger transitions. Its `disableFlipByClick` setting must remain false because the upstream corner guard otherwise prevents programmatic Previous in portrait mode.
 
-## Behavior and limits
+The vendored renderer has one scoped modification: its animation-frame callback exits when `galileaDisposed` is set. The adapter sets that flag before destroying the temporary engine, preventing a perpetual frame loop after rapid input or closing the presentation. Resize, motion preference changes, fullscreen changes, and hidden documents cancel the layer. The layer is inert and hidden from screen readers.
 
-The transient layer snapshots the previous content before rendering the next page. A single composited sheet turns over 1100 ms on desktop and 900 ms on mobile. Rapid input replaces the active turn rather than queueing it. Resize, theme changes, fullscreen changes, hidden documents, and closing the presentation cancel it.
+Snapshots freeze resolved text sizes and the original reading frame height. The animation bounds end at the stage bottom, above copyright and controls. Site reduced motion disables it; an explicit full-motion choice takes precedence over the OS preference.
 
-Unsupported animation/3D APIs fall back to the existing presentation transition. No new API requests, content-cache lifetime changes, or permanent reader styles are introduced. Service-worker shell assets include the new CSS and JavaScript.
+## Verification and review status
 
-Browser verification used Chromium with recorded real Bible and hymnal data and mocked network responses. Physical Safari/iOS devices were not tested. Production deployment status must be checked separately after pushing.
+Automated tests exercise the actual vendored engine in simulated DOM geometry in both directions. They verify diagonal polygon clipping, rotation within the page plane, moving shadows, and renderer cleanup. Adapter tests also cover old/new real-text snapshots, desktop/mobile settings, rapid input, scoped presentation types, boundaries, and motion preferences. These tests do not establish visual appearance in physical Windows Chrome.
 
-## Reading bounds correction
+The standalone HTML preview embeds the same engine, adapter, and styles. It runs without network requests and is provided for visual review. This revision is local and has not been pushed or deployed. Browser visual approval is pending.
 
-The projector layout inherited the site's viewport minimum height and allowed the reading main element to grow with its content. On a 1920 x 980 viewport, song 14's stage extended to y=1349 while copyright began at y=927. Constraining the reading main to its frame and removing that minimum keeps the stage at y=911, 16 px above copyright. Compact portrait projector spacing also preserves reading space inside its short 16:9 frame.
-
-Bible/song preferences now allow A- down to 35%, including preferences saved at the previously exhausted 70% limit. Other presentation types keep their original 70% minimum. Snapshots freeze their original height so fitting styles do not resize paper content. Versioned animation asset URLs and a new service-worker shell revision avoid stale cached module files; worship data still uses its existing three-hour cache.
-
-Hard Gate PASS: all four real verses of song 14 remained within the stage and above copyright in 16 Chromium combinations: 1920 x 980, 1366 x 768, 390 x 844, and 844 x 390; each in light/dark and normal/projector modes. A-/A+ visibly resized text and the maximum remained bounded. No browser page errors occurred.
-
-Purpose-Gate PASS: explicit frame bounds prevent content from expanding its own measurement area; smaller preferences give the reader direct size control. A longer turn and gentler curvature make the requested page motion easier to see.
-
-Liveliness PASS: inherited ENERGY 3 / RHYTHM 3 and scoped MOTION 2 remain unchanged; reading content, accent, and paper-turn gesture remain the focal features.
-
-Craftsmanship & Quality Locks PASS: regression tests cover constrained projector geometry, shrinking below the previous minimum, stable repeated fitting, maximum bounds, and both reduced-motion settings. Real-browser measurements and visible running 3D transforms supplement simulated layout tests.
-
-## Motion preference correction
-
-The previous JS gate and CSS media rule suppressed the paper layer even when the reader explicitly chose full motion. Both now honor that choice. A stronger page fold and a longer transition make the fold easier to see. Asset revision 21 replaces cached JS/CSS. No backend release is needed.
-
-Chrome render uses a single front/back sheet with directional perspective, skew, and shading instead of nested backface-hidden strips. This avoids fragmented nested 3D compositing and keeps the actual text on one stable snapshot.
-
-Live Chrome verification captured the rotating front sheet and new lyrics simultaneously. The outer layer clips perspective expansion to the reading bounds, keeping copyright and controls unobscured. Local regression and CI passed; frontend-only deployment skipped Apps Script.
+CSS/JS revision `22-soft` and service-worker shell `galilea-v35-22-soft-page-fold` include the local engine bundle so a later release will replace cached rigid-turn assets. No Apps Script changes or backend versions are required.
