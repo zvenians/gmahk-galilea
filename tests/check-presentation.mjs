@@ -159,7 +159,7 @@ for(const kind of ['song','bible']){
   assert.equal(savedScale.value,'1.00','User preference is persisted');
   for(let i=0;i<10;i++)context.resizePresentation(.1);
   assert.ok($('[data-presentation-larger]').disabled,'Upper bound disables A+');
-  assert.ok(stage.scrollHeight<=height&&stage.scrollWidth<=width,'Maximum text stays inside safe area');
+  assert.ok(stage.scrollHeight<=height+2&&stage.scrollWidth<=width+2,'Maximum text stays inside safe area within browser rounding');
   assert.ok(Math.abs(state.presentation.fittedScale-state.presentation.maxFittedScale)<.0001);
   context.resizePresentation(-.1);assert.ok(!$('[data-presentation-larger]').disabled);
   state.presentation.scale=.7;context.fitPresentationText();
@@ -186,9 +186,18 @@ consistentStage.innerHTML=slideMarkup(state.bibleReader.verses[0]);context.fitPr
 const sharedScale=state.presentation.fittedScale;
 consistentStage.innerHTML=slideMarkup(state.bibleReader.verses[1]);context.fitPresentationText();
 assert.equal(state.presentation.fittedScale,sharedScale,'Short and long verses use one font size before, during and after the fold');
-assert.ok(consistentStage.scrollHeight<=400,'The shared size still respects the reading boundary');
+assert.ok(consistentStage.scrollHeight<=402,'The shared size still respects the reading boundary');
 context.resizePresentation(-.1);const reducedSharedScale=state.presentation.fittedScale;
 consistentStage.innerHTML=slideMarkup(state.bibleReader.verses[0]);context.fitPresentationText();
 assert.equal(state.presentation.fittedScale,reducedSharedScale,'User text-size changes remain consistent across verses');
+const roundedStage=consistentStage.cloneNode(true);consistentStage.replaceWith(roundedStage);
+Object.defineProperties(roundedStage,{
+  clientHeight:{get:()=>400},clientWidth:{get:()=>800},
+  scrollHeight:{get:()=>Math.max(401,scale()*roundedStage.textContent.length*3)},
+  scrollWidth:{get:()=>801}
+});
+state.presentation={type:'bible',scale:1};context.fitPresentationText();
+assert.ok(state.presentation.fittedScale>.1,'One-pixel rounding must not collapse lyrics to an invisible font');
+assert.ok(roundedStage.scrollHeight<=402,'Real text overflow is still fitted');
 dom.window.close();
 console.log('Presentation verified: verse/reff ordering, theme songs, navigation, operator/offline, Bible, reduced motion and fitting.');

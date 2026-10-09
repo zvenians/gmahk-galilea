@@ -1,5 +1,13 @@
 # Fullscreen soft-page fold preview
 
+## Revision 25
+
+The shared text fitter allows two pixels for integer scroll/client rounding.
+A fixed one-pixel measurement difference previously drove every candidate to
+the minimum font scale, hiding lyrics while the unscaled verse label remained.
+The regression test simulates this difference and requires readable text while
+still fitting genuine overflow. Fold surfaces and the shared slide size remain.
+
 ## Revision 24
 
 Flat page surfaces are transparent. The vendored HTML renderer marks a surface as `fold` only while its soft-page angle is nonzero; CSS gives that clipped, lifted region an opaque theme-colored paper background. Simple and bottom pages are marked `flat`. This preserves the background photograph beneath the flat plane without making the lifted paper transparent.

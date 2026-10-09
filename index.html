@@ -5253,7 +5253,8 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
                 let sampleLow=.001,high=2.7;
                 for(let attempt=0;attempt<14;attempt++){
                   const candidate=(sampleLow+high)/2;shell.style.setProperty('--present-scale',String(candidate));
-                  if(stage.scrollHeight<=stage.clientHeight&&stage.scrollWidth<=stage.clientWidth)sampleLow=candidate;
+                  // Scroll and client dimensions round fractional pixels differently.
+                  if(stage.scrollHeight<=stage.clientHeight+2&&stage.scrollWidth<=stage.clientWidth+2)sampleLow=candidate;
                   else high=candidate;
                 }
                 low=Math.min(low,sampleLow);
