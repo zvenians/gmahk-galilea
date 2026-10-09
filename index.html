@@ -3463,6 +3463,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
 .journal-stage .home-announcements{grid-template-columns:minmax(0,1fr);gap:14px}
 }
 </style>
+  <link rel="stylesheet" href="/page-turn.css">
 </head>
 <body>
   <svg class="sr-only" aria-hidden="true">
@@ -5470,10 +5471,11 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       }
       function movePresentation(direction){
         const view=state.presentation;if(!view||!view.type)return;
+        const page=/^(song|bible)$/.test(view.type)?window.GalileaPageTurn?.capture():null;
         const previous=Math.max(0,Number(view.index)||0);view.index=previous+(direction<0?-1:1);renderPresentation();
         if(view.type==='song')state.hymnalReader.verseIndex=(songPresentationSlides(state.hymnalReader.song)[view.index]||{}).verseIndex||0;
         else if(view.type==='bible'&&state.bibleReader)state.bibleReader.index=view.index;
-        if(view.index!==previous)animatePresentationTransition(direction);
+        if(view.index!==previous&&!window.GalileaPageTurn?.play(page,direction))animatePresentationTransition(direction);
       }
       function animatePresentationTransition(direction){
         const shell=$('#presentation-shell');if(!shell||document.documentElement.dataset.motion==='reduced'||matchMedia('(prefers-reduced-motion: reduce)').matches)return;
@@ -5483,16 +5485,19 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         window.clearTimeout(presentationTransitionTimer);presentationTransitionTimer=window.setTimeout(()=>shell.classList.remove('presentation-enter-next','presentation-enter-prev'),duration);
       }
       function resizePresentation(delta){
+        window.GalileaPageTurn?.cancel();
         const view=state.presentation;if(!view||!view.type)return;
         view.scale=clampPresentationScale(Number(view.scale||1)+delta);safeStorage.set(presentationScaleKey(view.type),view.scale.toFixed(2));
         fitPresentationText();showPresentationControls(true);
         announcePresentation(view.scale>=1.35&&/^(song|bible)$/.test($('#presentation-shell').dataset.presentationKind||'')?'Ukuran maksimum yang muat di atas copyright':'Ukuran teks '+Math.round(view.scale*100)+' persen');
       }
       function togglePresentationTheme(){
+        window.GalileaPageTurn?.cancel();
         const view=state.presentation;if(!view||!view.type)return;view.theme=view.theme==='light'?'dark':'light';safeStorage.set('galilea:presentation-theme',view.theme);
         syncPresentationState();schedulePresentationFit();showPresentationControls(true);announcePresentation(view.theme==='light'?'Mode terang aktif':'Mode gelap aktif');
       }
       function togglePresentationProjector(){
+        window.GalileaPageTurn?.cancel();
         const view=state.presentation;if(!view||!view.type)return;view.projector=!view.projector;safeStorage.set('galilea:presentation-projector',view.projector?'1':'0');
         syncPresentationState();schedulePresentationFit();showPresentationControls(true);announcePresentation(view.projector?'Mode proyektor 16 banding 9 aktif':'Mode layar penuh aktif');
       }
@@ -5507,6 +5512,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         if(elapsed<900&&Math.abs(dx)>=56&&Math.abs(dx)>Math.abs(dy)*1.2)movePresentation(dx<0?1:-1);
       }
       function cleanupPresentation(){
+        window.GalileaPageTurn?.cancel();
         window.clearTimeout(presentationControlsTimer);window.clearTimeout(presentationFitTimer);window.clearTimeout(presentationTransitionTimer);window.cancelAnimationFrame(presentationFitFrame);presentationPointer=null;
         const shell=$('#presentation-shell');if(shell){shell.classList.remove('presentation-controls-hidden','presentation-enter-next','presentation-enter-prev','is-blackout','is-light');delete shell.dataset.fit;delete shell.dataset.presentationType;delete shell.dataset.presentationKind;}
         releasePresentationWakeLock();
@@ -6656,5 +6662,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       boot();
     }());
   </script>
+  <script src="/page-turn.js" defer></script>
 </body>
 </html>
