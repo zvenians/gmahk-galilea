@@ -1,5 +1,13 @@
 # Fullscreen soft-page fold preview
 
+## Revision 28
+
+Songs and Bible readings now open at the full shared fit ceiling (1.35), rather
+than 74% of that ceiling or a previously saved small preference. A- reduces text
+within the current presentation and A+ restores the maximum safe fit. The
+shared size preserves equal old/new text throughout the fold and stops above
+the copyright. Reopening a reading starts at maximum fit again.
+
 ## Revision 26
 
 Shared fitting measures the lyric and verse-label rectangles instead of the

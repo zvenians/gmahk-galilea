@@ -39,7 +39,7 @@ const initialMarkup=$('#app').innerHTML;
 assert.doesNotThrow(()=>context.render(),'Rendering before bootstrap must be safe');
 assert.equal($('#app').innerHTML,initialMarkup,'Keep the loading/error message visible');
 // Execute the actual production functions, without starting unrelated site/network code.
-for(const name of ['clampPresentationScale','presentationScaleKey','songPresentationSlides','songPresentationMarkup','normalizeOperatorSongSlides','openPresentation','renderPresentation','movePresentation','animatePresentationTransition','fitPresentationText','resizePresentation']){
+for(const name of ['clampPresentationScale','presentationScaleKey','storedPresentationScale','songPresentationSlides','songPresentationMarkup','normalizeOperatorSongSlides','openPresentation','renderPresentation','movePresentation','animatePresentationTransition','fitPresentationText','resizePresentation']){
   const start=html.indexOf('      function '+name+'(');
   assert.ok(start>=0,name+' exists');
   const end=html.indexOf('\n      function ',start+1);
@@ -54,6 +54,7 @@ const original=JSON.stringify(song);
 for(const isTheme of [false,true]){
   state.hymnalReader={song:{...song,isTheme},isTheme,verseIndex:0};
   context.openPresentation('song');context.renderPresentation();
+  assert.equal(state.presentation.scale,1.35,'Every song opens at maximum fit even if an old small preference is stored');
   assert.equal($('#presentation-counter').textContent,'1 / 4');
   assert.equal($('#presentation-stage .presentation-verse-label').textContent,'AYAT 1');
   const lyric=$('#presentation-stage .presentation-copy');
@@ -103,6 +104,7 @@ context.renderPresentation();assert.equal($('#presentation-stage .presentation-c
 
 state.bibleReader={book:'Yohanes',chapter:3,index:0,verses:[{number:16,text:'Ayat pertama'},{number:17,text:'Ayat berikutnya'}]};
 context.openPresentation('bible');context.renderPresentation();context.movePresentation(1);
+assert.equal(state.presentation.scale,1.35,'Bible defaults to maximum fit rather than an old small saved font');
 assert.equal($('#presentation-title').textContent,'Yohanes 3:17');
 assert.equal($('#presentation-stage .presentation-copy').textContent,'Ayat berikutnya');
 assert.equal(state.bibleReader.index,1);
@@ -227,6 +229,13 @@ dom.window.HTMLElement.prototype.getBoundingClientRect=function(){
 };
 context.fitPresentationText();
 assert.ok(state.presentation.fittedScale>.1&&state.presentation.fittedScale<1,'Fit the lyric bounds even when its wrapper clips overflowing text');
+state.presentation.scale=1.35;context.fitPresentationText();
+assert.equal(state.presentation.fittedScale,state.presentation.maxFittedScale,'Default fit uses the entire safe ceiling');
+const fullFitFont=parseFloat(geometryStage.querySelector('.presentation-copy').style.fontSize);
+context.resizePresentation(-.1);
+assert.ok(parseFloat(geometryStage.querySelector('.presentation-copy').style.fontSize)<fullFitFont,'A- visibly reduces the default full-fit font');
+context.resizePresentation(.1);
+assert.ok(Math.abs(parseFloat(geometryStage.querySelector('.presentation-copy').style.fontSize)-fullFitFont)<.01,'A+ restores the default full fit');
 dom.window.HTMLElement.prototype.getBoundingClientRect=nativeBox;
 dom.window.close();
 console.log('Presentation verified: verse/reff ordering, theme songs, navigation, operator/offline, Bible, reduced motion and fitting.');
