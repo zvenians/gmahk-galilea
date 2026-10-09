@@ -3,7 +3,8 @@
 .page-turn-book{width:100%;height:100%}
 .page-turn-sheet{position:relative;overflow:hidden;background:transparent}
 .page-turn-sheet[data-page-turn-surface="fold"]{background:var(--turn-paper)}
-.page-turn-active .presentation-frame>.presentation-main{visibility:hidden}
+.page-turn-active .presentation-frame>.presentation-main{opacity:0!important;transition:none!important}
+.page-turn-layer .page-turn-page{opacity:1!important}
 .page-turn-layer .page-turn-page{position:absolute!important;max-width:none!important;min-width:0!important;margin:0!important;transform:none!important;animation:none!important;pointer-events:none;visibility:visible;background:transparent!important}
 .page-turn-layer :is(.presentation-title,.presentation-stage){animation:none!important;transition:none!important}
 @media(prefers-reduced-motion:reduce){html:not([data-motion="full"]) .page-turn-layer{display:none!important}}

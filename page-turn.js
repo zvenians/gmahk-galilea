@@ -8,7 +8,8 @@
     const previous=active;active=null;
     clearTimeout(previous.timer);cancelAnimationFrame(previous.startFrame);
     previous.shell.classList.remove('page-turn-active');
-    previous.engine.getRender().galileaDisposed=true;previous.engine.destroy();previous.layer.remove();
+    try{previous.engine.getRender().galileaDisposed=true;previous.engine.destroy();}
+    finally{previous.layer.remove();previous.shell.classList.remove('page-turn-active');}
   }
   function capture(){
     cancel();

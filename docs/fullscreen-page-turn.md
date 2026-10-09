@@ -1,5 +1,14 @@
 # Fullscreen soft-page fold preview
 
+## Revision 26
+
+Shared fitting measures actual content rectangles instead of relying on scroll
+dimensions when browser layout is available. The final lyric font is assigned
+directly in pixels, with an 18px readability floor. During a turn, the original
+page uses opacity instead of inherited visibility; renderer disposal always
+removes the overlay in a finally block. Regression tests cover persistent scroll
+overflow, explicit readable font sizing, and disposal failure cleanup.
+
 ## Revision 25
 
 The shared text fitter allows two pixels for integer scroll/client rounding.

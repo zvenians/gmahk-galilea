@@ -199,5 +199,23 @@ Object.defineProperties(roundedStage,{
 state.presentation={type:'bible',scale:1};context.fitPresentationText();
 assert.ok(state.presentation.fittedScale>.1,'One-pixel rounding must not collapse lyrics to an invisible font');
 assert.ok(roundedStage.scrollHeight<=402,'Real text overflow is still fitted');
+const geometryStage=roundedStage.cloneNode(true);roundedStage.replaceWith(geometryStage);
+Object.defineProperties(geometryStage,{
+  clientHeight:{get:()=>400},clientWidth:{get:()=>800},
+  scrollHeight:{get:()=>416},scrollWidth:{get:()=>816}
+});
+geometryStage.getBoundingClientRect=()=>({left:0,top:0,right:800,bottom:400,width:800,height:400});
+const nativeBox=dom.window.HTMLElement.prototype.getBoundingClientRect;
+dom.window.HTMLElement.prototype.getBoundingClientRect=function(){
+  if(this.parentElement!==geometryStage)return nativeBox.call(this);
+  const height=this.matches('.presentation-copy')?scale()*this.textContent.length*3:40;
+  const top=this.matches('.presentation-copy')?40:0;
+  return {left:0,top,right:800,bottom:top+height,width:800,height};
+};
+state.presentation={type:'bible',scale:1};context.fitPresentationText();
+assert.ok(state.presentation.fittedScale>.1,'Content geometry must remain readable even when scroll dimensions never fit');
+assert.match(geometryStage.querySelector('.presentation-copy').style.fontSize,/px$/,'Original text has an explicit pixel size');
+assert.ok(parseFloat(geometryStage.querySelector('.presentation-copy').style.fontSize)>=18,'Text cannot shrink to an invisible size');
+dom.window.HTMLElement.prototype.getBoundingClientRect=nativeBox;
 dom.window.close();
 console.log('Presentation verified: verse/reff ordering, theme songs, navigation, operator/offline, Bible, reduced motion and fitting.');

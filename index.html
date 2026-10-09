@@ -3474,7 +3474,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
 .journal-stage .home-announcements{grid-template-columns:minmax(0,1fr);gap:14px}
 }
 </style>
-  <link rel="stylesheet" href="/page-turn.css?v=24-fold">
+  <link rel="stylesheet" href="/page-turn.css?v=26-visible">
 </head>
 <body>
   <svg class="sr-only" aria-hidden="true">
@@ -5238,12 +5238,15 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           }
         }
         if(stage.clientHeight<=0||stage.clientWidth<=0)return;
-        let fitted=clampPresentationScale(view.scale);stage.classList.add('is-fitting');shell.style.setProperty('--present-scale',String(fitted));
+        let fitted=clampPresentationScale(view.scale),textFont=0;stage.classList.add('is-fitting');shell.style.setProperty('--present-scale',String(fitted));
         if(textSlide){
+          const currentCopy=stage.querySelector('.presentation-copy');
+          currentCopy?.style.removeProperty('font-size');shell.style.setProperty('--present-scale','1');
+          const baseFont=currentCopy?(parseFloat(window.getComputedStyle?.(currentCopy)?.fontSize)||64):64;
           // All slides share the longest slide's safe ceiling. A+/A- selects
           // a proportion of it without changing size during navigation.
           const samples=view.type==='song'?songPresentationSlides(state.hymnalReader?.song).map(songPresentationMarkup):view.type==='bible'?(state.bibleReader?.verses||[]).map(verse=>'<span class="presentation-verse-label">AYAT '+esc(verse.number)+'</span><div class="presentation-copy bible">'+esc(verse.text)+'</div>'):[];
-          const profileKey=JSON.stringify([stage.clientWidth,stage.clientHeight,document.documentElement.clientWidth,shell.classList.contains('is-projector'),document.fonts?.status,samples]);
+          const profileKey=JSON.stringify([stage.clientWidth,stage.clientHeight,document.documentElement.clientWidth,baseFont,shell.classList.contains('is-projector'),document.fonts?.status,samples]);
           let low=view.textFitProfile?.key===profileKey?view.textFitProfile.ceiling:null;
           if(low===null){
             const originalNodes=[...stage.childNodes];low=2.7;
@@ -5253,8 +5256,12 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
                 let sampleLow=.001,high=2.7;
                 for(let attempt=0;attempt<14;attempt++){
                   const candidate=(sampleLow+high)/2;shell.style.setProperty('--present-scale',String(candidate));
-                  // Scroll and client dimensions round fractional pixels differently.
-                  if(stage.scrollHeight<=stage.clientHeight+2&&stage.scrollWidth<=stage.clientWidth+2)sampleLow=candidate;
+                  const bounds=stage.getBoundingClientRect(),blocks=[...stage.children].map(node=>node.getBoundingClientRect());
+                  // Measure content boxes so rounded scroll dimensions cannot hide text.
+                  const fits=bounds.height>0&&blocks.some(box=>box.height>0)
+                    ?blocks.every(box=>box.bottom<=bounds.bottom+2&&box.right<=bounds.right+2)
+                    :stage.scrollHeight<=stage.clientHeight+2&&stage.scrollWidth<=stage.clientWidth+2;
+                  if(fits)sampleLow=candidate;
                   else high=candidate;
                 }
                 low=Math.min(low,sampleLow);
@@ -5264,6 +5271,9 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           }
           view.maxFittedScale=low;
           fitted=low*clampPresentationScale(view.scale)/1.35;shell.style.setProperty('--present-scale',String(fitted));
+          textFont=Math.max(18,baseFont*fitted);
+          stage.querySelectorAll('.presentation-copy').forEach(copy=>copy.style.setProperty('font-size',textFont+'px','important'));
+          view.textFontSize=textFont;
         }else for(let attempt=0;attempt<8;attempt++){
           const available=Math.max(1,stage.clientHeight),needed=Math.max(1,stage.scrollHeight);
           if(needed<=available+2)break;
@@ -5275,7 +5285,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         stage.classList.remove('is-fitting');stage.scrollTop=0;view.fittedScale=fitted;
         shell.dataset.fit=fitted<clampPresentationScale(view.scale)-.015?'fitted':'preferred';
         const smaller=$('[data-presentation-smaller]'),larger=$('[data-presentation-larger]');
-        if(smaller)smaller.disabled=clampPresentationScale(view.scale)<=clampPresentationScale(.01)+.0001;
+        if(smaller)smaller.disabled=clampPresentationScale(view.scale)<=clampPresentationScale(.01)+.0001||(textSlide&&textFont<=18.01);
         if(larger){larger.disabled=clampPresentationScale(view.scale)>=1.3499;larger.title=larger.disabled&&textSlide?'Batas maksimum di atas copyright':'Perbesar teks';}
       }
       function schedulePresentationFit(){
@@ -6691,6 +6701,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
     }());
   </script>
   <script src="/vendor/page-flip-2.0.7.js?v=24-fold" defer></script>
-  <script src="/page-turn.js?v=24-fold" defer></script>
+  <script src="/page-turn.js?v=26-visible" defer></script>
 </body>
 </html>
