@@ -120,6 +120,10 @@ for(const mode of ['system','site']){
 // Simulate layout dimensions to test both width/height bounds and growth on larger screens.
 const stage=$('#presentation-stage'),shell=$('#presentation-shell');
 $('#presentation-dialog').setAttribute('open','');shell.dataset.presentationKind='song';
+shell.classList.add('is-projector');
+assert.equal(parseFloat(dom.window.getComputedStyle($('.presentation-main')).minHeight),0,'Reading frame must not inherit the site main viewport minimum');
+assert.equal(dom.window.getComputedStyle($('.presentation-main')).height,'100%','Projector reading area must stay constrained to its frame');
+shell.classList.remove('is-projector');
 state.presentation={type:'song',scale:1};
 let width=800,height=400;
 const scale=()=>Number(shell.style.getPropertyValue('--present-scale'));
@@ -158,6 +162,10 @@ for(const kind of ['song','bible']){
   assert.ok(stage.scrollHeight<=height&&stage.scrollWidth<=width,'Maximum text stays inside safe area');
   assert.ok(Math.abs(state.presentation.fittedScale-state.presentation.maxFittedScale)<.0001);
   context.resizePresentation(-.1);assert.ok(!$('[data-presentation-larger]').disabled);
+  state.presentation.scale=.7;context.fitPresentationText();
+  assert.ok(!$('[data-presentation-smaller]').disabled,'Previously saved 70% preference must still allow shrinking');
+  const oldMinimum=state.presentation.fittedScale;
+  context.resizePresentation(-.1);assert.ok(state.presentation.fittedScale<oldMinimum,'A- shrinks below the old 70% limit');
   for(let i=0;i<10;i++)context.resizePresentation(-.1);
   assert.ok($('[data-presentation-smaller]').disabled,'Lower bound disables A-');
   context.resizePresentation(.1);assert.ok(!$('[data-presentation-smaller]').disabled);

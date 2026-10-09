@@ -3425,10 +3425,21 @@
 /* Lagu layar penuh: satu ayat atau reff per slide; header dan latar tetap. */
 .presentation-song-layout.lyrics-slide{display:block;width:100%;max-width:none;min-height:0}
 .lyrics-slide .presentation-copy{width:100%;font-size:calc(clamp(2rem,5.2vw,6.2rem) * var(--present-scale));line-height:1.2;text-align:left;white-space:normal;text-wrap:wrap}
-.presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-main{padding-bottom:var(--presentation-footer-reserve,120px)!important}
+.presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-main{height:100%!important;min-height:0!important;padding-bottom:var(--presentation-footer-reserve,120px)!important}
 .presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-stage{overflow:hidden}
 .presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-stage.is-fitting{align-content:start}
 .presentation-shell.is-projector .presentation-frame{min-height:0}
+@media(max-width:820px) and (orientation:portrait){
+.presentation-shell.is-projector:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-main{padding-top:12px!important}
+.presentation-shell.is-projector:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-head{min-height:24px;padding-right:130px;gap:6px}
+.presentation-shell.is-projector:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-kicker{font-size:.5rem}
+.presentation-shell.is-projector:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-title{font-size:.65rem}
+.presentation-shell.is-projector:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-stage{padding:6px 0}
+.presentation-shell.is-projector:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-verse-label{padding:3px 7px;margin-bottom:6px;font-size:.6rem}
+.presentation-shell.is-projector:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-brand{transform:scale(.55)!important;transform-origin:top right!important}
+.presentation-shell.is-projector:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-footer{bottom:10px;font-size:.5rem}
+.presentation-shell.is-projector:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .copyright-mark{width:18px;height:18px}
+}
 .presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]) .presentation-title{animation:none!important}
 .presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]).presentation-enter-next .presentation-stage{animation:lyricsSoftNext .36s cubic-bezier(.22,.78,.22,1) both}
 .presentation-shell:is([data-presentation-kind="song"],[data-presentation-kind="bible"]).presentation-enter-prev .presentation-stage{animation:lyricsSoftPrev .36s cubic-bezier(.22,.78,.22,1) both}
@@ -3463,7 +3474,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
 .journal-stage .home-announcements{grid-template-columns:minmax(0,1fr);gap:14px}
 }
 </style>
-  <link rel="stylesheet" href="/page-turn.css">
+  <link rel="stylesheet" href="/page-turn.css?v=18">
 </head>
 <body>
   <svg class="sr-only" aria-hidden="true">
@@ -5181,9 +5192,9 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         $('#reader-body').innerHTML='<div class="song-reader-shell font-' + esc(fontSize) + '"><div class="v18-reader-tools"><div class="v18-reader-tools-main">'+favoriteButton(savedItem)+'<button class="btn primary present-button" type="button" data-present-song>'+icon('external')+'Mode layar</button></div><div class="song-size-group" role="group" aria-label="Ukuran font lagu"><button class="btn soft font-size-btn '+(fontSize==='small'?'active':'')+'" type="button" data-song-size="small" title="Ukuran teks kecil" aria-label="Ukuran teks kecil">A−</button><button class="btn soft font-size-btn '+(fontSize==='normal'?'active':'')+'" type="button" data-song-size="normal" title="Ukuran teks sedang" aria-label="Ukuran teks sedang">A</button><button class="btn soft font-size-btn '+(fontSize==='large'?'active':'')+'" type="button" data-song-size="large" title="Ukuran teks besar" aria-label="Ukuran teks besar">A+</button></div></div><header class="song-reader-hero"><span class="song-reader-number">' + (isTheme?'Lagu Tema Jemaat':'Lagu Sion · Nomor '+esc(song.number)) + '</span><h2>' + esc(song.title) + '</h2></header><section class="song-stage"><div class="song-stage-grid ' + (chorus?'has-chorus':'single-col') + '"><div class="song-verse-col"><div class="song-verse-card"><span class="chip brand">AYAT ' + esc(verse.index || index+1) + '</span><div class="song-verse">' + verse.lines.map(esc).join('<br>') + '</div></div></div>' + chorusCard + '</div></section><nav class="song-reader-nav" aria-label="Pilih ayat"><button class="icon-button" type="button" data-song-prev aria-label="Ayat sebelumnya" ' + (index===0?'disabled':'') + '>' + icon('arrow-left') + '</button><strong>Ayat ' + (index+1) + ' dari ' + Math.max(1,verses.length) + '</strong><button class="icon-button" type="button" data-song-next aria-label="Ayat berikutnya" ' + (index>=verses.length-1?'disabled':'') + '>' + icon('arrow') + '</button></nav><p class="small faint">Gunakan Mode Layar agar teks terlihat jelas dari jarak jauh.</p></div>';
       }
 
-      function clampPresentationScale(value){return Math.max(.7,Math.min(1.35,Number(value)||1));}
+      function clampPresentationScale(value,type=state.presentation&&state.presentation.type){return Math.max(/^(song|bible)$/.test(type||'')?.35:.7,Math.min(1.35,Number(value)||1));}
       function presentationScaleKey(type){return 'galilea:presentation-scale:'+(type==='bible'?'bible':type==='announcement'?'announcement':type==='schedule'?'schedule':type==='operator'?'operator':type==='screencheck'?'screencheck':'song');}
-      function storedPresentationScale(type){return clampPresentationScale(safeStorage.get(presentationScaleKey(type),'1'));}
+      function storedPresentationScale(type){return clampPresentationScale(safeStorage.get(presentationScaleKey(type),'1'),type);}
       function storedPresentationTheme(){
         const saved=safeStorage.get('galilea:presentation-theme','');
         if(saved==='light'||saved==='dark')return saved;
@@ -5250,7 +5261,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         stage.classList.remove('is-fitting');stage.scrollTop=0;view.fittedScale=fitted;
         shell.dataset.fit=fitted<clampPresentationScale(view.scale)-.015?'fitted':'preferred';
         const smaller=$('[data-presentation-smaller]'),larger=$('[data-presentation-larger]');
-        if(smaller)smaller.disabled=clampPresentationScale(view.scale)<=.7001;
+        if(smaller)smaller.disabled=clampPresentationScale(view.scale)<=clampPresentationScale(.01)+.0001;
         if(larger){larger.disabled=clampPresentationScale(view.scale)>=1.3499;larger.title=larger.disabled&&textSlide?'Batas maksimum di atas copyright':'Perbesar teks';}
       }
       function schedulePresentationFit(){
@@ -6662,6 +6673,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       boot();
     }());
   </script>
-  <script src="/page-turn.js" defer></script>
+  <script src="/page-turn.js?v=18" defer></script>
 </body>
 </html>
