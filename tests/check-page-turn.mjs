@@ -34,7 +34,10 @@ window.innerWidth=390;assert.equal(turn.play(turn.capture(),-1),true);layer=docu
 assert.equal(layer.dataset.direction,'prev');assert.equal(layer.querySelectorAll('.page-turn-segment').length,8);
 turn.play(turn.capture(),1);assert.equal(document.querySelectorAll('.page-turn-layer').length,1,'Rapid input replaces, not queues, animation');
 turn.cancel();document.documentElement.dataset.motion='reduced';assert.equal(turn.capture(),null);assert.equal(turn.play(null,1),false);
-document.documentElement.dataset.motion='full';systemReduced=true;assert.equal(turn.capture(),null);systemReduced=false;
+document.documentElement.dataset.motion='full';systemReduced=true;assert.ok(turn.capture(),'Explicit full motion overrides the system preference');
+delete document.documentElement.dataset.motion;assert.equal(turn.capture(),null,'System preference applies when no site choice exists');
+document.documentElement.dataset.motion='reduced';assert.equal(turn.capture(),null,'Reduced site choice always disables motion');
+document.documentElement.dataset.motion='full';systemReduced=false;
 shell.dataset.presentationType='schedule';assert.equal(turn.capture(),null,'No page turn outside Bible/Song');
 shell.dataset.presentationType='song';document.getElementById('presentation-dialog').open=false;assert.equal(turn.capture(),null);
 dom.window.close();

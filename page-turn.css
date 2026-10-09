@@ -5,11 +5,11 @@
 .page-turn-layer[data-direction="prev"] .page-turn-segment{transform-origin:right center}
 .page-turn-front,.page-turn-back{position:absolute;inset:0;overflow:hidden;background:var(--turn-paper);backface-visibility:hidden;-webkit-backface-visibility:hidden}
 .page-turn-back{background:var(--turn-back);transform:rotateY(180deg)}
-.page-turn-front::after,.page-turn-back::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 30%,var(--turn-shade) 90%);background-size:var(--turn-width) 100%;background-position:var(--turn-offset) 0;opacity:.25}
+.page-turn-front::after,.page-turn-back::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(90deg,transparent 30%,var(--turn-shade) 90%);background-size:var(--turn-width) 100%;background-position:var(--turn-offset) 0;opacity:.5}
 .page-turn-layer[data-direction="prev"] :is(.page-turn-front,.page-turn-back)::after{transform:scaleX(-1)}
 .page-turn-layer .page-turn-page{position:absolute!important;top:0!important;max-width:none!important;min-width:0!important;margin:0!important;transform:none!important;animation:none!important;pointer-events:none}
 .page-turn-layer :is(.presentation-title,.presentation-stage){animation:none!important;transition:none!important}
 .page-turn-shadow{position:absolute;inset:0;background:linear-gradient(90deg,rgba(0,0,0,.3),transparent 65%);pointer-events:none}
 .page-turn-layer[data-direction="prev"] .page-turn-shadow{transform:scaleX(-1)}
-@media(prefers-reduced-motion:reduce){.page-turn-layer{display:none!important}}
+@media(prefers-reduced-motion:reduce){html:not([data-motion="full"]) .page-turn-layer{display:none!important}}
 html[data-motion="reduced"] .page-turn-layer{display:none!important}

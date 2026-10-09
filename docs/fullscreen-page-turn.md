@@ -6,14 +6,14 @@ Design read: retain Galilea's current typography, green palette, reading hierarc
 
 ## Delivery gate
 
-- Hard Gate PASS: actual verse/lyric snapshots, no new copy, navigation, or controls; Chromium click-through covered keyboard, swipe, both themes, mobile, and close cleanup. Existing contrast tests passed. The layer is inert, hidden from screen readers, and ends above copyright and controls. Site and system reduced motion disable it.
+- Hard Gate PASS: actual verse/lyric snapshots, no new copy, navigation, or controls; Chromium click-through covered keyboard, swipe, both themes, mobile, and close cleanup. Existing contrast tests passed. The layer is inert, hidden from screen readers, and ends above copyright and controls. The site’s reduced-motion choice disables it. An explicit full-motion choice overrides the system preference; without a site choice, the system preference applies.
 - Purpose-Gate PASS: paper curvature and directional rotation connect the old reading page to the new one. A continuous lighting gradient conveys curvature, while a transient shadow conveys depth. No global decoration, font changes, or unrelated animations were added.
 - Liveliness PASS: declared dials follow the existing product. The verse or lyric remains the focal point; the original spacing and accent are retained. The specific book-turn gesture appears only during reading navigation.
 - Craftsmanship & Quality Locks PASS: all regression checks passed with `npm run check`; actual Chromium tests exercised Bible Next/Previous in light and dark, rapid navigation, both reduced-motion settings, modal cleanup, song navigation, mobile eight-segment rendering, swipe, end boundary, theme and text sizing. No duplicate IDs or browser page errors occurred.
 
 ## Behavior and limits
 
-The transient layer snapshots the previous content before rendering the next page. Desktop uses 14 curved strips over 760 ms; mobile uses eight over 620 ms. Rapid input replaces the active turn rather than queueing it. Resize, theme changes, fullscreen changes, hidden documents, and closing the presentation cancel it.
+The transient layer snapshots the previous content before rendering the next page. Desktop uses 14 curved strips over 1100 ms; mobile uses eight over 900 ms. Rapid input replaces the active turn rather than queueing it. Resize, theme changes, fullscreen changes, hidden documents, and closing the presentation cancel it.
 
 Unsupported animation/3D APIs fall back to the existing presentation transition. No new API requests, content-cache lifetime changes, or permanent reader styles are introduced. Service-worker shell assets include the new CSS and JavaScript.
 
@@ -32,3 +32,7 @@ Purpose-Gate PASS: explicit frame bounds prevent content from expanding its own 
 Liveliness PASS: inherited ENERGY 3 / RHYTHM 3 and scoped MOTION 2 remain unchanged; reading content, accent, and paper-turn gesture remain the focal features.
 
 Craftsmanship & Quality Locks PASS: regression tests cover constrained projector geometry, shrinking below the previous minimum, stable repeated fitting, maximum bounds, and both reduced-motion settings. Real-browser measurements and visible running 3D transforms supplement simulated layout tests.
+
+## Motion preference correction
+
+The previous JS gate and CSS media rule suppressed the paper layer even when the reader explicitly chose full motion. Both now honor that choice. Stronger strip curvature and a longer transition make the fold easier to see. Asset revision 19 replaces cached JS/CSS. No backend release is needed.
