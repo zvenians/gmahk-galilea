@@ -5,6 +5,12 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  workflow_dispatch:
+    inputs:
+      deploy_backend:
+        description: 'Deploy Apps Script backend after checks pass'
+        type: boolean
+        default: false
 
 permissions:
   contents: read
@@ -13,9 +19,22 @@ jobs:
   validate:
     name: Project & Contrast Checks
     runs-on: ubuntu-latest
+    outputs:
+      backend_changed: ${{ steps.backend.outputs.backend_changed }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+
+      - name: Determine whether Apps Script needs a release
+        id: backend
+        run: bash scripts/backend-release-needed.sh
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BEFORE_SHA: ${{ github.event.before }}
+          AFTER_SHA: ${{ github.sha }}
+          REQUEST_DEPLOY: ${{ inputs.deploy_backend }}
 
       - name: Setup Node.js 24
         uses: actions/setup-node@v5
@@ -26,13 +45,18 @@ jobs:
         run: npm ci
 
       - name: Run project verification & contrast checks
-        run: npm run check
+        run: |
+          node tests/check-backend-release.mjs
+          npm run check
 
   deploy:
     name: Apps Script Auto-Sync
     needs: validate
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && needs.validate.outputs.backend_changed == 'true'
     runs-on: ubuntu-latest
+    concurrency:
+      group: apps-script-production
+      cancel-in-progress: false
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
