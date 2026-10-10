@@ -78,7 +78,17 @@ rs.getBoundingClientRect=rm.getBoundingClientRect=()=>box(0,0,1440,900);
 rm.querySelector('.presentation-head').getBoundingClientRect=()=>box(50,60,1340,100);rt.getBoundingClientRect=()=>box(50,180,1340,580);
 rt.innerHTML='<div class="presentation-copy song">Lirik sebelumnya</div>';
 rw.eval(fs.readFileSync(new URL('../vendor/page-flip-2.0.7.js',import.meta.url),'utf8'));rw.eval(source);
+let realEngine;const PageFlip=rw.St.PageFlip;
+rw.St.PageFlip=class extends PageFlip{constructor(...args){super(...args);realEngine=this;}};
 const tick=time=>{const batch=[...frames.values()];frames.clear();batch.forEach(callback=>callback(time));};
+const inside=(point,polygon)=>{
+  let result=false;
+  for(let i=0,j=polygon.length-1;i<polygon.length;j=i++){
+    const a=polygon[i],b=polygon[j];
+    if((a.y>point.y)!==(b.y>point.y)&&point.x<(b.x-a.x)*(point.y-a.y)/(b.y-a.y)+a.x)result=!result;
+  }
+  return result;
+};
 const softTurn=direction=>{
   const snapshot=rw.GalileaPageTurn.capture();rt.querySelector('.presentation-copy').textContent='Lirik baru';
   assert.equal(rw.GalileaPageTurn.play(snapshot,direction),true);tick(0);tick(450);
@@ -88,6 +98,25 @@ const softTurn=direction=>{
   assert.equal(sheet.dataset.pageTurnSurface,'fold','The lifted paper is marked as opaque');
   assert.ok(rd.querySelector('.page-turn-sheet[data-page-turn-surface="flat"]'),'The underlying flat page remains a separate transparent surface');
   assert.ok(rd.querySelector('.stf__outerShadow').style.transform,'The fold has a moving shadow');
+  const renderer=realEngine.getRender();
+  assert.equal(renderer.flippingPage.getElement().dataset.pageTurnSurface,'fold','The lifted page stays solid in both directions');
+  assert.ok(Math.abs(realEngine.getFlipController().getCalculation().getAngle())>.1,'The corner lifts visibly instead of becoming a vertical strip');
+  if(direction>0){
+    for(const time of [450,750,1050,1350]){
+      tick(time);
+      const old=renderer.rightPage.getElement(),revealed=realEngine.getFlipController().getCalculation().getBottomClipArea().filter(Boolean);
+      assert.match(old.style.clipPath,/^polygon\(evenodd,/,'The old transparent page excludes the newly revealed page');
+      const oldPolygon=[...old.style.clipPath.matchAll(/(-?[\d.]+)px\s+(-?[\d.]+)px/g)].map(match=>({x:+match[1],y:+match[2]}));
+      for(let x=11;x<1340;x+=53)for(let y=13;y<700;y+=47){
+        const point={x,y},oldVisible=inside(point,oldPolygon),newVisible=inside(point,revealed);
+        assert.equal(oldVisible&&newVisible,false,'Old and incoming flat text never share the same area');
+        assert.ok(oldVisible||newVisible,'The two flat areas still cover the full page');
+      }
+    }
+  }
+  tick(1700);tick(1750);
+  assert.equal(rd.querySelector('.page-turn-layer'),null,'Completion restores the real text without an overlay');
+  assert.equal(rs.classList.contains('page-turn-active'),false);
   rw.GalileaPageTurn.cancel();tick(500);assert.equal(frames.size,0,'Canceled real renderer stops scheduling frames');
 };
 softTurn(1);softTurn(-1);real.window.close();

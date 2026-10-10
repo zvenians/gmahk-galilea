@@ -3,6 +3,37 @@
   let active=null;
   const motionAllowed=()=>document.documentElement.dataset.motion==='full'||(!reduced.matches&&document.documentElement.dataset.motion!=='reduced');
   const allowed=()=>motionAllowed()&&!document.hidden&&typeof window.St?.PageFlip==='function'&&typeof requestAnimationFrame==='function';
+  function prepareRenderer(engine,duration){
+    const render=engine.getRender(),controller=engine.getFlipController?.();
+    if(!controller)return;
+    const drawFrame=render.drawFrame.bind(render),startAnimation=render.startAnimation.bind(render);
+    render.drawFrame=()=>{
+      drawFrame();
+      if(render.galileaDisposed||!render.flippingPage)return;
+      // Surface role, not a near-zero angle, determines whether lifted paper is solid.
+      render.flippingPage.getElement().dataset.pageTurnSurface='fold';
+      if(render.getDirection()!==0||!render.rightPage)return;
+      const points=controller.getCalculation()?.getBottomClipArea().filter(point=>point&&Number.isFinite(point.x)&&Number.isFinite(point.y));
+      if(!points?.length)return;
+      const {pageWidth:width,height}=render.getRect(),first=points[0];
+      const ring=[{x:0,y:0},{x:width,y:0},{x:width,y:height},{x:0,y:height},{x:0,y:0},...points,first,{x:0,y:0}];
+      // Cut the revealed region out of the old page instead of covering it with a background.
+      const clip='polygon(evenodd, '+ring.map(point=>point.x+'px '+point.y+'px').join(', ')+')';
+      const old=render.rightPage.getElement();old.style.clipPath=clip;old.style.webkitClipPath=clip;
+      old.dataset.pageTurnSurface='flat';
+    };
+    render.startAnimation=(frames,time,onEnd)=>{
+      if(controller.getCalculation()){
+        const {pageWidth:width,height}=render.getRect();
+        frames=Array.from({length:241},(_,index)=>()=>{
+          const progress=index/240,eased=progress*progress*(3-2*progress);
+          const position={x:width*(.94-1.94*eased),y:height-height*.34*Math.sin(Math.PI*(.06+.94*eased))};
+          controller.fold(render.convertToGlobal(position));
+        });
+      }
+      return startAnimation(frames,duration,onEnd);
+    };
+  }
   function cancel(){
     if(!active)return;
     const previous=active;active=null;
@@ -57,6 +88,7 @@
     engine.on('changeState',event=>{if(event.data==='read'&&current.turning)finish();});
     try{
       engine.loadFromHTML(sheets);
+      prepareRenderer(engine,duration);
       current.startFrame=requestAnimationFrame(()=>{
         if(active!==current)return;
         current.turning=true;

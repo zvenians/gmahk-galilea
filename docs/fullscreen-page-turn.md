@@ -1,5 +1,18 @@
 # Fullscreen soft-page fold preview
 
+## Revision 29
+
+The stationary outgoing page now excludes the exact region revealed by the
+incoming page. Both flat surfaces remain transparent without showing both
+lyrics in the same area. The lifted surface stays solid by its renderer role,
+including frames where its rotation is nearly zero. A curved corner trajectory
+keeps the fold diagonal and uses the full animation duration at every width.
+Text fitting, pixel font sizes, copyright bounds and navigation remain shared.
+
+The actual-engine regression samples the revealed polygons over the animation,
+requiring zero overlap and full coverage of the flat page. It also verifies
+visible corner lift, both directions, completion and renderer cleanup.
+
 ## Revision 28
 
 Songs and Bible readings now open at the full shared fit ceiling (1.35), rather
@@ -50,6 +63,5 @@ Snapshots freeze resolved text sizes and the original reading frame height. The 
 
 Automated tests exercise the actual vendored engine in simulated DOM geometry in both directions. They verify diagonal polygon clipping, rotation within the page plane, moving shadows, and renderer cleanup. Adapter tests also cover old/new real-text snapshots, desktop/mobile settings, rapid input, scoped presentation types, boundaries, and motion preferences. These tests do not establish visual appearance in physical Windows Chrome.
 
-The standalone HTML preview embeds the same engine, adapter, and styles. It runs without network requests and is provided for visual review. This revision is local and has not been pushed or deployed. Browser visual approval is pending.
-
-CSS/JS revision `22-soft` and service-worker shell `galilea-v35-22-soft-page-fold` include the local engine bundle so a later release will replace cached rigid-turn assets. No Apps Script changes or backend versions are required.
+The current CSS/JS revision is `29-clip`, with service-worker shell
+`galilea-v35-29-clipped-fold`. The backend and Apps Script deployment are unchanged.
