@@ -236,6 +236,25 @@ context.resizePresentation(-.1);
 assert.ok(parseFloat(geometryStage.querySelector('.presentation-copy').style.fontSize)<fullFitFont,'A- visibly reduces the default full-fit font');
 context.resizePresentation(.1);
 assert.ok(Math.abs(parseFloat(geometryStage.querySelector('.presentation-copy').style.fontSize)-fullFitFont)<.01,'A+ restores the default full fit');
+dom.window.HTMLElement.prototype.getBoundingClientRect=function(){
+  if(this.matches('.presentation-fit-measure')){
+    const copy=this.querySelector('.presentation-copy'),font=parseFloat(copy?.style.fontSize)||0;
+    const lines=copy?Math.ceil(copy.textContent.length*font*.5/800):0;
+    const height=copy?48+lines*font*1.2:0;
+    return {left:0,top:0,right:800,bottom:height,width:800,height};
+  }
+  if(geometryStage.contains(this))return {left:0,top:450,right:800,bottom:600,width:800,height:150};
+  return nativeBox.call(this);
+};
+state.presentation={type:'song',scale:1.35};context.fitPresentationText();
+const naturalFit=parseFloat(geometryStage.querySelector('.presentation-copy').style.fontSize);
+assert.ok(naturalFit>30,'Fullscreen layout offsets cannot collapse fitting to the 18px floor');
+assert.ok(!$('[data-presentation-smaller]').disabled,'A- stays available on a real fit');
+assert.equal(document.querySelector('.presentation-fit-measure'),null,'Temporary measurement leaves no extra visible lyrics');
+context.resizePresentation(-.1);
+assert.ok(parseFloat(geometryStage.querySelector('.presentation-copy').style.fontSize)<naturalFit,'A- works when grid coordinates would fail');
+context.resizePresentation(.1);
+assert.ok(Math.abs(parseFloat(geometryStage.querySelector('.presentation-copy').style.fontSize)-naturalFit)<.01,'A+ restores natural fit');
 dom.window.HTMLElement.prototype.getBoundingClientRect=nativeBox;
 dom.window.close();
 console.log('Presentation verified: verse/reff ordering, theme songs, navigation, operator/offline, Bible, reduced motion and fitting.');

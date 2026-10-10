@@ -1,5 +1,15 @@
 # Fullscreen soft-page fold preview
 
+## Revision 30
+
+Shared fitting measures natural content in a hidden, unaligned measurement
+container with explicit pixel font candidates. Fullscreen grid placement and
+transforms cannot reject every candidate and lock both size controls at 18px.
+Stage padding is removed from the available width and height. Measurement
+never replaces the live lyrics and is removed in a finally block. A regression
+forces the live content coordinates outside the stage while requiring a large
+natural fit, functional A-/A+ and no leftover measurement element.
+
 ## Revision 29
 
 The stationary outgoing page now excludes the exact region revealed by the
@@ -63,5 +73,5 @@ Snapshots freeze resolved text sizes and the original reading frame height. The 
 
 Automated tests exercise the actual vendored engine in simulated DOM geometry in both directions. They verify diagonal polygon clipping, rotation within the page plane, moving shadows, and renderer cleanup. Adapter tests also cover old/new real-text snapshots, desktop/mobile settings, rapid input, scoped presentation types, boundaries, and motion preferences. These tests do not establish visual appearance in physical Windows Chrome.
 
-The current CSS/JS revision is `29-clip`, with service-worker shell
-`galilea-v35-29-clipped-fold`. The backend and Apps Script deployment are unchanged.
+The current CSS/JS revision is `30-fit`, with service-worker shell
+`galilea-v35-30-natural-fit`. The backend and Apps Script deployment are unchanged.

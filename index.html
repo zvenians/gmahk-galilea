@@ -3474,7 +3474,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
 .journal-stage .home-announcements{grid-template-columns:minmax(0,1fr);gap:14px}
 }
 </style>
-  <link rel="stylesheet" href="/page-turn.css?v=29-clip">
+  <link rel="stylesheet" href="/page-turn.css?v=30-fit">
 </head>
 <body>
   <svg class="sr-only" aria-hidden="true">
@@ -5249,24 +5249,37 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           const profileKey=JSON.stringify([stage.clientWidth,stage.clientHeight,document.documentElement.clientWidth,baseFont,shell.classList.contains('is-projector'),document.fonts?.status,samples]);
           let low=view.textFitProfile?.key===profileKey?view.textFitProfile.ceiling:null;
           if(low===null){
-            const originalNodes=[...stage.childNodes];low=2.7;
+            const originalNodes=[...stage.childNodes],stageStyle=window.getComputedStyle?.(stage)||{};
+            const contentWidth=stage.clientWidth-(parseFloat(stageStyle.paddingLeft)||0)-(parseFloat(stageStyle.paddingRight)||0);
+            const contentHeight=stage.clientHeight-(parseFloat(stageStyle.paddingTop)||0)-(parseFloat(stageStyle.paddingBottom)||0);
+            const measure=document.createElement('div');measure.className='presentation-stage presentation-fit-measure';measure.setAttribute('aria-hidden','true');measure.inert=true;
+            measure.style.cssText='position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;display:block;width:'+contentWidth+'px;height:auto;min-height:0;max-height:none;margin:0;padding:0;overflow:visible;';
+            shell.append(measure);const isolated=measure.getBoundingClientRect().width>0;low=2.7;
             try{
               for(const markup of samples.length?samples:[null]){
-                if(markup!==null)stage.innerHTML=markup;
+                if(isolated)measure.innerHTML=markup??stage.innerHTML;
+                else if(markup!==null)stage.innerHTML=markup;
                 let sampleLow=.001,high=2.7;
                 for(let attempt=0;attempt<14;attempt++){
                   const candidate=(sampleLow+high)/2;shell.style.setProperty('--present-scale',String(candidate));
-                  const bounds=stage.getBoundingClientRect(),blocks=[...stage.querySelectorAll('.presentation-copy,.presentation-verse-label')].map(node=>node.getBoundingClientRect());
-                  // Measure content boxes so rounded scroll dimensions cannot hide text.
-                  const fits=bounds.height>0&&blocks.some(box=>box.height>0)
+                  let fits;
+                  if(isolated){
+                    measure.querySelectorAll('.presentation-copy').forEach(copy=>copy.style.setProperty('font-size',baseFont*candidate+'px','important'));
+                    const measured=measure.getBoundingClientRect();
+                    // Measure natural content height, independent of fullscreen grid alignment and transforms.
+                    fits=Math.max(measured.height,measure.scrollHeight)<=contentHeight+1&&measure.scrollWidth<=contentWidth+1;
+                  }else{
+                    const bounds=stage.getBoundingClientRect(),blocks=[...stage.querySelectorAll('.presentation-copy,.presentation-verse-label')].map(node=>node.getBoundingClientRect());
+                    fits=bounds.height>0&&blocks.some(box=>box.height>0)
                     ?blocks.every(box=>box.bottom<=bounds.bottom+2&&box.right<=bounds.right+2)
                     :stage.scrollHeight<=stage.clientHeight+2&&stage.scrollWidth<=stage.clientWidth+2;
+                  }
                   if(fits)sampleLow=candidate;
                   else high=candidate;
                 }
                 low=Math.min(low,sampleLow);
               }
-            }finally{stage.replaceChildren(...originalNodes);}
+            }finally{measure.remove();if(!isolated)stage.replaceChildren(...originalNodes);}
             view.textFitProfile={key:profileKey,ceiling:low};
           }
           view.maxFittedScale=low;
@@ -6701,6 +6714,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
     }());
   </script>
   <script src="/vendor/page-flip-2.0.7.js?v=24-fold" defer></script>
-  <script src="/page-turn.js?v=29-clip" defer></script>
+  <script src="/page-turn.js?v=30-fit" defer></script>
 </body>
 </html>
