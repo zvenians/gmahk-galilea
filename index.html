@@ -3597,6 +3597,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
   <div class="toast-zone" id="toast-zone" aria-live="polite"></div>
   <div class="v18-network" id="network-status" role="status" aria-live="polite"><svg class="icon"><use href="#i-wifi"></use></svg><span>Mode offline — menampilkan data tersimpan</span></div>
 
+  <script src="/schedule-clock.js?v=32-wita"></script>
   <script>
     (function () {
       'use strict';
@@ -3824,7 +3825,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       function favoriteButton(item){const key=personalId(item.type,item.id);return '<button class="btn v18-fav-button '+(isFavorite(item.type,item.id)?'active':'')+'" type="button" data-favorite-key="'+attr(key)+'" data-favorite-item="'+attr(JSON.stringify(item))+'">'+icon('star')+(isFavorite(item.type,item.id)?'Tersimpan':'Simpan')+'</button>';}
       function eventStatus(summary) {
         if(!summary||!summary.timestamp)return {label:'Jadwal berikutnya',detail:'Jadwal terbaru tersedia di halaman ibadah'};
-        const start=Number(summary.timestamp),now=Date.now(),diff=start-now;
+        const start=Number(new Date(summary.timestamp)),now=Date.now(),diff=start-now;
         if(diff<=0&&diff>-2.5*3600000)return {label:'Sedang berlangsung',detail:(summary.dateLabel||'Hari ini')+' · '+(summary.time||'')};
         if(diff>0&&diff<24*3600000){const hours=Math.floor(diff/3600000),minutes=Math.max(1,Math.round((diff%3600000)/60000));return {label:'Dimulai dalam '+(hours?hours+' jam ':'')+minutes+' menit',detail:(summary.dateLabel||'Hari ini')+' · '+(summary.time||'')};}
         return {label:summary.countdown||'Ibadah berikutnya',detail:(summary.dateLabel||'')+' · '+(summary.time||'')};
@@ -4314,6 +4315,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       function render() {
         // Keep the loading/error view intact until bootstrap data is available.
         if(!state.data)return;
+        if(window.GalileaScheduleClock)window.GalileaScheduleClock.refresh(state.data);
         const renderers = {
           home: renderHome, today: renderToday, church: renderChurch, aboutsite: renderAboutSite, leaders: renderLeaders, schedule: renderSchedule,
           bulletin: renderBulletin, sabbath: renderSabbath, bible: renderBible, hymnal: renderHymnal,
@@ -5613,10 +5615,13 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
 
       function scheduleWorshipFallback() {
         const data=state.data||{},now=Date.now()-3*3600000;
+        const today=witaDateKey(),clock=window.GalileaScheduleClock;
         const candidates=[
+          clock&&clock.forDate(data,'sabbath',today)?{kind:'sabbath',source:clock.forDate(data,'sabbath',today)}:null,
+          clock&&clock.forDate(data,'wednesday',today)?{kind:'wednesday',source:clock.forDate(data,'wednesday',today)}:null,
           data.nextWednesday?{kind:'wednesday',source:data.nextWednesday}:null,
           data.nextSabbath?{kind:'sabbath',source:data.nextSabbath}:null
-        ].filter(Boolean).filter(item=>Number(new Date(item.source.timestamp||0))>=now).sort((a,b)=>Number(new Date(a.source.timestamp||0))-Number(new Date(b.source.timestamp||0)));
+        ].filter(Boolean).filter(item=>item.source.isoDate===today||Number(new Date(item.source.timestamp||0))>=now).sort((a,b)=>Number(new Date(a.source.timestamp||0))-Number(new Date(b.source.timestamp||0)));
         const item=candidates[0];if(!item)return null;
         const source=item.source,isSabbath=item.kind==='sabbath';
         const time=normalizeWorshipTime(source.time,isSabbath?'09:00':'19:00');
@@ -6548,11 +6553,23 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       }
       function startWebsiteSync() {
         if(state.websiteSyncTimer)return;
+        checkScheduleClock();
+        state.scheduleClockTimer=window.setInterval(checkScheduleClock,60000);
+        window.addEventListener('focus',checkScheduleClock);
         checkWebsiteUpdates(false);
         state.websiteSyncTimer=window.setInterval(()=>{applyWebsiteUpdate();checkWebsiteUpdates(false);},120000);
         window.addEventListener('online',()=>checkWebsiteUpdates(true));
-        document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkWebsiteUpdates(false);});
+        document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){checkScheduleClock();checkWebsiteUpdates(false);}});
         document.addEventListener('close',()=>applyWebsiteUpdate(),true);
+      }
+
+      function checkScheduleClock() {
+        if(!state.data||!window.GalileaScheduleClock)return;
+        const changed=window.GalileaScheduleClock.refresh(state.data);
+        if(changed)state.scheduleClockPending=true;
+        if(!state.scheduleClockPending||document.visibilityState==='hidden'||websiteUpdateIsBusy())return;
+        state.scheduleClockPending=false;
+        if(['home','today','schedule','bulletin'].includes(state.route))render();
       }
 
       async function boot() {

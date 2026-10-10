@@ -81,7 +81,7 @@ assert.doesNotMatch(index, /Siap ditampilkan/i);
 assert.doesNotMatch(index, /theme-song-preview/);
 assert.match(index, /id="presentation-offline"/);
 assert.match(index, /async function cachedResource/);
-assert.match(worker, /galilea-v35-31-pixel-fit/);
+assert.match(worker, /galilea-v35-32-schedule-clock/);
 assert.match(worker, /\/page-turn\.js/);
 assert.match(worker, /\/page-turn\.css/);
 assert.match(index, /GALILEA-DUAL-BRAND-31-0-0/);
