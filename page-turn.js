@@ -40,7 +40,7 @@
     clearTimeout(previous.timer);cancelAnimationFrame(previous.startFrame);
     previous.shell.classList.remove('page-turn-active');
     try{previous.engine.getRender().galileaDisposed=true;previous.engine.destroy();}
-    finally{previous.layer.remove();previous.shell.classList.remove('page-turn-active');}
+    finally{previous.layer.remove();previous.shell.classList.remove('page-turn-active');previous.shell.dispatchEvent(new CustomEvent('galilea:page-turn-end',{bubbles:true}));}
   }
   function capture(){
     cancel();

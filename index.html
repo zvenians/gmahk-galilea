@@ -3474,7 +3474,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
 .journal-stage .home-announcements{grid-template-columns:minmax(0,1fr);gap:14px}
 }
 </style>
-  <link rel="stylesheet" href="/page-turn.css?v=30-fit">
+  <link rel="stylesheet" href="/page-turn.css?v=31-pixel">
 </head>
 <body>
   <svg class="sr-only" aria-hidden="true">
@@ -5229,7 +5229,12 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       function fitPresentationText(){
         const dialog=$('#presentation-dialog'),shell=$('#presentation-shell'),stage=$('#presentation-stage'),view=state.presentation;
         if(!dialog||!dialog.open||!shell||!stage||!view||!view.type)return;
+        layoutPresentationFrame();
         const textSlide=/^(song|bible)$/.test(shell.dataset.presentationKind||'');
+        if(textSlide&&shell.classList.contains('page-turn-active')&&view.textFontSize>0){
+          stage.querySelectorAll('.presentation-copy').forEach(copy=>copy.style.setProperty('font-size',view.textFontSize+'px','important'));
+          return;
+        }
         if(textSlide){
           const frame=$('#presentation-frame'),footer=$('.presentation-footer');
           if(frame&&footer){
@@ -5238,37 +5243,35 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           }
         }
         if(stage.clientHeight<=0||stage.clientWidth<=0)return;
-        let fitted=clampPresentationScale(view.scale),textFont=0;stage.classList.add('is-fitting');shell.style.setProperty('--present-scale',String(fitted));
+        let fitted=clampPresentationScale(view.scale),textFont=0;stage.classList.add('is-fitting');
         if(textSlide){
-          const currentCopy=stage.querySelector('.presentation-copy');
-          currentCopy?.style.removeProperty('font-size');shell.style.setProperty('--present-scale','1');
-          const baseFont=currentCopy?(parseFloat(window.getComputedStyle?.(currentCopy)?.fontSize)||64):64;
-          // All slides share the longest slide's safe ceiling. A+/A- selects
-          // a proportion of it without changing size during navigation.
+          const baseFont=64;
+          // Keep one pixel ceiling for every page; measuring must not rescale the live page.
           const samples=view.type==='song'?songPresentationSlides(state.hymnalReader?.song).map(songPresentationMarkup):view.type==='bible'?(state.bibleReader?.verses||[]).map(verse=>'<span class="presentation-verse-label">AYAT '+esc(verse.number)+'</span><div class="presentation-copy bible">'+esc(verse.text)+'</div>'):[];
-          const profileKey=JSON.stringify([stage.clientWidth,stage.clientHeight,document.documentElement.clientWidth,baseFont,shell.classList.contains('is-projector'),document.fonts?.status,samples]);
-          let low=view.textFitProfile?.key===profileKey?view.textFitProfile.ceiling:null;
-          if(low===null){
+          const profileKey=JSON.stringify([stage.clientWidth,stage.clientHeight,document.documentElement.clientWidth,shell.classList.contains('is-projector'),document.fonts?.status,samples]);
+          let ceiling=view.textFitProfile?.key===profileKey?view.textFitProfile.fontCeiling:null;
+          if(ceiling==null){
             const originalNodes=[...stage.childNodes],stageStyle=window.getComputedStyle?.(stage)||{};
             const contentWidth=stage.clientWidth-(parseFloat(stageStyle.paddingLeft)||0)-(parseFloat(stageStyle.paddingRight)||0);
             const contentHeight=stage.clientHeight-(parseFloat(stageStyle.paddingTop)||0)-(parseFloat(stageStyle.paddingBottom)||0);
             const measure=document.createElement('div');measure.className='presentation-stage presentation-fit-measure';measure.setAttribute('aria-hidden','true');measure.inert=true;
             measure.style.cssText='position:absolute;visibility:hidden;pointer-events:none;left:0;top:0;display:block;width:'+contentWidth+'px;height:auto;min-height:0;max-height:none;margin:0;padding:0;overflow:visible;';
-            shell.append(measure);const isolated=measure.getBoundingClientRect().width>0;low=2.7;
+            ($('#presentation-frame')||shell).append(measure);const isolated=measure.getBoundingClientRect().width>0;ceiling=Infinity;
             try{
               for(const markup of samples.length?samples:[null]){
                 if(isolated)measure.innerHTML=markup??stage.innerHTML;
                 else if(markup!==null)stage.innerHTML=markup;
-                let sampleLow=.001,high=2.7;
+                let sampleLow=isolated?18:.001,high=isolated?512:2.7;
                 for(let attempt=0;attempt<14;attempt++){
-                  const candidate=(sampleLow+high)/2;shell.style.setProperty('--present-scale',String(candidate));
+                  const candidate=(sampleLow+high)/2;
                   let fits;
                   if(isolated){
-                    measure.querySelectorAll('.presentation-copy').forEach(copy=>copy.style.setProperty('font-size',baseFont*candidate+'px','important'));
+                    measure.querySelectorAll('.presentation-copy').forEach(copy=>copy.style.setProperty('font-size',candidate+'px','important'));
                     const measured=measure.getBoundingClientRect();
                     // Measure natural content height, independent of fullscreen grid alignment and transforms.
                     fits=Math.max(measured.height,measure.scrollHeight)<=contentHeight+1&&measure.scrollWidth<=contentWidth+1;
                   }else{
+                    shell.style.setProperty('--present-scale',String(candidate));
                     const bounds=stage.getBoundingClientRect(),blocks=[...stage.querySelectorAll('.presentation-copy,.presentation-verse-label')].map(node=>node.getBoundingClientRect());
                     fits=bounds.height>0&&blocks.some(box=>box.height>0)
                     ?blocks.every(box=>box.bottom<=bounds.bottom+2&&box.right<=bounds.right+2)
@@ -5277,17 +5280,18 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
                   if(fits)sampleLow=candidate;
                   else high=candidate;
                 }
-                low=Math.min(low,sampleLow);
+                ceiling=Math.min(ceiling,isolated?sampleLow:baseFont*sampleLow);
               }
             }finally{measure.remove();if(!isolated)stage.replaceChildren(...originalNodes);}
-            view.textFitProfile={key:profileKey,ceiling:low};
+            view.textFitProfile={key:profileKey,fontCeiling:ceiling};
           }
-          view.maxFittedScale=low;
-          fitted=low*clampPresentationScale(view.scale)/1.35;shell.style.setProperty('--present-scale',String(fitted));
-          textFont=Math.max(18,baseFont*fitted);
+          view.maxFittedScale=ceiling/baseFont;
+          fitted=view.maxFittedScale*clampPresentationScale(view.scale)/1.35;shell.style.setProperty('--present-scale',String(fitted));
+          textFont=Math.max(18,ceiling*clampPresentationScale(view.scale)/1.35);
           stage.querySelectorAll('.presentation-copy').forEach(copy=>copy.style.setProperty('font-size',textFont+'px','important'));
           view.textFontSize=textFont;
         }else for(let attempt=0;attempt<8;attempt++){
+          shell.style.setProperty('--present-scale',String(fitted));
           const available=Math.max(1,stage.clientHeight),needed=Math.max(1,stage.scrollHeight);
           if(needed<=available+2)break;
           const ratio=Math.max(.85,Math.min(.96,(available/needed)*.96));
@@ -5295,11 +5299,19 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           if(Math.abs(next-fitted)<.006)break;
           fitted=next;shell.style.setProperty('--present-scale',String(fitted));
         }
+        shell.style.setProperty('--present-scale',String(fitted));
         stage.classList.remove('is-fitting');stage.scrollTop=0;view.fittedScale=fitted;
         shell.dataset.fit=fitted<clampPresentationScale(view.scale)-.015?'fitted':'preferred';
         const smaller=$('[data-presentation-smaller]'),larger=$('[data-presentation-larger]');
         if(smaller)smaller.disabled=clampPresentationScale(view.scale)<=clampPresentationScale(.01)+.0001||(textSlide&&textFont<=18.01);
         if(larger){larger.disabled=clampPresentationScale(view.scale)>=1.3499;larger.title=larger.disabled&&textSlide?'Batas maksimum di atas copyright':'Perbesar teks';}
+      }
+      function layoutPresentationFrame(){
+        const shell=$('#presentation-shell'),frame=$('#presentation-frame');if(!shell||!frame)return;
+        if(!shell.classList.contains('is-projector')){frame.style.removeProperty('width');frame.style.removeProperty('height');return;}
+        const bounds=shell.getBoundingClientRect();if(bounds.width<=0||bounds.height<=0)return;
+        const width=Math.min(bounds.width,bounds.height*16/9),height=width*9/16;
+        frame.style.width=width+'px';frame.style.height=height+'px';
       }
       function schedulePresentationFit(){
         window.cancelAnimationFrame(presentationFitFrame);window.clearTimeout(presentationFitTimer);
@@ -6697,6 +6709,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       $('#presentation-dialog')?.addEventListener('close',cleanupPresentation);
       if('ResizeObserver' in window){presentationResizeObserver=new ResizeObserver(()=>{if($('#presentation-dialog')?.open)schedulePresentationFit();});const frame=$('#presentation-frame');if(frame)presentationResizeObserver.observe(frame);}
       document.addEventListener('fullscreenchange',()=>{if($('#presentation-dialog')?.open)schedulePresentationFit();});
+      document.addEventListener('galilea:page-turn-end',()=>{if($('#presentation-dialog')?.open)schedulePresentationFit();});
       document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'){if($('#presentation-dialog')?.open){requestPresentationWakeLock();schedulePresentationFit();}if(state.route==='home'&&state.async.devotional&&state.async.devotional.requestedDate!==witaDateKey())loadDevotionalHome(true);}else releasePresentationWakeLock();});
       window.addEventListener('beforeinstallprompt',event => { event.preventDefault(); state.deferredInstall=event; });
       window.addEventListener('online',()=>{updateNetworkStatus();ensureHymnalPack(true).catch(()=>{});toast('Koneksi kembali tersedia.');});
@@ -6714,6 +6727,6 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
     }());
   </script>
   <script src="/vendor/page-flip-2.0.7.js?v=24-fold" defer></script>
-  <script src="/page-turn.js?v=30-fit" defer></script>
+  <script src="/page-turn.js?v=31-pixel" defer></script>
 </body>
 </html>

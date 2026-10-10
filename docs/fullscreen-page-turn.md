@@ -1,5 +1,19 @@
 # Fullscreen soft-page fold preview
 
+## Revision 31
+
+The fit profile stores a pixel ceiling shared by all song or Bible pages.
+Candidate sizes are applied only inside the hidden measurement container;
+the live shell is never rescaled while searching. A scheduled fit during a
+page turn preserves the existing pixel font. Completion schedules a fit
+after the real page is visible again. The 16:9 frame uses the actual shell
+rectangle, including fullscreen and viewport changes, rather than viewport
+unit assumptions. Regressions cover both delayed fitting and 16:9 dimensions.
+`tests/presenter-desktop.html` renders the live app in selectable iframe
+viewports for visual checks at 1920 × 1080 and 1920 × 1200. Its metrics show
+the real inner viewport and current text sizes; it is not an emulated native
+Windows fullscreen test.
+
 ## Revision 30
 
 Shared fitting measures natural content in a hidden, unaligned measurement
@@ -73,5 +87,5 @@ Snapshots freeze resolved text sizes and the original reading frame height. The 
 
 Automated tests exercise the actual vendored engine in simulated DOM geometry in both directions. They verify diagonal polygon clipping, rotation within the page plane, moving shadows, and renderer cleanup. Adapter tests also cover old/new real-text snapshots, desktop/mobile settings, rapid input, scoped presentation types, boundaries, and motion preferences. These tests do not establish visual appearance in physical Windows Chrome.
 
-The current CSS/JS revision is `30-fit`, with service-worker shell
-`galilea-v35-30-natural-fit`. The backend and Apps Script deployment are unchanged.
+The current CSS/JS revision is `31-pixel`, with service-worker shell
+`galilea-v35-31-pixel-fit`. The backend and Apps Script deployment are unchanged.

@@ -39,7 +39,7 @@ const initialMarkup=$('#app').innerHTML;
 assert.doesNotThrow(()=>context.render(),'Rendering before bootstrap must be safe');
 assert.equal($('#app').innerHTML,initialMarkup,'Keep the loading/error message visible');
 // Execute the actual production functions, without starting unrelated site/network code.
-for(const name of ['clampPresentationScale','presentationScaleKey','storedPresentationScale','songPresentationSlides','songPresentationMarkup','normalizeOperatorSongSlides','openPresentation','renderPresentation','movePresentation','animatePresentationTransition','fitPresentationText','resizePresentation']){
+for(const name of ['clampPresentationScale','presentationScaleKey','storedPresentationScale','songPresentationSlides','songPresentationMarkup','normalizeOperatorSongSlides','openPresentation','renderPresentation','movePresentation','animatePresentationTransition','fitPresentationText','layoutPresentationFrame','resizePresentation']){
   const start=html.indexOf('      function '+name+'(');
   assert.ok(start>=0,name+' exists');
   const end=html.indexOf('\n      function ',start+1);
@@ -255,6 +255,26 @@ context.resizePresentation(-.1);
 assert.ok(parseFloat(geometryStage.querySelector('.presentation-copy').style.fontSize)<naturalFit,'A- works when grid coordinates would fail');
 context.resizePresentation(.1);
 assert.ok(Math.abs(parseFloat(geometryStage.querySelector('.presentation-copy').style.fontSize)-naturalFit)<.01,'A+ restores natural fit');
+const beforeAnimationFont=geometryStage.querySelector('.presentation-copy').style.fontSize;
+shell.classList.add('page-turn-active');
+context.fitPresentationText();
+assert.equal(geometryStage.querySelector('.presentation-copy').style.fontSize,beforeAnimationFont,'Deferred fit cannot shrink the real page while its snapshot is turning');
+assert.equal(document.querySelector('.presentation-fit-measure'),null);
+shell.classList.remove('page-turn-active');
+context.fitPresentationText();
+assert.equal(geometryStage.querySelector('.presentation-copy').style.fontSize,beforeAnimationFont,'Completion keeps the same pixel font');
+const writeProperty=shell.style.setProperty.bind(shell.style),scaleWrites=[];
+shell.style.setProperty=(name,value,...args)=>{if(name==='--present-scale')scaleWrites.push(value);return writeProperty(name,value,...args);};
+state.presentation.textFitProfile=null;context.fitPresentationText();
+assert.ok(scaleWrites.length<=2,'Natural measurement never applies its candidate sizes to the live shell');
+shell.style.setProperty=writeProperty;
+for(const [screenWidth,screenHeight,expectedWidth,expectedHeight] of [[1920,1080,1920,1080],[1920,1200,1920,1080],[2560,1080,1920,1080],[800,1200,800,450]]){
+  shell.getBoundingClientRect=()=>({width:screenWidth,height:screenHeight});shell.classList.add('is-projector');context.layoutPresentationFrame();
+  assert.equal(parseFloat($('#presentation-frame').style.width),expectedWidth);
+  assert.equal(parseFloat($('#presentation-frame').style.height),expectedHeight,'16:9 uses the actual fullscreen container');
+}
+shell.classList.remove('is-projector');context.layoutPresentationFrame();
+assert.equal($('#presentation-frame').style.width,'','Leaving 16:9 restores the full frame');
 dom.window.HTMLElement.prototype.getBoundingClientRect=nativeBox;
 dom.window.close();
 console.log('Presentation verified: verse/reff ordering, theme songs, navigation, operator/offline, Bible, reduced motion and fitting.');

@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="id">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Verifikasi viewport presenter Galilea</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#07140b;color:#fff;font:14px system-ui}header{display:flex;align-items:center;gap:18px;padding:12px 18px}select{font:inherit;padding:6px}#viewport{position:relative;margin:auto;overflow:hidden}iframe{position:absolute;inset:0;border:0;transform-origin:top left}output{font-variant-numeric:tabular-nums}
+</style>
+<header><label>Viewport <select id="resolution"><option value="1920,1080">1920 × 1080</option><option value="1920,1200">1920 × 1200</option><option value="1366,768">1366 × 768</option><option value="800,1200">800 × 1200</option></select></label><output id="metrics">Memuat aplikasi…</output></header>
+<div id="viewport"><iframe title="Aplikasi Galilea pada viewport pengujian" src="/?revision=31#hymnal"></iframe></div>
+<script>
+const resolution=document.querySelector('#resolution'),viewport=document.querySelector('#viewport'),frame=document.querySelector('iframe'),metrics=document.querySelector('#metrics');
+function resize(){const [w,h]=resolution.value.split(',').map(Number),scale=Math.min(innerWidth/w,(innerHeight-58)/h);frame.style.width=w+'px';frame.style.height=h+'px';frame.style.transform='scale('+scale+')';viewport.style.width=w*scale+'px';viewport.style.height=h*scale+'px';}
+resolution.addEventListener('change',resize);addEventListener('resize',resize);resize();
+function inspect(){const doc=frame.contentDocument,copy=doc?.querySelector('#presentation-stage .presentation-copy'),shell=doc?.querySelector('#presentation-shell');if(copy&&doc.querySelector('#presentation-dialog').open){const styles=frame.contentWindow.getComputedStyle(copy),fonts=[...doc.querySelectorAll('.presentation-copy')].map(node=>frame.contentWindow.getComputedStyle(node).fontSize);metrics.textContent=doc.documentElement.clientWidth+' × '+doc.documentElement.clientHeight+' · teks '+styles.fontSize+' · '+(shell.classList.contains('page-turn-active')?'melipat':'selesai')+' · salinan '+fonts.join(', ');}requestAnimationFrame(inspect);}inspect();
+</script>
+</html>
