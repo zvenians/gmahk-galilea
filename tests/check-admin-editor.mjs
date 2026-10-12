@@ -49,4 +49,7 @@ assert.match(w.document.querySelector('[data-link-error]').textContent,/HTTPS/);
 w.document.querySelector('[data-link-cancel]').click();assert.equal(w.document.querySelector('.rich-link-panel').hidden,true);
 editor.innerHTML='<p><br></p>';editor.dispatchEvent(new w.Event('input',{bubbles:true}));
 assert.equal(textarea.value,'','Kolom wajib tidak boleh dianggap terisi oleh paragraf kosong.');
+const eventCount=inputEvents;editor.dispatchEvent(new w.Event('blur'));assert.equal(inputEvents,eventCount,'Fokus tanpa perubahan tidak boleh menandai draf berubah.');
+for(const script of source.matchAll(/<script>([\s\S]*?)<\/script>/g))new vm.Script(script[1].replace(/<\?!= JSON\.stringify\(appUrl \|\| ''\) \?>/,"''"));
+assert.doesNotMatch(source,/id="content" data-route|\$\('#content'\)\.dataset\.route/,'Main content tidak boleh tertangkap sebagai tombol navigasi saat textbox diklik.');
 console.log('Admin editor PASS: selection restoration, all command dispatches, dirty state, form serialization, empty validation, unsafe links, and existing backend formatting parity.');

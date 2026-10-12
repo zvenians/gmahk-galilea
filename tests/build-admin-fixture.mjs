@@ -6,7 +6,7 @@ if(!output)throw new Error('Pass a temporary output directory for the isolated b
 fs.mkdirSync(output,{recursive:true});
 const source=fs.readFileSync(new URL('../apps-script-backend/Admins.html',import.meta.url),'utf8');
 const mock=`<script>
-const entities=[{key:'activities',label:'Berita Jemaat',icon:'newspaper'},{key:'gallery',label:'Media',icon:'image'},{key:'announcements',label:'Pengumuman',icon:'bell'},{key:'themeSong',label:'Lagu Tema',icon:'music'},{key:'worshipPlans',label:'Susunan Ibadah',icon:'layout'},{key:'settings',label:'Pengaturan',icon:'settings'},{key:'schedule',label:'Jadwal Pelayanan',icon:'calendar'}];
+const entities=[{key:'activities',label:'Berita Jemaat',icon:'newspaper'},{key:'gallery',label:'Galeri',icon:'image'},{key:'announcements',label:'Agenda dan Pengumuman',icon:'bell'},{key:'themeSong',label:'Lagu Tema',icon:'music'},{key:'worshipPlans',label:'Susunan Ibadah',icon:'layout'},{key:'leaders',label:'Pengurus Gereja',icon:'users'},{key:'banners',label:'Pengumuman Terjadwal',icon:'flag'},{key:'settings',label:'Pengaturan',icon:'settings'},{key:'schedule',label:'Jadwal Pelayanan',icon:'calendar'}];
 const dashboard={pendingApprovals:0,myDrafts:0,activeAnnouncements:2,serviceRequests:0,scheduleSheet:'Jadwal Triwulan',updatedAt:'Mode uji',systemStatus:'Data contoh',loading:false};
 const user={name:'Pengurus (contoh)',email:'fixture@example.test',role:'SUPERADMIN',permissions:{edit:true,approve:true,manageAdmins:true}};
 const fields=[{key:'title',label:'Judul',type:'text',required:true},{key:'description',label:'Isi Berita',type:'textarea',required:true}];
