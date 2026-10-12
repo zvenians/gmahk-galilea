@@ -71,6 +71,24 @@
     return songs.filter(song => !needle || String(song.number).includes(needle) || String(song.title).toLowerCase().includes(needle));
   }
 
+  async function removeScore(number) {
+    const previous = writes.get(number) || Promise.resolve();
+    const task = previous.catch(() => {}).then(async () => {
+      const db = await openDatabase();
+      await new Promise((resolve, reject) => {
+        const transaction = db.transaction('scores', 'readwrite');
+        transaction.objectStore('scores').delete(number);
+        transaction.oncomplete = resolve;
+        transaction.onerror = () => reject(transaction.error);
+        transaction.onabort = () => reject(transaction.error);
+      });
+      memory.delete(number);
+    });
+    writes.set(number, task);
+    try { await task; }
+    finally { if (writes.get(number) === task) writes.delete(number); }
+  }
+
   function destroy() {
     if (active) active.destroy();
     active = undefined;
@@ -108,7 +126,7 @@
       releaseUrl();
       if (score) objectUrl = URL.createObjectURL(score.blob);
       const lyrics = (song.lyrics || []).map(part => '<section class="scores-verse"><h3>'+escape(/chorus|refrain/i.test(part.type) ? 'Reff' : 'Ayat '+part.index)+'</h3><p>'+escape((part.lines || []).join('\n')).replace(/\n/g,'<br>')+'</p></section>').join('');
-      reader.innerHTML = '<article class="scores-heading"><div><p class="eyebrow">Lagu Sion No. '+escape(song.number)+'</p><h2 tabindex="-1" id="scores-song-title">'+escape(song.title)+'</h2></div><button type="button" class="btn" data-score-lyrics>'+icon('book')+'Buka mode lirik</button></article><div class="scores-layout"><section class="scores-paper" aria-label="Partitur"><div class="scores-file-control"><label for="scores-file">'+(score?'Ganti PDF partitur':'Pilih PDF partitur')+'</label><input id="scores-file" type="file" accept="application/pdf,.pdf"><p class="muted">Maksimal 25 MB. PDF disimpan di browser perangkat ini dan tidak dikirim ke server.</p></div>'+(score?'<p class="scores-filename">'+escape(score.name)+'</p><p class="scores-save-note">'+(score.persistent?'Tersimpan di browser ini.':'PDF hanya tersedia selama tab ini terbuka. Penyimpanan browser tidak tersedia atau penuh.')+'</p><div class="scores-pdf-stage"><div class="scores-pdf-actions"><button type="button" class="btn" data-score-fullscreen>Layar penuh PDF</button><a class="btn soft" href="'+escape(objectUrl)+'" target="_blank" rel="noopener">Buka PDF di tab baru</a><a class="btn soft" href="'+escape(objectUrl)+'" download="'+escape(score.name)+'">Unduh PDF</a></div><iframe class="scores-pdf" title="Partitur Lagu Sion '+escape(song.number)+'" src="'+escape(objectUrl)+'#view=FitH"></iframe></div>':'<div class="scores-empty"><h3>Partitur belum ditambahkan.</h3><p>Pilih PDF partitur untuk Lagu Sion No. '+escape(song.number)+'. Lirik tetap bisa dibaca di sampingnya.</p></div>')+'</section><aside class="scores-lyrics" aria-label="Lirik lagu"><h2>Lirik</h2>'+lyrics+'</aside></div>';
+      reader.innerHTML = '<article class="scores-heading"><div><p class="eyebrow">Lagu Sion No. '+escape(song.number)+'</p><h2 tabindex="-1" id="scores-song-title">'+escape(song.title)+'</h2></div><button type="button" class="btn" data-score-lyrics>'+icon('book')+'Buka mode lirik</button></article><div class="scores-layout"><section class="scores-paper" aria-label="Partitur"><div class="scores-file-control"><label for="scores-file">'+(score?'Ganti PDF partitur':'Pilih PDF partitur')+'</label><input id="scores-file" type="file" accept="application/pdf,.pdf"><p class="muted">Maksimal 25 MB. PDF disimpan di browser perangkat ini dan tidak dikirim ke server.</p></div>'+(score?'<p class="scores-filename">'+escape(score.name)+'</p><p class="scores-save-note">'+(score.persistent?'Tersimpan di browser ini.':'PDF hanya tersedia selama tab ini terbuka. Penyimpanan browser tidak tersedia atau penuh.')+'</p><div class="scores-pdf-stage"><div class="scores-pdf-actions"><button type="button" class="btn" data-score-fullscreen>Layar penuh PDF</button><a class="btn soft" href="'+escape(objectUrl)+'" target="_blank" rel="noopener">Buka PDF di tab baru</a><a class="btn soft" href="'+escape(objectUrl)+'" download="'+escape(score.name)+'">Unduh PDF</a><button type="button" class="btn ghost" data-score-remove>Lepas PDF</button></div><iframe class="scores-pdf" title="Partitur Lagu Sion '+escape(song.number)+'" src="'+escape(objectUrl)+'#view=FitH"></iframe></div>':'<div class="scores-empty"><h3>Partitur belum ditambahkan.</h3><p>Pilih PDF partitur untuk Lagu Sion No. '+escape(song.number)+'. Lirik tetap bisa dibaca di sampingnya.</p></div>')+'</section><aside class="scores-lyrics" aria-label="Lirik lagu"><h2>Lirik</h2>'+lyrics+'</aside></div>';
     }
 
     async function choose(number, focus) {
@@ -157,6 +175,17 @@
       if (event.target.closest('#scores-random') && songs.length) return choose(songs[Math.floor(Math.random()*songs.length)].number, true);
       if (event.target.closest('[data-score-retry]')) return choose(selectedNumber, true);
       if (event.target.closest('[data-score-lyrics]') && currentSong) return openLyrics(currentSong.number);
+      if (event.target.closest('[data-score-remove]') && currentSong) {
+        const number = selectedNumber;
+        const token = ++sequence;
+        try {
+          await removeScore(number);
+          if (disposed || token !== sequence) return;
+          renderReader(currentSong, null);
+          announce('PDF dilepas dari lagu ini. File asli tetap ada di perangkat Anda.');
+        } catch (_) { if (!disposed && token === sequence) announce('PDF belum bisa dilepas. Coba lagi.'); }
+        return;
+      }
       if (event.target.closest('[data-score-fullscreen]')) {
         try {
           if (document.fullscreenElement) await document.exitFullscreen();

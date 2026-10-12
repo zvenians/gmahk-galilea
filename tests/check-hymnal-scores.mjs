@@ -12,7 +12,8 @@ const indexedDB = {open() {
     request.result = {close(){}, transaction(name, mode) {
       const tx = {objectStore: () => ({
         get(number) { const result = {}; queueMicrotask(() => { result.result = records.get(number); result.onsuccess(); }); return result; },
-        put(entry) { queueMicrotask(() => { if (failWrites) {tx.error=new Error('quota');tx.onabort();} else {records.set(entry.number,entry);tx.oncomplete();} }); }
+        put(entry) { queueMicrotask(() => { if (failWrites) {tx.error=new Error('quota');tx.onabort();} else {records.set(entry.number,entry);tx.oncomplete();} }); },
+        delete(number) {queueMicrotask(()=>{records.delete(number);tx.oncomplete();});}
       })};
       return tx;
     }};
@@ -56,6 +57,10 @@ view.root.querySelector('[data-score-lyrics]').click();assert.deepEqual(view.ope
 attach(view,new File(['not a PDF'],'wrong.pdf'));await flush();
 assert.match(view.root.querySelector('#scores-status').textContent,/File bukan PDF/);
 assert.equal(records.get('1').name,'uji.pdf','Invalid import cannot replace saved PDF');
+view.root.querySelector('[data-score-remove]').click();await flush();
+assert.equal(records.has('1'),false,'Removing attachment deletes only this song record');
+assert.equal(view.root.querySelector('iframe'),null);
+attach(view,pdf);await flush();
 select(view,2);await flush();assert.equal(view.root.querySelector('iframe'),null,'Scores remain isolated by song number');
 assert.ok(view.revoked.length>0,'Switching songs releases prior PDF URL');
 failWrites=true;attach(view,pdf);await flush();assert.match(view.root.textContent,/hanya tersedia selama tab ini terbuka/);failWrites=false;
