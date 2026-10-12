@@ -1,5 +1,5 @@
 <!doctype html>
-<html lang="id" data-theme="light" data-build="GALILEA-ADMIN-CONTROL-CENTER-52-0-0">
+<html lang="id" data-theme="light" data-build="GALILEA-ADMIN-CONTROL-CENTER-53-0-0">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover">
@@ -1730,6 +1730,240 @@
     .rich-toolbar { gap: 1px }
     .rich-toolbar button { width: 44px }
   }
+  /* Component surfaces keep the chapel visible while protecting operational text. */
+  :root { --radius-sm: 10px; --radius: 16px; --radius-lg: 20px; --radius-xl: 28px; --dur: .24s }
+  [data-theme="dark"] { --surface: #0d1811; --bg: #08110b }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif }
+  .topbar { border-radius: 16px; padding: 12px 18px; box-shadow: 0 8px 24px rgba(9,30,17,.08) }
+  .top-actions { gap: 8px }
+  .sidebar-user .avatar { display: grid; place-items: center; width: 36px; height: 36px; background: #e7eddb; color: #173a25; border-radius: 12px }
+  .top-actions .icon-btn { border-color: transparent; background: var(--surface-2) }
+  .top-actions .icon-btn[aria-expanded="true"] { color: var(--accent-text); background: var(--accent-soft); border-color: var(--accent) }
+  #notif-badge { min-width: 20px; height: 20px; display: grid; place-items: center; border: 2px solid var(--surface); border-radius: 7px; background: var(--danger); color: #fff }
+  .crumb strong { font-size: .9rem }
+  .editorial-welcome { border-radius: 24px; padding: clamp(26px,4vw,48px); background: rgba(15,35,24,.90); margin-bottom: 20px }
+  .welcome-title { max-width: 850px; margin-bottom: 14px }
+  .welcome-meta { gap: 8px 14px }
+  .welcome-actions { margin-top: 24px; gap: 10px }
+  .editorial-welcome .btn.primary { background: #e7eddb; color: #173a25; border-color: #e7eddb }
+  .editorial-welcome .btn.primary:hover { background: #fff; border-color: #fff }
+  .editorial-welcome .btn:not(.primary) { background: #254332; color: #fff; border-color: #779281 }
+  .editorial-welcome .btn:not(.primary):hover { background: #345841 }
+  .dashboard-sync-strip { gap: 16px; margin-top: 28px; border-radius: 12px; background: var(--surface); padding: 10px 14px }
+  .sync-meta { gap: 10px; font-size: .76rem }
+  .dashboard-workbench { border-radius: 24px; padding: clamp(20px,3vw,32px) }
+  .section-label, .eyebrow { font-size: .72rem; text-transform: none; letter-spacing: .01em; font-weight: 600 }
+  .eyebrow::before { display: none }
+  .section-head-clean { margin-bottom: 18px }
+  .section-head-clean h2 { font-size: 1.3rem }
+  .editorial-metrics-bar { gap: 12px; background: transparent; border: 0; overflow: visible; box-shadow: none }
+  [data-theme="dark"] .editorial-metrics-bar { background: transparent }
+  .metric-block { min-height: 148px; gap: 10px; padding: 20px; border: 1px solid var(--line); border-radius: 16px; background: var(--surface); cursor: default }
+  .metric-block:hover { background: var(--surface); border-color: var(--line-strong) }
+  .metric-name { font-size: .8rem; font-weight: 600; text-transform: none; letter-spacing: 0; color: var(--soft) }
+  .metric-icon-small { width: 32px; height: 32px; display: grid; place-items: center; border-radius: 10px; background: var(--surface-2); color: var(--accent-text); opacity: 1 }
+  .metric-icon-small .icon { width: 16px; height: 16px }
+  .metric-number { font-size: clamp(2rem,3vw,2.7rem); font-variant-numeric: tabular-nums; font-weight: 650 }
+  .metric-caption { font-size: .74rem }
+  .actions-list-grid { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px }
+  .action-tile { display: grid; grid-template-columns: auto minmax(0,1fr); align-items: start; align-content: start; gap: 16px; min-height: 150px; padding: 22px; border-radius: 18px; background: var(--surface); transition: background var(--dur), border-color var(--dur), transform var(--dur) var(--ease) }
+  .action-tile:hover { box-shadow: none; transform: translateY(-3px); border-color: var(--accent); background: var(--surface-hover) }
+  .action-tile:active { transform: translateY(0) }
+  .action-tile-icon { width: 44px; height: 44px; border-radius: 13px; color: var(--accent-text); background: var(--accent-soft) }
+  .action-tile-body { align-self: center }
+  .action-tile-body strong { font-size: .98rem; font-weight: 650 }
+  .action-tile-body span { font-size: .78rem; line-height: 1.6; margin-top: 6px }
+  .action-tile-link { grid-column: 2; color: var(--accent-text); font-size: .74rem; font-weight: 650; text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--line-strong) }
+  .action-tile:hover .action-tile-link { text-decoration-color: currentColor }
+  .action-tile[data-route="worshipPlans"] { grid-column: span 2; padding: 28px; background: var(--accent-soft); border-color: color-mix(in srgb,var(--accent) 25%,var(--line)); min-height: 174px }
+  .action-tile[data-route="worshipPlans"] .action-tile-body strong { font-size: 1.5rem; letter-spacing: -.03em }
+  .action-tile[data-route="worshipPlans"] .action-tile-icon { background: var(--btn-primary-bg); color: var(--btn-primary-text) }
+  .action-tile[data-route="worshipPlans"]:hover { background: color-mix(in srgb,var(--accent-soft) 90%,var(--surface)); border-color: var(--accent) }
+  .attention-header h2 { font-size: 1.05rem }
+  .attention-list { gap: 10px }
+  .attention-item { padding: 16px 18px; border-radius: 14px; gap: 18px; min-height: 76px }
+  .attention-count { min-width: 44px; color: var(--accent-text); font-variant-numeric: tabular-nums }
+  .attention-text strong { font-size: .86rem }
+  .attention-text span { font-size: .76rem; margin-top: 4px }
+  .btn, .btn-sync { min-height: 44px; padding: 10px 16px; gap: 8px; border-radius: 11px; font-size: .8rem; font-weight: 650; white-space: normal; line-height: 1.35; transition: color var(--dur),background var(--dur),border-color var(--dur),transform .16s var(--ease) }
+  .btn:active:not(:disabled), .btn-sync:active { transform: translateY(1px) }
+  .btn.primary { border-color: var(--btn-primary-bg); box-shadow: inset 0 1px 0 rgba(255,255,255,.12) }
+  .btn.danger:hover { background: var(--danger-soft); color: var(--danger) }
+  .btn[aria-busy="true"] { opacity: .8; cursor: progress }
+  .busy-spinner { width: 16px; height: 16px; flex: 0 0 auto; border: 2px solid currentColor; border-right-color: transparent; border-radius: 50%; animation: spin .8s linear infinite }
+  .icon-btn { width: 44px; height: 44px; flex: 0 0 44px; border-radius: 12px }
+  .icon-btn:active { transform: scale(.95) }
+  .icon-btn[aria-busy="true"] .icon { animation: spin .8s linear infinite }
+  .icon-btn:disabled { cursor: progress; opacity: .7 }
+  .page-head { padding: 0 0 24px; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; background: transparent; box-shadow: none; gap: 20px }
+  .page-head h1 { font-size: clamp(1.9rem,3vw,2.8rem); margin: 4px 0 10px }
+  .page-head p { max-width: 600px; line-height: 1.6 }
+  .toolbar { padding: 10px 12px; gap: 12px; border-radius: 14px; background: var(--surface-2) }
+  .search { gap: 10px; padding-inline: 6px; min-width: 0 }
+  .toolbar :is(input,select,.search) { min-height: 44px }
+  .filters { gap: 8px }
+  input,select,textarea { min-height: 44px; border-radius: 10px; padding: 11px 13px; font-size: .86rem }
+  .field { gap: 8px }
+  .field > label { font-size: .8rem; font-weight: 650; text-transform: none; letter-spacing: 0 }
+  .form-grid { gap: 20px }
+  .help { font-size: .73rem }
+  .record-grid { gap: 18px; grid-template-columns: repeat(auto-fill,minmax(min(100%,280px),1fr)) }
+  .card { border-radius: 18px; transition: border-color var(--dur),background var(--dur) }
+  .card:hover { box-shadow: none }
+  .record { overflow: hidden; gap: 0; padding: 0; background: var(--surface) }
+  .record:hover { transform: none }
+  .record-thumb { position: relative; width: 100%; aspect-ratio: 16/9; overflow: hidden; background: var(--surface-2); display: grid; place-items: center }
+  .record-thumb img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; transition: transform .5s var(--ease) }
+  .record:hover .record-thumb img { transform: scale(1.035) }
+  .record-thumb-fallback { display: grid; place-items: center; gap: 8px; color: var(--faint); font-size: .74rem }
+  .record-thumb-fallback .icon { width: 28px; height: 28px }
+  .record-main { padding: 20px 20px 10px; flex: 1 }
+  .record h3 { margin: 14px 0 10px; font-size: 1.1rem; line-height: 1.35; font-weight: 650 }
+  .record-summary { -webkit-line-clamp: 3; font-size: .82rem; line-height: 1.6; margin-bottom: 12px }
+  .record-actions { align-self: stretch; width: auto; margin: 0 20px; padding: 14px 0 20px; border-top: 1px solid var(--line); gap: 8px; justify-content: flex-start }
+  .record-actions .btn { flex: 0 1 auto }
+  .record-actions .record-delete { margin-left: auto; min-width: 44px; padding: 10px }
+  [data-theme] .status { text-transform: none; letter-spacing: 0; font-size: .7rem; font-weight: 600; border-radius: 7px; min-height: 26px; padding: 3px 8px; background: var(--surface-2); color: var(--soft); border-color: var(--line) }
+  [data-theme] .status:is(.publish,.approved) { background: var(--success-soft); color: var(--success); border-color: transparent }
+  [data-theme] .status.pending { background: var(--warning-soft); color: var(--accent-text); border-color: transparent }
+  [data-theme] .status.rejected { background: var(--danger-soft); color: var(--danger); border-color: transparent }
+  .status::before { display: none }
+  .status-legend { padding: 0; background: transparent; border: 0; gap: 8px; margin-bottom: 20px }
+  .status-legend > span:last-child { font-size: .73rem }
+  .workflow-item { padding: 18px; border-radius: 14px }
+  .workflow-item:hover,.approval-card:hover,.service-card:hover,.user-card:hover { transform: none; box-shadow: none }
+  .workflow-item span { font-size: .74rem }
+  .approval-tabs { position: static; padding: 5px; border-radius: 12px; background: var(--surface-2); backdrop-filter: none }
+  .approval-tab { min-height: 44px; border-radius: 9px; font-size: .8rem }
+  .approval-tab.active { color: var(--btn-primary-text); background: var(--btn-primary-bg) }
+  .approval-card,.service-card,.user-card { padding: 22px; gap: 20px }
+  .role-card,.activity-row { border-radius: 14px; padding: 16px }
+  dialog { width: min(760px,calc(100vw - 32px)); max-width: min(760px,calc(100vw - 32px)); border-radius: 24px; border-color: var(--line-strong); box-shadow: 0 28px 90px rgba(3,15,8,.32) }
+  dialog::backdrop { background: rgba(5,18,10,.64); backdrop-filter: none; -webkit-backdrop-filter: none }
+  dialog[open] { animation: admin-dialog-in .24s var(--ease) }
+  @keyframes admin-dialog-in { from { opacity: 0; transform: translateY(12px) scale(.98) } }
+  .modal-head { padding: 18px 24px; gap: 16px }
+  .modal-head strong { font-size: 1.12rem; letter-spacing: -.02em }
+  .modal-body { padding: 24px; scrollbar-width: thin }
+  .modal-foot { gap: 10px; padding: 16px 24px; background: var(--surface-2); flex-wrap: wrap }
+  .workflow-guide { gap: 8px; margin-bottom: 24px }
+  .workflow-step { border-radius: 10px; padding: 12px }
+  .workflow-step b { font-size: .73rem }
+  .workflow-step span { font-size: .68rem }
+  .workflow-step.active { box-shadow: none; border-color: var(--accent); color: var(--accent-text); background: var(--accent-soft) }
+  .rich-editor { border-radius: 14px }
+  .rich-toolbar { padding: 8px; gap: 3px }
+  .rich-toolbar button { border-radius: 8px }
+  .rich-toolbar button[aria-pressed="true"] { box-shadow: inset 0 0 0 1px var(--accent) }
+  .image-upload-panel { padding: 16px; border-radius: 12px; border-style: dashed }
+  .photo-thumb:focus-within .photo-thumb-actions { opacity: 1 }
+  .btn-remove-photo,.btn-remove-photo-row,.btn-set-primary,.btn-set-primary-row { min-width: 44px; min-height: 44px; border-radius: 9px }
+  .notification-panel { width: min(420px,calc(100vw - 32px)); max-width: min(420px,calc(100vw - 32px)); border-radius: 20px; box-shadow: 0 20px 60px rgba(5,24,12,.2); background: var(--surface); transform-origin: top right }
+  .notification-panel.open { animation: admin-dialog-in .2s var(--ease) }
+  .notification-panel:hover { box-shadow: 0 20px 60px rgba(5,24,12,.2) }
+  .notification-head { z-index: 1; padding: 18px 20px }
+  .notification-head strong { font-size: 1rem; letter-spacing: -.02em }
+  .notification-head span { font-size: .73rem; margin-top: 5px }
+  .notification-list { padding: 8px; gap: 4px }
+  .notification-item { padding: 14px 12px; gap: 12px; border-radius: 12px; transition: background var(--dur) }
+  .notification-symbol { width: 36px; height: 36px; display: grid!important; place-items: center; margin: 0!important; border-radius: 11px; color: var(--accent-text)!important; background: var(--accent-soft) }
+  .notification-item:is(.danger,.error) .notification-symbol { color: var(--danger)!important; background: var(--danger-soft) }
+  .notification-item.warning .notification-symbol { color: var(--accent-text)!important; background: var(--warning-soft) }
+  .notification-item strong { font-size: .84rem }
+  .notification-item span { font-size: .77rem }
+  .notification-item small { font-size: .71rem; margin-top: 8px }
+  .notification-empty { padding: 36px 20px }
+  .notification-empty > .icon { margin: 0 auto 16px; width: 40px; height: 40px; padding: 10px; border-radius: 12px; background: var(--success-soft); color: var(--success) }
+  .notification-empty strong { display: block; color: var(--text); margin-bottom: 6px; font-weight: 650 }
+  .notification-empty p { margin: 0; font-size: .8rem }
+  .operation-bar { border: 1px solid var(--line); border-radius: 14px; padding: 14px 18px; background: var(--surface); backdrop-filter: none }
+  .operation-bar.success { background: var(--success-soft) }
+  .operation-bar.warning { background: var(--warning-soft) }
+  .operation-bar.error { background: var(--danger-soft) }
+  .operation-copy strong { font-size: .85rem }
+  .operation-copy span { white-space: normal; font-size: .76rem; margin-top: 4px }
+  .toast-zone { gap: 10px; bottom: max(20px,env(safe-area-inset-bottom)); right: 20px; pointer-events: none }
+  .toast { pointer-events: auto; position: relative; overflow: hidden; gap: 12px; min-width: min(390px,calc(100vw - 40px)); padding: 18px 16px 20px; border: 1px solid var(--line-strong); border-radius: 18px; box-shadow: 0 12px 44px rgba(4,20,11,.2) }
+  .toast-icon { width: 36px; height: 36px; border-radius: 11px }
+  .toast-copy strong { font-size: .85rem; font-weight: 700 }
+  .toast-copy span { font-size: .78rem; line-height: 1.6; margin-top: 4px }
+  .toast-dismiss { width: 44px; height: 44px; display: grid; place-items: center; margin: -8px -8px 0 0; border-radius: 10px }
+  .toast-dismiss:hover { color: var(--text); background: var(--surface-2) }
+  .toast-undo { min-height: 44px; margin-top: 0 }
+  .toast-progress { position: absolute; bottom: 0; left: 0; height: 3px; width: 100%; background: var(--accent); transform-origin: left; animation: toast-lifetime var(--toast-duration,5200ms) linear forwards }
+  .toast.success .toast-progress { background: var(--success) }
+  .toast.warning .toast-progress { background: var(--warning) }
+  .toast.error .toast-progress { background: var(--danger) }
+  .toast.is-paused .toast-progress { animation-play-state: paused }
+  @keyframes toast-lifetime { to { transform: scaleX(0) } }
+  .confirm-dialog { width: min(470px,calc(100vw - 32px)) }
+  .confirm-dialog .modal-body { padding: 32px }
+  .confirm-mark { width: 52px; height: 52px; border-radius: 16px; margin-bottom: 22px }
+  .confirm-dialog h2 { font-size: 1.6rem; line-height: 1.2 }
+  .confirm-dialog p { font-size: .88rem; line-height: 1.7 }
+  .confirm-dialog .modal-foot .btn { flex: 1 }
+  .empty { grid-column: 1/-1; padding: 48px 20px; background: var(--surface-2); border: 1px dashed var(--line-strong); border-radius: 16px }
+  @media (max-width: 980px) {
+    .actions-list-grid { grid-template-columns: repeat(2,minmax(0,1fr)) }
+    .action-tile[data-route="worshipPlans"] { grid-column: 1/-1 }
+    .action-tile { min-height: 156px }
+  }
+  @media (max-width: 620px) {
+    .editorial-welcome { padding: 24px 20px; border-radius: 20px }
+    .dashboard-workbench { padding: 20px 16px; border-radius: 20px }
+    .welcome-title { font-size: clamp(28px,7vw,36px) }
+    .welcome-sub { font-size: .88rem }
+    .welcome-actions .btn { flex: 1 1 auto }
+    .dashboard-sync-strip { flex-direction: column; align-items: stretch; gap: 10px }
+    .sync-meta { align-items: flex-start }
+    .sync-meta > .icon { flex-shrink: 0; margin-top: 4px }
+    .actions-list-grid { grid-template-columns: 1fr; gap: 10px }
+    .action-tile,.action-tile[data-route="worshipPlans"] { min-height: 0; padding: 20px; gap: 10px 16px; grid-column: auto }
+    .action-tile[data-route="worshipPlans"] .action-tile-body strong { font-size: 1.2rem }
+    .editorial-metrics-bar { grid-template-columns: repeat(2,minmax(0,1fr)); gap: 10px }
+    .metric-block { padding: 14px; min-height: 144px }
+    .metric-top { align-items: flex-start }
+    .metric-name { font-size: .73rem }
+    .metric-icon-small { width: 26px; height: 26px; flex-shrink: 0 }
+    .metric-number { font-size: 2rem }
+    .metric-caption { font-size: .71rem }
+    .notification-panel { position: fixed; top: 88px; left: 12px; right: 12px; width: auto; max-height: calc(100dvh - 110px) }
+    .toolbar { align-items: stretch }
+    .toolbar .search { flex-basis: 100% }
+    .toolbar .filters { width: 100%; flex-direction: row }
+    .toolbar .filters select { flex: 1; min-width: 0 }
+    .page-head .btn { width: 100% }
+    .record-actions { display: flex; flex-direction: row }
+    .record-actions .btn { width: auto; flex: 1 }
+    .record-actions .record-delete { flex: 0 0 44px }
+    dialog { border-radius: 20px; width: calc(100vw - 16px); max-width: calc(100vw - 16px) }
+    .modal-head,.modal-body { padding: 18px }
+    .modal-foot { padding: 14px 18px max(14px,env(safe-area-inset-bottom)); display: flex; flex-wrap: wrap }
+    #editor-dialog .modal-foot .btn { flex: 1 1 calc(50% - 10px); width: auto }
+    .workflow-guide { grid-template-columns: repeat(2,minmax(0,1fr)) }
+    .workflow-step::after { display: none }
+    .form-grid { gap: 18px }
+    .toast-zone { left: 12px; right: 12px; bottom: max(12px,env(safe-area-inset-bottom)) }
+    .toast { min-width: 0; width: 100%; padding-inline: 14px }
+    .confirm-dialog .modal-body { padding: 24px }
+  }
+  @media (max-width: 360px) {
+    .top-actions { gap: 2px }
+    .topbar { padding-inline: 8px }
+    .metric-top { flex-direction: column-reverse; gap: 8px }
+    .metric-block { min-height: 166px }
+    .action-tile { grid-template-columns: 36px minmax(0,1fr); gap: 10px }
+    .action-tile-icon { width: 36px; height: 36px }
+  }
+  @media (hover:none) {
+    .photo-thumb-actions { opacity: 1 }
+    .action-tile:hover { transform: none }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .record-thumb img { transform: none!important }
+    .action-tile:hover,.btn:hover,.btn:active,.icon-btn:active { transform: none }
+    .toast-progress { display: none }
+  }
 </style>
 </head>
 <body>
@@ -1770,9 +2004,9 @@
   <div id="root"></div>
   <div class="toast-zone" id="toasts" aria-live="polite"></div>
 
-  <dialog id="editor-dialog">
+  <dialog id="editor-dialog" aria-labelledby="editor-title">
     <form id="editor-form">
-      <div class="modal-head"><div><strong id="editor-title">Editor</strong><div class="small faint" id="editor-subtitle"></div></div><button class="icon-btn" type="button" data-close="editor-dialog"><svg class="icon"><use href="#i-close"/></svg></button></div>
+      <div class="modal-head"><div><strong id="editor-title">Editor</strong><div class="small faint" id="editor-subtitle"></div></div><button class="icon-btn" type="button" data-close="editor-dialog" aria-label="Tutup editor"><svg class="icon"><use href="#i-close"/></svg></button></div>
       <div class="modal-body"><div id="editor-workflow"></div><div class="form-grid" id="editor-fields"></div><section class="editor-preview" id="editor-preview" aria-live="polite"></section></div>
       <div class="modal-foot"><button class="btn" type="button" data-close="editor-dialog">Batal</button><button class="btn" type="button" data-preview-editor>Pratinjau</button><button class="btn soft" type="submit" name="intent" value="draft">Simpan Draft</button><button class="btn primary" type="submit" name="intent" value="submit"><svg class="icon"><use href="#i-send"/></svg>Ajukan Persetujuan</button></div>
     </form>
@@ -1780,7 +2014,7 @@
   <dialog id="review-dialog"><div class="modal-head"><div><strong>Review Perubahan</strong><span class="small faint" id="review-caption">Periksa isi sebelum mengambil keputusan</span></div><button class="icon-btn" type="button" data-close="review-dialog"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="modal-body" id="review-body"></div><div class="modal-foot" id="review-actions"><button class="btn danger" type="button" data-review="REJECT">Minta revisi</button><button class="btn primary" type="button" data-review="APPROVE"><svg class="icon"><use href="#i-check"/></svg>Setujui &amp; Terbitkan</button></div></dialog>
   <dialog id="service-dialog"><div class="modal-head"><strong>Permohonan Jemaat</strong><button class="icon-btn" type="button" data-close="service-dialog"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="modal-body" id="service-body"></div><div class="modal-foot"><button class="btn" type="button" data-close="service-dialog">Tutup</button><button class="btn primary" type="button" id="save-service">Simpan Status</button></div></dialog>
   <dialog id="user-dialog"><form id="user-form"><div class="modal-head"><strong>Pengelola Portal</strong><button class="icon-btn" type="button" data-close="user-dialog"><svg class="icon"><use href="#i-close"/></svg></button></div><div class="modal-body"><div class="form-grid"><input type="hidden" name="id"><div class="field full"><label>Nama</label><input name="name" required></div><div class="field full"><label>Email Google</label><input name="email" type="email" required></div><div class="field"><label>Peran</label><select name="role"><option>VIEWER</option><option>EDITOR</option><option>APPROVER</option><option>SUPERADMIN</option></select></div><div class="field"><label>Status</label><select name="status"><option>AKTIF</option><option>NONAKTIF</option></select></div></div></div><div class="modal-foot"><button class="btn" type="button" data-close="user-dialog">Batal</button><button class="btn primary" type="submit">Simpan Pengelola</button></div></form></dialog>
-  <dialog id="confirm-dialog" class="confirm-dialog"><div class="modal-body"><div class="confirm-mark" id="confirm-mark"><svg class="icon"><use href="#i-info"/></svg></div><h2 id="confirm-title">Konfirmasi tindakan</h2><p id="confirm-message"></p></div><div class="modal-foot"><button class="btn" type="button" id="confirm-cancel">Batal</button><button class="btn primary" type="button" id="confirm-accept">Lanjutkan</button></div></dialog>
+  <dialog id="confirm-dialog" class="confirm-dialog" aria-labelledby="confirm-title" aria-describedby="confirm-message"><div class="modal-body"><div class="confirm-mark" id="confirm-mark" aria-hidden="true"><svg class="icon"><use href="#i-info"/></svg></div><h2 id="confirm-title">Konfirmasi tindakan</h2><p id="confirm-message"></p></div><div class="modal-foot"><button class="btn" type="button" id="confirm-cancel">Batal</button><button class="btn primary" type="button" id="confirm-accept">Lanjutkan</button></div></dialog>
 
 <script>
   (function(){
@@ -1793,12 +2027,34 @@
     const esc=value=>String(value==null?'':value).replace(/[&<>"]/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[ch]));
     const attr=esc;
     function server(name,args,timeoutMs){return new Promise((resolve,reject)=>{let done=false;const timer=setTimeout(()=>{if(!done){done=true;reject(new Error('Server admin belum merespons. Periksa daftar terbaru sebelum mencoba lagi karena proses mungkin sudah tersimpan.'))}},Math.max(8000,Number(timeoutMs)||25000));const finish=fn=>value=>{if(done)return;done=true;clearTimeout(timer);fn(value)};if(typeof google!=='undefined'&&google.script&&google.script.run&&typeof google.script.run[name]==='function'){const runner=google.script.run.withSuccessHandler(finish(resolve)).withFailureHandler(finish(error=>reject(new Error(error&&error.message?error.message:String(error)))));runner[name].apply(runner,args||[]);return}fetch('/api/admin',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({method:name,args:args||[]})}).then(res=>{if(!res.ok){const ct=res.headers.get('content-type')||'';if(!ct.includes('application/json'))throw new Error('Server mengembalikan error '+res.status+'. Coba kembali.');}return res.json()}).then(payload=>{if(!payload||payload.ok===false){finish(error=>reject(new Error(error&&error.message?error.message:String(error))))(payload&&payload.error?payload.error:'Terjadi gangguan server admin.')}else{finish(resolve)(payload.data!==undefined?payload.data:payload)}}).catch(finish(error=>reject(new Error(error&&error.message?error.message:String(error)))))})}
-    function toast(message,typeOrUndo,duration){const undoFn=typeof typeOrUndo==='function'?typeOrUndo:null;const type=undoFn?'info':(['success','warning','error','info'].includes(typeOrUndo)?typeOrUndo:'info');const titles={success:'Berhasil',warning:'Perlu perhatian',error:'Proses gagal',info:'Informasi'};const icons={success:'check',warning:'info',error:'close',info:'info'};const el=document.createElement('div');el.className='toast '+type;el.setAttribute('role',type==='error'?'alert':'status');el.innerHTML='<span class="toast-icon">'+icon(icons[type])+'</span><span class="toast-copy"><strong>'+titles[type]+'</strong><span>'+esc(message)+'</span>'+(undoFn?'<button class="toast-undo">Urungkan</button>':'')+'</span><button class="toast-dismiss" aria-label="Tutup">'+icon('close')+'</button>';const remove=()=>el.remove();el.querySelector('.toast-dismiss').addEventListener('click',remove);if(undoFn)el.querySelector('.toast-undo').addEventListener('click',()=>{undoFn();remove()});$('#toasts').append(el);const timer=setTimeout(remove,duration||5200);el.addEventListener('mouseenter',()=>clearTimeout(timer),{once:true})}
+    function toast(message,typeOrUndo,duration){
+      const undoFn=typeof typeOrUndo==='function'?typeOrUndo:null;
+      const type=undoFn?'info':(['success','warning','error','info'].includes(typeOrUndo)?typeOrUndo:'info');
+      const titles={success:'Berhasil',warning:'Perlu perhatian',error:'Proses gagal',info:'Informasi'};
+      const icons={success:'check',warning:'info',error:'close',info:'info'};
+      const el=document.createElement('div');
+      let remaining=Number(duration)>0?Number(duration):5200,started=0,timer,hovered=false,focused=false;
+      el.className='toast '+type;
+      el.setAttribute('role',type==='error'?'alert':'status');
+      el.style.setProperty('--toast-duration',remaining+'ms');
+      el.innerHTML='<span class="toast-icon">'+icon(icons[type])+'</span><span class="toast-copy"><strong>'+titles[type]+'</strong><span>'+esc(message)+'</span>'+(undoFn?'<button type="button" class="toast-undo">Urungkan</button>':'')+'</span><button type="button" class="toast-dismiss" aria-label="Tutup notifikasi">'+icon('close')+'</button><span class="toast-progress" aria-hidden="true"></span>';
+      const remove=()=>{clearTimeout(timer);el.remove()};
+      const resume=()=>{if(hovered||focused||timer)return;el.classList.remove('is-paused');started=performance.now();timer=setTimeout(remove,remaining)};
+      const pause=()=>{if(!timer)return;clearTimeout(timer);timer=null;remaining=Math.max(0,remaining-(performance.now()-started));el.classList.add('is-paused')};
+      el.querySelector('.toast-dismiss').addEventListener('click',remove);
+      if(undoFn)el.querySelector('.toast-undo').addEventListener('click',()=>{undoFn();remove()});
+      el.addEventListener('mouseenter',()=>{hovered=true;pause()});
+      el.addEventListener('mouseleave',()=>{hovered=false;resume()});
+      el.addEventListener('focusin',()=>{focused=true;pause()});
+      el.addEventListener('focusout',event=>{if(el.contains(event.relatedTarget))return;focused=false;resume()});
+      $('#toasts').append(el);
+      resume();
+    }
     function setOperation(type,title,detail){const bar=$('#operation-bar');if(!bar)return;bar.className='operation-bar '+(type||'info');bar.hidden=false;$('#operation-title').textContent=title||'Proses selesai';$('#operation-detail').textContent=detail||'';$('#operation-icon').innerHTML=icon(type==='success'?'check':type==='error'?'close':'info')}
     function clearOperation(){const bar=$('#operation-bar');if(bar)bar.hidden=true}
-    function confirmAction(options){const config=typeof options==='string'?{message:options}:options||{};const dialog=$('#confirm-dialog');if(!dialog)return Promise.resolve(false);$('#confirm-title').textContent=config.title||'Konfirmasi tindakan';$('#confirm-message').textContent=config.message||'Lanjutkan tindakan ini?';const accept=$('#confirm-accept');accept.textContent=config.confirmLabel||'Lanjutkan';accept.className='btn '+(config.danger?'danger':'primary');$('#confirm-mark').classList.toggle('danger',Boolean(config.danger));if(dialog.open)dialog.close();dialog.showModal();return new Promise(resolve=>{state.confirmResolve=resolve})}
+    function confirmAction(options){const config=typeof options==='string'?{message:options}:options||{};const dialog=$('#confirm-dialog');if(!dialog)return Promise.resolve(false);if(state.confirmResolve)finishConfirmation(false);$('#confirm-title').textContent=config.title||'Konfirmasi tindakan';$('#confirm-message').textContent=config.message||'Lanjutkan tindakan ini?';const accept=$('#confirm-accept');accept.innerHTML=icon(config.danger?'trash':'check')+'<span>'+esc(config.confirmLabel||'Lanjutkan')+'</span>';accept.className='btn '+(config.danger?'danger':'primary');$('#confirm-mark').classList.toggle('danger',Boolean(config.danger));$('#confirm-mark').innerHTML=icon(config.danger?'trash':'info');dialog.showModal();$('#confirm-cancel').focus();return new Promise(resolve=>{state.confirmResolve=resolve})}
     function finishConfirmation(value){const dialog=$('#confirm-dialog');if(dialog&&dialog.open)dialog.close();if(state.confirmResolve){const resolve=state.confirmResolve;state.confirmResolve=null;resolve(Boolean(value))}}
-    function setBusy(button,busy,label){if(!button)return;button.disabled=busy;if(busy){button.dataset.old=button.innerHTML;button.textContent=label||'Memproses…'}else if(button.dataset.old){button.innerHTML=button.dataset.old;delete button.dataset.old}}
+    function setBusy(button,busy,label){if(!button)return;button.disabled=busy;if(busy){if(button.dataset.old==null)button.dataset.old=button.innerHTML;button.setAttribute('aria-busy','true');button.innerHTML='<span class="busy-spinner" aria-hidden="true"></span><span>'+esc(label||'Memproses…')+'</span>'}else{button.removeAttribute('aria-busy');if(button.dataset.old!=null){button.innerHTML=button.dataset.old;delete button.dataset.old}}}
     function status(value){const raw=String(value||'DRAFT').toUpperCase(),key=raw.toLowerCase(),labels={DRAFT:'Draf',PENDING:'Menunggu Tinjauan',REVIEW:'Sedang Ditinjau',APPROVED:'Sudah Disetujui',PUBLISH:'Sudah Terbit',REJECTED:'Perlu Revisi'};return '<span class="status '+key+'" title="Status: '+attr(labels[raw]||raw)+'">'+esc(labels[raw]||raw)+'</span>'}
     function friendlyEntity(key){const item=(state.boot.entities||[]).find(e=>e.key===key);return item?item.label:key}
     function initials(name){return String(name||'A').split(/\s+/).slice(0,2).map(x=>x[0]).join('').toUpperCase()}
@@ -1813,6 +2069,7 @@
     }
     function nav(route,iconName,label,count){const value=Math.max(0,Number(count)||0);return '<button class="nav-item" data-route="'+attr(route)+'">'+icon(iconName)+'<span>'+esc(label)+'</span><span class="count" data-nav-count="'+attr(route)+'" '+(value?'':'hidden')+'>'+esc(value)+'</span></button>'}
     function closeSidebar(){$('#sidebar')?.classList.remove('open');$('#overlay')?.classList.remove('open');$('#mobile-menu')?.setAttribute('aria-expanded','false')}
+    function closeNotifications(restoreFocus){const panel=$('#notif-panel');if(!panel?.classList.contains('open'))return;panel.classList.remove('open');$('#notif-toggle')?.setAttribute('aria-expanded','false');if(restoreFocus)$('#notif-toggle')?.focus()}
     function routeTitle(){if(state.route==='dashboard')return'Dashboard';if(state.route==='services')return'Layanan Jemaat';if(state.route==='approvals')return'Persetujuan';if(state.route==='activity')return'Audit & Aktivitas';if(state.route==='users')return'Pengelola Portal';if(state.route==='system')return'Sistem & Backup';return friendlyEntity(state.route)}
     function navigate(route){state.route=route;state.search='';state.status='ALL';location.hash=route;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.route===route));$('#crumb-title').textContent=routeTitle();$('#content').dataset.page=route;$$('.nav-more').forEach(el=>el.open=false);closeSidebar();renderRoute()}
 
@@ -1875,7 +2132,7 @@
         '</section>' +
         '<div class="dashboard-workbench">'+attentionSection +
         '<section class="editorial-metrics-section">' +
-          '<div class="section-label">RINGKASAN AKTIVITAS</div>' +
+          '<div class="section-label">Ringkasan aktivitas</div>' +
           '<div class="editorial-metrics-bar">' +
             metric('check', metricValue(d.pendingApprovals), 'Persetujuan', 'Menunggu review', loading) +
             '<div class="metric-divider"></div>' +
@@ -1889,7 +2146,7 @@
         '<section class="editorial-actions-section">' +
           '<div class="section-head-clean">' +
             '<div>' +
-              '<div class="section-label">AKSES CEPAT</div>' +
+              '<div class="section-label">Akses cepat</div>' +
               '<h2>Tindakan Utama Pelayanan</h2>' +
             '</div>' +
           '</div>' +
@@ -1910,7 +2167,7 @@
           '<strong>'+esc(title)+'</strong>' +
           '<span>'+esc(description)+'</span>' +
         '</div>' +
-        '<span class="action-tile-arrow">'+icon('external')+'</span>' +
+        '<span class="action-tile-link">'+(route==='worshipPlans'?'Kelola susunan ibadah':'Buka '+esc(title.toLowerCase()))+'</span>' +
       '</button>';
     }
 
@@ -1920,13 +2177,19 @@
       if(badge){badge.textContent=data.count>99?'99+':data.count;badge.hidden=!data.count}
       const panel=$('#notif-panel');
       if(!panel)return;
+      const refreshFocused=document.activeElement===panel.querySelector('[data-refresh-notifications]');
       const items=Array.isArray(data.items)?data.items:[];
-      panel.innerHTML='<div class="notification-head"><div><strong>Pusat Notifikasi</strong><span>'+(data.checkedAt?'Diperiksa '+esc(data.checkedAt):'Mengambil data terbaru…')+'</span></div><button class="icon-btn" type="button" data-refresh-notifications aria-label="Perbarui notifikasi">'+icon('refresh')+'</button></div><div class="notification-list">'+(items.length?items.map(item=>'<button class="notification-item '+attr(item.severity||'info')+'" data-route="'+attr(item.route||'dashboard')+'"><span class="notification-dot"></span><span><strong>'+esc(item.title)+'</strong><span>'+esc(item.detail||'')+'</span>'+(item.time?'<small>'+esc(item.time)+'</small>':'')+'</span></button>').join(''):'<div class="notification-empty">'+icon('check')+'<p>Tidak ada tindakan yang perlu ditangani.</p></div>')+'</div>';
+      const notificationIcon=item=>({approvals:'check',services:'heart',activities:'newspaper',schedule:'calendar',gallery:'image'})[item.route]||'bell';
+      panel.innerHTML='<div class="notification-head"><div><strong>Pusat Notifikasi</strong><span>'+(data.checkedAt?'Diperiksa '+esc(data.checkedAt):'Mengambil data terbaru…')+'</span></div><button class="icon-btn" type="button" data-refresh-notifications aria-label="Perbarui notifikasi">'+icon('refresh')+'</button></div><div class="notification-list">'+(items.length?items.map(item=>'<button type="button" class="notification-item '+attr(item.severity||'info')+'" data-route="'+attr(item.route||'dashboard')+'"><span class="notification-symbol" aria-hidden="true">'+icon(notificationIcon(item))+'</span><span><strong>'+esc(item.title)+'</strong><span>'+esc(item.detail||'')+'</span>'+(item.time?'<small>'+esc(item.time)+'</small>':'')+'</span></button>').join(''):'<div class="notification-empty">'+icon('check')+'<strong>Semua sudah ditangani</strong><p>Tidak ada tindakan yang perlu ditangani.</p></div>')+'</div>';
+      if(refreshFocused)panel.querySelector('[data-refresh-notifications]')?.focus({preventScroll:true});
     }
     async function loadNotifications(showError){
       if(!state.boot)return;
+      const button=showError?$('[data-refresh-notifications]'):null;
+      if(button){button.disabled=true;button.setAttribute('aria-busy','true')}
       try{state.notifications=await server('adminGetNotifications',[],20000);syncNotifications()}
       catch(error){if(showError)toast(cleanError(error.message),'error')}
+      finally{if(button){button.disabled=false;button.removeAttribute('aria-busy')}}
     }
     async function loadDashboardSummary(showError){if(!state.boot)return;const request=++state.dashboardRequest;state.boot.dashboard.loading=true;state.boot.dashboard.error='';if(state.route==='dashboard')renderDashboard();try{const result=await server('adminGetDashboardSummary',[],32000);if(request!==state.dashboardRequest)return;if(result&&result.dashboard)state.boot.dashboard=Object.assign({},state.boot.dashboard,result.dashboard,{loading:false,error:''});if(result&&result.publicSite)state.boot.publicSite=Object.assign({},state.boot.publicSite,result.publicSite);if(state.route==='dashboard')renderDashboard()}catch(error){if(request!==state.dashboardRequest)return;state.boot.dashboard.loading=false;state.boot.dashboard.error=cleanError(error.message);if(state.route==='dashboard')renderDashboard();if(showError)toast(state.boot.dashboard.error,'error')}}
 
@@ -1938,9 +2201,10 @@
     function recordHtml(record){
       const isSchedule=state.entity==='schedule',isSetting=state.entity==='settings';
       const values=isSchedule?(record.fields||{}):(record.values||{});
-      const pieces=Object.keys(values).map(k=>values[k]).filter(value=>value&&typeof value!=='object');
+      const mediaKeys=['photos','media','photoUrl','imageUrl','image','photo','fileUrl','videoUrl','thumbnail'];
+      const pieces=Object.keys(values).filter(key=>isSchedule||(!mediaKeys.includes(key)&&!['title','name'].includes(key))).map(k=>values[k]).filter(value=>value&&typeof value!=='object');
       const stripHtml = (html) => { const tmp = document.createElement('DIV'); tmp.innerHTML = String(html).replace(/<[^>]+>/g, ' '); return tmp.textContent || tmp.innerText || ''; };
-      const rawSummary = isSchedule ? [record.dateLabel,record.time?record.time+' WITA':''].concat(pieces.slice(0,3)).filter(Boolean).join(' � ') : isSetting ? String(values.value||'Belum diisi.') : pieces.slice(1,4).join(' � ');
+      const rawSummary = isSchedule ? [record.dateLabel,record.time?record.time+' WITA':''].concat(pieces.slice(0,3)).filter(Boolean).join(' · ') : isSetting ? String(values.value||'Belum diisi.') : String(values.description||values.summary||pieces.slice(0,3).join(' · '));
       const summary = stripHtml(rawSummary).substring(0, 150);
       const canDelete=state.boot.user.permissions.edit&&!isSetting;
       
@@ -1958,10 +2222,10 @@
         } catch(e) {}
       }
       if (thumbSrc) {
-        thumb = '<div class="record-thumb" style="width:100%;height:140px;background:#f5f5f5;border-radius:8px 8px 0 0;overflow:hidden;margin:-16px -18px 12px;width:calc(100% + 36px)"><img src="'+attr(adminImageUrl(thumbSrc))+'" style="width:100%;height:100%;object-fit:cover" loading="lazy" onerror="this.style.display=\'none\'"></div>';
+        thumb = '<div class="record-thumb"><span class="record-thumb-fallback">'+icon('image')+'<span>Pratinjau gambar</span></span><img src="'+attr(adminImageUrl(thumbSrc))+'" alt="'+attr(record.title||'Gambar konten')+'" loading="lazy" onerror="this.style.display=\'none\';this.previousElementSibling.lastElementChild.textContent=\'Gambar belum dapat dimuat\'"></div>';
       }
       
-      return '<article class="card record">'+thumb+'<div class="record-main"><div class="record-top">'+status(record.status||(isSchedule?'PUBLISH':'DRAFT'))+'<span class="small faint">'+esc(record.group||record.sectionTitle||'')+'</span></div><h3 style="white-space:normal;word-break:break-word;margin:4px 0">'+esc(record.title||'Tanpa judul')+'</h3><p class="record-summary" style="display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;font-size:12px;line-height:1.4">'+esc(summary||'Belum ada keterangan.')+'</p></div><div class="record-actions" style="margin-top:auto;padding-top:12px;border-top:1px solid #ddd;display:flex;gap:8px;flex-wrap:wrap">'+(state.boot.user.permissions.edit?'<button class="btn" data-edit-record="'+attr(record.id)+'">'+icon('edit')+'Edit</button>'+(isSchedule?'<button class="btn soft" data-duplicate-schedule="'+attr(record.id)+'">'+icon('plus')+'Duplikat</button>':'')+(canDelete?'<button class="btn danger" data-delete-record="'+attr(record.id)+'">'+icon('trash')+'</button>':''):'')+'</div></article>';
+      return '<article class="card record">'+thumb+'<div class="record-main"><div class="record-top">'+status(record.status||(isSchedule?'PUBLISH':'DRAFT'))+'<span class="small faint">'+esc(record.group||record.sectionTitle||'')+'</span></div><h3>'+esc(record.title||'Tanpa judul')+'</h3><p class="record-summary">'+esc(summary||'Belum ada keterangan.')+'</p></div>'+(state.boot.user.permissions.edit?'<div class="record-actions"><button class="btn soft" data-edit-record="'+attr(record.id)+'">'+icon('edit')+'Edit konten</button>'+(isSchedule?'<button class="btn" data-duplicate-schedule="'+attr(record.id)+'">'+icon('plus')+'Duplikat</button>':'')+(canDelete?'<button class="btn danger record-delete" data-delete-record="'+attr(record.id)+'" aria-label="Ajukan penghapusan '+attr(record.title||'konten')+'">'+icon('trash')+'</button>':'')+'</div>':'')+'</article>';
     }
     function workflowGuide(active){const steps=[['DRAFT','1. Draft','Isi dan periksa'],['PENDING','2. Diajukan','Menunggu reviewer'],['REVIEW','3. Ditinjau','Setujui atau revisi'],['PUBLISH','4. Terbit','Tampil di website']];const rank={DRAFT:0,REJECTED:0,PENDING:1,REVIEW:2,APPROVED:3,PUBLISH:3};const current=rank[active]??0;return '<div class="workflow-guide">'+steps.map((step,index)=>'<div class="workflow-step '+(index===current?'active':index<current?'done':'')+'"><b>'+step[1]+'</b><span>'+step[2]+'</span></div>').join('')+'</div>'}
     function workflowHtml(items){if(!items.length)return'';return '<div class="workflow-strip">'+items.map(w=>{const canManage=w.ownerEmail===state.boot.user.email||state.boot.user.role==='SUPERADMIN';const canApprove=state.boot.user.permissions.approve;let actions='';if(w.state==='PENDING'){if(canApprove)actions+='<button class="btn primary" data-open-review="'+attr(w.id)+'">'+icon('check')+'Tinjau</button>';if(canManage)actions+='<button class="btn" data-cancel-workflow="'+attr(w.id)+'">Tarik kembali</button>';if(!actions)actions='<span class="small faint">Menunggu reviewer</span>'}else if(canManage){if(w.action==='DELETE')actions+='<button class="btn primary" data-resubmit-workflow="'+attr(w.id)+'">'+icon('send')+'Ajukan hapus lagi</button>';else actions+='<button class="btn" data-edit-workflow="'+attr(w.id)+'">'+icon('edit')+(w.state==='REJECTED'?'Perbaiki revisi':'Lanjutkan draft')+'</button>';actions+='<button class="icon-btn" data-delete-workflow="'+attr(w.id)+'" aria-label="Hapus draft">'+icon('trash')+'</button>'}else actions='<span class="small faint">Dikelola oleh '+esc(w.ownerName)+'</span>';return '<div class="workflow-item">'+status(w.state)+'<div class="workflow-copy"><strong>'+esc(friendlyEntity(w.entity))+' · '+esc(w.action==='DELETE'?'HAPUS':'UBAH / TAMBAH')+'</strong><span>'+esc(w.ownerName)+' · '+esc(w.updatedAt)+'</span>'+(w.note?'<span class="workflow-note">Catatan: '+esc(w.note)+'</span>':'')+'</div><div class="button-row">'+actions+'</div></div>'}).join('')+'</div>'}
@@ -2329,18 +2593,15 @@
         const p=$('#notif-panel');
         if(p){p.classList.toggle('open');e.currentTarget.setAttribute('aria-expanded',String(p.classList.contains('open')))}
       });
-      document.addEventListener('click',(e)=>{
-        if(!e.target.closest('.notif-wrap')){
-          const p=$('#notif-panel');
-          if(p)p.classList.remove('open');
-          $('#notif-toggle')?.setAttribute('aria-expanded','false');
-        }
-      });
+      $('#notif-toggle')?.setAttribute('aria-controls','notif-panel');
+      $('#notif-toggle')?.addEventListener('keydown',event=>{if(event.key!=='ArrowDown')return;event.preventDefault();$('#notif-panel')?.classList.add('open');event.currentTarget.setAttribute('aria-expanded','true');$('#notif-panel button')?.focus()});
       syncNotifications();
     }
-    document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeSidebar();$$('.nav-more').forEach(el=>el.open=false)}});
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeNotifications(true);closeSidebar();$$('.nav-more').forEach(el=>el.open=false)}});
+    document.addEventListener('focusin',event=>{if(!event.target.closest('.notif-wrap'))closeNotifications(false)});
     document.addEventListener('click',async event=>{
-      const route=event.target.closest('[data-route]');if(route)return navigate(route.dataset.route);
+      if(!event.target.closest('.notif-wrap'))closeNotifications(false);
+      const route=event.target.closest('[data-route]');if(route){closeNotifications(false);return navigate(route.dataset.route)}
       const close=event.target.closest('[data-close]');if(close)return closeDialogSafely(close.dataset.close);
       if(event.target.closest('[data-operation-close]'))return clearOperation();
       if(event.target.closest('[data-refresh-notifications]'))return loadNotifications(true);
