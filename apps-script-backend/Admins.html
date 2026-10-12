@@ -1636,6 +1636,89 @@
     .loader-mark::before, .loader-mark::after { animation: none !important }
     .theme-logo-pair > img { transition: none }
   }
+  /* Landscape remains static; the workspace is the only frosted surface. */
+  :root { --sidebar: 0px; --surface: #fbfcf8; --bg: #e9eee4; --radius: 10px }
+  body { background: #e9eee4 url('https://gmahk-galilea.vercel.app/assets/admin-valley.webp') center center / cover fixed no-repeat }
+  body::before { content: ''; position: fixed; inset: 0; background: rgba(12,30,20,.23); pointer-events: none; z-index: -1 }
+  .admin-shell { display: flex; flex-direction: column; min-height: 100dvh }
+  .sidebar { position: relative; inset: auto; width: 100%; min-height: 92px; padding: 20px clamp(20px,4vw,72px); flex-direction: row; align-items: center; gap: 24px; background: rgba(15,35,24,.92); border: 0; overflow: visible; transform: none }
+  .brand { padding: 0; border: 0; flex-shrink: 0 }
+  .brand strong { color: #fff; font-size: 16px }
+  .brand span { color: #dae4d9; font-size: 12px; text-transform: none; letter-spacing: 0 }
+  .brand-logo { width: 42px; height: 42px }
+  .nav-scroll { display: flex; align-items: center; justify-content: center; gap: 4px; overflow: visible; padding: 0 }
+  .nav-item { width: auto; min-height: 44px; padding: 10px 12px; color: #e4ece2; font-size: 13px; white-space: nowrap }
+  .nav-item .icon { display: none }
+  .nav-item.active { background: #e5ecdf; color: #173a25; box-shadow: none }
+  .nav-item::before { display: none }
+  .nav-item:hover { color: #173a25; background: #e5ecdf }
+  .nav-more { position: relative }
+  .nav-more summary { color: #e4ece2; padding: 12px; cursor: pointer; font-size: 13px }
+  .nav-more-panel { position: absolute; top: 100%; right: 0; width: 248px; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-lg); max-height: 65vh; overflow: auto; z-index: 80 }
+  .nav-more-panel .nav-item { color: var(--text); width: 100%; text-align: left }
+  .nav-more-panel .nav-label { margin: 12px 8px 4px }
+  .sidebar-user { border: 0; padding: 0; flex-shrink: 0 }
+  .sidebar-user strong { color: #fff }
+  .sidebar-user .user-row > span > span { color: #dae4d9 }
+  .workspace { grid-column: auto; margin-left: 0; width: 100%; min-height: calc(100dvh - 92px) }
+  .topbar { position: relative; top: auto; width: min(1280px,calc(100% - 64px)); margin: 16px auto 0; padding: 10px 16px; border: 0; border-radius: 10px; background: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none }
+  .content { width: min(1280px,calc(100% - 64px)); padding: 28px; margin: 18px auto 40px; background: rgba(251,252,248,.94); border: 1px solid rgba(255,255,255,.6); border-radius: 16px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px) }
+  .content[data-route='dashboard'] { background: transparent; padding: 0; border: 0; backdrop-filter: none; -webkit-backdrop-filter: none }
+  .editorial-welcome { padding: 32px 8px 24px; color: #fff }
+  .welcome-eyebrow { display: none }
+  .welcome-title { color: #fff; font-size: clamp(30px,4vw,52px); letter-spacing: -.035em; line-height: 1.13; text-shadow: 0 2px 18px rgba(0,0,0,.4) }
+  .welcome-sub { color: #fff; max-width: 650px; font-size: 16px; text-shadow: 0 1px 8px #163421 }
+  .welcome-meta { color: #fff }
+  .welcome-meta-status { color: #fff; background: rgba(15,35,24,.9) }
+  .dashboard-sync-strip { background: var(--surface); color: var(--text); border-radius: 8px; padding: 12px 16px; margin-top: 24px }
+  .dashboard-workbench { padding: 28px; background: rgba(251,252,248,.94); border: 1px solid rgba(255,255,255,.6); border-radius: 16px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px) }
+  .dashboard-workbench .editorial-actions-section { margin-top: 28px }
+  .card, .metric, .action-tile { box-shadow: none }
+  .record-grid { grid-template-columns: repeat(auto-fit,minmax(min(100%,300px),1fr)) }
+  .rich-content { font-size: 16px; padding: 16px; min-height: 200px; background: var(--surface); overflow-wrap: anywhere }
+  .rich-toolbar button { width: 40px; height: 40px; font-size: 16px }
+  .rich-toolbar button[aria-pressed='true'] { background: var(--accent-soft); color: var(--accent-text) }
+  .rich-link-panel { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; padding: 10px; border-bottom: 1px solid var(--line); background: var(--surface-2) }
+  .rich-link-panel[hidden] { display: none }
+  .rich-link-panel input { flex: 1; min-width: 150px }
+  .admin-footer { color: #fff; background: rgba(15,35,24,.92); border: 0 }
+  .operation-bar { width: min(1280px,calc(100% - 64px)); margin: 14px auto 0 }
+  :where(button,a,summary,input,select,textarea,[contenteditable]):focus-visible { outline: 3px solid #b88f33; outline-offset: 3px }
+  [data-theme='dark'] .content:not([data-route='dashboard']), [data-theme='dark'] .dashboard-workbench { background: rgba(12,25,17,.96); border-color: var(--line) }
+  [data-theme='dark'] .topbar, [data-theme='dark'] .dashboard-sync-strip { background: #14271b }
+  [data-theme='dark'] body::before { background: rgba(5,18,10,.52) }
+  @media (max-width: 1180px) {
+    .sidebar { gap: 12px; padding-inline: 24px }
+    .nav-item { padding-inline: 8px }
+    .sidebar-user .avatar { display: none }
+  }
+  @media (max-width: 980px) {
+    .sidebar { position: fixed; inset: 0 auto 0 0; width: min(320px,88vw); min-height: 100dvh; flex-direction: column; align-items: stretch; gap: 20px; padding: 24px; transform: translateX(-105%); overflow-y: auto; z-index: 70 }
+    .sidebar.open { transform: none }
+    .nav-scroll { flex-direction: column; align-items: stretch; justify-content: flex-start; overflow: visible }
+    .nav-item { width: 100%; text-align: left }
+    .nav-more summary { padding-inline: 8px }
+    .nav-more-panel { position: static; width: 100%; max-height: none; box-shadow: none; margin-top: 8px }
+    .sidebar-user { margin-top: auto }
+    .mobile-menu { display: inline-flex }
+    .mobile-overlay { display: block; position: fixed; inset: 0; z-index: 60; background: rgba(0,0,0,.5); opacity: 0; visibility: hidden }
+    .mobile-overlay.open { opacity: 1; visibility: visible }
+    .workspace { min-height: 100dvh }
+    .topbar, .content, .operation-bar { width: calc(100% - 32px) }
+    .content { padding: 20px }
+    .dashboard-workbench { padding: 20px }
+    .editorial-welcome { padding-top: 24px }
+  }
+  @media (max-width: 480px) {
+    .topbar, .content, .operation-bar { width: calc(100% - 24px) }
+    .content, .dashboard-workbench { padding: 16px; border-radius: 12px }
+    .content[data-route='dashboard'] { padding: 0 }
+    .topbar { gap: 8px; padding-inline: 10px }
+    .welcome-title { font-size: 32px }
+    .rich-content { max-height: 42dvh }
+    .rich-toolbar { gap: 1px }
+    .rich-toolbar button { width: 36px }
+  }
 </style>
 </head>
 <body>
@@ -1713,13 +1796,14 @@
 
     function shell(){
       const user=state.boot.user, d=state.boot.dashboard;
-      const entityNav=state.boot.entities.filter(e=>!['settings','schedule'].includes(e.key)).map(e=>nav(e.key,e.icon,e.label)).join('');
-      return '<div class="admin-shell"><div class="mobile-overlay" id="overlay"></div><aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard">'+logoMark('brand-logo')+'<span><strong>GMAHK Galilea</strong><span>Admin</span></span></a><div class="nav-scroll"><div class="nav-label">OVERVIEW</div>'+nav('dashboard','grid','Dashboard')+'<div class="nav-label">KONTEN</div>'+entityNav+nav('settings','settings','Pengaturan')+'<div class="nav-label">IBADAH</div>'+nav('schedule','calendar','Jadwal Pelayanan')+(user.permissions.edit?'<div class="nav-label">JEMAAT</div>'+nav('services','heart','Layanan Jemaat'):'')+(user.permissions.approve?nav('approvals','check','Persetujuan'):'')+(user.permissions.approve?nav('activity','clock','Aktivitas'):'')+(user.permissions.manageAdmins?nav('users','shield','Pengelola'):'')+(user.permissions.edit?nav('system','settings','Sistem'):'')+'</div><div class="sidebar-user"><div class="user-row"><span class="avatar">'+esc(initials(user.name))+'</span><span><strong>'+esc(user.name)+'</strong><span>'+esc(user.role)+'</span></span></div></div></aside><section class="workspace"><header class="topbar"><div class="button-row"><button class="icon-btn mobile-menu" id="mobile-menu" aria-label="Buka menu">'+icon('menu')+'</button><div class="crumb"><strong id="crumb-title">Dashboard</strong><span>GMAHK Galilea</span></div></div><div class="top-actions"><div class="notif-wrap"><button class="icon-btn" id="notif-toggle" aria-label="Notifikasi" aria-expanded="false">'+icon('bell')+'<span class="count" id="notif-badge" style="position:absolute;top:-4px;right:-4px;padding:0 4px;font-size:10px" hidden>0</span></button><div id="notif-panel" class="card notification-panel" aria-label="Pusat notifikasi"></div></div><a class="icon-btn" href="'+attr(state.boot.publicSite.publicUrl||APP_URL)+'" target="_blank" rel="noopener" title="Buka website">'+icon('external')+'</a><button class="icon-btn" id="theme-toggle" aria-label="Ganti tema">'+icon(currentTheme()==='dark'?'sun':'moon')+'</button></div></header><div class="operation-bar" id="operation-bar" hidden><span class="operation-icon" id="operation-icon">'+icon('info')+'</span><span class="operation-copy"><strong id="operation-title">Status operasi</strong><span id="operation-detail"></span></span><button class="icon-btn operation-close" type="button" data-operation-close aria-label="Tutup status">'+icon('close')+'</button></div><main class="content" id="content"></main><footer class="admin-footer"><div class="footer-inner"><span>GMAHK Galilea Balikpapan</span><span class="faint">Google Sheets · Vercel Edge</span></div></footer></section></div>';
+      const primaryKeys=['activities','gallery','announcements'];
+      const entityNav=state.boot.entities.filter(e=>primaryKeys.includes(e.key)).map(e=>nav(e.key,e.icon,e.label)).join('')+nav('schedule','calendar','Jadwal Pelayanan')+'<details class="nav-more"><summary>Lainnya</summary><div class="nav-more-panel">'+state.boot.entities.filter(e=>!primaryKeys.includes(e.key)&&!['settings','schedule'].includes(e.key)).map(e=>nav(e.key,e.icon,e.label)).join('');
+      return '<div class="admin-shell"><div class="mobile-overlay" id="overlay"></div><aside class="sidebar" id="sidebar"><a class="brand" href="#dashboard">'+logoMark('brand-logo')+'<span><strong>GMAHK Galilea</strong><span>Portal Sekretariat</span></span></a><div class="nav-scroll">'+nav('dashboard','grid','Dashboard')+entityNav+nav('settings','settings','Pengaturan')+(user.permissions.edit?'<div class="nav-label">JEMAAT</div>'+nav('services','heart','Layanan Jemaat'):'')+(user.permissions.approve?nav('approvals','check','Persetujuan'):'')+(user.permissions.approve?nav('activity','clock','Aktivitas'):'')+(user.permissions.manageAdmins?nav('users','shield','Pengelola'):'')+(user.permissions.edit?nav('system','settings','Sistem'):'')+'</div></details></div><div class="sidebar-user"><div class="user-row"><span class="avatar">'+esc(initials(user.name))+'</span><span><strong>'+esc(user.name)+'</strong><span>'+esc(user.role)+'</span></span></div></div></aside><section class="workspace"><header class="topbar"><div class="button-row"><button class="icon-btn mobile-menu" id="mobile-menu" aria-label="Buka menu">'+icon('menu')+'</button><div class="crumb"><strong id="crumb-title">Dashboard</strong><span>GMAHK Galilea</span></div></div><div class="top-actions"><div class="notif-wrap"><button class="icon-btn" id="notif-toggle" aria-label="Notifikasi" aria-expanded="false">'+icon('bell')+'<span class="count" id="notif-badge" style="position:absolute;top:-4px;right:-4px;padding:0 4px;font-size:10px" hidden>0</span></button><div id="notif-panel" class="card notification-panel" aria-label="Pusat notifikasi"></div></div><a class="icon-btn" href="'+attr(state.boot.publicSite.publicUrl||APP_URL)+'" target="_blank" rel="noopener" title="Buka website">'+icon('external')+'</a><button class="icon-btn" id="theme-toggle" aria-label="Ganti tema">'+icon(currentTheme()==='dark'?'sun':'moon')+'</button></div></header><div class="operation-bar" id="operation-bar" hidden><span class="operation-icon" id="operation-icon">'+icon('info')+'</span><span class="operation-copy"><strong id="operation-title">Status operasi</strong><span id="operation-detail"></span></span><button class="icon-btn operation-close" type="button" data-operation-close aria-label="Tutup status">'+icon('close')+'</button></div><main class="content" id="content"></main><footer class="admin-footer"><div class="footer-inner"><span>GMAHK Galilea Balikpapan</span><span>Portal Sekretariat</span></div></footer></section></div>';
     }
     function nav(route,iconName,label,count){const value=Math.max(0,Number(count)||0);return '<button class="nav-item" data-route="'+attr(route)+'">'+icon(iconName)+'<span>'+esc(label)+'</span><span class="count" data-nav-count="'+attr(route)+'" '+(value?'':'hidden')+'>'+esc(value)+'</span></button>'}
-    function closeSidebar(){$('#sidebar')?.classList.remove('open');$('#overlay')?.classList.remove('open')}
+    function closeSidebar(){$('#sidebar')?.classList.remove('open');$('#overlay')?.classList.remove('open');$('#mobile-menu')?.setAttribute('aria-expanded','false')}
     function routeTitle(){if(state.route==='dashboard')return'Dashboard';if(state.route==='services')return'Layanan Jemaat';if(state.route==='approvals')return'Persetujuan';if(state.route==='activity')return'Audit & Aktivitas';if(state.route==='users')return'Pengelola Portal';if(state.route==='system')return'Sistem & Backup';return friendlyEntity(state.route)}
-    function navigate(route){state.route=route;state.search='';state.status='ALL';location.hash=route;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.route===route));$('#crumb-title').textContent=routeTitle();closeSidebar();renderRoute()}
+    function navigate(route){state.route=route;state.search='';state.status='ALL';location.hash=route;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.route===route));$('#crumb-title').textContent=routeTitle();$('#content').dataset.route=route;$$('.nav-more').forEach(el=>el.open=false);closeSidebar();renderRoute()}
 
     async function renderRoute(){const box=$('#content');box.innerHTML=loadingCard('Menyiapkan '+routeTitle());try{if(state.route==='dashboard')return renderDashboard();if(state.route==='services')return await loadServices();if(state.route==='approvals')return await loadApprovals();if(state.route==='activity')return await loadActivity();if(state.route==='users')return await loadUsers();if(state.route==='system')return renderSystem();return await loadEntity(state.route)}catch(error){box.innerHTML=errorBox(error.message)}}
     function loadingCard(label){return '<div class="empty"><div class="loader-mark" style="width:72px;height:72px"><span class="orbit"></span>'+logoMark('loader-advent')+'</div><strong>'+esc(label||'Memuat')+'</strong><p class="muted small">Menyambungkan data terbaru…</p></div>'}
@@ -1765,20 +1849,20 @@
       $('#content').innerHTML =
         '<section class="editorial-welcome">' +
           '<div class="welcome-eyebrow"><span>GMAHK GALILEA</span><span class="eyebrow-sep">·</span><span>CONTROL CENTER</span></div>' +
-          '<h1 class="welcome-title">Selamat datang, '+esc(u.name)+'.</h1>' +
+          '<h1 class="welcome-title">Ruang pelayanan Galilea</h1>' +
           '<div class="welcome-meta">' +
             '<span class="welcome-meta-item"><span class="welcome-meta-status">'+esc(u.role)+'</span></span>' +
             (d.scheduleSheet?'<span class="welcome-meta-dot"></span><span class="welcome-meta-item">'+esc(d.scheduleSheet)+'</span>':'')+
             (d.systemStatus?'<span class="welcome-meta-dot"></span><span class="welcome-meta-item">'+esc(d.systemStatus)+'</span>':'')+
           '</div>' +
-          '<p class="welcome-sub">'+(canEdit?'Kelola seluruh konten website, jadwal ibadah, dan pelayanan jemaat dalam satu ruang kerja yang tenang dan tertata.':'Akses peninjauan Anda siap. Seluruh konten publik dapat diperiksa secara aman.')+'</p>' +
+          '<p class="welcome-sub">Selamat datang, '+esc(u.name)+'. '+(canEdit?'Kelola berita, jadwal ibadah, dan pelayanan jemaat.':'Tinjau konten dan jadwal pelayanan jemaat.')+'</p>' +
           heroActions +
           '<div class="dashboard-sync-strip'+syncClass+'">' +
             '<span class="sync-meta">'+icon(d.error?'info':'refresh')+'<span>'+esc(syncText)+'</span></span>' +
             syncAction +
           '</div>' +
         '</section>' +
-        attentionSection +
+        '<div class="dashboard-workbench">'+attentionSection +
         '<section class="editorial-metrics-section">' +
           '<div class="section-label">RINGKASAN AKTIVITAS</div>' +
           '<div class="editorial-metrics-bar">' +
@@ -1799,7 +1883,7 @@
             '</div>' +
           '</div>' +
           '<div class="actions-list-grid">' + quickItems + '</div>' +
-        '</section>';
+        '</section></div>';
     }
     function metric(iconName, value, title, subtitle, loading){
       return '<article class="metric-block '+(loading?'is-loading':'')+'">' +
@@ -1901,47 +1985,71 @@
     function sanitizeHtml(html){
       if(!html)return'';
       const div=document.createElement('div');div.innerHTML=html;
-      const allowedTags=['P','STRONG','B','EM','I','U','BR','UL','OL','LI','A','DIV','SPAN'];
+      const allowedTags=['P','STRONG','B','EM','I','U','BR','UL','OL','LI','A'];
       function clean(node){
         if(node.nodeType===3)return; // Text node
         if(node.nodeType!==1){node.remove();return;}
+        if(['SCRIPT','STYLE','IFRAME','OBJECT','SVG','MATH'].includes(node.nodeName)){node.remove();return;}
+        Array.from(node.childNodes).forEach(clean);
+        if(node.nodeName==='DIV'){const paragraph=document.createElement('p');while(node.firstChild)paragraph.appendChild(node.firstChild);node.replaceWith(paragraph);return;}
         if(!allowedTags.includes(node.nodeName)){
           while(node.firstChild)node.parentNode.insertBefore(node.firstChild,node);
           node.remove();return;
         }
         const attrs=node.attributes;
         for(let i=attrs.length-1;i>=0;i--){
-          const name=attrs[i].name.toLowerCase(),val=attrs[i].value.toLowerCase();
-          if(name==='href'){if(val.startsWith('javascript:'))node.removeAttribute(name);}
+          const name=attrs[i].name.toLowerCase();
+          if(name==='href'&&node.nodeName==='A'){if(!safeEditorLink(attrs[i].value))node.removeAttribute(name);}
           else node.removeAttribute(name); // Strip all other attributes (class, style, etc)
         }
-        Array.from(node.childNodes).forEach(clean);
       }
       Array.from(div.childNodes).forEach(clean);
       return div.innerHTML;
     }
+    function safeEditorLink(value){
+      try{const url=new URL(String(value||'').trim());return url.protocol==='https:'?url.href:''}catch(error){return ''}
+    }
+    function richEditorHtml(field,value){
+      const buttons=[['bold','Tebal','<b>B</b>'],['italic','Miring','<i>I</i>'],['underline','Garis bawah','<u>U</u>'],['insertUnorderedList','Daftar poin','•'],['insertOrderedList','Daftar bernomor','1.'],['createLink','Tambahkan tautan','Tautan'],['unlink','Hapus tautan','Lepas'],['removeFormat','Hapus format','Bersihkan'],['undo','Urungkan','↶'],['redo','Ulangi','↷']];
+      return '<div class="rich-editor"><div class="rich-toolbar" role="toolbar" aria-label="Format '+attr(field.label)+'" data-rich-target="'+attr(field.key)+'">'+buttons.map(item=>'<button type="button" data-command="'+item[0]+'" title="'+item[1]+'" aria-label="'+item[1]+'"'+(['bold','italic','underline','insertUnorderedList','insertOrderedList'].includes(item[0])?' aria-pressed="false"':'')+' style="'+(['createLink','unlink','removeFormat'].includes(item[0])?'width:auto;padding-inline:10px':'')+'">'+item[2]+'</button>').join('')+'</div><div class="rich-link-panel" hidden><label>Tautan <input type="url" data-link-url placeholder="https://" aria-label="Alamat tautan"></label><button type="button" class="btn" data-link-apply>Terapkan</button><button type="button" class="btn" data-link-cancel>Batal</button><span data-link-error role="alert"></span></div><div class="rich-content" contenteditable="true" role="textbox" aria-multiline="true" aria-label="'+attr(field.label)+'" aria-required="'+Boolean(field.required)+'" data-rich-editor="'+attr(field.key)+'"></div><textarea name="'+attr(field.key)+'" class="sr-only" tabindex="-1" '+(field.required?'required':'')+'>'+esc(value)+'</textarea></div>';
+    }
     function initRichEditor(key){
       const editor=$('[data-rich-editor="'+CSS.escape(key)+'"]'),textarea=$('[name="'+CSS.escape(key)+'"].sr-only');
       if(!editor||!textarea)return;
-      editor.innerHTML=legacyToHtml(textarea.value);
+      editor.innerHTML=sanitizeHtml(legacyToHtml(textarea.value));
       const toolbar=$('[data-rich-target="'+CSS.escape(key)+'"]');
+      const container=editor.closest('.rich-editor'),linkPanel=$('.rich-link-panel',container),linkInput=$('[data-link-url]',container);
+      let savedRange=null;
+      const remember=()=>{const selection=getSelection();if(selection&&selection.rangeCount&&editor.contains(selection.anchorNode)&&editor.contains(selection.focusNode))savedRange=selection.getRangeAt(0).cloneRange();updateButtons()};
+      const restore=()=>{const range=savedRange;editor.focus();if(range&&editor.contains(range.commonAncestorContainer)){const selection=getSelection();selection.removeAllRanges();selection.addRange(range);savedRange=range}};
+      const sync=()=>{textarea.value=editor.textContent.trim()?sanitizeHtml(editor.innerHTML):'';textarea.dispatchEvent(new Event('input',{bubbles:true}));remember()};
+      const updateButtons=()=>{if(!toolbar)return;toolbar.querySelectorAll('[aria-pressed]').forEach(button=>{let active=false;try{active=document.queryCommandState(button.dataset.command)}catch(error){}button.setAttribute('aria-pressed',String(active));button.classList.toggle('active',active)})};
+      const execute=(command,value)=>{restore();document.execCommand('styleWithCSS',false,false);document.execCommand(command,false,value||null);sync()};
       if(toolbar){
+        toolbar.addEventListener('mousedown',e=>{if(e.target.closest('[data-command]')){remember();e.preventDefault()}});
         toolbar.addEventListener('click',e=>{
           const btn=e.target.closest('[data-command]');
           if(!btn)return;
           e.preventDefault();
           const cmd=btn.dataset.command;
           if(cmd==='createLink'){
-            const url=prompt('Masukkan URL:','https://');
-            if(url)document.execCommand(cmd,false,url);
+            remember();linkPanel.hidden=false;linkInput.value='';$('[data-link-error]',container).textContent='';linkInput.focus();
           } else {
-            document.execCommand(cmd,false,null);
+            execute(cmd);
           }
-          editor.focus();
         });
       }
-      editor.addEventListener('input',()=>textarea.value=sanitizeHtml(editor.innerHTML));
-      editor.addEventListener('blur',()=>textarea.value=sanitizeHtml(editor.innerHTML));
+      const applyLink=()=>{const url=safeEditorLink(linkInput.value);if(!url){ $('[data-link-error]',container).textContent='Masukkan alamat HTTPS yang valid.';return}restore();const selection=getSelection();if(selection.isCollapsed){document.execCommand('insertText',false,url);remember();const range=selection.getRangeAt(0);range.setStart(range.endContainer,Math.max(0,range.endOffset-url.length));savedRange=range.cloneRange()}execute('createLink',url);linkPanel.hidden=true};
+      $('[data-link-apply]',container).addEventListener('click',applyLink);
+      $('[data-link-cancel]',container).addEventListener('click',()=>{linkPanel.hidden=true;restore()});
+      linkInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyLink()}if(e.key==='Escape'){e.preventDefault();e.stopPropagation();linkPanel.hidden=true;restore()}});
+      editor.addEventListener('input',sync);
+      editor.addEventListener('blur',sync);
+      editor.addEventListener('keyup',remember);
+      editor.addEventListener('mouseup',remember);
+      editor.addEventListener('focus',remember);
+      textarea.addEventListener('invalid',()=>editor.focus());
+      sync();
     }
     function photoManagerHtml(key, value) {
       var urls = String(value == null ? '' : value).split('\n').map(function(u){return u.trim()}).filter(Boolean);
@@ -2041,7 +2149,7 @@
       $$('[data-rich-editor]').forEach(el => {
         const key = el.dataset.richEditor;
         const textarea = $('[name="'+CSS.escape(key)+'"].sr-only');
-        if (textarea) textarea.value = sanitizeHtml(el.innerHTML);
+        if (textarea) textarea.value = el.textContent.trim()?sanitizeHtml(el.innerHTML):'';
       });
       const form=$('#editor-form'),values=Object.fromEntries(new FormData(form).entries());if(state.currentEdit&&state.currentEdit.entity==='schedule'){const fields={};Object.keys(values).filter(key=>key.startsWith('schedule:')).forEach(key=>fields[key.slice(9)]=values[key]);return{Jenis:values.sectionId||'',Tanggal:values.isoDate||'',...fields}}const result={};(state.entityData.fields||[]).forEach(field=>{const value=values[field.key];if(value)result[field.label]=value});return result}
     function editorValidation(snapshot){const entries=Object.entries(snapshot||{}),filled=entries.filter(item=>String(item[1]||'').trim()).length,issues=[];if(state.currentEdit&&state.currentEdit.entity==='schedule'){if(!snapshot.Tanggal)issues.push('Tanggal belum diisi.');const duties=entries.filter(item=>!['Jenis','Tanggal'].includes(item[0])&&String(item[1]||'').trim());if(!duties.length)issues.push('Belum ada petugas yang diisi.');if(duties.length>8)issues.push('Petugas akan dibagi otomatis menjadi beberapa layar agar tidak terpotong.');}else{const required=(state.entityData.fields||[]).filter(field=>field.required).filter(field=>!String(snapshot[field.label]||'').trim());required.forEach(field=>issues.push(field.label+' wajib diisi.'));}return{filled:filled,total:entries.length,issues:issues,ready:issues.filter(item=>/belum|wajib/i.test(item)).length===0}}
@@ -2051,7 +2159,7 @@
       let control;
       if(field.type==='textarea') {
         if(state.entityData.entity==='activities' && field.key==='description') {
-          control='<div class="rich-editor"><div class="rich-toolbar" data-rich-target="'+attr(field.key)+'"><button type="button" data-command="bold" title="Bold">'+icon('edit')+'</button><button type="button" data-command="italic" title="Italic"><i>I</i></button><button type="button" data-command="underline" title="Underline"><u>U</u></button><div class="rich-toolbar-sep"></div><button type="button" data-command="insertUnorderedList" title="Bullet List">•</button><button type="button" data-command="insertOrderedList" title="Numbered List">1.</button><div class="rich-toolbar-sep"></div><button type="button" data-command="createLink" title="Link">'+icon('link')+'</button><button type="button" data-command="removeFormat" title="Clear Formatting">'+icon('trash')+'</button></div><div class="rich-content" contenteditable="true" data-rich-editor="'+attr(field.key)+'"></div><textarea name="'+attr(field.key)+'" class="sr-only" '+(field.required?'required':'')+'>'+esc(value)+'</textarea></div>';
+          control=richEditorHtml(field,value);
         } else {
           control='<textarea name="'+attr(field.key)+'" placeholder="'+attr(field.help||'Ketik isi di sini.')+'" '+(field.required?'required':'')+'>'+esc(value)+'</textarea>';
         }
@@ -2202,7 +2310,7 @@
       dialog.close();
     }
     function bindShell(){
-      $('#mobile-menu')?.addEventListener('click',()=>{$('#sidebar').classList.toggle('open');$('#overlay').classList.toggle('open')});
+      $('#mobile-menu')?.addEventListener('click',()=>{const open=$('#sidebar').classList.toggle('open');$('#overlay').classList.toggle('open',open);$('#mobile-menu').setAttribute('aria-expanded',String(open))});
       $('#overlay')?.addEventListener('click',closeSidebar);
       $('#theme-toggle')?.addEventListener('click',()=>applyTheme(document.documentElement.dataset.theme==='dark'?'light':'dark'));
       $('#notif-toggle')?.addEventListener('click',(e)=>{
@@ -2219,6 +2327,7 @@
       });
       syncNotifications();
     }
+    document.addEventListener('keydown',event=>{if(event.key==='Escape'){closeSidebar();$$('.nav-more').forEach(el=>el.open=false)}});
     document.addEventListener('click',async event=>{
       const route=event.target.closest('[data-route]');if(route)return navigate(route.dataset.route);
       const close=event.target.closest('[data-close]');if(close)return closeDialogSafely(close.dataset.close);
