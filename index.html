@@ -3475,6 +3475,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
 }
 </style>
   <link rel="stylesheet" href="/page-turn.css?v=31-pixel">
+  <link rel="stylesheet" href="/hymnal-scores.css?v=34-pdf">
 </head>
 <body>
   <svg class="sr-only" aria-hidden="true">
@@ -3546,6 +3547,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         <button class="nav-link" type="button" data-route="sabbath">Sekolah Sabat</button>
         <button class="nav-link" type="button" data-route="bible">Alkitab</button>
         <button class="nav-link" type="button" data-route="hymnal">Lagu Sion</button>
+        <button class="nav-link" type="button" data-route="hymnal-scores">Lagu Sion (Partiture)</button>
         <span class="nav-drop"><button type="button" data-nav-toggle aria-expanded="false">Lainnya <svg class="icon"><use href="#i-down"></use></svg></button><span class="nav-drop-menu"><button type="button" data-route="bulletin"><svg class="icon"><use href="#i-file"></use></svg>Warta Digital</button><button type="button" data-route="announcements"><svg class="icon"><use href="#i-bell"></use></svg>Agenda dan Pengumuman</button><button type="button" data-route="activities"><svg class="icon"><use href="#i-calendar"></use></svg>Berita Jemaat</button><button type="button" data-route="visitor"><svg class="icon"><use href="#i-map"></use></svg>Panduan Pengunjung</button><button type="button" data-route="favorites"><svg class="icon"><use href="#i-star"></use></svg>Tersimpan</button><button type="button" data-route="gallery"><svg class="icon"><use href="#i-image"></use></svg>Galeri</button><button type="button" data-route="services"><svg class="icon"><use href="#i-heart"></use></svg>Layanan Jemaat</button><button type="button" data-route="aboutsite"><svg class="icon"><use href="#i-info"></use></svg>Tentang Website</button><button type="button" data-route="faq"><svg class="icon"><use href="#i-help"></use></svg>FAQ</button></span></span>
       </nav>
       <div class="header-actions">
@@ -3598,6 +3600,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
   <div class="v18-network" id="network-status" role="status" aria-live="polite"><svg class="icon"><use href="#i-wifi"></use></svg><span>Mode offline — menampilkan data tersimpan</span></div>
 
   <script src="/schedule-clock.js?v=32-wita"></script>
+  <script src="/hymnal-scores.js?v=34-pdf"></script>
   <script>
     (function () {
       'use strict';
@@ -3639,7 +3642,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       });
 
       const APP_URL = window.location.origin;
-      const ROUTES = ['home','today','church','aboutsite','leaders','schedule','bulletin','sabbath','bible','hymnal','favorites','visitor','activities','announcements','gallery','services','faq','contact'];
+      const ROUTES = ['home','today','church','aboutsite','leaders','schedule','bulletin','sabbath','bible','hymnal','hymnal-scores','favorites','visitor','activities','announcements','gallery','services','faq','contact'];
       const MOBILE_GROUPS = [
         {label:'Utama',items:[
           ['home','home','Beranda','Ringkasan hari ini']
@@ -3651,7 +3654,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
           ['today','church','Ibadah Hari Ini','Tema, lagu & susunan acara'],['schedule','calendar','Jadwal','Pelayanan terdekat'],['bulletin','file','Warta Digital','Susunan ibadah & kabar'],['services','heart','Layanan Jemaat','Kirim permohonan']
         ]},
         {label:'Materi Iman',items:[
-          ['sabbath','book','Sekolah Sabat','Pelajaran mingguan'],['bible','book','Alkitab','Baca firman'],['hymnal','music','Lagu Sion','Pujian jemaat']
+          ['sabbath','book','Sekolah Sabat','Pelajaran mingguan'],['bible','book','Alkitab','Baca firman'],['hymnal','music','Lagu Sion','Pujian jemaat'],['hymnal-scores','file','Lagu Sion (Partiture)','Lirik & PDF jemaat']
         ]},
         {label:'Informasi Jemaat',items:[
           ['visitor','map','Panduan Pengunjung','Untuk kunjungan pertama'],['favorites','star','Tersimpan','Favorit & terakhir dibaca'],['announcements','bell','Agenda dan Pengumuman','Informasi ibadah mendatang'],['activities','calendar','Berita Jemaat','Kegiatan yang sudah berlangsung'],['gallery','image','Galeri','Dokumentasi'],['faq','help','FAQ','Bantuan website']
@@ -3779,7 +3782,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         const photo = leaderPhotoSources(leader && leader.photoUrl);
         return '<div class="avatar" role="img" aria-label="Foto ' + attr(label) + '"><span class="avatar-fallback" aria-hidden="true">' + esc(letters) + '</span>' + (photo.primary ? '<img src="' + attr(photo.primary) + '"' + (photo.fallback ? ' data-avatar-fallback="' + attr(photo.fallback) + '"' : '') + ' data-avatar-image alt="" loading="lazy" decoding="async">' : '') + '</div>';
       }
-      const routeTitle = route => ({home:'Beranda',today:'Ibadah Hari Ini',church:'Gereja',aboutsite:'Tentang Website',leaders:'Pengurus',schedule:'Jadwal Ibadah',bulletin:'Warta Digital',sabbath:'Sekolah Sabat',bible:'Alkitab',hymnal:'Lagu Sion',favorites:'Tersimpan',visitor:'Panduan Pengunjung',activities:'Berita Jemaat',announcements:'Agenda dan Pengumuman',gallery:'Galeri',services:'Layanan Jemaat',faq:'FAQ',contact:'Kontak'})[route] || 'Galilea';
+      const routeTitle = route => ({home:'Beranda',today:'Ibadah Hari Ini',church:'Gereja',aboutsite:'Tentang Website',leaders:'Pengurus',schedule:'Jadwal Ibadah',bulletin:'Warta Digital',sabbath:'Sekolah Sabat',bible:'Alkitab',hymnal:'Lagu Sion','hymnal-scores':'Lagu Sion (Partiture)',favorites:'Tersimpan',visitor:'Panduan Pengunjung',activities:'Berita Jemaat',announcements:'Agenda dan Pengumuman',gallery:'Galeri',services:'Layanan Jemaat',faq:'FAQ',contact:'Kontak'})[route] || 'Galilea';
       const ROUTE_DESCRIPTIONS = {
         home:'Website resmi GMAHK Galilea Balikpapan untuk jadwal ibadah, Sekolah Sabat, Alkitab, Lagu Sion, warta, dan informasi pelayanan jemaat.',
         today:'Tema, ayat, lagu, susunan acara, dan informasi Ibadah Hari Ini GMAHK Galilea Balikpapan.',
@@ -3788,6 +3791,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         bulletin:'Warta Jemaat digital GMAHK Galilea Balikpapan yang dapat dibaca, dibagikan, dan diunduh.',
         sabbath:'Pelajaran Sekolah Sabat, Berita Misi, Bacaan Persembahan, dan Penginjilan Perorangan Advent.',
         bible:'Baca Alkitab Bahasa Indonesia dengan mode layar besar untuk ibadah.',hymnal:'Lagu Sion dan Lagu Tema GMAHK Galilea dengan lirik serta mode layar besar.',
+        'hymnal-scores':'Cari Lagu Sion berdasarkan nomor atau judul, lalu baca lirik bersama PDF partitur jemaat di perangkat Anda.',
         announcements:'Agenda dan Pengumuman GMAHK Galilea untuk Rabu Malam, Ibadah Khotbah, Sekolah Sabat, dan Pemuda Advent.',
         activities:'Berita kegiatan dan pelayanan Jemaat Galilea Balikpapan.',gallery:'Galeri kegiatan GMAHK Galilea Balikpapan.',
         services:'Permohonan doa, kunjungan, kelas Alkitab, baptisan, dan layanan Jemaat Galilea.',faq:'Panduan penggunaan Website GMAHK Galilea.',contact:'Alamat, jadwal, peta, dan kontak GMAHK Galilea Balikpapan.'
@@ -4315,10 +4319,11 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
       function render() {
         // Keep the loading/error view intact until bootstrap data is available.
         if(!state.data)return;
+        window.GalileaHymnalScores?.destroy();
         if(window.GalileaScheduleClock)window.GalileaScheduleClock.refresh(state.data);
         const renderers = {
           home: renderHome, today: renderToday, church: renderChurch, aboutsite: renderAboutSite, leaders: renderLeaders, schedule: renderSchedule,
-          bulletin: renderBulletin, sabbath: renderSabbath, bible: renderBible, hymnal: renderHymnal,
+          bulletin: renderBulletin, sabbath: renderSabbath, bible: renderBible, hymnal: renderHymnal, 'hymnal-scores': renderHymnalScores,
           favorites: renderFavorites, visitor: renderVisitor, activities: renderActivities,
           announcements: renderAnnouncements, gallery: renderGallery, services: renderServices,
           faq: renderFaq, contact: renderContact
@@ -5132,6 +5137,26 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         } catch(error) { toast(error.message); }
       }
 
+      function renderHymnalScores() {
+        return pageHead('Pujian jemaat', 'Lagu Sion (Partiture)', 'Cari lagu, lalu baca lirik bersama PDF partitur jemaat.') + '<section class="section" style="padding-top:10px"><div class="shell" id="hymnal-scores-view"><div class="toolbar hymnal-toolbar"><div class="field-control"><label for="scores-select">Pilih lagu</label><select id="scores-select"><option value="">Memuat daftar lagu…</option></select></div><div class="field-control"><label for="scores-search">Cari Lagu Sion</label><div class="hymnal-search-box"><input id="scores-search" type="search" placeholder="Nomor atau judul lagu…"><button class="btn" type="button" id="scores-random">Lagu acak'+icon('music')+'</button></div></div><div class="hymnal-actions"><span class="chip hymnal-count" id="scores-count">Memuat…</span></div></div><p id="scores-status" role="status" aria-live="polite">Memuat daftar lagu…</p><div id="scores-reader"></div><p id="scores-results"></p><div id="scores-list">'+loadingBox()+'</div></div></section>';
+      }
+      async function loadHymnalScores() {
+        const root = $('#hymnal-scores-view');
+        if (!root) return;
+        ['scores-select','scores-search','scores-random'].forEach(id => { root.querySelector('#'+id).disabled = true; });
+        try {
+          const catalog = await getViewerHymnalCatalog();
+          if (!root.isConnected || state.route !== 'hymnal-scores') return;
+          root.querySelector('#scores-status').textContent = 'Pilih lagu untuk membaca lirik dan menambahkan PDF partitur.';
+          await window.GalileaHymnalScores.mount({root, catalog, getSong:getViewerHymnalSong, openLyrics:openSong, icon});
+        } catch(error) {
+          if (root.isConnected) {
+            root.querySelector('#scores-status').textContent = error.message;
+            root.querySelector('#scores-list').innerHTML = '<button class="btn" type="button" id="scores-load-retry">Coba muat daftar lagi</button>';
+            root.querySelector('#scores-load-retry').addEventListener('click', loadHymnalScores, {once:true});
+          }
+        }
+      }
       function renderHymnal() {
         const theme=state.data.themeSong;
         const featured=theme?'<article class="theme-song-feature"><div><span class="chip gold">LAGU TEMA JEMAAT</span><h2>'+esc(theme.title)+'</h2><p>Lagu tema ditempatkan paling atas dan dapat diperbarui pengurus melalui Portal Sekretariat.</p><button class="btn primary" type="button" data-theme-song>'+icon('play')+'Buka Lagu Tema</button></div></article>':'<article class="theme-song-feature"><div><span class="chip gold">LAGU TEMA JEMAAT</span><h2>Belum diterbitkan.</h2><p>Pengurus dapat mengisi Judul, Ayat 1, Ayat 2, ayat tambahan, dan Reff melalui Portal Sekretariat.</p></div></article>';
@@ -5972,6 +5997,7 @@ html[data-motion="reduced"] .presentation-stage{animation:none!important}
         if (state.route === 'sabbath') loadSabbath();
         if (state.route === 'bible') loadBibleBooks();
         if (state.route === 'hymnal') loadHymnal();
+        if (state.route === 'hymnal-scores') loadHymnalScores();
 
         $('#member-form')?.addEventListener('submit', async event => {
           event.preventDefault();
