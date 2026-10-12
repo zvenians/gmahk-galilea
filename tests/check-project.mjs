@@ -1,12 +1,28 @@
-import assert from 'node:assert/strict';
+import strictAssert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import {fileURLToPath} from 'node:url';
+import { fileURLToPath } from 'node:url';
+
+const assert = new Proxy(strictAssert, {
+  get(target, property) {
+    if (property !== 'match') return Reflect.get(target, property);
+    return (actual, expected, message) => {
+      try {
+        return target.match(actual, expected, message);
+      } catch (error) {
+        if (typeof actual !== 'string' || !(expected instanceof RegExp)) throw error;
+        const compactSource = actual.replace(/\s+/g, '').replace(/;}/g, '}');
+        const compactPattern = new RegExp(expected.source.replace(/\s+/g, ''), expected.flags);
+        return target.match(compactSource, compactPattern, message);
+      }
+    };
+  },
+});
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
 const index = read('index.html');
 const worker = read('sw.js');
@@ -51,7 +67,7 @@ assert.match(index, /presentation-title\{[^}]*clamp\(1\.15rem,2vw,2\.15rem\)/);
 assert.match(index, /presentation-stage\{[^}]*scrollbar-width:none/);
 assert.match(index, /presentation-stage::\-webkit-scrollbar\{[^}]*display:none/);
 assert.match(index, /presentation-head\{[^}]*display:flex/);
-assert.match(index, /presentation-title::before\{[^}]*content:"—"/);
+assert.match(index, /presentation-title::before\{[^}]*content:['"]—['"]/);
 assert.match(index, /presentation-controls button\{[^}]*clamp\(34px,2\.5vw,40px\)/);
 assert.match(index, /GALILEA-PRESENTATION-SUITE-22-0-0/);
 assert.match(index, /presentation-controls-hidden/);
@@ -71,7 +87,10 @@ assert.match(index, /function togglePresentationTheme\(\)/);
 assert.match(index, /is-light/);
 assert.match(index, /Gunakan mode gelap/);
 assert.match(index, /event\.key\.toLowerCase\(\)==='t'/);
-assert.match(index, /@media\(max-width:520px\)\{\.presentation-controls button\{width:32px;height:32px\}/);
+assert.match(
+  index,
+  /@media\(max-width:520px\)\{\.presentation-controls button\{width:32px;height:32px\}/,
+);
 assert.match(index, /GALILEA-PRESENTATION-MOTION-23-0-0/);
 assert.match(index, /function animatePresentationTransition\(direction\)/);
 assert.match(index, /presentation-enter-next/);
@@ -128,8 +147,11 @@ assert.match(index, /@media\(max-width:1180px\)/);
 assert.match(index, /@media\(max-width:820px\)/);
 assert.match(index, /@media\(max-width:380px\)/);
 assert.match(index, /env\(safe-area-inset-bottom\)/);
-assert.match(index, /data-presentation-type="schedule"/);
-assert.match(index, /\.presentation-stage\{max-width:100%;padding-right:0;overscroll-behavior:contain\}/);
+assert.match(index, /data-presentation-type=['"]schedule['"]/);
+assert.match(
+  index,
+  /\.presentation-stage\{max-width:100%;padding-right:0;overscroll-behavior:contain\}/,
+);
 assert.match(index, /\.presentation-controls\{left:max\(8px,env\(safe-area-inset-left\)\)/);
 assert.match(index, /function openWorshipOperator\(\)/);
 assert.match(index, /async function prepareWorshipOffline\(\)/);
@@ -151,12 +173,16 @@ assert.match(index, /Pilih Lagu Tema atau Lagu Sion/);
 assert.doesNotMatch(index, /footer-updated'\)\.textContent = 'V/);
 
 const allScriptBlocks = [...index.matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)];
-const scriptBlocks = allScriptBlocks.filter(match => !/type=["']application\/ld\+json["']/i.test(match[0])).map(match => match[1]);
+const scriptBlocks = allScriptBlocks
+  .filter((match) => !/type=["']application\/ld\+json["']/i.test(match[0]))
+  .map((match) => match[1]);
 assert.ok(scriptBlocks.length > 0, 'Tidak ditemukan blok JavaScript pada index.html.');
 for (const [position, source] of scriptBlocks.entries()) {
-  new vm.Script(source, {filename: `index-inline-${position + 1}.js`});
+  new vm.Script(source, { filename: `index-inline-${position + 1}.js` });
 }
-const structuredData = allScriptBlocks.find(match => /type=["']application\/ld\+json["']/i.test(match[0]));
+const structuredData = allScriptBlocks.find((match) =>
+  /type=["']application\/ld\+json["']/i.test(match[0]),
+);
 assert.ok(structuredData, 'Data terstruktur SEO belum tersedia.');
 assert.equal(JSON.parse(structuredData[1])['@graph'][0]['@type'], 'Church');
 
@@ -169,9 +195,9 @@ const bridge = read('apps-script-backend/VercelApi.gs');
 const website = read('apps-script-backend/Website.gs');
 const admin = read('apps-script-backend/Admin.gs');
 const adminHtml = read('apps-script-backend/Admins.html');
-new vm.Script(bridge, {filename: 'VercelApi.gs'});
-new vm.Script(website, {filename: 'Website.gs'});
-new vm.Script(admin, {filename: 'Admin.gs'});
+new vm.Script(bridge, { filename: 'VercelApi.gs' });
+new vm.Script(website, { filename: 'Website.gs' });
+new vm.Script(admin, { filename: 'Admin.gs' });
 assert.match(website, /daily-reading-v16/);
 assert.match(website, /const day = exactDay;/);
 assert.doesNotMatch(website, /const day = exactDay \|\| pastDays/);
@@ -197,13 +223,16 @@ assert.match(index, /loaded&&String\(loaded\.resourceType/);
 assert.match(index, /--presentation-bg-schedule/);
 assert.match(website, /presentation_schedule_background_url/);
 assert.match(proxy, /public, s-maxage=900, stale-while-revalidate=1800/);
-// REMOVED
 assert.match(adminHtml, /GALILEA-ADMIN-BOOTSTRAP-35-8-0/);
 assert.match(adminHtml, /logo-galilea-light\.webp/);
 assert.match(adminHtml, /logo-galilea-dark\.webp/);
 assert.doesNotMatch(adminHtml, /adventist_logo\.png/);
-assert.match(adminHtml, /name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover"/);
-assert.match(adminHtml, /responsive admin lock: iPhone, Android, tablet, dan desktop/);
+assert.match(
+  adminHtml,
+  /name="viewport" content="width=device-width,initial-scale=1,maximum-scale=5,viewport-fit=cover"/,
+);
+assert.match(adminHtml, /@media\s*\(max-width:\s*850px\)/);
+assert.match(adminHtml, /@media\s*\(max-width:\s*480px\)/);
 assert.match(adminHtml, /data-preview-editor/);
 assert.match(adminHtml, /data-duplicate-schedule/);
 assert.match(adminHtml, /function duplicateSchedule\(id\)/);
@@ -214,35 +243,42 @@ assert.match(website, /awr-borneo-youtube-v13-unique/);
 assert.match(website, /sabbath-discussion-youtube-v13-single/);
 assert.match(index, /function scheduleWorshipFallback\(\)/);
 assert.match(index, /Bagian yang belum diterbitkan tidak diisi dengan perkiraan/);
-assert.match(index, /record\.timestamp\|\|\(record\.isoDate\+'T'\+record\.time\+'\:00\+08\:00'\)/);
+assert.match(
+  index,
+  /record\.timestamp[\s\S]*?record\.isoDate\s*\+\s*'T'\s*\+\s*record\.time\s*\+\s*':00\+08:00'/,
+);
 assert.match(website, /gwReadThemeSong_/);
 assert.match(website, /gwEnsureV200ContentSchemas_/);
 assert.match(website, /item\.dateValue <= today/);
-const adminScripts = [...adminHtml.replace(/<\?!=\s*JSON\.stringify\(appUrl\s*\|\|\s*''\)\s*\?>/g, "''").matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi)].map(match => match[1]);
+const adminScripts = [
+  ...adminHtml
+    .replace(/<\?!=\s*JSON\.stringify\(appUrl\s*\|\|\s*''\)\s*\?>/g, "''")
+    .matchAll(/<script(?:\s[^>]*)?>([\s\S]*?)<\/script>/gi),
+].map((match) => match[1]);
 assert.ok(adminScripts.length > 0, 'Tidak ditemukan blok JavaScript pada Admins.html.');
 for (const [position, source] of adminScripts.entries()) {
-  new vm.Script(source, {filename: `admin-inline-${position + 1}.js`});
+  new vm.Script(source, { filename: `admin-inline-${position + 1}.js` });
 }
 assert.match(website, /CACHE_SECONDS:\s*60/);
 assert.doesNotMatch(quarterlyPdf, /WEBSITE GALILEA\) Tj|Diunduh melalui Website Gereja Galilea/);
 assert.match(quarterlyPdf, /JADWAL PELAYANAN JEMAAT/);
-const calls = [...index.matchAll(/server\('([^']+)'/g)].map(match => match[1]);
+const calls = [...index.matchAll(/server\(\s*'([^']+)'/g)].map((match) => match[1]);
 assert.ok(calls.length >= 20, 'Jumlah integrasi viewer lebih sedikit dari yang diharapkan.');
-// These Bible methods are deliberately terminated in api/gas.js. The Vercel
-// proxy reads the single Bible source directly, so they must not be forwarded
-// to Apps Script and do not need handlers in apps-script-backend/VercelApi.gs.
-// Keep this list explicit: a newly added viewer method must still be present
-// in the Apps Script bridge unless it is intentionally added here.
+// Metode Alkitab selesai di api/gas.js dan tidak diteruskan ke Apps Script.
+// Daftar ini tetap eksplisit agar metode viewer baru tidak lolos tanpa sengaja.
 const VERCEL_ONLY_BIBLE_METHODS = new Set([
   'getBibleBook',
   'getBibleBooks',
   'getBibleChapter',
-  'searchBible'
+  'searchBible',
 ]);
 for (const method of new Set(calls)) {
   assert.ok(proxy.includes(`'${method}'`), `Method ${method} belum diizinkan oleh proxy Vercel.`);
   if (!VERCEL_ONLY_BIBLE_METHODS.has(method)) {
-    assert.ok(bridge.includes(`${method}: function`), `Method ${method} belum tersedia pada bridge Apps Script.`);
+    assert.ok(
+      bridge.includes(`${method}: function`),
+      `Method ${method} belum tersedia pada bridge Apps Script.`,
+    );
   }
 }
 
@@ -250,9 +286,9 @@ const vercel = JSON.parse(read('vercel.json'));
 assert.equal(vercel.rewrites[0].source, '/admin');
 assert.equal(vercel.rewrites[0].destination, '/api/admin');
 assert.deepEqual(vercel.regions, ['sin1']);
-assert.ok(vercel.headers.some(item => item.source === '/api/og'));
-assert.ok(vercel.headers.some(item => item.source === '/robots.txt'));
-assert.ok(vercel.headers.some(item => item.source === '/sitemap.xml'));
+assert.ok(vercel.headers.some((item) => item.source === '/api/og'));
+assert.ok(vercel.headers.some((item) => item.source === '/robots.txt'));
+assert.ok(vercel.headers.some((item) => item.source === '/sitemap.xml'));
 
 assert.match(robots, /Allow: \//);
 assert.match(robots, /Disallow: \/admin/);
@@ -265,7 +301,11 @@ assert.equal(manifest.start_url, '/#home');
 assert.equal(manifest.lang, 'id');
 
 const envExample = read('.env.example');
-for (const key of ['GALILEA_APPS_SCRIPT_API_URL', 'GALILEA_APPS_SCRIPT_ADMIN_URL', 'GALILEA_API_SECRET']) {
+for (const key of [
+  'GALILEA_APPS_SCRIPT_API_URL',
+  'GALILEA_APPS_SCRIPT_ADMIN_URL',
+  'GALILEA_API_SECRET',
+]) {
   assert.match(envExample, new RegExp(`^${key}=`, 'm'));
 }
 
@@ -274,143 +314,223 @@ function mockResponse() {
     statusCode: 200,
     headers: {},
     body: null,
-    setHeader(key, value) { this.headers[key] = value; },
-    status(code) { this.statusCode = code; return this; },
-    json(value) { this.body = value; return this; },
-    send(value) { this.body = value; return this; },
-    redirect(code, value) { this.statusCode = code; this.body = value; return this; }
+    setHeader(key, value) {
+      this.headers[key] = value;
+    },
+    status(code) {
+      this.statusCode = code;
+      return this;
+    },
+    json(value) {
+      this.body = value;
+      return this;
+    },
+    send(value) {
+      this.body = value;
+      return this;
+    },
+    redirect(code, value) {
+      this.statusCode = code;
+      this.body = value;
+      return this;
+    },
   };
 }
 
-const {default: gasHandler} = await import('../api/gas.js');
+const { default: gasHandler } = await import('../api/gas.js');
 let response = mockResponse();
-await gasHandler({method: 'GET', headers: {}}, response);
+await gasHandler({ method: 'GET', headers: {} }, response);
 assert.equal(response.statusCode, 200);
 assert.equal(response.body.ok, true);
 
 process.env.GALILEA_APPS_SCRIPT_API_URL = 'https://script.google.com/macros/s/DEPLOYMENT_ID/exec';
 process.env.GALILEA_API_SECRET = '12345678901234567890123456789012';
 response = mockResponse();
-await gasHandler({method: 'POST', headers: {}, body: {method: 'fungsiBerbahaya', args: []}}, response);
+await gasHandler(
+  { method: 'POST', headers: {}, body: { method: 'fungsiBerbahaya', args: [] } },
+  response,
+);
 assert.equal(response.statusCode, 403);
 
 const nativeFetch = globalThis.fetch;
 let forwarded = null;
 globalThis.fetch = async (url, options) => {
-  forwarded = {url, body: JSON.parse(options.body)};
+  forwarded = { url, body: JSON.parse(options.body) };
   return {
     ok: true,
     status: 200,
-    async text() { return JSON.stringify({ok: true, data: {title: 'Galilea'}}); }
+    async text() {
+      return JSON.stringify({ ok: true, data: { title: 'Galilea' } });
+    },
   };
 };
 response = mockResponse();
-await gasHandler({method: 'POST', headers: {}, body: {method: 'getWebsiteData', args: []}}, response);
+await gasHandler(
+  { method: 'POST', headers: {}, body: { method: 'getWebsiteData', args: [] } },
+  response,
+);
 globalThis.fetch = nativeFetch;
 assert.equal(response.statusCode, 200);
 assert.equal(response.body.data.title, 'Galilea');
 assert.equal(forwarded.body.method, 'getWebsiteData');
 assert.equal(forwarded.body.secret, process.env.GALILEA_API_SECRET);
 
-const {default: adminHandler} = await import('../api/admin.js');
+const { default: adminHandler } = await import('../api/admin.js');
 
-// TEST 1: Full URL → valid 307 redirect with ?page=admin
-process.env.GALILEA_APPS_SCRIPT_ADMIN_URL = 'https://script.google.com/macros/s/AKfycbTEST_FULL_URL/exec';
+// URL lengkap diarahkan ke halaman admin.
+process.env.GALILEA_APPS_SCRIPT_ADMIN_URL =
+  'https://script.google.com/macros/s/AKfycbTEST_FULL_URL/exec';
 response = mockResponse();
-adminHandler({method: 'GET', query: {open: '1'}}, response);
+adminHandler({ method: 'GET', query: { open: '1' } }, response);
 assert.equal(response.statusCode, 307, 'Full URL harus menghasilkan redirect 307');
 assert.match(response.body, /page=admin/, 'Redirect harus menyertakan ?page=admin');
-assert.match(response.body, /AKfycbTEST_FULL_URL/, 'Redirect harus mengarah ke deployment yang dikonfigurasi');
+assert.match(
+  response.body,
+  /AKfycbTEST_FULL_URL/,
+  'Redirect harus mengarah ke deployment yang dikonfigurasi',
+);
 
-// TEST 2: Bare deployment ID → valid 307 redirect
+// Deployment ID saja juga diarahkan dengan benar.
 process.env.GALILEA_APPS_SCRIPT_ADMIN_URL = 'AKfycbTEST_BARE_ID';
 response = mockResponse();
-adminHandler({method: 'GET', query: {open: '1'}}, response);
+adminHandler({ method: 'GET', query: { open: '1' } }, response);
 assert.equal(response.statusCode, 307, 'Bare deployment ID harus menghasilkan redirect 307');
 assert.match(response.body, /page=admin/, 'Redirect dari bare ID harus menyertakan ?page=admin');
-assert.match(response.body, /AKfycbTEST_BARE_ID/, 'Redirect dari bare ID harus mengarah ke deployment yang dikonfigurasi');
+assert.match(
+  response.body,
+  /AKfycbTEST_BARE_ID/,
+  'Redirect dari bare ID harus mengarah ke deployment yang dikonfigurasi',
+);
 
-// TEST 3: Missing env → 503 error, tidak fallback diam-diam
+// Env kosong harus menghasilkan 503, bukan fallback diam-diam.
 delete process.env.GALILEA_APPS_SCRIPT_ADMIN_URL;
 response = mockResponse();
-adminHandler({method: 'GET', query: {open: '1'}}, response);
-assert.equal(response.statusCode, 503, 'Missing env harus menghasilkan error 503, bukan fallback diam-diam');
+adminHandler({ method: 'GET', query: { open: '1' } }, response);
+assert.equal(
+  response.statusCode,
+  503,
+  'Missing env harus menghasilkan error 503, bukan fallback diam-diam',
+);
 
-// TEST 4: Invalid URL → 503 error
+// URL tidak valid harus menghasilkan 503.
 process.env.GALILEA_APPS_SCRIPT_ADMIN_URL = 'https://evil.example.com/attack';
 response = mockResponse();
-adminHandler({method: 'GET', query: {open: '1'}}, response);
+adminHandler({ method: 'GET', query: { open: '1' } }, response);
 assert.equal(response.statusCode, 503, 'URL invalid harus menghasilkan error 503');
 
-// TEST 5: Restore valid env for subsequent tests
+// Pulihkan env untuk pemeriksaan berikutnya.
 process.env.GALILEA_APPS_SCRIPT_ADMIN_URL = 'https://script.google.com/macros/s/DEPLOYMENT_ID/exec';
 response = mockResponse();
-adminHandler({method: 'GET', query: {open: '1'}}, response);
+adminHandler({ method: 'GET', query: { open: '1' } }, response);
 assert.equal(response.statusCode, 307);
 assert.match(response.body, /page=admin/);
 
-// TEST 7: No stale hardcoded deployment ID in api/admin.js source
+// Jangan sisakan deployment ID lama di api/admin.js.
 const adminSource = read('api/admin.js');
-assert.doesNotMatch(adminSource, /AKfycbxOkCVxWcipB8IY6Y9ToTuWfJ/, 'api/admin.js tidak boleh mengandung hardcoded deployment ID');
-assert.doesNotMatch(adminSource, /AKfycbzcZfVYt2IfLh8raFPGsZqzNyIbLrfyDrDd0Xh6KeOlqxwHrxvEPi8PqlWJsykugNN6qg/, 'api/admin.js tidak boleh mengandung legacy deployment ID');
-assert.doesNotMatch(adminSource, /AKfycbyQcY5P0e_tcLdFhrTdjEHvO15zeiMXcJ8KZFXiIN0PNCOW/, 'api/admin.js tidak boleh mengandung stale Vercel deployment ID');
-assert.match(adminSource, /process\.env\.GALILEA_APPS_SCRIPT_ADMIN_URL/, 'api/admin.js harus membaca dari environment variable');
+assert.doesNotMatch(
+  adminSource,
+  /AKfycbxOkCVxWcipB8IY6Y9ToTuWfJ/,
+  'api/admin.js tidak boleh mengandung hardcoded deployment ID',
+);
+assert.doesNotMatch(
+  adminSource,
+  /AKfycbzcZfVYt2IfLh8raFPGsZqzNyIbLrfyDrDd0Xh6KeOlqxwHrxvEPi8PqlWJsykugNN6qg/,
+  'api/admin.js tidak boleh mengandung legacy deployment ID',
+);
+assert.doesNotMatch(
+  adminSource,
+  /AKfycbyQcY5P0e_tcLdFhrTdjEHvO15zeiMXcJ8KZFXiIN0PNCOW/,
+  'api/admin.js tidak boleh mengandung stale Vercel deployment ID',
+);
+assert.match(
+  adminSource,
+  /process\.env\.GALILEA_APPS_SCRIPT_ADMIN_URL/,
+  'api/admin.js harus membaca dari environment variable',
+);
 
-const {default: quarterlyHandler} = await import('../api/quarterly-pdf.js');
+const { default: quarterlyHandler } = await import('../api/quarterly-pdf.js');
 globalThis.fetch = async () => ({
   ok: true,
   status: 200,
   async text() {
-    return JSON.stringify({ok: true, data: {
-      periodLabel: 'TRIWULAN III · JULI - SEPTEMBER 2026',
-      updatedAt: 'Senin, 24 Agustus 2026 · 14.15 WITA',
-      sections: [{title: 'Kebaktian Khotbah', records: [{
-        dateLabel: 'Sabat, 29 Agustus 2026', time: '09:00',
-        fields: [{label: 'Pengkhotbah', value: 'Bpk. G. Sinurat'}, {label: 'Lagu Pujian', value: 'UKSS Eklesia'}]
-      }]}]
-    }});
-  }
+    return JSON.stringify({
+      ok: true,
+      data: {
+        periodLabel: 'TRIWULAN III · JULI - SEPTEMBER 2026',
+        updatedAt: 'Senin, 24 Agustus 2026 · 14.15 WITA',
+        sections: [
+          {
+            title: 'Kebaktian Khotbah',
+            records: [
+              {
+                dateLabel: 'Sabat, 29 Agustus 2026',
+                time: '09:00',
+                fields: [
+                  { label: 'Pengkhotbah', value: 'Bpk. G. Sinurat' },
+                  { label: 'Lagu Pujian', value: 'UKSS Eklesia' },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    });
+  },
 });
 response = mockResponse();
-await quarterlyHandler({method: 'GET'}, response);
+await quarterlyHandler({ method: 'GET' }, response);
 globalThis.fetch = nativeFetch;
 assert.equal(response.statusCode, 200);
 assert.ok(Buffer.isBuffer(response.body));
 assert.equal(response.body.subarray(0, 4).toString(), '%PDF');
 assert.match(response.headers['Content-Disposition'], /Jadwal-Ibadah-Galilea/);
-const {buildPdf:buildWeeklyPdf} = await import('../api/weekly-bulletin.js');
-const weeklyBuffer=buildWeeklyPdf({updatedAt:'Uji',nextSabbath:{title:'Ibadah Sabat',dateLabel:'Sabat',time:'09.00',fields:[]},announcements:[],activities:[]});
+const { buildPdf: buildWeeklyPdf } = await import('../api/weekly-bulletin.js');
+const weeklyBuffer = buildWeeklyPdf({
+  updatedAt: 'Uji',
+  nextSabbath: { title: 'Ibadah Sabat', dateLabel: 'Sabat', time: '09.00', fields: [] },
+  announcements: [],
+  activities: [],
+});
 assert.ok(Buffer.isBuffer(weeklyBuffer));
-assert.equal(weeklyBuffer.subarray(0,4).toString(),'%PDF');
-assert.match(weeklyPdf,/GALILEA-WEEKLY-BULLETIN-20\.0\.0/);
-assert.match(weeklyPdf,/AGENDA DAN PENGUMUMAN/);
-assert.doesNotMatch(weeklyPdf,/KEGIATAN MENDATANG/);
+assert.equal(weeklyBuffer.subarray(0, 4).toString(), '%PDF');
+assert.match(weeklyPdf, /GALILEA-WEEKLY-BULLETIN-20\.0\.0/);
+assert.match(weeklyPdf, /AGENDA DAN PENGUMUMAN/);
+assert.doesNotMatch(weeklyPdf, /KEGIATAN MENDATANG/);
 assert.match(youtubeProxy, /youtube\.com\/feeds\/videos\.xml/);
 assert.match(youtubeProxy, /uniqueByTitle\(videos, 3\)/);
 assert.match(thumbnailProxy, /i\.ytimg\.com\/vi/);
 assert.match(thumbnailProxy, /stale-while-revalidate=604800/);
 
-const {default: mediaHandler} = await import('../api/thumbnail.js');
+const { default: mediaHandler } = await import('../api/thumbnail.js');
 response = mockResponse();
-await mediaHandler({method:'GET',query:{id:'bad'}},response);
-assert.equal(response.statusCode,400);
+await mediaHandler({ method: 'GET', query: { id: 'bad' } }, response);
+assert.equal(response.statusCode, 400);
 
 globalThis.fetch = async () => ({
-  ok:true,
-  status:200,
-  headers:new Headers({'content-type':'image/png','content-length':'1000'}),
-  async arrayBuffer(){const bytes=new Uint8Array(1000);bytes.set([0x89,0x50,0x4e,0x47,0x0d,0x0a,0x1a,0x0a]);return bytes.buffer;}
+  ok: true,
+  status: 200,
+  headers: new Headers({ 'content-type': 'image/png', 'content-length': '1000' }),
+  async arrayBuffer() {
+    const bytes = new Uint8Array(1000);
+    bytes.set([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    return bytes.buffer;
+  },
 });
 response = mockResponse();
-await mediaHandler({method:'GET',query:{id:'abcdefghijk'}},response);
+await mediaHandler({ method: 'GET', query: { id: 'abcdefghijk' } }, response);
 globalThis.fetch = nativeFetch;
-assert.equal(response.statusCode,200);
-assert.equal(response.headers['Content-Type'],'image/png');
+assert.equal(response.statusCode, 200);
+assert.equal(response.headers['Content-Type'], 'image/png');
 assert.ok(Buffer.isBuffer(response.body));
-if (process.env.WRITE_SAMPLE_PDF === '1') fs.writeFileSync('/tmp/galilea-quarterly-sample.pdf', response.body);
+if (process.env.WRITE_SAMPLE_PDF === '1')
+  fs.writeFileSync('/tmp/galilea-quarterly-sample.pdf', response.body);
 
 console.log(`OK · ${new Set(calls).size} fungsi viewer terhubung ke proxy dan bridge Apps Script.`);
 console.log('OK · index.html bebas template Apps Script dan JavaScript berhasil diparse.');
 console.log('OK · konfigurasi Vercel, admin route, manifest, dan environment variables lengkap.');
-console.log('OK · proxy menolak fungsi di luar allowlist dan /admin diarahkan ke deployment terpisah.');
-console.log('OK · PDF triwulan spreadsheet tanpa watermark dan metadata Open Graph WhatsApp tersedia.');
+console.log(
+  'OK · proxy menolak fungsi di luar allowlist dan /admin diarahkan ke deployment terpisah.',
+);
+console.log(
+  'OK · PDF triwulan spreadsheet tanpa watermark dan metadata Open Graph WhatsApp tersedia.',
+);

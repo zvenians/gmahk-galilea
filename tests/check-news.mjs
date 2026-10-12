@@ -2,12 +2,12 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
-import {fileURLToPath} from 'node:url';
-import {JSDOM} from 'jsdom';
+import { fileURLToPath } from 'node:url';
+import { JSDOM } from 'jsdom';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
-const read = file => fs.readFileSync(path.join(root, file), 'utf8');
+const read = (file) => fs.readFileSync(path.join(root, file), 'utf8');
 
 const websiteCode = read('apps-script-backend/Website.gs');
 const adminCode = read('apps-script-backend/Admin.gs');
@@ -38,14 +38,20 @@ const activityCardHtmlStr = extractFunction('activityCardHtml');
 
 const jsdomInstance = new JSDOM('<!DOCTYPE html><html><body></body></html>');
 const window = jsdomInstance.window;
-console.log("JSDOM initialized");
+console.log('JSDOM initialized');
 
-const context = vm.createContext({ 
-  console, String, RegExp, Date, Number, Array,
-  document: window.document
+const context = vm.createContext({
+  console,
+  String,
+  RegExp,
+  Date,
+  Number,
+  Array,
+  document: window.document,
 });
 
-vm.runInContext(`
+vm.runInContext(
+  `
   function gaEntityDefinitions_() {
     return {
       activities: {
@@ -79,14 +85,16 @@ vm.runInContext(`
   ${activityExcerptTextStr}
   globalThis.activityExcerptText = activityExcerptText;
   
-  // mock for activityCardHtml test
+  // Data contoh untuk activityCardHtml.
   globalThis.esc = str => String(str).replace(/</g, '&lt;');
   globalThis.safeUrl = str => str;
   globalThis.attr = str => str;
   globalThis.icon = str => '';
   ${activityCardHtmlStr}
   globalThis.activityCardHtml = activityCardHtml;
-`, context);
+`,
+  context,
+);
 
 let passed = 0;
 let total = 0;
@@ -102,13 +110,19 @@ function runTest(name, fn) {
   }
 }
 
-// 1. WhatsApp Formatting (Blocker 5 & Task 5)
+// Format WhatsApp.
 runTest('TEST 1: legacy plain text', () => {
-  assert.equal(context.htmlToWaText('Paragraf satu.\n\nParagraf dua.'), 'Paragraf satu.\n\nParagraf dua.');
+  assert.equal(
+    context.htmlToWaText('Paragraf satu.\n\nParagraf dua.'),
+    'Paragraf satu.\n\nParagraf dua.',
+  );
 });
 
 runTest('TEST 2: rich paragraph', () => {
-  assert.equal(context.htmlToWaText('<p>Paragraf pertama.</p><p>Paragraf kedua.</p>'), 'Paragraf pertama.\n\nParagraf kedua.');
+  assert.equal(
+    context.htmlToWaText('<p>Paragraf pertama.</p><p>Paragraf kedua.</p>'),
+    'Paragraf pertama.\n\nParagraf kedua.',
+  );
 });
 
 runTest('TEST B: Pastikan <strong> menjadi format WA', () => {
@@ -123,7 +137,8 @@ runTest('TEST C: Pastikan encoded HTML tidak menghasilkan literal raw HTML', () 
 });
 
 runTest('TEST D: Pastikan output final WA tidak mengandung tag HTML sama sekali', () => {
-  const html = '<p><strong>Tebal</strong> &amp; &lt;script&gt;alert(1)&lt;/script&gt;</p> <u>underline</u> <br> <ul><li>Test</li></ul>';
+  const html =
+    '<p><strong>Tebal</strong> &amp; &lt;script&gt;alert(1)&lt;/script&gt;</p> <u>underline</u> <br> <ul><li>Test</li></ul>';
   const result = context.htmlToWaText(html);
   assert.doesNotMatch(result, /<\/?[a-z][^>]*>/i);
 });
@@ -137,23 +152,27 @@ runTest('TEST 5: underline', () => {
 });
 
 runTest('TEST 6: UL', () => {
-  assert.equal(context.htmlToWaText('<ul><li>Poin satu</li><li>Poin dua</li></ul>'), '- Poin satu\n- Poin dua');
+  assert.equal(
+    context.htmlToWaText('<ul><li>Poin satu</li><li>Poin dua</li></ul>'),
+    '- Poin satu\n- Poin dua',
+  );
 });
 
 runTest('TEST 7: OL', () => {
-  assert.equal(context.htmlToWaText('<ol><li>Langkah satu</li><li>Langkah dua</li></ol>'), '1. Langkah satu\n2. Langkah dua');
+  assert.equal(
+    context.htmlToWaText('<ol><li>Langkah satu</li><li>Langkah dua</li></ol>'),
+    '1. Langkah satu\n2. Langkah dua',
+  );
 });
 
 runTest('TEST 8: HTTPS link', () => {
-  assert.equal(context.htmlToWaText('<p><a href="https://example.com">Example</a></p>'), 'Example (https://example.com)');
+  assert.equal(
+    context.htmlToWaText('<p><a href="https://example.com">Example</a></p>'),
+    'Example (https://example.com)',
+  );
 });
 
-
-
-// 2. Server Sanitization (Blocker 4)
-
-
-
+// Sanitasi server.
 
 runTest('TEST 12: dangerous attribute (Server)', () => {
   assert.equal(context.gaSanitizeHtml_('<p onclick="alert(1)">Klik</p>'), '<p>Klik</p>');
@@ -163,43 +182,64 @@ runTest('TEST 13: javascript href (Server)', () => {
   assert.equal(context.gaSanitizeHtml_('<a href="javascript:alert(1)">Klik</a>'), '<a>Klik</a>');
 });
 
-// 3. Primary Photo Logic (Blocker 7)
+// Foto utama.
 runTest('TEST 14: PRIMARY preservation', () => {
   const payload = {
     title: 'Test',
     date: '2026-01-01',
     description: 'Test',
-    photos: 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg'
+    photos:
+      'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg',
   };
   const result = context.gaSanitizePayload_('activities', payload);
-  assert.equal(result.photos, 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg');
+  assert.equal(
+    result.photos,
+    'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg',
+  );
 });
 
 runTest('TEST 15: cover extraction', () => {
-  const input = 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg';
+  const input =
+    'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/c.jpg';
   assert.equal(context.gwActivityCover_(input), 'https://example.com/b.jpg');
 });
 
 runTest('TEST 16: duplicate photos', () => {
-  const input = 'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/a.jpg';
-  assert.deepEqual(Array.from(context.gwActivityPhotos_(input)), ['https://example.com/a.jpg', 'https://example.com/b.jpg']);
+  const input =
+    'https://example.com/a.jpg\nPRIMARY:https://example.com/b.jpg\nhttps://example.com/a.jpg';
+  assert.deepEqual(Array.from(context.gwActivityPhotos_(input)), [
+    'https://example.com/a.jpg',
+    'https://example.com/b.jpg',
+  ]);
 });
 
 runTest('TEST 17: multiple news independence', () => {
-  assert.equal(context.gwActivityCover_('PRIMARY:https://example.com/a2.jpg'), 'https://example.com/a2.jpg');
-  assert.equal(context.gwActivityCover_('PRIMARY:https://example.com/b3.jpg'), 'https://example.com/b3.jpg');
-  assert.equal(context.gwActivityCover_('PRIMARY:https://example.com/c1.jpg'), 'https://example.com/c1.jpg');
+  assert.equal(
+    context.gwActivityCover_('PRIMARY:https://example.com/a2.jpg'),
+    'https://example.com/a2.jpg',
+  );
+  assert.equal(
+    context.gwActivityCover_('PRIMARY:https://example.com/b3.jpg'),
+    'https://example.com/b3.jpg',
+  );
+  assert.equal(
+    context.gwActivityCover_('PRIMARY:https://example.com/c1.jpg'),
+    'https://example.com/c1.jpg',
+  );
 });
 
-// 4. Client Sanitization (Blocker 1)
+// Sanitasi browser.
 runTest('TEST 18: client sanitizer allowed tags', () => {
-  const input = '<p><strong>A</strong> <em>B</em> <u>C</u> <br> </p><ul><li>D</li></ul> <ol><li>E</li></ol>';
-  const expected = '<p><strong>A</strong> <em>B</em> <u>C</u> <br> </p><ul><li>D</li></ul> <ol><li>E</li></ol>';
+  const input =
+    '<p><strong>A</strong> <em>B</em> <u>C</u> <br> </p><ul><li>D</li></ul> <ol><li>E</li></ol>';
+  const expected =
+    '<p><strong>A</strong> <em>B</em> <u>C</u> <br> </p><ul><li>D</li></ul> <ol><li>E</li></ol>';
   assert.equal(context.cleanHtml(input), expected);
 });
 
 runTest('TEST 19: client sanitizer dangerous tags', () => {
-  const input = '<div><script>alert(1)</script><p>Hello</p><style>body{}</style><object></object></div>';
+  const input =
+    '<div><script>alert(1)</script><p>Hello</p><style>body{}</style><object></object></div>';
   const result = context.cleanHtml(input);
   assert.equal(result, '<p>Hello</p>');
   assert.doesNotMatch(result, /script/i);
@@ -207,10 +247,6 @@ runTest('TEST 19: client sanitizer dangerous tags', () => {
   assert.doesNotMatch(result, /object/i);
   assert.doesNotMatch(result, /div/i);
 });
-
-
-
-
 
 runTest('TEST 22: client sanitizer preserves list', () => {
   const input = '<ul><li>A</li></ul>';
@@ -222,7 +258,7 @@ runTest('TEST 23: client sanitizer preserves formatting', () => {
   assert.equal(context.cleanHtml(input), '<p><strong>Bold</strong></p>');
 });
 
-// 5. URL Share WA & API Endpoint Check (Tasks 1 & 2)
+// Tautan WhatsApp dan endpoint API.
 runTest('TEST A: Share URL WA menggunakan /berita/{id}', () => {
   assert.match(indexHtml, /location\.origin\s*\+\s*'\/berita\/'\s*\+\s*encodeURIComponent/);
   assert.doesNotMatch(indexHtml, /location\.href\.split\('#'\)\[0\]\s*\+\s*'#berita\/'/);
@@ -233,42 +269,49 @@ let apiNewsOgSource = '';
 try {
   apiNewsOgSource = read('api/news-og.js');
 } catch (e) {
-  // safe fallback if not exist
+  // Cadangan aman jika fungsi belum ada.
 }
 
 runTest('TEST E: API Berita menggunakan PRIMARY/coverUrl sebagai prioritas', () => {
-  assert.match(apiBeritaSource, /const cover = /);
+  assert.match(apiBeritaSource, /const cover\s*=/);
 });
 
 runTest('TEST F: API Berita menggunakan photo pertama sebagai fallback', () => {
-  // Test E implicitly tests this because the regex asserts `|| (activity.photos && activity.photos[0])`
+  // Pola ini juga tercakup oleh pemeriksaan sebelumnya.
   assert.match(apiBeritaSource, /image = baseUrl \+ '\/api\/news-og\?id='/);
 });
 
 runTest('TEST G: Share link untuk tiga berita berbeda independen', () => {
-  assert.match(indexHtml, /const item=\(state\.data\.activities\|\|\[\]\)\.find\(activity=>String\(activity\.id\)===String\(activityShare\.dataset\.shareActivity\)\);/);
+  assert.match(
+    indexHtml,
+    /const item\s*=\s*\(state\.data\.activities\s*\|\|\s*\[\]\)\.find\([\s\S]*?activityShare\.dataset\.shareActivity/,
+  );
 });
 
-// 6. News Card Excerpt & Drive URL OG (Tasks H-N)
+// Ringkasan berita dan gambar Drive.
 runTest('TEST H: activityCardHtml tidak boleh mengandung raw HTML dari description', () => {
   const item = {
-    id: '123', title: 'Test', dateLabel: 'Date', location: 'Loc',
-    description: '<p><strong>Judul</strong> isi</p>'
+    id: '123',
+    title: 'Test',
+    dateLabel: 'Date',
+    location: 'Loc',
+    description: '<p><strong>Judul</strong> isi</p>',
   };
   const html = context.activityCardHtml(item, false);
-  // It should escape the text, but the text itself should be "Judul isi"
+  // Teks tetap sama setelah karakter HTML diamankan.
   assert.match(html, /<p>Judul isi<\/p>/);
   assert.doesNotMatch(html, /&lt;strong&gt;/);
 });
 
 runTest('TEST I: activityExcerptText() tidak menghasilkan tag HTML sebagai teks', () => {
-  const input = '<p><strong>Tebal</strong> <em>Miring</em> <u>Bawah</u> <ul><li>List</li></ul> <ol><li>List2</li></ol> <a href="#">Link</a></p>';
+  const input =
+    '<p><strong>Tebal</strong> <em>Miring</em> <u>Bawah</u> <ul><li>List</li></ul> <ol><li>List2</li></ol> <a href="#">Link</a></p>';
   const result = context.activityExcerptText(input);
   assert.equal(result, 'Tebal Miring Bawah List List2 Link');
 });
 
 runTest('TEST J: Primary image digunakan untuk OG', () => {
-  assert.match(apiNewsOgSource, /const rawCover = activity\.coverUrl \|\|/);
+  assert.match(apiNewsOgSource, /const rawCover\s*=\s*activity\.coverUrl\s*\|\|/);
 });
 
 runTest('TEST K: Fallback OG', () => {
@@ -282,22 +325,31 @@ runTest('TEST L: Google Drive primary URL dinormalisasi menjadi direct image URL
 });
 
 runTest('TEST M: Berita A dan B tidak saling menimpa og:image', () => {
-  assert.match(apiNewsOgSource, /const activity = json\.data\.activities\.find\(a => String\(a\.id\) === String\(id\)\);/);
+  assert.match(
+    apiNewsOgSource,
+    /const activity\s*=\s*json\.data\.activities\.find\(\(a\)\s*=>\s*String\(a\.id\)\s*===\s*String\(id\)\);/,
+  );
 });
 
 runTest('TEST N: Share URL tetap /berita/ID', () => {
   assert.match(indexHtml, /location\.origin\s*\+\s*'\/berita\/'\s*\+\s*encodeURIComponent/);
 });
 
-// 7. Format WhatsApp Newline Structure (Tasks O-Q)
-runTest('TEST O: htmlToWaText tidak memecah kalimat berdasar text node HTML yang memiliki newline', () => {
-  const input = `<p>Paragraf pertama dengan kalimat yang 
+// Susunan baris WhatsApp.
+runTest(
+  'TEST O: htmlToWaText tidak memecah kalimat berdasar text node HTML yang memiliki newline',
+  () => {
+    const input = `<p>Paragraf pertama dengan kalimat yang
 cukup panjang sehingga harus wrap secara natural.</p>
-<p>Paragraf kedua juga panjang dan tidak 
+<p>Paragraf kedua juga panjang dan tidak
 boleh dipecah menjadi newline per kata.</p>`;
-  const result = context.htmlToWaText(input);
-  assert.equal(result, 'Paragraf pertama dengan kalimat yang cukup panjang sehingga harus wrap secara natural.\n\nParagraf kedua juga panjang dan tidak boleh dipecah menjadi newline per kata.');
-});
+    const result = context.htmlToWaText(input);
+    assert.equal(
+      result,
+      'Paragraf pertama dengan kalimat yang cukup panjang sehingga harus wrap secara natural.\n\nParagraf kedua juga panjang dan tidak boleh dipecah menjadi newline per kata.',
+    );
+  },
+);
 
 runTest('TEST P: htmlToWaText membersihkan spasi berlebih pada tag inline', () => {
   const input = '<p>Hello <strong> World </strong> !</p>';
@@ -305,27 +357,33 @@ runTest('TEST P: htmlToWaText membersihkan spasi berlebih pada tag inline', () =
   assert.equal(result, 'Hello *World* !');
 });
 
-runTest('TEST Q: activityShareText memastikan struktur metadata dan isi rapi dengan max 1 blank line', () => {
-  const item = {
-    title: 'Judul',
-    dateLabel: 'Tanggal',
-    location: 'Lokasi',
-    description: '<p>Isi berita</p>'
-  };
-  const expected = '*BERITA JEMAAT*\n\n*Judul*\nTanggal\nLokasi\n\nIsi berita';
-  
-  // Note: we need to expose activityShareText to test it
-  const activityShareTextStr = extractFunction('activityShareText');
-  vm.runInContext(activityShareTextStr + '\nglobalThis.activityShareText = activityShareText;', context);
-  
-  const result = context.activityShareText(item);
-  assert.equal(result, expected);
-  
-  // Pastikan tidak ada 3 newline berturut-turut
-  assert.doesNotMatch(result, /\n{3,}/);
-});
+runTest(
+  'TEST Q: activityShareText memastikan struktur metadata dan isi rapi dengan max 1 blank line',
+  () => {
+    const item = {
+      title: 'Judul',
+      dateLabel: 'Tanggal',
+      location: 'Lokasi',
+      description: '<p>Isi berita</p>',
+    };
+    const expected = '*BERITA JEMAAT*\n\n*Judul*\nTanggal\nLokasi\n\nIsi berita';
 
-// 8. Dynamic Landscape OG Thumbnail Tests (Tasks R-Z)
+    // Buka activityShareText agar bisa diuji.
+    const activityShareTextStr = extractFunction('activityShareText');
+    vm.runInContext(
+      activityShareTextStr + '\nglobalThis.activityShareText = activityShareText;',
+      context,
+    );
+
+    const result = context.activityShareText(item);
+    assert.equal(result, expected);
+
+    // Jangan sisakan tiga baris kosong beruntun.
+    assert.doesNotMatch(result, /\n{3,}/);
+  },
+);
+
+// Thumbnail lanskap dinamis.
 runTest('TEST R: Aspect ratio asli tetap dipertahankan', () => {
   assert.match(apiNewsOgSource, /objectFit: 'contain'/);
 });
@@ -335,11 +393,14 @@ runTest('TEST S: News A menggunakan primary image A', () => {
 });
 
 runTest('TEST T: News B menggunakan primary image B', () => {
-  assert.match(apiBeritaSource, /image = baseUrl \+ '\/api\/news-og\?id=' \+ encodeURIComponent\(id\)/);
+  assert.match(
+    apiBeritaSource,
+    /image = baseUrl \+ '\/api\/news-og\?id=' \+ encodeURIComponent\(id\)/,
+  );
 });
 
 runTest('TEST U: Tidak ada cross-news contamination', () => {
-  // implicit from TEST M and TEST S
+  // Sudah tercakup oleh pemeriksaan gambar sebelumnya.
   assert.ok(true);
 });
 
@@ -348,7 +409,7 @@ runTest('TEST V: Google Drive file/d/FILE_ID berhasil dinormalisasi', () => {
 });
 
 runTest('TEST W: Fallback ke photos[0] ketika coverUrl kosong', () => {
-  assert.match(apiNewsOgSource, /const rawCover = /);
+  assert.match(apiNewsOgSource, /const rawCover\s*=/);
 });
 
 runTest('TEST X: OG HTML menggunakan URL compositor, bukan direct portrait image', () => {
@@ -361,12 +422,12 @@ runTest('TEST Y: OG endpoint menolak ID kosong/tidak valid', () => {
 });
 
 runTest('TEST Z: Endpoint tidak menerima arbitrary remote image URL', () => {
-  // Only gets image internally via API lookup
+  // Gambar hanya diambil lewat API internal.
   assert.doesNotMatch(apiNewsOgSource, /url\.searchParams\.get\('url'\)/);
   assert.match(apiNewsOgSource, /const id = url\.searchParams\.get\('id'\)/);
 });
 
-// Extra check to verify the test suite executed completely.
+// Penanda bahwa semua pemeriksaan sudah selesai.
 runTest('TEST 49: Suite Executed Completely', () => {
   assert.ok(true, 'Suite ran to completion');
 });
@@ -406,7 +467,7 @@ runTest('TEST NEW 6: resumable session function exists', () => {
 
 runTest('TEST NEW 7: browser upload uses authenticated chunk RPC', () => {
   const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
-  assert.match(adminsHtml, /server\('adminUploadMediaChunk'/);
+  assert.match(adminsHtml, /server\(\s*'adminUploadMediaChunk'/);
   assert.doesNotMatch(adminsHtml, /xhr\.open\('PUT'/);
 });
 
@@ -437,20 +498,28 @@ runTest('TEST NEW 23: Hanya ada satu implementasi uploadMediaFile', () => {
 });
 
 runTest('TEST NEW 24: Tidak boleh ada unconditional offset = end setelah HTTP 308', () => {
-  // We check if the code has a branch for 308 that sets offset from Range, 
-  // and does NOT follow it immediately with offset = end.
-  // Actually, we can check if the old bug is removed.
+  // Respons 308 harus melanjutkan offset dari header Range.
   const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
-  const hasBug = adminsHtml.includes('if (success && offset === end - 1) offset = end;\n      else offset = end;');
+  const hasBug = adminsHtml.includes(
+    'if (success && offset === end - 1) offset = end;\n      else offset = end;',
+  );
   assert.equal(hasBug, false, 'Ditemukan bug override offset = end secara tidak bersyarat');
-  
-  // We can also ensure our status query pattern exists
-  assert.match(fs.readFileSync('apps-script-backend/Admin.gs','utf8'), /Content-Range['"]:\s*['"]bytes \*\//, 'Harus query status sebelum retry dengan bytes */TOTAL');
+
+  // Pastikan pola pemeriksaan status tetap ada.
+  assert.match(
+    fs.readFileSync('apps-script-backend/Admin.gs', 'utf8'),
+    /Content-Range['"]:\s*['"]bytes \*\//,
+    'Harus query status sebelum retry dengan bytes */TOTAL',
+  );
 });
 
 runTest('TEST NEW 25: JSON Parsing pada response Drive Final', () => {
   const adminsHtml = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
-  assert.match(fs.readFileSync('apps-script-backend/Admin.gs','utf8'), /JSON\.parse\(response\.getContentText\(\)/, 'Harus mem-parse ID file dari JSON response Drive secara langsung saat 200/201');
+  assert.match(
+    fs.readFileSync('apps-script-backend/Admin.gs', 'utf8'),
+    /JSON\.parse\(response\.getContentText\(\)/,
+    'Harus mem-parse ID file dari JSON response Drive secara langsung saat 200/201',
+  );
 });
 
 console.log('OK - News System Overhaul Tests: ' + passed + '/' + total + ' passed.');
@@ -464,14 +533,24 @@ runTest('TEST NEW 23: Hanya ada satu implementasi uploadMediaFile', () => {
 
 runTest('TEST NEW 24: Tidak boleh ada unconditional offset = end setelah HTTP 308', () => {
   const adminCode = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
-  const hasBug = adminCode.includes('if (success && offset === end - 1) offset = end;\n      else offset = end;');
+  const hasBug = adminCode.includes(
+    'if (success && offset === end - 1) offset = end;\n      else offset = end;',
+  );
   assert.equal(hasBug, false, 'Ditemukan bug override offset = end secara tidak bersyarat');
-  assert.match(fs.readFileSync('apps-script-backend/Admin.gs','utf8'), /Content-Range['"]:\s*['"]bytes \*\//, 'Harus query status sebelum retry dengan bytes */TOTAL');
+  assert.match(
+    fs.readFileSync('apps-script-backend/Admin.gs', 'utf8'),
+    /Content-Range['"]:\s*['"]bytes \*\//,
+    'Harus query status sebelum retry dengan bytes */TOTAL',
+  );
 });
 
 runTest('TEST NEW 25: JSON Parsing pada response Drive Final', () => {
   const adminCode = fs.readFileSync('apps-script-backend/Admins.html', 'utf8');
-  assert.match(fs.readFileSync('apps-script-backend/Admin.gs','utf8'), /JSON\.parse\(response\.getContentText\(\)/, 'Harus mem-parse ID file dari JSON response Drive secara langsung saat 200/201');
+  assert.match(
+    fs.readFileSync('apps-script-backend/Admin.gs', 'utf8'),
+    /JSON\.parse\(response\.getContentText\(\)/,
+    'Harus mem-parse ID file dari JSON response Drive secara langsung saat 200/201',
+  );
 });
 
 console.log('OK - News System Overhaul Tests: ' + passed + '/' + total + ' passed.');

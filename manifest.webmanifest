@@ -11,13 +11,23 @@
   "theme_color": "#294b37",
   "categories": ["lifestyle", "education", "books"],
   "icons": [
-    {"src":"/assets/logo-galilea-icon-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"/assets/logo-galilea-light.webp","sizes":"640x640","type":"image/webp","purpose":"any"}
+    {
+      "src": "/assets/logo-galilea-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/assets/logo-galilea-light.webp",
+      "sizes": "640x640",
+      "type": "image/webp",
+      "purpose": "any"
+    }
   ],
   "shortcuts": [
-    {"name":"Ibadah Hari Ini","short_name":"Ibadah","url":"/#today"},
-    {"name":"Jadwal Ibadah","short_name":"Jadwal","url":"/#schedule"},
-    {"name":"Warta Digital","short_name":"Warta","url":"/#bulletin"},
-    {"name":"Renungan Pagi","short_name":"Renungan","url":"/#home"}
+    { "name": "Ibadah Hari Ini", "short_name": "Ibadah", "url": "/#today" },
+    { "name": "Jadwal Ibadah", "short_name": "Jadwal", "url": "/#schedule" },
+    { "name": "Warta Digital", "short_name": "Warta", "url": "/#bulletin" },
+    { "name": "Renungan Pagi", "short_name": "Renungan", "url": "/#home" }
   ]
 }

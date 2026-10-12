@@ -1,0 +1,8 @@
+.codex/
+assets/
+docs/
+og-data/
+vendor/
+node_modules/
+package-lock.json
+*.md

@@ -11,15 +11,21 @@ const adminSource = fs.readFileSync(path.join(root, 'apps-script-backend/Admin.g
 
 const ctx = vm.createContext({
   Utilities: { formatDate: () => '2026-09-23', getUuid: () => '1234567890abcdef' },
-  Session: { getEffectiveUser: () => ({ getEmail: () => 'admin@test.com' }), getActiveUser: () => ({ getEmail: () => 'admin@test.com' }) },
+  Session: {
+    getEffectiveUser: () => ({ getEmail: () => 'admin@test.com' }),
+    getActiveUser: () => ({ getEmail: () => 'admin@test.com' }),
+  },
   GW: { SHEETS: { banners: 'Website Banner' }, UTC_OFFSET: '+0800', TIMEZONE: 'Asia/Makassar' },
   GA: { SHEETS: { admins: 'admins' }, ROLES: { EDITOR: 1, APPROVER: 2 } },
-  Logger: { log: () => {} }
+  Logger: { log: () => {} },
 });
 
 try {
   vm.runInContext(websiteSource, ctx);
-  vm.runInContext('function gaWorkflowRows_() { return []; }; function gaEnsureEntityIds_() {}; function gwEnsureSettingsSheet_() {}; function gwReadSettings_() { return {}; } function gwChooseScheduleSheet_() {}; function gaHealthSources_() { return []; } function gwSpreadsheet_() { return mockSpreadsheet; } function gaCurrentUser_() { return { role: "SUPERADMIN", email: "admin@test.com", status: "AKTIF" }; }', ctx);
+  vm.runInContext(
+    'function gaWorkflowRows_() { return []; }; function gaEnsureEntityIds_() {}; function gwEnsureSettingsSheet_() {}; function gwReadSettings_() { return {}; } function gwChooseScheduleSheet_() {}; function gaHealthSources_() { return []; } function gwSpreadsheet_() { return mockSpreadsheet; } function gaCurrentUser_() { return { role: "SUPERADMIN", email: "admin@test.com", status: "AKTIF" }; }',
+    ctx,
+  );
   vm.runInContext(adminSource, ctx);
 } catch (e) {
   console.log(e);

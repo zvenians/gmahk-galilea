@@ -1,7 +1,7 @@
 export async function GET(request) {
   const url = new URL(request.url);
   const id = url.searchParams.get('id');
-  
+
   const protocol = request.headers.get('x-forwarded-proto') || 'https';
   const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
   const baseUrl = protocol + '://' + host;
@@ -16,19 +16,23 @@ export async function GET(request) {
       const response = await fetch(baseUrl + '/api/gas', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ method: 'getWebsiteData', args: [] })
+        body: JSON.stringify({ method: 'getWebsiteData', args: [] }),
       });
-      
+
       if (response.ok) {
         const json = await response.json();
         if (json.ok && json.data && Array.isArray(json.data.activities)) {
-          const activity = json.data.activities.find(a => String(a.id) === String(id));
+          const activity = json.data.activities.find((a) => String(a.id) === String(id));
           if (activity) {
             title = activity.title + ' — Berita Jemaat';
             description = (activity.description || description).slice(0, 160);
-            
-            const firstMediaImage = activity.media && activity.media.find(m => m.mimeType.startsWith('image/')) ? activity.media.find(m => m.mimeType.startsWith('image/')).url : null;
-            const cover = activity.coverUrl || firstMediaImage || (activity.photos && activity.photos[0]);
+
+            const firstMediaImage =
+              activity.media && activity.media.find((m) => m.mimeType.startsWith('image/'))
+                ? activity.media.find((m) => m.mimeType.startsWith('image/')).url
+                : null;
+            const cover =
+              activity.coverUrl || firstMediaImage || (activity.photos && activity.photos[0]);
             if (cover) {
               image = baseUrl + '/api/news-og?id=' + encodeURIComponent(id);
             }
@@ -77,16 +81,16 @@ export async function GET(request) {
     status: 200,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300'
-    }
+      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300',
+    },
   });
 }
 
 function escapeHtml(unsafe) {
   return String(unsafe || '')
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
 }

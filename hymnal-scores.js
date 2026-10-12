@@ -7,22 +7,34 @@
   let active;
   let selectedNumber = '';
   let query = '';
-  const escape = value => String(value == null ? '' : value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
+  const escape = (value) =>
+    String(value == null ? '' : value).replace(
+      /[&<>"']/g,
+      (character) =>
+        ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[character],
+    );
 
   function openDatabase() {
     if (!window.indexedDB) return Promise.reject(new Error('Penyimpanan browser tidak tersedia.'));
     if (database) return database;
     database = new Promise((resolve, reject) => {
       const request = window.indexedDB.open('galilea-hymnal-scores', 1);
-      request.onupgradeneeded = () => request.result.createObjectStore('scores', {keyPath:'number'});
+      request.onupgradeneeded = () =>
+        request.result.createObjectStore('scores', { keyPath: 'number' });
       request.onsuccess = () => {
         const db = request.result;
-        db.onversionchange = () => { db.close(); database = undefined; };
+        db.onversionchange = () => {
+          db.close();
+          database = undefined;
+        };
         resolve(db);
       };
       request.onerror = () => reject(request.error);
       request.onblocked = () => reject(new Error('Penyimpanan sedang dipakai tab lain.'));
-    }).catch(error => { database = undefined; throw error; });
+    }).catch((error) => {
+      database = undefined;
+      throw error;
+    });
     return database;
   }
 
@@ -35,23 +47,30 @@
         request.onsuccess = () => resolve(request.result || null);
         request.onerror = () => reject(request.error);
       });
-    } catch (_) { return null; }
+    } catch (_) {
+      return null;
+    }
   }
 
   async function saveScore(number, file) {
     const previous = writes.get(number) || Promise.resolve();
     const task = previous.catch(() => {}).then(() => writeScore(number, file));
     writes.set(number, task);
-    try { return await task; }
-    finally { if (writes.get(number) === task) writes.delete(number); }
+    try {
+      return await task;
+    } finally {
+      if (writes.get(number) === task) writes.delete(number);
+    }
   }
 
   async function writeScore(number, file) {
-    if (!file || !file.size) throw new Error('PDF kosong. Pilih file partitur yang berisi halaman.');
+    if (!file || !file.size)
+      throw new Error('PDF kosong. Pilih file partitur yang berisi halaman.');
     if (file.size > MAX_BYTES) throw new Error('Ukuran PDF maksimal 25 MB.');
     const header = new Uint8Array(await file.slice(0, 5).arrayBuffer());
-    if (String.fromCharCode(...header) !== '%PDF-') throw new Error('File bukan PDF. Pilih partitur berformat PDF.');
-    const entry = {number, name:file.name, blob:file, persistent:true};
+    if (String.fromCharCode(...header) !== '%PDF-')
+      throw new Error('File bukan PDF. Pilih partitur berformat PDF.');
+    const entry = { number, name: file.name, blob: file, persistent: true };
     try {
       const db = await openDatabase();
       await new Promise((resolve, reject) => {
@@ -61,37 +80,55 @@
         transaction.onerror = () => reject(transaction.error);
         transaction.onabort = () => reject(transaction.error);
       });
-    } catch (_) { entry.persistent = false; }
+    } catch (_) {
+      entry.persistent = false;
+    }
     memory.set(number, entry);
     return entry;
   }
 
   function filterSongs(songs, text) {
-    const needle = String(text || '').toLowerCase().trim();
-    return songs.filter(song => !needle || String(song.number).includes(needle) || String(song.title).toLowerCase().includes(needle));
+    const needle = String(text || '')
+      .toLowerCase()
+      .trim();
+    return songs.filter(
+      (song) =>
+        !needle ||
+        String(song.number).includes(needle) ||
+        String(song.title).toLowerCase().includes(needle),
+    );
   }
 
   async function removeScore(number) {
     const previous = writes.get(number) || Promise.resolve();
-    const task = previous.catch(() => {}).then(async () => {
-      let db;
-      try { db = await openDatabase(); }
-      catch (error) {
-        if (memory.get(number)?.persistent === false) { memory.delete(number); return; }
-        throw error;
-      }
-      await new Promise((resolve, reject) => {
-        const transaction = db.transaction('scores', 'readwrite');
-        transaction.objectStore('scores').delete(number);
-        transaction.oncomplete = resolve;
-        transaction.onerror = () => reject(transaction.error);
-        transaction.onabort = () => reject(transaction.error);
+    const task = previous
+      .catch(() => {})
+      .then(async () => {
+        let db;
+        try {
+          db = await openDatabase();
+        } catch (error) {
+          if (memory.get(number)?.persistent === false) {
+            memory.delete(number);
+            return;
+          }
+          throw error;
+        }
+        await new Promise((resolve, reject) => {
+          const transaction = db.transaction('scores', 'readwrite');
+          transaction.objectStore('scores').delete(number);
+          transaction.oncomplete = resolve;
+          transaction.onerror = () => reject(transaction.error);
+          transaction.onabort = () => reject(transaction.error);
+        });
+        memory.delete(number);
       });
-      memory.delete(number);
-    });
     writes.set(number, task);
-    try { await task; }
-    finally { if (writes.get(number) === task) writes.delete(number); }
+    try {
+      await task;
+    } finally {
+      if (writes.get(number) === task) writes.delete(number);
+    }
   }
 
   function destroy() {
@@ -99,7 +136,7 @@
     active = undefined;
   }
 
-  function mount({root, catalog, getSong, openLyrics, icon}) {
+  function mount({ root, catalog, getSong, openLyrics, icon }) {
     destroy();
     let disposed = false;
     let sequence = 0;
@@ -114,14 +151,27 @@
     const list = root.querySelector('#scores-list');
     const reader = root.querySelector('#scores-reader');
     const status = root.querySelector('#scores-status');
-    select.innerHTML = '<option value="">Pilih Lagu Sion</option>' + songs.map(song => '<option value="'+escape(song.number)+'">'+escape(song.number+' · '+song.title)+'</option>').join('');
+    select.innerHTML =
+      '<option value="">Pilih Lagu Sion</option>' +
+      songs
+        .map(
+          (song) =>
+            '<option value="' +
+            escape(song.number) +
+            '">' +
+            escape(song.number + ' · ' + song.title) +
+            '</option>',
+        )
+        .join('');
     select.value = selectedNumber;
     search.value = query;
     select.disabled = false;
     search.disabled = false;
     root.querySelector('#scores-random').disabled = false;
     root.querySelector('#scores-count').textContent = songs.length + ' lagu';
-    const announce = message => { status.textContent = message; };
+    const announce = (message) => {
+      status.textContent = message;
+    };
     function restoreStage() {
       if (expandedStage) {
         expandedStage.classList.remove('is-expanded');
@@ -132,7 +182,9 @@
         if (stageAnchor?.isConnected) stageAnchor.replaceWith(expandedStage);
         else expandedStage.remove();
       }
-      inerted.splice(0).forEach(element => { element.inert = false; });
+      inerted.splice(0).forEach((element) => {
+        element.inert = false;
+      });
       expandedStage = undefined;
       stageAnchor = undefined;
       document.body.classList.remove('scores-pdf-expanded');
@@ -143,26 +195,98 @@
       document.body.append(stage);
       expandedStage = stage;
       stage.classList.add('is-expanded');
-      stage.setAttribute('role','dialog');
-      stage.setAttribute('aria-modal','true');
-      stage.setAttribute('aria-label','Partitur layar penuh');
+      stage.setAttribute('role', 'dialog');
+      stage.setAttribute('aria-modal', 'true');
+      stage.setAttribute('aria-label', 'Partitur layar penuh');
       stage.addEventListener('click', onClick);
-      [...document.body.children].filter(element => element !== stage && !element.inert).forEach(element => { element.inert = true; inerted.push(element); });
+      [...document.body.children]
+        .filter((element) => element !== stage && !element.inert)
+        .forEach((element) => {
+          element.inert = true;
+          inerted.push(element);
+        });
       document.body.classList.add('scores-pdf-expanded');
     }
-    const releaseUrl = () => { restoreStage(); if (objectUrl) URL.revokeObjectURL(objectUrl); objectUrl = ''; };
+    const releaseUrl = () => {
+      restoreStage();
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+      objectUrl = '';
+    };
 
     function renderList() {
       const matches = filterSongs(songs, query);
-      list.innerHTML = matches.length ? '<div class="song-list">'+matches.slice(0,120).map(song => '<button class="song-row" type="button" data-score-song="'+escape(song.number)+'"><span class="song-number">'+escape(song.number)+'</span><span>'+escape(song.title)+'</span>'+icon('chevron')+'</button>').join('')+'</div>' : '<div class="empty"><p>Lagu tidak ditemukan. Coba nomor atau judul lain.</p></div>';
-      root.querySelector('#scores-results').textContent = matches.length + ' lagu ditemukan' + (matches.length > 120 ? ' · menampilkan 120 pertama' : '');
+      list.innerHTML = matches.length
+        ? '<div class="song-list">' +
+          matches
+            .slice(0, 120)
+            .map(
+              (song) =>
+                '<button class="song-row" type="button" data-score-song="' +
+                escape(song.number) +
+                '"><span class="song-number">' +
+                escape(song.number) +
+                '</span><span>' +
+                escape(song.title) +
+                '</span>' +
+                icon('chevron') +
+                '</button>',
+            )
+            .join('') +
+          '</div>'
+        : '<div class="empty"><p>Lagu tidak ditemukan. Coba nomor atau judul lain.</p></div>';
+      root.querySelector('#scores-results').textContent =
+        matches.length +
+        ' lagu ditemukan' +
+        (matches.length > 120 ? ' · menampilkan 120 pertama' : '');
     }
 
     function renderReader(song, score) {
       releaseUrl();
       if (score) objectUrl = URL.createObjectURL(score.blob);
-      const lyrics = (song.lyrics || []).map(part => '<section class="scores-verse"><h3>'+escape(/chorus|refrain/i.test(part.type) ? 'Reff' : 'Ayat '+part.index)+'</h3><p>'+escape((part.lines || []).join('\n')).replace(/\n/g,'<br>')+'</p></section>').join('');
-      reader.innerHTML = '<article class="scores-heading"><div><p class="eyebrow">Lagu Sion No. '+escape(song.number)+'</p><h2 tabindex="-1" id="scores-song-title">'+escape(song.title)+'</h2></div><button type="button" class="btn" data-score-lyrics>'+icon('book')+'Buka mode lirik</button></article><div class="scores-layout"><section class="scores-paper" aria-label="Partitur"><div class="scores-file-control"><label for="scores-file">'+(score?'Ganti PDF partitur':'Pilih PDF partitur')+'</label><input id="scores-file" type="file" accept="application/pdf,.pdf"><p class="muted">Maksimal 25 MB. PDF disimpan di browser perangkat ini dan tidak dikirim ke server.</p></div>'+(score?'<p class="scores-filename">'+escape(score.name)+'</p><p class="scores-save-note">'+(score.persistent?'Tersimpan di browser ini.':'PDF hanya tersedia selama tab ini terbuka. Penyimpanan browser tidak tersedia atau penuh.')+'</p><div class="scores-pdf-stage"><div class="scores-pdf-actions"><button type="button" class="btn" data-score-fullscreen>Layar penuh PDF</button><a class="btn soft" href="'+escape(objectUrl)+'" target="_blank" rel="noopener">Buka PDF di tab baru</a><a class="btn soft" href="'+escape(objectUrl)+'" download="'+escape(score.name)+'">Unduh PDF</a><button type="button" class="btn ghost" data-score-remove>Lepas PDF</button></div><iframe class="scores-pdf" title="Partitur Lagu Sion '+escape(song.number)+'" src="'+escape(objectUrl)+'#view=FitH"></iframe></div>':'<div class="scores-empty"><h3>Partitur belum ditambahkan.</h3><p>Pilih PDF partitur untuk Lagu Sion No. '+escape(song.number)+'. Lirik tetap bisa dibaca di sampingnya.</p></div>')+'</section><aside class="scores-lyrics" aria-label="Lirik lagu"><h2>Lirik</h2>'+lyrics+'</aside></div>';
+      const lyrics = (song.lyrics || [])
+        .map(
+          (part) =>
+            '<section class="scores-verse"><h3>' +
+            escape(/chorus|refrain/i.test(part.type) ? 'Reff' : 'Ayat ' + part.index) +
+            '</h3><p>' +
+            escape((part.lines || []).join('\n')).replace(/\n/g, '<br>') +
+            '</p></section>',
+        )
+        .join('');
+      reader.innerHTML =
+        '<article class="scores-heading"><div><p class="eyebrow">Lagu Sion No. ' +
+        escape(song.number) +
+        '</p><h2 tabindex="-1" id="scores-song-title">' +
+        escape(song.title) +
+        '</h2></div><button type="button" class="btn" data-score-lyrics>' +
+        icon('book') +
+        'Buka mode lirik</button></article><div class="scores-layout"><section class="scores-paper" aria-label="Partitur"><div class="scores-file-control"><label for="scores-file">' +
+        (score ? 'Ganti PDF partitur' : 'Pilih PDF partitur') +
+        '</label><input id="scores-file" type="file" accept="application/pdf,.pdf"><p class="muted">Maksimal 25 MB. PDF disimpan di browser perangkat ini dan tidak dikirim ke server.</p></div>' +
+        (score
+          ? '<p class="scores-filename">' +
+            escape(score.name) +
+            '</p><p class="scores-save-note">' +
+            (score.persistent
+              ? 'Tersimpan di browser ini.'
+              : 'PDF hanya tersedia selama tab ini terbuka. Penyimpanan browser tidak tersedia atau penuh.') +
+            '</p><div class="scores-pdf-stage"><div class="scores-pdf-actions"><button type="button" class="btn" data-score-fullscreen>Layar penuh PDF</button><a class="btn soft" href="' +
+            escape(objectUrl) +
+            '" target="_blank" rel="noopener">Buka PDF di tab baru</a><a class="btn soft" href="' +
+            escape(objectUrl) +
+            '" download="' +
+            escape(score.name) +
+            '">Unduh PDF</a><button type="button" class="btn ghost" data-score-remove>Lepas PDF</button></div><iframe class="scores-pdf" title="Partitur Lagu Sion ' +
+            escape(song.number) +
+            '" src="' +
+            escape(objectUrl) +
+            '#view=FitH"></iframe></div>'
+          : '<div class="scores-empty"><h3>Partitur belum ditambahkan.</h3><p>Pilih PDF partitur untuk Lagu Sion No. ' +
+            escape(song.number) +
+            '. Lirik tetap bisa dibaca di sampingnya.</p></div>') +
+        '</section><aside class="scores-lyrics" aria-label="Lirik lagu"><h2>Lirik</h2>' +
+        lyrics +
+        '</aside></div>';
     }
 
     async function choose(number, focus) {
@@ -178,17 +302,27 @@
         if (disposed || token !== sequence) return;
         currentSong = song;
         renderReader(song, score);
-        announce(score ? 'Lirik dan PDF partitur siap dibaca.' : 'Lirik siap. Pilih PDF untuk menambahkan partitur.');
+        announce(
+          score
+            ? 'Lirik dan PDF partitur siap dibaca.'
+            : 'Lirik siap. Pilih PDF untuk menambahkan partitur.',
+        );
         if (focus) reader.querySelector('#scores-song-title').focus();
       } catch (error) {
         if (disposed || token !== sequence) return;
-        reader.innerHTML = '<div class="empty"><p>'+escape(error.message)+'</p><button type="button" class="btn" data-score-retry>Coba muat lagi</button></div>';
+        reader.innerHTML =
+          '<div class="empty"><p>' +
+          escape(error.message) +
+          '</p><button type="button" class="btn" data-score-retry>Coba muat lagi</button></div>';
         announce('Lagu belum berhasil dimuat.');
       }
     }
 
     function onInput(event) {
-      if (event.target === search) { query = search.value; renderList(); }
+      if (event.target === search) {
+        query = search.value;
+        renderList();
+      }
     }
     async function onChange(event) {
       if (event.target === select && select.value) return choose(select.value, true);
@@ -202,15 +336,26 @@
         const score = await saveScore(number, file);
         if (disposed || token !== sequence || selectedNumber !== number) return;
         renderReader(currentSong, score);
-        announce(score.persistent ? 'PDF partitur tersimpan di browser ini.' : 'PDF siap dibaca, tetapi belum tersimpan untuk dibuka kembali.');
-      } catch (error) { if (!disposed && token === sequence) { announce(error.message); event.target.value = ''; } }
+        announce(
+          score.persistent
+            ? 'PDF partitur tersimpan di browser ini.'
+            : 'PDF siap dibaca, tetapi belum tersimpan untuk dibuka kembali.',
+        );
+      } catch (error) {
+        if (!disposed && token === sequence) {
+          announce(error.message);
+          event.target.value = '';
+        }
+      }
     }
     async function onClick(event) {
       const song = event.target.closest('[data-score-song]');
       if (song) return choose(song.dataset.scoreSong, true);
-      if (event.target.closest('#scores-random') && songs.length) return choose(songs[Math.floor(Math.random()*songs.length)].number, true);
+      if (event.target.closest('#scores-random') && songs.length)
+        return choose(songs[Math.floor(Math.random() * songs.length)].number, true);
       if (event.target.closest('[data-score-retry]')) return choose(selectedNumber, true);
-      if (event.target.closest('[data-score-lyrics]') && currentSong) return openLyrics(currentSong.number);
+      if (event.target.closest('[data-score-lyrics]') && currentSong)
+        return openLyrics(currentSong.number);
       if (event.target.closest('[data-score-remove]') && currentSong) {
         const number = selectedNumber;
         const token = ++sequence;
@@ -219,7 +364,9 @@
           if (disposed || token !== sequence) return;
           renderReader(currentSong, null);
           announce('PDF dilepas dari lagu ini. File asli tetap ada di perangkat Anda.');
-        } catch (_) { if (!disposed && token === sequence) announce('PDF belum bisa dilepas. Coba lagi.'); }
+        } catch (_) {
+          if (!disposed && token === sequence) announce('PDF belum bisa dilepas. Coba lagi.');
+        }
         return;
       }
       if (event.target.closest('[data-score-fullscreen]')) {
@@ -240,7 +387,9 @@
     }
     function onFullscreen() {
       const button = (expandedStage || reader).querySelector('[data-score-fullscreen]');
-      if (button) button.textContent = document.fullscreenElement || expandedStage ? 'Keluar layar penuh' : 'Layar penuh PDF';
+      if (button)
+        button.textContent =
+          document.fullscreenElement || expandedStage ? 'Keluar layar penuh' : 'Layar penuh PDF';
     }
     function onKeydown(event) {
       if (event.key !== 'Escape') return;
@@ -257,17 +406,19 @@
     document.addEventListener('keydown', onKeydown);
     renderList();
     const ready = selectedNumber ? choose(selectedNumber, false) : Promise.resolve();
-    active = {destroy() {
-      disposed = true;
-      ++sequence;
-      releaseUrl();
-      root.removeEventListener('input', onInput);
-      root.removeEventListener('change', onChange);
-      root.removeEventListener('click', onClick);
-      document.removeEventListener('fullscreenchange', onFullscreen);
-      document.removeEventListener('keydown', onKeydown);
-    }};
+    active = {
+      destroy() {
+        disposed = true;
+        ++sequence;
+        releaseUrl();
+        root.removeEventListener('input', onInput);
+        root.removeEventListener('change', onChange);
+        root.removeEventListener('click', onClick);
+        document.removeEventListener('fullscreenchange', onFullscreen);
+        document.removeEventListener('keydown', onKeydown);
+      },
+    };
     return ready;
   }
-  window.GalileaHymnalScores = {mount, destroy, filterSongs};
+  window.GalileaHymnalScores = { mount, destroy, filterSongs };
 })();

@@ -77,31 +77,31 @@ jobs:
             echo "Error: Admins.html NOT FOUND in pulled version!"
             exit 1
           fi
-          
+
           echo "--- 1. meta name=admin-build-commit ---"
           grep -n "meta name=\"admin-build-commit\"" "$FILE" || true
-          
+
           echo "--- 2. renderPhotoManager ---"
           grep -c "renderPhotoManager" "$FILE" || true
-          
+
           echo "--- 3. initPhotoManagers ---"
           grep -c "initPhotoManagers" "$FILE" || true
-          
+
           echo "--- 4. [GALILEA INIT PHOTO] ---"
           grep -n "GALILEA INIT PHOTO" "$FILE" || true
-          
+
           echo "--- 5. [GALILEA PHOTO MANAGER] ---"
           grep -n "GALILEA PHOTO MANAGER" "$FILE" || true
-          
+
           echo "--- 6. Belum ada foto ---"
           grep -n "Belum ada foto" "$FILE" || true
-          
+
           echo "--- 7. selector [name=...+CSS.escape(key)+...] ---"
           grep -n "CSS.escape(key)+'\"]'" "$FILE" || true
-          
+
           echo "--- 8. PRIMARY extraction ---"
           grep -n "arr.find.*PRIMARY:" "$FILE" || true
-          
+
           echo "=================================================="
           echo "TASK 3 — HASH VERSION ${{ github.event.inputs.version }}"
           echo "=================================================="

@@ -9,18 +9,10 @@ import part07 from '../og-data/part-07.js';
 import part08 from '../og-data/part-08.js';
 import part09 from '../og-data/part-09.js';
 
-const OG_IMAGE = Buffer.from([
-  part00,
-  part01,
-  part02,
-  part03,
-  part04,
-  part05,
-  part06,
-  part07,
-  part08,
-  part09
-].join(''), 'base64');
+const OG_IMAGE = Buffer.from(
+  [part00, part01, part02, part03, part04, part05, part06, part07, part08, part09].join(''),
+  'base64',
+);
 
 export default function handler(req, res) {
   if (req.method !== 'GET' && req.method !== 'HEAD') {

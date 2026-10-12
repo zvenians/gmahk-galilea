@@ -2,9 +2,9 @@ name: CI
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
   workflow_dispatch:
     inputs:
       deploy_backend:
@@ -105,24 +105,24 @@ jobs:
             echo "Error: DEPLOYMENT_ID_ADMIN secret is missing."
             exit 1
           fi
-          
+
           # Modify manifest for Admin (USER_ACCESSING)
           jq '.webapp.executeAs = "USER_ACCESSING" | .webapp.access = "ANYONE"' apps-script-backend/appsscript.json > tmp.json && mv tmp.json apps-script-backend/appsscript.json
-          
+
           # Inject build markers
           SHORT_SHA=$(echo "$GITHUB_SHA" | cut -c1-7)
           sed -i "s/__ADMIN_BUILD_COMMIT__/${SHORT_SHA}/g" apps-script-backend/Admins.html
           echo "Build marker commit injected: $SHORT_SHA"
-          
+
           # Compute pre-push hash
           GITHUB_HASH=$(sha256sum apps-script-backend/Admins.html | awk '{print $1}')
           GITHUB_SIZE=$(wc -c < apps-script-backend/Admins.html | tr -d ' ')
           echo "GitHub Admins.html SHA256: $GITHUB_HASH"
           echo "GitHub Admins.html size: $GITHUB_SIZE bytes"
-          
+
           echo "Pushing Admin Source..."
           clasp push --force
-          
+
           echo "Creating Admin Version..."
           OUTPUT=$(clasp version "Admin: GitHub $GITHUB_SHA")
           VERSION=$(echo "$OUTPUT" | grep -o -E '[0-9]+' | tail -1)
@@ -130,32 +130,32 @@ jobs:
             echo "Error: Failed to extract Apps Script version."
             exit 1
           fi
-          
+
           echo "Deploying Admin to version $VERSION..."
           clasp deploy -i "$DEPLOYMENT_ID_ADMIN" -V "$VERSION" -d "Admin: GitHub $GITHUB_SHA"
-          
+
           echo "═══════════════════════════════════════════"
           echo "PHASE A: Verifying Admin Deployment..."
           echo "═══════════════════════════════════════════"
           clasp deployments > deployments.txt
           cat deployments.txt
-          
+
           DEPLOY_LINE=$(grep "$DEPLOYMENT_ID_ADMIN" deployments.txt | grep -v 'web app meta-version' || true)
-          
+
           if [ -z "$DEPLOY_LINE" ]; then
             echo "Error: DEPLOYMENT_ID_ADMIN not found in deployment list!"
             exit 1
           fi
-          
+
           echo "Found deployment: $DEPLOY_LINE"
-          
+
           if echo "$DEPLOY_LINE" | grep -q "@$VERSION"; then
             echo "Version verified: $VERSION"
           else
             echo "Error: Version Mismatch! Expected @$VERSION"
             exit 1
           fi
-          
+
           if echo "$DEPLOY_LINE" | grep -q "$GITHUB_SHA"; then
             echo "Description verified: $GITHUB_SHA"
           else
@@ -181,11 +181,11 @@ jobs:
           else
             echo "No separate historical admin deployment requires synchronization."
           fi
-          
+
           echo "═══════════════════════════════════════════"
           echo "PHASE B: Remote Source Parity Check..."
           echo "═══════════════════════════════════════════"
-          
+
           # Pull remote source to temporary directory
           mkdir -p /tmp/clasp-pull-verify
           cp .clasp.json /tmp/clasp-pull-verify/.clasp.json
@@ -193,21 +193,21 @@ jobs:
           jq '.rootDir = "/tmp/clasp-pull-verify"' .clasp.json > /tmp/clasp-pull-verify/.clasp.json
           cd /tmp/clasp-pull-verify
           clasp pull
-          
+
           echo "--- Remote files pulled ---"
           ls -la /tmp/clasp-pull-verify/
-          
+
           REMOTE_FILE="/tmp/clasp-pull-verify/Admins.html"
           if [ ! -f "$REMOTE_FILE" ]; then
             echo "Error: Admins.html NOT FOUND in pulled source!"
             exit 1
           fi
-          
+
           REMOTE_HASH=$(sha256sum "$REMOTE_FILE" | awk '{print $1}')
           REMOTE_SIZE=$(wc -c < "$REMOTE_FILE" | tr -d ' ')
           echo "Remote Admins.html SHA256: $REMOTE_HASH"
           echo "Remote Admins.html size: $REMOTE_SIZE bytes"
-          
+
           # Key pattern checks on remote source
           echo "--- Key Pattern Checks on REMOTE source ---"
           grep -c "renderPhotoManager" "$REMOTE_FILE" | xargs -I{} echo "renderPhotoManager occurrences: {}"
@@ -216,21 +216,21 @@ jobs:
           grep -c "GALILEA PHOTO MANAGER" "$REMOTE_FILE" | xargs -I{} echo "Diagnostic log occurrences: {}"
           grep -c "GALILEA INIT PHOTO" "$REMOTE_FILE" | xargs -I{} echo "Init diagnostic log occurrences: {}"
           grep -c "admin-build-commit" "$REMOTE_FILE" | xargs -I{} echo "Build marker occurrences: {}"
-          
+
           # Check fixed selector
           if grep -q 'CSS.escape(key)+'"'"'"]'"'"')' "$REMOTE_FILE"; then
             echo "Selector fix: PRESENT (correct bracket closure)"
           else
             echo "Selector fix: MISSING or DIFFERENT"
           fi
-          
+
           # Check PRIMARY logic
           if grep -q 'arr.find.*PRIMARY:' "$REMOTE_FILE"; then
             echo "PRIMARY find logic: PRESENT"
           else
             echo "PRIMARY find logic: MISSING"
           fi
-          
+
           echo "═══════════════════════════════════════════"
           echo "PHASE B COMPLETE"
           echo "GitHub hash:  $GITHUB_HASH"
@@ -256,13 +256,13 @@ jobs:
             echo "Error: DEPLOYMENT_ID_API secret is missing."
             exit 1
           fi
-          
+
           # Modify manifest for API (USER_DEPLOYING, ANYONE_ANONYMOUS)
           jq '.webapp.executeAs = "USER_DEPLOYING" | .webapp.access = "ANYONE_ANONYMOUS"' apps-script-backend/appsscript.json > tmp.json && mv tmp.json apps-script-backend/appsscript.json
-          
+
           echo "Pushing API Source..."
           clasp push --force
-          
+
           echo "Creating API Version..."
           OUTPUT=$(clasp version "API: GitHub $GITHUB_SHA")
           VERSION=$(echo "$OUTPUT" | grep -o -E '[0-9]+' | tail -1)
@@ -270,7 +270,7 @@ jobs:
             echo "Error: Failed to extract Apps Script version."
             exit 1
           fi
-          
+
           echo "Deploying API to version $VERSION..."
           clasp deploy -i "$DEPLOYMENT_ID_API" -V "$VERSION" -d "API: GitHub $GITHUB_SHA"
         env:
