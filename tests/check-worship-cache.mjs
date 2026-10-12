@@ -93,7 +93,7 @@ Object.assign(boot.context,{
   startWebsiteSync(){},initPreferences(){},buildMobileNav(){},readStoredList:()=>[],startDayRolloverWatcher(){},witaDateKey:()=> '2026-10-05',
   VIEWER_LANGUAGES:['id'],ROUTES:['home','hymnal'],location:{hash:'#home'},history:{replaceState(){}},
   setShellData(){},render(){renders++;},releaseStartupLoader(){},setLanguage(){},updateNetworkStatus(){},clearTimeout(){},startupGuard:0,
-  MutationObserver:class {observe(){}},document:{body:{},querySelector:()=>null},
+  MutationObserver:class {observe(){}},document:{body:{},querySelector:()=>null,querySelectorAll:()=>[]},
 });
 vm.runInContext(sourceFunction('boot'),boot.context);
 await boot.context.boot();
