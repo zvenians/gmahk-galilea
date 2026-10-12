@@ -6,16 +6,20 @@ if(!output)throw new Error('Pass a temporary output directory for the isolated b
 fs.mkdirSync(output,{recursive:true});
 const source=fs.readFileSync(new URL('../apps-script-backend/Admins.html',import.meta.url),'utf8');
 const mock=`<script>
+const populated=new URLSearchParams(location.search).has('populated');
 const entities=[{key:'activities',label:'Berita Jemaat',icon:'newspaper'},{key:'gallery',label:'Galeri',icon:'image'},{key:'announcements',label:'Agenda dan Pengumuman',icon:'bell'},{key:'themeSong',label:'Lagu Tema',icon:'music'},{key:'worshipPlans',label:'Susunan Ibadah',icon:'layout'},{key:'leaders',label:'Pengurus Gereja',icon:'users'},{key:'banners',label:'Pengumuman Terjadwal',icon:'flag'},{key:'settings',label:'Pengaturan',icon:'settings'},{key:'schedule',label:'Jadwal Pelayanan',icon:'calendar'}];
 const dashboard={pendingApprovals:0,myDrafts:0,activeAnnouncements:2,serviceRequests:0,scheduleSheet:'Jadwal Triwulan',updatedAt:'Mode uji',systemStatus:'Data contoh',loading:false};
 const user={name:'Pengurus (contoh)',email:'fixture@example.test',role:'SUPERADMIN',permissions:{edit:true,approve:true,manageAdmins:true}};
 const fields=[{key:'title',label:'Judul',type:'text',required:true},{key:'description',label:'Isi Berita',type:'textarea',required:true}];
 let drafts=[];
+const records=populated?[{id:'EXAMPLE-1',title:'Contoh konten dengan gambar',status:'PUBLISH',values:{title:'Contoh konten dengan gambar',description:'Data contoh untuk memeriksa tampilan card, panjang teks, dan tombol. Bukan berita jemaat yang sebenarnya.',imageUrl:'./admin-valley.webp'}},{id:'EXAMPLE-2',title:'Contoh draf tanpa gambar',status:'DRAFT',values:{title:'Contoh draf tanpa gambar',description:'Data contoh untuk memeriksa card teks dan status draf.'}},{id:'EXAMPLE-3',title:'Contoh gambar gagal dimuat',status:'PUBLISH',values:{title:'Contoh gambar gagal dimuat',description:'Pratinjau alternatif ketika gambar tidak tersedia.',imageUrl:'./missing-image.webp'}}]:[];
+const notificationData={count:populated?2:0,items:populated?[{title:'Contoh persetujuan menunggu',detail:'Data contoh untuk memeriksa navigasi notifikasi.',severity:'warning',route:'approvals',time:'Mode uji'},{title:'Contoh pembaruan berita',detail:'Data contoh untuk memeriksa navigasi ke Berita Jemaat.',severity:'info',route:'activities',time:'Mode uji'}]:[],checkedAt:'Mode uji'};
+window.adminFixture={records,notificationData,failNotifications:false};
 function fixtureResponse(method,args){
  if(method==='adminGetBootstrap')return{user,entities,dashboard,publicSite:{publicUrl:'https://gmahk-galilea.vercel.app/'}};
  if(method==='adminGetDashboardSummary')return{dashboard};
- if(method==='adminGetNotifications')return{count:0,items:[],checkedAt:'Mode uji'};
- if(method==='adminListEntity')return{entity:args[0],label:entities.find(x=>x.key===args[0])?.label||args[0],fields,records:[],workflows:args[0]==='activities'?drafts:[]};
+ if(method==='adminGetNotifications'){if(window.adminFixture.failNotifications)throw new Error('Gangguan notifikasi contoh');return notificationData;}
+ if(method==='adminListEntity')return{entity:args[0],label:entities.find(x=>x.key===args[0])?.label||args[0],fields,records:args[0]==='activities'?records:[],workflows:args[0]==='activities'?drafts:[]};
  if(method==='adminSaveWorkflow'){const value=args[0];drafts=[{id:'TEST-DRAFT',entity:'activities',entityId:'',action:'UPSERT',state:'DRAFT',ownerEmail:user.email,ownerName:user.name,updatedAt:'Mode uji',payload:value.payload}];document.querySelector('#fixture-payload').textContent=JSON.stringify(value.payload);dashboard.myDrafts=1;return{message:'Draf disimpan di memori uji; tidak dikirim ke server.'};}
  if(method==='adminListApprovals'||method==='adminListUsers'||method==='adminListServices')return[];
  if(method==='adminGetDashboardActivity')return{audit:[],health:[]};
