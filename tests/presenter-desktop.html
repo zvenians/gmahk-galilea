@@ -7,7 +7,7 @@
 <style>
 *{box-sizing:border-box}body{margin:0;background:#07140b;color:#fff;font:14px system-ui}header{display:flex;align-items:center;gap:18px;padding:12px 18px}select{font:inherit;padding:6px}#viewport{position:relative;margin:auto;overflow:hidden}iframe{position:absolute;inset:0;border:0;transform-origin:top left}output{font-variant-numeric:tabular-nums}
 </style>
-<header><label>Viewport <select id="resolution"><option value="1920,1080">1920 × 1080</option><option value="1920,1200">1920 × 1200</option><option value="1366,768">1366 × 768</option><option value="800,1200">800 × 1200</option></select></label><output id="metrics">Memuat aplikasi…</output></header>
+<header><label>Viewport <select id="resolution"><option value="1920,1080">1920 × 1080</option><option value="1920,1200">1920 × 1200</option><option value="1366,768">1366 × 768</option><option value="800,1200">800 × 1200</option><option value="420,900">420 × 900</option><option value="320,900">320 × 900</option></select></label><output id="metrics">Memuat aplikasi…</output></header>
 <div id="viewport"><iframe title="Aplikasi Galilea pada viewport pengujian" src="/?revision=31#hymnal"></iframe></div>
 <script>
 const resolution=document.querySelector('#resolution'),viewport=document.querySelector('#viewport'),frame=document.querySelector('iframe'),metrics=document.querySelector('#metrics');
