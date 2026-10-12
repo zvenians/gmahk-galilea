@@ -1703,6 +1703,7 @@
   @media (max-width: 1180px) {
     .sidebar { position: fixed; inset: 0 auto 0 0; width: min(320px,88vw); min-height: 100dvh; flex-direction: column; align-items: stretch; gap: 20px; padding: 24px; transform: translateX(-105%); overflow-y: auto; z-index: 70 }
     .sidebar.open { transform: none }
+    .sidebar:not(.open) { visibility: hidden }
     .nav-scroll { flex-direction: column; align-items: stretch; justify-content: flex-start; overflow: visible }
     .nav-item { width: 100%; text-align: left }
     .nav-more summary { padding-inline: 8px }

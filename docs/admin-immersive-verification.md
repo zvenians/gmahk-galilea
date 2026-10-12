@@ -26,6 +26,7 @@ Reading this as: a church secretariat workspace for Galilea's administrators, wi
 - Keyboard selection remains intact across toolbar focus. Empty formatted paragraphs remain empty for required-field validation. Cancelled invalid links cannot block the form; unchanged blur does not mark a draft dirty.
 - Viewport / document widths: 1920/1905, 1366/1351, 980/965, 420/405, 320/305. No horizontal document overflow. Statistics reflow 4 → 2 → 1 columns.
 - At 320 px, editor dialog is 291 px wide and rich toolbar is 259 px wide, with 44×44 px bold button. Drawer and “Lainnya” open, all modules remain reachable.
+- Closed drawers are hidden from keyboard focus and accessibility traversal below the drawer breakpoint.
 - Browser screenshot: `admin-ui-proof.jpg`, captured after loader is hidden, using explicitly labelled example data.
 
 The preview fixture replaces transport with in-memory responses and is generated only by a per-preview build override. It is not a production admin bypass. Production `/admin` remains the authenticated Apps Script redirect. Live Google sign-in was unavailable in the test browser; a real production spreadsheet save was not performed or claimed.
