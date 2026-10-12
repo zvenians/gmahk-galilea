@@ -74,7 +74,12 @@
   async function removeScore(number) {
     const previous = writes.get(number) || Promise.resolve();
     const task = previous.catch(() => {}).then(async () => {
-      const db = await openDatabase();
+      let db;
+      try { db = await openDatabase(); }
+      catch (error) {
+        if (memory.get(number)?.persistent === false) { memory.delete(number); return; }
+        throw error;
+      }
       await new Promise((resolve, reject) => {
         const transaction = db.transaction('scores', 'readwrite');
         transaction.objectStore('scores').delete(number);
@@ -100,6 +105,9 @@
     let sequence = 0;
     let objectUrl = '';
     let currentSong;
+    let expandedStage;
+    let stageAnchor;
+    const inerted = [];
     const songs = catalog.songs || [];
     const select = root.querySelector('#scores-select');
     const search = root.querySelector('#scores-search');
@@ -114,7 +122,35 @@
     root.querySelector('#scores-random').disabled = false;
     root.querySelector('#scores-count').textContent = songs.length + ' lagu';
     const announce = message => { status.textContent = message; };
-    const releaseUrl = () => { if (objectUrl) URL.revokeObjectURL(objectUrl); objectUrl = ''; document.body.classList.remove('scores-pdf-expanded'); };
+    function restoreStage() {
+      if (expandedStage) {
+        expandedStage.classList.remove('is-expanded');
+        expandedStage.removeAttribute('role');
+        expandedStage.removeAttribute('aria-modal');
+        expandedStage.removeAttribute('aria-label');
+        expandedStage.removeEventListener('click', onClick);
+        if (stageAnchor?.isConnected) stageAnchor.replaceWith(expandedStage);
+        else expandedStage.remove();
+      }
+      inerted.splice(0).forEach(element => { element.inert = false; });
+      expandedStage = undefined;
+      stageAnchor = undefined;
+      document.body.classList.remove('scores-pdf-expanded');
+    }
+    function expandStage(stage) {
+      stageAnchor = document.createComment('PDF position');
+      stage.before(stageAnchor);
+      document.body.append(stage);
+      expandedStage = stage;
+      stage.classList.add('is-expanded');
+      stage.setAttribute('role','dialog');
+      stage.setAttribute('aria-modal','true');
+      stage.setAttribute('aria-label','Partitur layar penuh');
+      stage.addEventListener('click', onClick);
+      [...document.body.children].filter(element => element !== stage && !element.inert).forEach(element => { element.inert = true; inerted.push(element); });
+      document.body.classList.add('scores-pdf-expanded');
+    }
+    const releaseUrl = () => { restoreStage(); if (objectUrl) URL.revokeObjectURL(objectUrl); objectUrl = ''; };
 
     function renderList() {
       const matches = filterSongs(songs, query);
@@ -187,32 +223,30 @@
         return;
       }
       if (event.target.closest('[data-score-fullscreen]')) {
-        const stage = reader.querySelector('.scores-pdf-stage');
+        const stage = expandedStage || reader.querySelector('.scores-pdf-stage');
         try {
           if (document.fullscreenElement) await document.exitFullscreen();
           else if (stage.classList.contains('is-expanded')) {
-            stage.classList.remove('is-expanded');
-            document.body.classList.remove('scores-pdf-expanded');
+            restoreStage();
           } else if (stage.requestFullscreen) await stage.requestFullscreen();
           else throw new Error('Fullscreen unavailable');
         } catch (_) {
-          stage.classList.add('is-expanded');
-          document.body.classList.add('scores-pdf-expanded');
+          expandStage(stage);
           announce('PDF memenuhi jendela. Tekan Escape atau Keluar layar penuh untuk kembali.');
         }
         onFullscreen();
+        stage.querySelector('[data-score-fullscreen]')?.focus();
       }
     }
     function onFullscreen() {
-      const button = reader.querySelector('[data-score-fullscreen]');
-      if (button) button.textContent = document.fullscreenElement || reader.querySelector('.is-expanded') ? 'Keluar layar penuh' : 'Layar penuh PDF';
+      const button = (expandedStage || reader).querySelector('[data-score-fullscreen]');
+      if (button) button.textContent = document.fullscreenElement || expandedStage ? 'Keluar layar penuh' : 'Layar penuh PDF';
     }
     function onKeydown(event) {
       if (event.key !== 'Escape') return;
-      const stage = reader.querySelector('.scores-pdf-stage.is-expanded');
+      const stage = expandedStage;
       if (!stage) return;
-      stage.classList.remove('is-expanded');
-      document.body.classList.remove('scores-pdf-expanded');
+      restoreStage();
       onFullscreen();
       reader.querySelector('[data-score-fullscreen]').focus();
     }

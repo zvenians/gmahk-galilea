@@ -1,5 +1,5 @@
-const CACHE='galilea-v37-34-hymnal-scores';
-const SHELL=['/','/index.html','/hymnal-scores.js?v=34-pdf3','/hymnal-scores.css?v=34-pdf3','/schedule-clock.js?v=32-wita','/vendor/page-flip-2.0.7.js?v=24-fold','/page-turn.css?v=31-pixel','/page-turn.js?v=31-pixel','/manifest.webmanifest','/assets/logo-galilea-light.webp','/assets/logo-galilea-dark.webp','/assets/logo-galilea-icon-192.png','/assets/presentation/schedule.webp','/assets/presentation/bible.webp','/assets/presentation/hymnal.webp'];
+const CACHE='galilea-v38-34-hymnal-scores';
+const SHELL=['/','/index.html','/hymnal-scores.js?v=34-pdf4','/hymnal-scores.css?v=34-pdf4','/schedule-clock.js?v=32-wita','/vendor/page-flip-2.0.7.js?v=24-fold','/page-turn.css?v=31-pixel','/page-turn.js?v=31-pixel','/manifest.webmanifest','/assets/logo-galilea-light.webp','/assets/logo-galilea-dark.webp','/assets/logo-galilea-icon-192.png','/assets/presentation/schedule.webp','/assets/presentation/bible.webp','/assets/presentation/hymnal.webp'];
 self.addEventListener('install',event=>{event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(SHELL)).then(()=>self.skipWaiting()));});
 self.addEventListener('activate',event=>{event.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(key=>key!==CACHE).map(key=>caches.delete(key)))).then(()=>self.clients.claim()));});
 self.addEventListener('fetch',event=>{
