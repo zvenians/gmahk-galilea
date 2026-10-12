@@ -67,12 +67,12 @@ body :focus-visible {
   background: var(--control-primary) !important;
 }
 :is(.view,.modal,.site-footer) .btn.primary:hover { filter: brightness(.95); }
-:is(.view,.modal,.site-footer) .btn.ghost {
+:is(.view,.modal,.site-footer) .btn:not(.primary):not(.whatsapp) {
   color: var(--control-text) !important;
   border-color: var(--control-border) !important;
   background: var(--control-bg) !important;
 }
-:is(.view,.modal,.site-footer) .btn.ghost:hover { background: var(--control-hover) !important; }
+:is(.view,.modal,.site-footer) .btn:not(.primary):not(.whatsapp):hover { background: var(--control-hover) !important; }
 :is(.view,.modal,.site-footer) .btn.whatsapp {
   color: #fff !important;
   border-color: #126b3b !important;
