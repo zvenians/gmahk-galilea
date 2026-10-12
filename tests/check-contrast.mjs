@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 
 function rgb(hex) {
   const value = hex.replace('#','');
@@ -40,4 +41,20 @@ for (const [label,foreground,background] of pairs) {
   const result = ratio(foreground,background);
   assert.ok(result >= 4.5, `${label} hanya memiliki rasio ${result.toFixed(2)}:1`);
   console.log(`OK · ${label}: ${result.toFixed(2)}:1`);
+}
+
+const visitorCss = fs.readFileSync(new URL('../visitor-ui.css', import.meta.url),'utf8');
+const tokens = block => Object.fromEntries([...block.matchAll(/--([\w-]+):\s*(#[\da-f]{6})/gi)].map(match => [match[1],match[2]]));
+const light = tokens(visitorCss.match(/:root\s*\{([^}]+)\}/)[1]);
+const dark = tokens(visitorCss.match(/\[data-theme="dark"\]\s*\{([^}]+)\}/)[1]);
+const cinema = tokens(visitorCss.match(/:is\(\.film-hero,[\s\S]*?\)\s*\{([^}]+)\}/)[1]);
+for (const [name,theme] of [['terang',light],['gelap',dark],['kartu hijau',cinema]]) {
+  for (const [foreground,background] of [['control-text','control-bg'],['control-text','control-hover'],['control-on-primary','control-primary']]) {
+    const result = ratio(theme[foreground],theme[background]);
+    assert.ok(result >= 4.5, `${name}: ${foreground} / ${background} ${result.toFixed(2)}:1`);
+    console.log(`OK · tombol ${name}: ${result.toFixed(2)}:1`);
+  }
+  for (const foreground of ['control-border','control-focus']) {
+    assert.ok(ratio(theme[foreground],theme['control-bg']) >= 3, `${name}: batas dan fokus harus terlihat.`);
+  }
 }

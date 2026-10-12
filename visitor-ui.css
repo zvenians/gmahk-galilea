@@ -1,0 +1,269 @@
+/* Hijau Galilea tetap jadi warna utama; tombol punya warna sendiri. */
+:root {
+  --control-bg: #fafaf5;
+  --control-text: #163c27;
+  --control-border: #728476;
+  --control-primary: #123821;
+  --control-on-primary: #ffffff;
+  --control-hover: #e4ece1;
+  --control-focus: #245c39;
+  --text-faint: #536259;
+  --warning: #745318;
+}
+[data-theme="dark"] {
+  --control-bg: #14251b;
+  --control-text: #edf3e8;
+  --control-border: #839b87;
+  --control-primary: #b6d4ad;
+  --control-on-primary: #102219;
+  --control-hover: #253c2c;
+  --control-focus: #dbcb94;
+  --text-faint: #b3c2b4;
+  --warning: #e8cc8a;
+}
+:is(.film-hero,.page-head,.v18-today-card.primary,.worship-command-panel.primary,.word-stage,.faith-interlude,.site-footer) {
+  --control-bg: #153d2a;
+  --control-text: #f5f1e6;
+  --control-border: #b4c9b9;
+  --control-primary: #f5f1e6;
+  --control-on-primary: #102219;
+  --control-hover: #244d36;
+  --control-focus: #e6cd87;
+}
+body::before { display: none; }
+body :focus-visible {
+  outline: 3px solid var(--control-focus);
+  outline-offset: 4px;
+}
+.icon { stroke-width: 2.1; }
+:is(.btn,.icon-button,.tab,.v18-quick,.segmented button) {
+  transition: background-color .18s ease, border-color .18s ease, color .18s ease, transform .18s ease;
+}
+:is(.view,.modal,.site-footer) .btn {
+  min-height: 48px;
+  max-width: 100%;
+  padding: 12px 18px;
+  border: 1px solid var(--control-border) !important;
+  border-radius: 12px !important;
+  color: var(--control-text) !important;
+  background: var(--control-bg) !important;
+  box-shadow: none;
+  font-size: .9rem;
+  font-weight: 720;
+  line-height: 1.35;
+  text-align: center;
+  white-space: normal;
+}
+:is(.view,.modal,.site-footer) .btn::after { display: none; }
+:is(.view,.modal,.site-footer) .btn:hover {
+  background: var(--control-hover) !important;
+  border-color: var(--control-text) !important;
+  transform: translateY(-1px);
+}
+:is(.view,.modal,.site-footer) .btn.primary,
+[data-theme="dark"] :is(.view,.modal,.site-footer) .btn.primary {
+  color: var(--control-on-primary) !important;
+  border-color: var(--control-primary) !important;
+  background: var(--control-primary) !important;
+}
+:is(.view,.modal,.site-footer) .btn.primary:hover { filter: brightness(.95); }
+:is(.view,.modal,.site-footer) .btn.whatsapp {
+  color: #fff !important;
+  border-color: #126b3b !important;
+  background: #126b3b !important;
+}
+:is(.view,.modal,.site-footer) .btn.danger { color: var(--danger) !important; }
+:is(.btn,.icon-button,.tab,.v18-quick):active { transform: translateY(1px); }
+:is(.btn,.icon-button):disabled { cursor: wait; opacity: .65; transform: none; }
+.btn .icon, .btn .brand-svg { width: 20px; height: 20px; }
+.icon-button {
+  width: 46px;
+  height: 46px;
+  min-width: 44px;
+  min-height: 44px;
+  border-radius: 12px;
+}
+.header-row {
+  border-color: #709880 !important;
+  background: #173e2b !important;
+  backdrop-filter: none !important;
+  box-shadow: 0 8px 22px rgba(2,14,7,.12);
+}
+.header-row .brand-name { color: #fff !important; }
+.header-row .brand-tagline { color: #d1e0d2 !important; }
+.header-row :is(.icon-button,.language-switcher) {
+  color: #f5f1e6 !important;
+  border-color: #a1baaa !important;
+  background: #244e36 !important;
+  border-radius: 12px !important;
+}
+.header-row :is(.icon-button,.language-switcher):hover { background: #355f46 !important; }
+.header-row .mobile-toggle {
+  min-width: 108px !important;
+  color: #102219 !important;
+  border-color: #f5f1e6 !important;
+  background: #f5f1e6 !important;
+}
+.header-row .mobile-toggle:hover { background: #e5eadb !important; }
+.header-row :focus-visible { outline-color: #e6cd87; }
+.header-row .menu-label { text-transform: none; letter-spacing: 0; font-size: .85rem; }
+.mobile-panel { transition: clip-path .24s ease, visibility .24s ease !important; }
+.mobile-nav button { border-color: #89a491 !important; background: #143322 !important; color: #f5f1e6 !important; }
+.mobile-nav button:hover, .mobile-nav button.active { background: #2c5139 !important; border-color: #e6cd87 !important; }
+.mobile-nav-icon { border-radius: 12px !important; color: #e6cd87 !important; background: #203c2a !important; }
+.mobile-panel :focus-visible { outline-color: #e6cd87; }
+
+/* Judul lebih ringkas supaya jadwal cepat terlihat. */
+.film-hero { min-height: 0; }
+.film-hero-inner {
+  display: grid;
+  grid-template-columns: minmax(0,1.25fr) minmax(240px,.75fr);
+  align-items: center;
+  gap: clamp(28px,4vw,64px);
+  padding: 142px 0 48px;
+}
+.film-hero-inner:not(:has(.visitor-story)) { grid-template-columns: minmax(0,1fr); }
+.film-hero h1 {
+  max-width: 17ch;
+  font-size: clamp(2.8rem,5.2vw,5.4rem);
+  line-height: 1.04;
+  letter-spacing: -.045em;
+}
+.film-kicker { max-width: 62ch; margin-bottom: 22px; font-size: .72rem; letter-spacing: .055em; line-height: 1.6; }
+.film-hero-lead { max-width: 58ch; margin-top: 22px; font-size: 1.02rem; line-height: 1.7; }
+.film-hero-bottom { margin-top: 28px; }
+.film-greeting span { color: #d1e0d2; }
+.film-hero-lines, .page-head::before { display: none; }
+.visitor-story {
+  position: relative;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid #91ac97;
+  border-radius: 22px;
+  color: #fff;
+  background: #133321;
+  text-align: left;
+  cursor: pointer;
+}
+.visitor-story img { width: 100%; aspect-ratio: 4/3; object-fit: cover; }
+.visitor-story-copy { display: block; padding: 22px; background: #133321; }
+.visitor-story-copy small { display: block; margin-bottom: 8px; color: #e6cd87; font-size: .78rem; }
+.visitor-story-copy strong { display: block; font-size: clamp(1.2rem,1.8vw,1.65rem); line-height: 1.3; }
+.visitor-story-copy>span { display: inline-flex; align-items: center; gap: 8px; margin-top: 15px; color: #dce6d8; font-size: .86rem; }
+.visitor-story:hover { border-color: #e6cd87; }
+.page-head { min-height: 0; padding-top: 148px !important; padding-bottom: 48px !important; }
+.page-head h1 { font-size: clamp(2.3rem,5vw,4.5rem) !important; line-height: 1.08 !important; }
+.page-head .lead { margin-top: 20px; }
+.chapter-heading h2, .word-stage-heading h2 { font-size: clamp(2.1rem,4.4vw,4.2rem); line-height: 1.06; letter-spacing: -.045em; }
+.chapter-heading { margin-bottom: 32px; gap: 28px; }
+.cinema-chapter { padding-block: clamp(48px,6vw,80px); }
+.cinema-chapter-grid { grid-template-columns: minmax(0,1fr); }
+.journal-stage { padding-bottom: 76px; }
+.service-reel-item { min-height: 108px; padding-block: 23px; }
+.v18-today-hub { padding-block: 36px; }
+.v18-today-card h2 { font-size: clamp(1.7rem,3.4vw,3rem); line-height: 1.15; letter-spacing: -.035em; }
+.v18-today-card .service-name { display: block; margin-bottom: 10px; color: #e6cd87; font-size: .92rem; font-weight: 700; }
+.v18-status { margin-bottom: 18px; padding: 0; border: 0; border-radius: 0; text-transform: none; letter-spacing: 0; }
+.v18-status::before { display: none; }
+.v18-quick { min-height: 108px; border-color: var(--control-border); background: var(--surface); border-radius: 14px; cursor: pointer; }
+.v18-quick .icon { width: 25px; height: 25px; color: var(--brand-strong); }
+.v18-quick:hover { background: var(--brand-soft); border-color: var(--brand-strong); }
+.schedule-cue { min-height: 150px; padding: 24px 0; grid-template-columns: 64px minmax(0,1fr) 48px; gap: 22px; }
+.schedule-cue-icon { width: 56px; height: 56px; border-color: var(--control-border); border-radius: 14px; }
+.schedule-cue-copy strong { margin-block: 8px; font-size: clamp(1.4rem,2.5vw,2.25rem); line-height: 1.2; }
+.schedule-cue-arrow { width: 44px; height: 44px; border-radius: 12px; }
+.word-stage-heading { padding-top: 64px; }
+.word-stage #home-devotional { padding-bottom: 64px; }
+.word-stage .devotional-cinema { backdrop-filter: none; }
+.worship-command-panel h2 { font-size: clamp(1.8rem,3.3vw,3.2rem); line-height: 1.08; }
+.worship-check span { color: var(--text-soft); }
+.worship-check small { color: var(--text-faint); font-size: .78rem; }
+.worship-check.missing .icon { color: var(--warning); }
+.worship-readiness-score { color: var(--brand-strong); }
+.operator-section { padding-top: 0; }
+.operator-tools { border: 1px solid var(--control-border); border-radius: 18px; background: var(--surface); }
+.operator-tools summary { display: flex; align-items: center; gap: 12px; min-height: 64px; padding: 18px 22px; color: var(--text); cursor: pointer; list-style: none; }
+.operator-tools summary::-webkit-details-marker { display: none; }
+.operator-tools summary>span { flex: 1; font-weight: 700; }
+.operator-tools summary small { color: var(--text-soft); }
+.operator-tools .worship-command { padding: 0 18px 18px; }
+.operator-tools[open] summary>.icon:last-child { transform: rotate(180deg); }
+
+/* Link dan video Reels tetap memakai alur lama. */
+.instagram-stage { background: var(--bg-elevated); }
+.instagram-stage::before { display: none; }
+.instagram-stage-head { align-items: center; gap: 24px; margin-bottom: 28px; }
+.instagram-stage-head h2 { max-width: 18ch; margin-top: 8px; font-size: clamp(2rem,4.3vw,4.1rem); line-height: 1.08; letter-spacing: -.04em; }
+.instagram-stage-head p:not(.eyebrow) { max-width: 55ch; color: var(--text-soft); }
+.instagram-profile-link { min-height: 48px; padding: 12px 16px; border: 1px solid var(--control-border); border-radius: 12px; color: var(--control-text) !important; background: var(--control-bg); font-size: .88rem; }
+.instagram-reel-live { grid-template-columns: minmax(280px,.7fr) minmax(0,1fr); gap: 28px; align-items: center; }
+.instagram-reel-phone { width: min(100%,410px); border-color: var(--control-border); border-radius: 20px; box-shadow: none; }
+.instagram-reel-phone::before { display: none; }
+.instagram-reel-copy { padding: clamp(24px,3vw,40px); border-radius: 20px; background: var(--surface); box-shadow: none; backdrop-filter: none; }
+.instagram-reel-badge { max-width: 100%; padding: 0; border: 0; border-radius: 0; color: var(--brand-strong); background: transparent; font-size: .8rem; letter-spacing: 0; text-transform: none; }
+.instagram-reel-copy h3 { margin-block: 18px 12px; font-size: clamp(1.7rem,3vw,2.8rem); line-height: 1.15; overflow-wrap: anywhere; }
+.instagram-reel-meta { color: var(--text-faint); letter-spacing: 0; text-transform: none; font-size: .85rem; }
+.instagram-reel-fallback {
+  grid-template-columns: 100px minmax(0,1fr);
+  align-items: center;
+  gap: 28px;
+  border-radius: 22px;
+  border-color: var(--line-strong);
+  box-shadow: none;
+}
+.instagram-profile-mark { display: grid; place-items: center; width: 100px; height: 100px; border: 1px solid var(--control-border); border-radius: 26px; color: var(--brand-strong); background: var(--brand-soft); }
+.instagram-profile-mark .brand-svg { width: 44px; height: 44px; }
+.instagram-reel-fallback h3 { margin-block: 10px 12px; font-size: clamp(1.6rem,3.2vw,2.7rem) !important; line-height: 1.15; }
+.instagram-reel-fallback p { max-width: 62ch; margin-block: 0 18px; }
+.instagram-reel-actions { margin-top: 20px; }
+.instagram-stage .faith-loader { min-height: 190px; border-radius: 20px; }
+.toast { border-color: var(--control-border); }
+.loader { transition-duration: .25s; }
+
+@media (max-width: 960px) {
+  .film-hero-inner { grid-template-columns: minmax(0,1fr) minmax(220px,.65fr); gap: 24px; }
+  .film-hero h1 { font-size: clamp(2.6rem,5.4vw,4.3rem); }
+  .chapter-heading { grid-template-columns: 1fr; gap: 16px; }
+  .instagram-stage-head { align-items: flex-start; flex-direction: column; }
+}
+@media (max-width: 760px) {
+  .film-hero-inner { grid-template-columns: minmax(0,1fr); padding: 122px 0 36px; }
+  .film-hero h1 { max-width: 18ch; font-size: clamp(2.5rem,9.4vw,4.1rem); line-height: 1.08; }
+  .film-kicker { font-size: .69rem; letter-spacing: .02em; margin-bottom: 18px; }
+  .film-hero-lead { font-size: 1rem; }
+  .film-hero-actions { margin-top: 24px; }
+  .film-hero-bottom { margin-top: 22px; }
+  .visitor-story { display: grid; grid-template-columns: 110px minmax(0,1fr); border-radius: 16px; }
+  .visitor-story img { height: 100%; min-height: 155px; aspect-ratio: auto; }
+  .visitor-story-copy { padding: 18px; }
+  .visitor-story-copy strong { font-size: 1.12rem; }
+  .visitor-story-copy small { font-size: .72rem; }
+  .page-head { padding-top: 124px !important; padding-bottom: 36px !important; }
+  .v18-today-grid, .worship-command { grid-template-columns: 1fr; }
+  .v18-quick-grid { grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .v18-quick { min-height: 105px; padding: 16px; }
+  .v18-today-card { padding: 24px; }
+  .v18-today-card .button-row .btn { width: 100%; }
+  .service-reel-item { min-height: 0; padding: 20px 24px; }
+  .schedule-cue { grid-template-columns: 48px minmax(0,1fr); gap: 16px; }
+  .schedule-cue-icon { width: 44px; height: 44px; }
+  .schedule-cue-arrow { display: none; }
+  .word-stage-heading { padding-top: 48px; }
+  .instagram-reel-live { grid-template-columns: minmax(0,1fr); }
+  .instagram-reel-copy { padding: 24px; }
+  .instagram-reel-fallback { grid-template-columns: minmax(0,1fr); gap: 20px; }
+  .instagram-profile-mark { width: 64px; height: 64px; border-radius: 18px; }
+  .instagram-profile-mark .brand-svg { width: 30px; height: 30px; }
+  .instagram-reel-actions .btn { width: 100%; }
+  .operator-tools summary { flex-wrap: wrap; padding: 16px; }
+  .operator-tools summary>span { flex-basis: calc(100% - 68px); }
+  .operator-tools summary small { padding-left: 32px; }
+  .operator-tools .worship-command { padding: 0 12px 12px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(.btn,.icon-button,.tab,.v18-quick,.segmented button,.loader,.mobile-panel) { transition: none !important; }
+}
+[data-motion="reduced"] :is(.btn,.icon-button,.tab,.v18-quick,.segmented button,.loader,.mobile-panel) { transition: none !important; }
