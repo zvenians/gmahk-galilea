@@ -114,7 +114,7 @@
     root.querySelector('#scores-random').disabled = false;
     root.querySelector('#scores-count').textContent = songs.length + ' lagu';
     const announce = message => { status.textContent = message; };
-    const releaseUrl = () => { if (objectUrl) URL.revokeObjectURL(objectUrl); objectUrl = ''; };
+    const releaseUrl = () => { if (objectUrl) URL.revokeObjectURL(objectUrl); objectUrl = ''; document.body.classList.remove('scores-pdf-expanded'); };
 
     function renderList() {
       const matches = filterSongs(songs, query);
@@ -187,24 +187,40 @@
         return;
       }
       if (event.target.closest('[data-score-fullscreen]')) {
+        const stage = reader.querySelector('.scores-pdf-stage');
         try {
           if (document.fullscreenElement) await document.exitFullscreen();
-          else {
-            const stage = reader.querySelector('.scores-pdf-stage');
-            if (!stage.requestFullscreen) throw new Error('Layar penuh PDF tidak tersedia. Gunakan Buka PDF di tab baru.');
-            await stage.requestFullscreen();
-          }
-        } catch (error) { announce(error.message); }
+          else if (stage.classList.contains('is-expanded')) {
+            stage.classList.remove('is-expanded');
+            document.body.classList.remove('scores-pdf-expanded');
+          } else if (stage.requestFullscreen) await stage.requestFullscreen();
+          else throw new Error('Fullscreen unavailable');
+        } catch (_) {
+          stage.classList.add('is-expanded');
+          document.body.classList.add('scores-pdf-expanded');
+          announce('PDF memenuhi jendela. Tekan Escape atau Keluar layar penuh untuk kembali.');
+        }
+        onFullscreen();
       }
     }
     function onFullscreen() {
       const button = reader.querySelector('[data-score-fullscreen]');
-      if (button) button.textContent = document.fullscreenElement ? 'Keluar layar penuh' : 'Layar penuh PDF';
+      if (button) button.textContent = document.fullscreenElement || reader.querySelector('.is-expanded') ? 'Keluar layar penuh' : 'Layar penuh PDF';
+    }
+    function onKeydown(event) {
+      if (event.key !== 'Escape') return;
+      const stage = reader.querySelector('.scores-pdf-stage.is-expanded');
+      if (!stage) return;
+      stage.classList.remove('is-expanded');
+      document.body.classList.remove('scores-pdf-expanded');
+      onFullscreen();
+      reader.querySelector('[data-score-fullscreen]').focus();
     }
     root.addEventListener('input', onInput);
     root.addEventListener('change', onChange);
     root.addEventListener('click', onClick);
     document.addEventListener('fullscreenchange', onFullscreen);
+    document.addEventListener('keydown', onKeydown);
     renderList();
     const ready = selectedNumber ? choose(selectedNumber, false) : Promise.resolve();
     active = {destroy() {
@@ -215,6 +231,7 @@
       root.removeEventListener('change', onChange);
       root.removeEventListener('click', onClick);
       document.removeEventListener('fullscreenchange', onFullscreen);
+      document.removeEventListener('keydown', onKeydown);
     }};
     return ready;
   }
