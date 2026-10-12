@@ -1,5 +1,3 @@
-
-
 import { createRequire } from 'module';
 import { join } from 'path';
 import fs from 'fs';
@@ -14,7 +12,7 @@ if (typeof globalThis.__dirname === 'undefined') {
     join(cwd, 'node_modules', 'harfbuzzjs'),
     join(cwd, 'node_modules', '@vercel', 'og', 'dist'),
     cwd,
-    join(cwd, 'api')
+    join(cwd, 'api'),
   ];
   let foundDir = cwd;
   for (const dir of possibleDirs) {
@@ -31,37 +29,41 @@ export async function GET(req) {
     const { ImageResponse } = await import('@vercel/og');
     const url = new URL(req.url);
     const id = url.searchParams.get('id');
-    
+
     if (!id) {
       return new Response('ID is required', { status: 400 });
     }
-    
+
     const protocol = req.headers.get('x-forwarded-proto') || 'https';
     const host = req.headers.get('x-forwarded-host') || req.headers.get('host');
     const baseUrl = protocol + '://' + host;
-    
+
     const response = await fetch(baseUrl + '/api/gas', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ method: 'getWebsiteData', args: [] })
+      body: JSON.stringify({ method: 'getWebsiteData', args: [] }),
     });
-    
+
     if (!response.ok) {
       return new Response('Failed to fetch data', { status: 500 });
     }
-    
+
     const json = await response.json();
     if (!json.ok || !json.data || !Array.isArray(json.data.activities)) {
       return new Response('Invalid data format', { status: 500 });
     }
-    
-    const activity = json.data.activities.find(a => String(a.id) === String(id));
+
+    const activity = json.data.activities.find((a) => String(a.id) === String(id));
     if (!activity) {
       return new Response('Not found', { status: 404 });
     }
-    
-    const firstMediaImage = activity.media && activity.media.find(m => m.mimeType.startsWith('image/')) ? activity.media.find(m => m.mimeType.startsWith('image/')).url : null;
-    const rawCover = activity.coverUrl || firstMediaImage || (activity.photos && activity.photos[0]);
+
+    const firstMediaImage =
+      activity.media && activity.media.find((m) => m.mimeType.startsWith('image/'))
+        ? activity.media.find((m) => m.mimeType.startsWith('image/')).url
+        : null;
+    const rawCover =
+      activity.coverUrl || firstMediaImage || (activity.photos && activity.photos[0]);
     if (!rawCover) {
       return new ImageResponse(
         {
@@ -76,18 +78,18 @@ export async function GET(req) {
               justifyContent: 'center',
               color: '#f4e5b0',
               fontSize: 48,
-              fontFamily: 'sans-serif'
+              fontFamily: 'sans-serif',
             },
-            children: 'GMAHK Galilea Balikpapan'
-          }
+            children: 'GMAHK Galilea Balikpapan',
+          },
         },
         {
           width: 1200,
-          height: 630
-        }
+          height: 630,
+        },
       );
     }
-    
+
     let image = rawCover;
     let driveId = '';
     const matchFile = image.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/i);
@@ -102,7 +104,7 @@ export async function GET(req) {
     if (driveId) {
       image = 'https://lh3.googleusercontent.com/d/' + driveId + '=w1200';
     }
-    
+
     return new ImageResponse(
       {
         type: 'div',
@@ -113,7 +115,7 @@ export async function GET(req) {
             height: '100%',
             backgroundColor: '#07170d',
             alignItems: 'center',
-            justifyContent: 'center'
+            justifyContent: 'center',
           },
           children: [
             {
@@ -123,20 +125,20 @@ export async function GET(req) {
                 style: {
                   objectFit: 'contain',
                   maxWidth: '1200px',
-                  maxHeight: '630px'
-                }
-              }
-            }
-          ]
-        }
+                  maxHeight: '630px',
+                },
+              },
+            },
+          ],
+        },
       },
       {
         width: 1200,
         height: 630,
         headers: {
-          'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800'
-        }
-      }
+          'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+        },
+      },
     );
   } catch (e) {
     console.error('OG Image generation error:', e);

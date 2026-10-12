@@ -28,28 +28,31 @@ function fallbackSvg() {
 export default async function handler(request, response) {
   if (request.method !== 'GET') {
     response.setHeader('Allow', 'GET');
-    return response.status(405).json({ok:false,error:'Metode tidak didukung.'});
+    return response.status(405).json({ ok: false, error: 'Metode tidak didukung.' });
   }
-  const id = String(request.query && request.query.id || '').trim();
+  const id = String((request.query && request.query.id) || '').trim();
   if (!/^[A-Za-z0-9_-]{11}$/.test(id)) {
-    return response.status(400).json({ok:false,error:'ID video tidak valid.'});
+    return response.status(400).json({ ok: false, error: 'ID video tidak valid.' });
   }
-  const candidates = ['maxresdefault.jpg','hqdefault.jpg','mqdefault.jpg'];
+  const candidates = ['maxresdefault.jpg', 'hqdefault.jpg', 'mqdefault.jpg'];
   for (const file of candidates) {
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), 5000);
     try {
       const source = await fetch('https://i.ytimg.com/vi/' + id + '/' + file, {
-        headers:{Accept:'image/avif,image/webp,image/jpeg,*/*','User-Agent':BUILD},
-        redirect:'follow',
-        signal:controller.signal
+        headers: { Accept: 'image/avif,image/webp,image/jpeg,*/*', 'User-Agent': BUILD },
+        redirect: 'follow',
+        signal: controller.signal,
       });
       if (!source.ok) continue;
       const type = String(source.headers.get('content-type') || '');
       const bytes = Buffer.from(await source.arrayBuffer());
       if (!/^image\//i.test(type) || bytes.length < 900) continue;
       response.setHeader('Content-Type', type);
-      response.setHeader('Cache-Control', 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800');
+      response.setHeader(
+        'Cache-Control',
+        'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800',
+      );
       response.setHeader('X-Galilea-Build', BUILD);
       return response.status(200).send(bytes);
     } catch (_) {
@@ -58,8 +61,11 @@ export default async function handler(request, response) {
       clearTimeout(timer);
     }
   }
-  response.setHeader('Content-Type','image/svg+xml; charset=utf-8');
-  response.setHeader('Cache-Control','public, max-age=300, s-maxage=3600, stale-while-revalidate=86400');
-  response.setHeader('X-Galilea-Build',BUILD);
+  response.setHeader('Content-Type', 'image/svg+xml; charset=utf-8');
+  response.setHeader(
+    'Cache-Control',
+    'public, max-age=300, s-maxage=3600, stale-while-revalidate=86400',
+  );
+  response.setHeader('X-Galilea-Build', BUILD);
   return response.status(200).send(fallbackSvg());
 }

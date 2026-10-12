@@ -1,5 +1,5 @@
-import {appsScriptApiUrl} from './_apps-script.js';
-import {callAppsScript} from './_gas-transport.js';
+import { appsScriptApiUrl } from './_apps-script.js';
+import { callAppsScript } from './_gas-transport.js';
 
 const PUBLIC_METHODS = new Set([
   'downloadQuarterlySchedulePdf',
@@ -23,7 +23,7 @@ const PUBLIC_METHODS = new Set([
   'searchBible',
   'searchWebsite',
   'submitServiceRequest',
-  'translateViewerTexts'
+  'translateViewerTexts',
 ]);
 
 const BUILD = 'GALILEA-VERCEL-BRIDGE-17.5.0';
@@ -47,10 +47,12 @@ function backendUrl(rawValue) {
   const url = new URL(String(rawValue || ''));
   const validHost = url.protocol === 'https:' && url.hostname === 'script.google.com';
   const validPath = /^\/macros\/s\/[^/]+\/exec$/.test(url.pathname);
-  if (!validHost || !validPath) throw new Error('GALILEA_APPS_SCRIPT_API_URL belum valid. Gunakan URL deployment API yang berakhir /exec.');
+  if (!validHost || !validPath)
+    throw new Error(
+      'GALILEA_APPS_SCRIPT_API_URL belum valid. Gunakan URL deployment API yang berakhir /exec.',
+    );
   return url.toString();
 }
-
 
 const DEVOTIONAL_API = 'https://sabbath-school.adventech.io/api/v2';
 const DEVOTIONAL_SITE = 'https://sabbath-school.adventech.io';
@@ -91,8 +93,14 @@ function truncate(value, limit) {
 function sanitizeHtml(value) {
   return String(value == null ? '' : value)
     .replace(/<!--[\s\S]*?-->/g, '')
-    .replace(/<(script|style|iframe|object|embed|form|input|button|textarea|select)[^>]*>[\s\S]*?<\/\1>/gi, '')
-    .replace(/<(script|style|iframe|object|embed|form|input|button|textarea|select)\b[^>]*\/?\s*>/gi, '')
+    .replace(
+      /<(script|style|iframe|object|embed|form|input|button|textarea|select)[^>]*>[\s\S]*?<\/\1>/gi,
+      '',
+    )
+    .replace(
+      /<(script|style|iframe|object|embed|form|input|button|textarea|select)\b[^>]*\/?\s*>/gi,
+      '',
+    )
     .replace(/\s+on[a-z]+\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
     .replace(/\s+(?:style|id|class)\s*=\s*(?:"[^"]*"|'[^']*'|[^\s>]+)/gi, '')
     .replace(/\s+(href|src)\s*=\s*(["'])\s*(?:javascript:|data:text\/html)[\s\S]*?\2/gi, '')
@@ -118,7 +126,11 @@ function renderBible(value) {
 function longDateLabel(dateKey) {
   const date = new Date(dateKey + 'T12:00:00+08:00');
   const label = new Intl.DateTimeFormat('id-ID', {
-    timeZone: 'Asia/Makassar', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+    timeZone: 'Asia/Makassar',
+    weekday: 'long',
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
   }).format(date);
   return label.charAt(0).toUpperCase() + label.slice(1);
 }
@@ -128,9 +140,9 @@ async function fetchOfficialJson(url) {
   const timer = setTimeout(() => controller.abort(), 12000);
   try {
     const result = await fetch(url, {
-      headers: {'Accept': 'application/json', 'User-Agent': BUILD},
+      headers: { Accept: 'application/json', 'User-Agent': BUILD },
       redirect: 'follow',
-      signal: controller.signal
+      signal: controller.signal,
     });
     if (!result.ok) throw new Error('HTTP ' + result.status);
     return await result.json();
@@ -145,59 +157,89 @@ async function getOfficialDailyDevotional(dateValue) {
   const year = Number(yearText);
   const quarter = Math.floor((Number(monthText) - 1) / 3) + 1;
   const periodId = year + '-' + String(quarter).padStart(2, '0');
-  const quarterlyPayload = await fetchOfficialJson(DEVOTIONAL_API + '/in/quarterlies/' + periodId + '/index.json');
+  const quarterlyPayload = await fetchOfficialJson(
+    DEVOTIONAL_API + '/in/quarterlies/' + periodId + '/index.json',
+  );
   const quarterly = quarterlyPayload.quarterly || quarterlyPayload || {};
-  const lessons = Array.isArray(quarterly.lessons) ? quarterly.lessons : (Array.isArray(quarterlyPayload.lessons) ? quarterlyPayload.lessons : []);
+  const lessons = Array.isArray(quarterly.lessons)
+    ? quarterly.lessons
+    : Array.isArray(quarterlyPayload.lessons)
+      ? quarterlyPayload.lessons
+      : [];
   const target = dateNumber(dateKey);
-  const lesson = lessons.find(item => {
+  const lesson = lessons.find((item) => {
     const start = dateNumber(item.start_date || item.startDate);
     const end = dateNumber(item.end_date || item.endDate || item.start_date || item.startDate);
     return start && start <= target && end >= target;
   });
   if (!lesson) throw new Error('Pelajaran Advent untuk tanggal WITA hari ini belum ditemukan.');
 
-  const lessonId = String(lesson.id || lesson.index || lesson.number || '').replace(/\D/g, '').padStart(2, '0');
+  const lessonId = String(lesson.id || lesson.index || lesson.number || '')
+    .replace(/\D/g, '')
+    .padStart(2, '0');
   if (!lessonId || lessonId === '00') throw new Error('Nomor pelajaran harian tidak valid.');
   const base = DEVOTIONAL_API + '/in/quarterlies/' + periodId + '/lessons/' + lessonId;
   const detailPayload = await fetchOfficialJson(base + '/index.json');
-  const lessonDetail = detailPayload.lesson && typeof detailPayload.lesson === 'object' ? detailPayload.lesson : detailPayload;
-  const days = Array.isArray(detailPayload.days) ? detailPayload.days : (Array.isArray(lessonDetail.days) ? lessonDetail.days : []);
+  const lessonDetail =
+    detailPayload.lesson && typeof detailPayload.lesson === 'object'
+      ? detailPayload.lesson
+      : detailPayload;
+  const days = Array.isArray(detailPayload.days)
+    ? detailPayload.days
+    : Array.isArray(lessonDetail.days)
+      ? lessonDetail.days
+      : [];
 
-  let day = days.find(item => dateNumber(item.date) === target) || null;
+  let day = days.find((item) => dateNumber(item.date) === target) || null;
   let reading = null;
   if (day) {
-    const dayId = String(day.id || day.index || '').replace(/\D/g, '').padStart(2, '0');
+    const dayId = String(day.id || day.index || '')
+      .replace(/\D/g, '')
+      .padStart(2, '0');
     if (dayId && dayId !== '00') {
       const payload = await fetchOfficialJson(base + '/days/' + dayId + '/read/index.json');
       reading = payload && payload.read ? payload.read : payload;
     }
   } else {
-    const candidates = await Promise.all(days.map(async (item, index) => {
-      const dayId = String(item.id || item.index || index + 1).replace(/\D/g, '').padStart(2, '0');
-      try {
-        const payload = await fetchOfficialJson(base + '/days/' + dayId + '/read/index.json');
-        const value = payload && payload.read ? payload.read : payload;
-        return {day: item, dayId, reading: value};
-      } catch (_) {
-        return null;
-      }
-    }));
-    const exact = candidates.find(item => item && dateNumber(item.reading && item.reading.date || item.day && item.day.date) === target);
+    const candidates = await Promise.all(
+      days.map(async (item, index) => {
+        const dayId = String(item.id || item.index || index + 1)
+          .replace(/\D/g, '')
+          .padStart(2, '0');
+        try {
+          const payload = await fetchOfficialJson(base + '/days/' + dayId + '/read/index.json');
+          const value = payload && payload.read ? payload.read : payload;
+          return { day: item, dayId, reading: value };
+        } catch (_) {
+          return null;
+        }
+      }),
+    );
+    const exact = candidates.find(
+      (item) =>
+        item &&
+        dateNumber((item.reading && item.reading.date) || (item.day && item.day.date)) === target,
+    );
     if (exact) {
-      day = Object.assign({}, exact.day, {id: exact.dayId});
+      day = Object.assign({}, exact.day, { id: exact.dayId });
       reading = exact.reading;
     }
   }
 
   reading = reading || day || {};
-  const readingDate = dateNumber(reading.date || day && day.date);
-  if (!day || readingDate !== target) throw new Error('Bacaan Advent yang tersedia belum cocok dengan tanggal WITA hari ini.');
+  const readingDate = dateNumber(reading.date || (day && day.date));
+  if (!day || readingDate !== target)
+    throw new Error('Bacaan Advent yang tersedia belum cocok dengan tanggal WITA hari ini.');
   const contentHtml = sanitizeHtml(reading.content || day.content || '');
   const bibleHtml = renderBible(reading.bible || day.bible || '');
   if (!contentHtml) throw new Error('Isi bacaan Advent hari ini masih kosong.');
 
-  const dayId = String(day.id || day.index || '').replace(/\D/g, '').padStart(2, '0');
-  const title = cleanText(reading.title || day.title || lessonDetail.title || lesson.title || 'Renungan Pagi');
+  const dayId = String(day.id || day.index || '')
+    .replace(/\D/g, '')
+    .padStart(2, '0');
+  const title = cleanText(
+    reading.title || day.title || lessonDetail.title || lesson.title || 'Renungan Pagi',
+  );
   const scripture = truncate(bibleHtml, 190);
   return {
     id: 'adventech-' + periodId + '-' + lessonId + '-' + dayId,
@@ -209,15 +251,21 @@ async function getOfficialDailyDevotional(dateValue) {
     contentDateLabel: longDateLabel(dateKey),
     scripture,
     summary: truncate(contentHtml, 420),
-    contentHtml: (bibleHtml ? '<div class="devotional-scripture">' + bibleHtml + '</div>' : '') + contentHtml,
-    videoId: '', thumbnailUrl: '', embedUrl: '', watchUrl: '',
+    contentHtml:
+      (bibleHtml ? '<div class="devotional-scripture">' + bibleHtml + '</div>' : '') + contentHtml,
+    videoId: '',
+    thumbnailUrl: '',
+    embedUrl: '',
+    watchUrl: '',
     isArchive: false,
     isPending: false,
     source: 'Adventech Sabbath School · Bahasa Indonesia',
     sourceUrl: DEVOTIONAL_SITE,
     lessonTitle: cleanText(lessonDetail.title || lesson.title || ''),
-    lessonNumber: Number(String(lessonDetail.id || lessonDetail.number || lessonId).replace(/\D/g, '')) || Number(lessonId),
-    attribution: 'Materi Advent harian · Dibagikan melalui Website Gereja Galilea'
+    lessonNumber:
+      Number(String(lessonDetail.id || lessonDetail.number || lessonId).replace(/\D/g, '')) ||
+      Number(lessonId),
+    attribution: 'Materi Advent harian · Dibagikan melalui Website Gereja Galilea',
   };
 }
 
@@ -265,7 +313,13 @@ const BIBLE_BOOKS = [
   { id: 'MRK', name: 'Markus', folder: 'Markus', chapters: 16, testament: 'PB' },
   { id: 'LUK', name: 'Lukas', folder: 'Lukas', chapters: 24, testament: 'PB' },
   { id: 'JHN', name: 'Yohanes', folder: 'Yohanes', chapters: 21, testament: 'PB' },
-  { id: 'ACT', name: 'Kisah Para Rasul', folder: 'Kisah_Para_Rasul', chapters: 28, testament: 'PB' },
+  {
+    id: 'ACT',
+    name: 'Kisah Para Rasul',
+    folder: 'Kisah_Para_Rasul',
+    chapters: 28,
+    testament: 'PB',
+  },
   { id: 'ROM', name: 'Roma', folder: 'Roma', chapters: 16, testament: 'PB' },
   { id: '1CO', name: '1 Korintus', folder: '1_Korintus', chapters: 16, testament: 'PB' },
   { id: '2CO', name: '2 Korintus', folder: '2_Korintus', chapters: 13, testament: 'PB' },
@@ -287,11 +341,10 @@ const BIBLE_BOOKS = [
   { id: '2JN', name: '2 Yohanes', folder: '2_Yohanes', chapters: 1, testament: 'PB' },
   { id: '3JN', name: '3 Yohanes', folder: '3_Yohanes', chapters: 1, testament: 'PB' },
   { id: 'JUD', name: 'Yudas', folder: 'Yudas', chapters: 1, testament: 'PB' },
-  { id: 'REV', name: 'Wahyu', folder: 'Wahyu', chapters: 22, testament: 'PB' }
+  { id: 'REV', name: 'Wahyu', folder: 'Wahyu', chapters: 22, testament: 'PB' },
 ];
 
-// Satu-satunya sumber runtime Alkitab. Metadata di bawah harus selalu menunjuk
-// ke repositori yang benar-benar di-fetch, bukan penyedia lain.
+// Metadata harus menunjuk ke sumber Alkitab yang benar-benar dipakai.
 const BIBLE_SOURCE_BASE = 'https://raw.githubusercontent.com/neocarles/alkitab-tb/master/Alkitab/';
 const BIBLE_SOURCE_URL = 'https://github.com/neocarles/alkitab-tb';
 const BIBLE_SOURCE_LABEL = 'Alkitab Terjemahan Baru (TB) · dataset neocarles/alkitab-tb';
@@ -307,11 +360,13 @@ function bibleChapterUrl(book, chapter) {
 
 function resolveBibleBook(bookId) {
   const idStr = String(bookId || '').toUpperCase();
-  return BIBLE_BOOKS.find(b => b.id === idStr || b.name.toUpperCase() === idStr) || null;
+  return BIBLE_BOOKS.find((b) => b.id === idStr || b.name.toUpperCase() === idStr) || null;
 }
 
 function parseTbChapter(text) {
-  const lines = String(text || '').replace(/\r/g, '').split('\n');
+  const lines = String(text || '')
+    .replace(/\r/g, '')
+    .split('\n');
   const verses = [];
   let currentVerse = null;
   for (const line of lines) {
@@ -325,7 +380,7 @@ function parseTbChapter(text) {
       currentVerse.text = (currentVerse.text + ' ' + trimmed).trim();
     }
   }
-  return verses.filter(v => v.text);
+  return verses.filter((v) => v.text);
 }
 
 function getBibleBooksDirect() {
@@ -335,7 +390,7 @@ function getBibleBooksDirect() {
     chapters: b.chapters,
     testament: b.testament,
     testamentLabel: b.testament === 'PL' ? 'Perjanjian Lama' : 'Perjanjian Baru',
-    order: i + 1
+    order: i + 1,
   }));
 }
 
@@ -367,13 +422,13 @@ async function getBibleChapterDirect(bookId, chapter) {
     chapters: book.chapters,
     verses,
     source: BIBLE_SOURCE_LABEL,
-    sourceUrl: BIBLE_SOURCE_URL
+    sourceUrl: BIBLE_SOURCE_URL,
   };
 }
 
 async function getBibleBookDirect(bookId) {
   const idStr = String(bookId || '').toUpperCase();
-  const book = BIBLE_BOOKS.find(b => b.id === idStr || b.name.toUpperCase() === idStr);
+  const book = BIBLE_BOOKS.find((b) => b.id === idStr || b.name.toUpperCase() === idStr);
   if (!book) throw new Error('Kitab tidak dikenali.');
 
   const chapterPromises = Array.from({ length: book.chapters }, async (_, idx) => {
@@ -393,12 +448,11 @@ async function getBibleBookDirect(bookId) {
     source: BIBLE_SOURCE_LABEL,
     sourceUrl: BIBLE_SOURCE_URL,
     watermark: 'Diunduh melalui Website Galilea',
-    copyright: '© Sekretaris Galilea 2026'
+    copyright: '© Sekretaris Galilea 2026',
   };
 }
 
-// Cache chapter lintas-invocation (hangat selama serverless instance hidup),
-// supaya pencarian berulang tidak menembak GitHub raw lagi.
+// Cache pasal mencegah permintaan GitHub berulang selama instance masih hidup.
 const bibleChapterCache = new Map();
 const BIBLE_CACHE_TTL_MS = 86400000;
 const BIBLE_CACHE_MAX_ENTRIES = 1200;
@@ -406,7 +460,7 @@ const BIBLE_CACHE_MAX_ENTRIES = 1200;
 async function getCachedChapterVerses(book, chapter) {
   const key = `${book.id}-${chapter}`;
   const hit = bibleChapterCache.get(key);
-  if (hit && (Date.now() - hit.at) < BIBLE_CACHE_TTL_MS) return hit.verses;
+  if (hit && Date.now() - hit.at < BIBLE_CACHE_TTL_MS) return hit.verses;
   const verses = await fetchTbChapterVerses(book, chapter);
   if (bibleChapterCache.size >= BIBLE_CACHE_MAX_ENTRIES) {
     const oldest = bibleChapterCache.keys().next().value;
@@ -417,14 +471,17 @@ async function getCachedChapterVerses(book, chapter) {
 }
 
 function normalizeSearchQuery(value) {
-  return String(value || '').toLowerCase().replace(/\s+/g, ' ').trim();
+  return String(value || '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim();
 }
 
 function resolveSearchScope(scope) {
   const raw = String(scope || 'all').trim();
   const upper = raw.toUpperCase();
   if (upper === 'PL' || upper === 'PB') {
-    return { books: BIBLE_BOOKS.filter(b => b.testament === upper), scope: upper };
+    return { books: BIBLE_BOOKS.filter((b) => b.testament === upper), scope: upper };
   }
   if (!raw || upper === 'ALL') return { books: BIBLE_BOOKS.slice(), scope: 'all' };
   const book = resolveBibleBook(raw);
@@ -432,7 +489,7 @@ function resolveSearchScope(scope) {
   return { books: [book], scope: book.id };
 }
 
-// Menjalankan task dengan batas konkurensi agar GitHub raw tidak dibanjiri.
+// Batasi proses paralel agar GitHub tidak kebanjiran permintaan.
 async function runWithConcurrency(tasks, limit, shouldStop) {
   let cursor = 0;
   const workers = Array.from({ length: Math.min(limit, tasks.length) }, async () => {
@@ -463,8 +520,14 @@ async function searchBibleDirect(query, scope) {
   let hitDeadline = false;
   const startedAt = Date.now();
   const stop = () => {
-    if (results.length >= BIBLE_SEARCH_MAX_RESULTS) { hitLimit = true; return true; }
-    if ((Date.now() - startedAt) > BIBLE_SEARCH_DEADLINE_MS) { hitDeadline = true; return true; }
+    if (results.length >= BIBLE_SEARCH_MAX_RESULTS) {
+      hitLimit = true;
+      return true;
+    }
+    if (Date.now() - startedAt > BIBLE_SEARCH_DEADLINE_MS) {
+      hitDeadline = true;
+      return true;
+    }
     return false;
   };
 
@@ -478,14 +541,17 @@ async function searchBibleDirect(query, scope) {
     }
     scanned += 1;
     for (const verse of verses) {
-      if (results.length >= BIBLE_SEARCH_MAX_RESULTS) { hitLimit = true; return; }
+      if (results.length >= BIBLE_SEARCH_MAX_RESULTS) {
+        hitLimit = true;
+        return;
+      }
       if (!verse.text.toLowerCase().includes(normalized)) continue;
       results.push({
         book: book.name,
         bookId: book.id,
         chapter,
         verse: String(verse.number),
-        text: verse.text
+        text: verse.text,
       });
     }
   });
@@ -493,8 +559,8 @@ async function searchBibleDirect(query, scope) {
   await runWithConcurrency(tasks, BIBLE_SEARCH_CONCURRENCY, stop);
 
   results.sort((a, b) => {
-    const orderA = BIBLE_BOOKS.findIndex(x => x.id === a.bookId);
-    const orderB = BIBLE_BOOKS.findIndex(x => x.id === b.bookId);
+    const orderA = BIBLE_BOOKS.findIndex((x) => x.id === a.bookId);
+    const orderB = BIBLE_BOOKS.findIndex((x) => x.id === b.bookId);
     if (orderA !== orderB) return orderA - orderB;
     if (a.chapter !== b.chapter) return a.chapter - b.chapter;
     return Number(a.verse) - Number(b.verse);
@@ -511,7 +577,7 @@ async function searchBibleDirect(query, scope) {
     limited: hitLimit,
     timedOut: hitDeadline,
     source: BIBLE_SOURCE_LABEL,
-    sourceUrl: BIBLE_SOURCE_URL
+    sourceUrl: BIBLE_SOURCE_URL,
   };
 }
 
@@ -521,36 +587,51 @@ export default async function handler(request, response) {
       ok: true,
       service: 'Galilea Vercel API Bridge',
       build: BUILD,
-      configured: Boolean(appsScriptApiUrl() && process.env.GALILEA_API_SECRET)
+      configured: Boolean(appsScriptApiUrl() && process.env.GALILEA_API_SECRET),
     });
   }
 
   if (request.method !== 'POST') {
     response.setHeader('Allow', 'GET, POST');
-    return reply(response, 405, {ok: false, error: 'Metode permintaan tidak didukung.'});
+    return reply(response, 405, { ok: false, error: 'Metode permintaan tidak didukung.' });
   }
 
   try {
     const rawLength = Number(request.headers['content-length'] || 0);
-    if (rawLength > MAX_REQUEST_BYTES) return reply(response, 413, {ok: false, error: 'Permintaan terlalu besar.'});
+    if (rawLength > MAX_REQUEST_BYTES)
+      return reply(response, 413, { ok: false, error: 'Permintaan terlalu besar.' });
 
     const body = parseBody(request);
     const method = String(body.method || '');
     const args = Array.isArray(body.args) ? body.args : [];
-    if (!PUBLIC_METHODS.has(method)) return reply(response, 403, {ok: false, error: 'Fungsi tidak diizinkan pada viewer publik.'});
+    if (!PUBLIC_METHODS.has(method))
+      return reply(response, 403, {
+        ok: false,
+        error: 'Fungsi tidak diizinkan pada viewer publik.',
+      });
     if (args.length > 20 || JSON.stringify(args).length > MAX_REQUEST_BYTES) {
-      return reply(response, 413, {ok: false, error: 'Parameter permintaan terlalu besar.'});
+      return reply(response, 413, { ok: false, error: 'Parameter permintaan terlalu besar.' });
     }
 
     if (method === 'getDailyDevotional') {
       try {
         const devotional = await getOfficialDailyDevotional(args[0]);
-        return reply(response, 200, {ok: true, data: devotional, meta: {source: 'adventech-direct', build: BUILD}}, 'public, s-maxage=900, stale-while-revalidate=1800');
+        return reply(
+          response,
+          200,
+          { ok: true, data: devotional, meta: { source: 'adventech-direct', build: BUILD } },
+          'public, s-maxage=900, stale-while-revalidate=1800',
+        );
       } catch (devotionalError) {
         return reply(response, 502, {
           ok: false,
-          error: 'Renungan Pagi teks hari ini belum dapat dimuat dari sumber resmi. ' +
-            String(devotionalError && devotionalError.message ? devotionalError.message : devotionalError || '')
+          error:
+            'Renungan Pagi teks hari ini belum dapat dimuat dari sumber resmi. ' +
+            String(
+              devotionalError && devotionalError.message
+                ? devotionalError.message
+                : devotionalError || '',
+            ),
         });
       }
     }
@@ -558,64 +639,110 @@ export default async function handler(request, response) {
     if (method === 'getBibleBooks') {
       try {
         const books = getBibleBooksDirect();
-        return reply(response, 200, {ok: true, data: books, meta: {source: 'tb-neocarles', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
+        return reply(
+          response,
+          200,
+          { ok: true, data: books, meta: { source: 'tb-neocarles', build: BUILD } },
+          'public, s-maxage=86400, stale-while-revalidate=604800',
+        );
       } catch (booksError) {
-        return reply(response, 502, {ok: false, error: 'Daftar kitab Alkitab belum dapat dimuat: ' + String(booksError?.message || booksError)});
+        return reply(response, 502, {
+          ok: false,
+          error:
+            'Daftar kitab Alkitab belum dapat dimuat: ' + String(booksError?.message || booksError),
+        });
       }
     }
 
     if (method === 'getBibleChapter') {
       try {
         const chapter = await getBibleChapterDirect(args[0], args[1]);
-        return reply(response, 200, {ok: true, data: chapter, meta: {source: 'tb-neocarles', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
+        return reply(
+          response,
+          200,
+          { ok: true, data: chapter, meta: { source: 'tb-neocarles', build: BUILD } },
+          'public, s-maxage=86400, stale-while-revalidate=604800',
+        );
       } catch (chapterError) {
-        return reply(response, 502, {ok: false, error: 'Pasal Alkitab belum dapat dimuat: ' + String(chapterError?.message || chapterError)});
+        return reply(response, 502, {
+          ok: false,
+          error:
+            'Pasal Alkitab belum dapat dimuat: ' + String(chapterError?.message || chapterError),
+        });
       }
     }
 
     if (method === 'getBibleBook') {
       try {
         const bookData = await getBibleBookDirect(args[0]);
-        return reply(response, 200, {ok: true, data: bookData, meta: {source: 'tb-neocarles', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
+        return reply(
+          response,
+          200,
+          { ok: true, data: bookData, meta: { source: 'tb-neocarles', build: BUILD } },
+          'public, s-maxage=86400, stale-while-revalidate=604800',
+        );
       } catch (bookError) {
-        return reply(response, 502, {ok: false, error: 'Isi kitab Alkitab belum dapat dimuat: ' + String(bookError?.message || bookError)});
+        return reply(response, 502, {
+          ok: false,
+          error: 'Isi kitab Alkitab belum dapat dimuat: ' + String(bookError?.message || bookError),
+        });
       }
     }
 
     if (method === 'searchBible') {
       const rawQuery = String(args[0] || '');
       if (normalizeSearchQuery(rawQuery).length < BIBLE_SEARCH_MIN_QUERY) {
-        return reply(response, 400, {ok: false, error: 'Ketik minimal 2 karakter untuk mencari ayat.'});
+        return reply(response, 400, {
+          ok: false,
+          error: 'Ketik minimal 2 karakter untuk mencari ayat.',
+        });
       }
       try {
         const found = await searchBibleDirect(rawQuery, args[1]);
-        return reply(response, 200, {ok: true, data: found, meta: {source: 'tb-neocarles', build: BUILD}}, 'public, s-maxage=86400, stale-while-revalidate=604800');
+        return reply(
+          response,
+          200,
+          { ok: true, data: found, meta: { source: 'tb-neocarles', build: BUILD } },
+          'public, s-maxage=86400, stale-while-revalidate=604800',
+        );
       } catch (searchError) {
-        return reply(response, 502, {ok: false, error: 'Pencarian Alkitab belum dapat dijalankan: ' + String(searchError?.message || searchError)});
+        return reply(response, 502, {
+          ok: false,
+          error:
+            'Pencarian Alkitab belum dapat dijalankan: ' +
+            String(searchError?.message || searchError),
+        });
       }
     }
 
     const configuredUrl = backendUrl(appsScriptApiUrl());
     const secret = String(process.env.GALILEA_API_SECRET || '');
-    if (secret.length < 32) throw new Error('GALILEA_API_SECRET belum dipasang atau terlalu pendek.');
+    if (secret.length < 32)
+      throw new Error('GALILEA_API_SECRET belum dipasang atau terlalu pendek.');
 
-    const {response: upstream, payload} = await callAppsScript(configuredUrl, {secret, method, args});
+    const { response: upstream, payload } = await callAppsScript(configuredUrl, {
+      secret,
+      method,
+      args,
+    });
 
     if (!upstream.ok || !payload || payload.ok !== true) {
       return reply(response, upstream.ok ? 502 : upstream.status, {
         ok: false,
-        error: payload && payload.error ? payload.error : 'Backend Galilea belum dapat dihubungi.'
+        error: payload && payload.error ? payload.error : 'Backend Galilea belum dapat dihubungi.',
       });
     }
 
-    return reply(response, 200, {ok: true, data: payload.data, meta: payload.meta || null});
+    return reply(response, 200, { ok: true, data: payload.data, meta: payload.meta || null });
   } catch (error) {
     const timedOut = error && error.name === 'AbortError';
     return reply(response, timedOut ? 504 : 500, {
       ok: false,
       error: timedOut
         ? 'Backend membutuhkan waktu terlalu lama. Silakan coba lagi.'
-        : String(error && error.message ? error.message : error || 'Terjadi gangguan pada API Galilea.')
+        : String(
+            error && error.message ? error.message : error || 'Terjadi gangguan pada API Galilea.',
+          ),
     });
   }
 }
