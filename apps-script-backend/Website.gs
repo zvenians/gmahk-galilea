@@ -18,6 +18,7 @@ const GW = Object.freeze({
   YOUTUBE_CHANNEL_PROPERTY: 'GALILEA_AWR_BORNEO_CHANNEL_ID',
   SERVICE_SPREADSHEET_PROPERTY: 'GALILEA_SERVICE_SPREADSHEET_ID',
   TITLE_MARKER: 'JADWAL IBADAH JEMAAT GALILEA',
+  SCHEDULE_SHEET: 'Jadwal Triwulan',
   CACHE_SECONDS: 60,
   SHEETS: Object.freeze({
     settings: 'Website Setting',
@@ -290,7 +291,7 @@ function websiteOnEdit(e) {
   if (!e || !e.range) return;
   const sheetName = e.range.getSheet().getName();
   const watched = Object.keys(GW.SHEETS).map(function (key) { return GW.SHEETS[key]; });
-  if (watched.indexOf(sheetName) >= 0 || /^Triwulan\s+[IV]+\s+\d{4}$/i.test(sheetName)) {
+  if (watched.indexOf(sheetName) >= 0 || gwNormalize_(sheetName) === gwNormalize_(GW.SCHEDULE_SHEET) || /^Triwulan\s+[IV]+\s+\d{4}$/i.test(sheetName)) {
     gwRefreshWebsiteGalilea_();
   }
 }
@@ -352,7 +353,7 @@ function getWebsiteData(options) {
   gwEnsureV200ContentSchemas_(spreadsheet);
   const scheduleSheet = gwChooseScheduleSheet_(spreadsheet);
   if (!scheduleSheet) {
-    throw new Error('Sheet jadwal aktif tidak ditemukan. Pastikan A1 berisi “' + GW.TITLE_MARKER + '”.');
+    throw new Error('Sheet jadwal tidak ditemukan. Gunakan nama “' + GW.SCHEDULE_SHEET + '”.');
   }
 
   const rowCount = Math.max(scheduleSheet.getLastRow(), 1);
@@ -379,7 +380,7 @@ function getWebsiteData(options) {
     dayKey: Utilities.formatDate(now, GW.TIMEZONE, 'yyyy-MM-dd'),
     site: gwPublicSettings_(settings),
     scheduleSheet: scheduleSheet.getName(),
-    periodLabel: gwPeriodLabel_(now),
+    periodLabel: gwSchedulePeriodLabel_(sections, now),
     updatedAt: gwFormatDateTime_(now),
     nextSabbath: gwNextSabbath_(sections, now),
     nextWednesday: gwNextWednesday_(sections, now),
@@ -1273,6 +1274,8 @@ function gwReadPublicHealth_(spreadsheet) {
 /* -------------------------------------------------------------------------- */
 
 function gwChooseScheduleSheet_(spreadsheet) {
+  const fixed = spreadsheet.getSheetByName(GW.SCHEDULE_SHEET);
+  if (fixed) return fixed;
   const period = gwCurrentPeriod_();
   const exact = spreadsheet.getSheetByName('Triwulan ' + gwRoman_(period.quarter) + ' ' + period.year);
   if (exact) return exact;
@@ -1281,6 +1284,22 @@ function gwChooseScheduleSheet_(spreadsheet) {
   });
   candidates.sort(function (a, b) { return gwScheduleRank_(b.getName()) - gwScheduleRank_(a.getName()); });
   return candidates[0] || null;
+}
+
+function gwSchedulePeriodLabel_(sections, now) {
+  const periods = {};
+  (sections || []).forEach(function (section) {
+    (section.records || []).forEach(function (record) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(record.isoDate || '')) return;
+      const date = new Date(record.isoDate + 'T12:00:00' + GW.UTC_OFFSET);
+      if (isNaN(date.getTime())) return;
+      const year = Number(Utilities.formatDate(date, GW.TIMEZONE, 'yyyy'));
+      const quarter = Math.floor((Number(Utilities.formatDate(date, GW.TIMEZONE, 'M')) - 1) / 3) + 1;
+      periods[year + '-' + quarter] = gwPeriodLabel_(date);
+    });
+  });
+  const keys = Object.keys(periods).sort();
+  return keys.length ? keys.map(function (key) { return periods[key]; }).join(' / ') : gwPeriodLabel_(now);
 }
 
 function gwScheduleRank_(name) {
