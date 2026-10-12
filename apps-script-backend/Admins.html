@@ -1642,7 +1642,8 @@
   body::before { content: ''; position: fixed; inset: 0; background: rgba(12,30,20,.23); pointer-events: none; z-index: -1 }
   .admin-shell { display: flex; flex-direction: column; min-height: 100dvh }
   .sidebar { position: relative; inset: auto; width: 100%; min-height: 92px; padding: 20px clamp(20px,4vw,72px); flex-direction: row; align-items: center; gap: 24px; background: rgba(15,35,24,.92); border: 0; overflow: visible; transform: none }
-  .brand { padding: 0; border: 0; flex-shrink: 0 }
+  .brand { padding: 0; margin: 0; border: 0; background: transparent; flex-shrink: 0 }
+  .brand::after { display: none }
   .brand strong { color: #fff; font-size: 16px }
   .brand span { color: #dae4d9; font-size: 12px; text-transform: none; letter-spacing: 0 }
   .brand-logo { width: 42px; height: 42px }
@@ -1652,6 +1653,9 @@
   .nav-item.active { background: #e5ecdf; color: #173a25; box-shadow: none }
   .nav-item::before { display: none }
   .nav-item:hover { color: #173a25; background: #e5ecdf }
+  [data-theme] .sidebar .nav-item { color: #e4ece2 }
+  [data-theme] .sidebar .nav-item.active, [data-theme] .sidebar .nav-item:hover { color: #173a25 }
+  [data-theme] .sidebar .nav-more-panel .nav-item { color: var(--text) }
   .nav-more { position: relative }
   .nav-more summary { color: #e4ece2; padding: 12px; cursor: pointer; font-size: 13px }
   .nav-more-panel { position: absolute; top: 100%; right: 0; width: 248px; padding: 8px; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-lg); max-height: 65vh; overflow: auto; z-index: 80 }
@@ -1663,12 +1667,14 @@
   .workspace { grid-column: auto; margin-left: 0; width: 100%; min-height: calc(100dvh - 92px) }
   .topbar { position: relative; top: auto; width: min(1280px,calc(100% - 64px)); margin: 16px auto 0; padding: 10px 16px; border: 0; border-radius: 10px; background: var(--surface); backdrop-filter: none; -webkit-backdrop-filter: none }
   .content { width: min(1280px,calc(100% - 64px)); padding: 28px; margin: 18px auto 40px; background: rgba(251,252,248,.94); border: 1px solid rgba(255,255,255,.6); border-radius: 16px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px) }
-  .content[data-route='dashboard'] { background: transparent; padding: 0; border: 0; backdrop-filter: none; -webkit-backdrop-filter: none }
-  .editorial-welcome { padding: 32px 8px 24px; color: #fff }
+  .content[data-page='dashboard'] { background: transparent; padding: 0; border: 0; backdrop-filter: none; -webkit-backdrop-filter: none }
+  .mobile-menu { display: none }
+  .editorial-welcome { padding: 32px 8px 24px; color: #fff; background: rgba(15,35,24,.88); border: 0; border-radius: 12px; box-shadow: none; padding-inline: 28px }
+  .editorial-welcome::before { display: none }
   .welcome-eyebrow { display: none }
   .welcome-title { color: #fff; font-size: clamp(30px,4vw,52px); letter-spacing: -.035em; line-height: 1.13; text-shadow: 0 2px 18px rgba(0,0,0,.4) }
   .welcome-sub { color: #fff; max-width: 650px; font-size: 16px; text-shadow: 0 1px 8px #163421 }
-  .welcome-meta { color: #fff }
+  .welcome-meta, .welcome-meta-item { color: #fff }
   .welcome-meta-status { color: #fff; background: rgba(15,35,24,.9) }
   .dashboard-sync-strip { background: var(--surface); color: var(--text); border-radius: 8px; padding: 12px 16px; margin-top: 24px }
   .dashboard-workbench { padding: 28px; background: rgba(251,252,248,.94); border: 1px solid rgba(255,255,255,.6); border-radius: 16px; backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px) }
@@ -1684,7 +1690,7 @@
   .admin-footer { color: #fff; background: rgba(15,35,24,.92); border: 0 }
   .operation-bar { width: min(1280px,calc(100% - 64px)); margin: 14px auto 0 }
   :where(button,a,summary,input,select,textarea,[contenteditable]):focus-visible { outline: 3px solid #b88f33; outline-offset: 3px }
-  [data-theme='dark'] .content:not([data-route='dashboard']), [data-theme='dark'] .dashboard-workbench { background: rgba(12,25,17,.96); border-color: var(--line) }
+  [data-theme='dark'] .content:not([data-page='dashboard']), [data-theme='dark'] .dashboard-workbench { background: rgba(12,25,17,.96); border-color: var(--line) }
   [data-theme='dark'] .topbar, [data-theme='dark'] .dashboard-sync-strip { background: #14271b }
   [data-theme='dark'] body::before { background: rgba(5,18,10,.52) }
   @media (max-width: 1180px) {
@@ -1712,7 +1718,7 @@
   @media (max-width: 480px) {
     .topbar, .content, .operation-bar { width: calc(100% - 24px) }
     .content, .dashboard-workbench { padding: 16px; border-radius: 12px }
-    .content[data-route='dashboard'] { padding: 0 }
+    .content[data-page='dashboard'] { padding: 0 }
     .topbar { gap: 8px; padding-inline: 10px }
     .welcome-title { font-size: 32px }
     .rich-content { max-height: 42dvh }
@@ -1803,7 +1809,7 @@
     function nav(route,iconName,label,count){const value=Math.max(0,Number(count)||0);return '<button class="nav-item" data-route="'+attr(route)+'">'+icon(iconName)+'<span>'+esc(label)+'</span><span class="count" data-nav-count="'+attr(route)+'" '+(value?'':'hidden')+'>'+esc(value)+'</span></button>'}
     function closeSidebar(){$('#sidebar')?.classList.remove('open');$('#overlay')?.classList.remove('open');$('#mobile-menu')?.setAttribute('aria-expanded','false')}
     function routeTitle(){if(state.route==='dashboard')return'Dashboard';if(state.route==='services')return'Layanan Jemaat';if(state.route==='approvals')return'Persetujuan';if(state.route==='activity')return'Audit & Aktivitas';if(state.route==='users')return'Pengelola Portal';if(state.route==='system')return'Sistem & Backup';return friendlyEntity(state.route)}
-    function navigate(route){state.route=route;state.search='';state.status='ALL';location.hash=route;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.route===route));$('#crumb-title').textContent=routeTitle();$('#content').dataset.route=route;$$('.nav-more').forEach(el=>el.open=false);closeSidebar();renderRoute()}
+    function navigate(route){state.route=route;state.search='';state.status='ALL';location.hash=route;$$('.nav-item').forEach(b=>b.classList.toggle('active',b.dataset.route===route));$('#crumb-title').textContent=routeTitle();$('#content').dataset.page=route;$$('.nav-more').forEach(el=>el.open=false);closeSidebar();renderRoute()}
 
     async function renderRoute(){const box=$('#content');box.innerHTML=loadingCard('Menyiapkan '+routeTitle());try{if(state.route==='dashboard')return renderDashboard();if(state.route==='services')return await loadServices();if(state.route==='approvals')return await loadApprovals();if(state.route==='activity')return await loadActivity();if(state.route==='users')return await loadUsers();if(state.route==='system')return renderSystem();return await loadEntity(state.route)}catch(error){box.innerHTML=errorBox(error.message)}}
     function loadingCard(label){return '<div class="empty"><div class="loader-mark" style="width:72px;height:72px"><span class="orbit"></span>'+logoMark('loader-advent')+'</div><strong>'+esc(label||'Memuat')+'</strong><p class="muted small">Menyambungkan data terbaru…</p></div>'}
@@ -2022,7 +2028,7 @@
       let savedRange=null;
       const remember=()=>{const selection=getSelection();if(selection&&selection.rangeCount&&editor.contains(selection.anchorNode)&&editor.contains(selection.focusNode))savedRange=selection.getRangeAt(0).cloneRange();updateButtons()};
       const restore=()=>{const range=savedRange;editor.focus();if(range&&editor.contains(range.commonAncestorContainer)){const selection=getSelection();selection.removeAllRanges();selection.addRange(range);savedRange=range}};
-      const sync=()=>{textarea.value=editor.textContent.trim()?sanitizeHtml(editor.innerHTML):'';textarea.dispatchEvent(new Event('input',{bubbles:true}));remember()};
+      const sync=()=>{const value=editor.textContent.trim()?sanitizeHtml(editor.innerHTML):'';if(textarea.value!==value){textarea.value=value;textarea.dispatchEvent(new Event('input',{bubbles:true}))}remember()};
       const updateButtons=()=>{if(!toolbar)return;toolbar.querySelectorAll('[aria-pressed]').forEach(button=>{let active=false;try{active=document.queryCommandState(button.dataset.command)}catch(error){}button.setAttribute('aria-pressed',String(active));button.classList.toggle('active',active)})};
       const execute=(command,value)=>{restore();document.execCommand('styleWithCSS',false,false);document.execCommand(command,false,value||null);sync()};
       if(toolbar){
@@ -2041,8 +2047,8 @@
       }
       const applyLink=()=>{const url=safeEditorLink(linkInput.value);if(!url){ $('[data-link-error]',container).textContent='Masukkan alamat HTTPS yang valid.';return}restore();const selection=getSelection();if(selection.isCollapsed){document.execCommand('insertText',false,url);remember();const range=selection.getRangeAt(0);range.setStart(range.endContainer,Math.max(0,range.endOffset-url.length));savedRange=range.cloneRange()}execute('createLink',url);linkPanel.hidden=true};
       $('[data-link-apply]',container).addEventListener('click',applyLink);
-      $('[data-link-cancel]',container).addEventListener('click',()=>{linkPanel.hidden=true;restore()});
-      linkInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyLink()}if(e.key==='Escape'){e.preventDefault();e.stopPropagation();linkPanel.hidden=true;restore()}});
+      $('[data-link-cancel]',container).addEventListener('click',()=>{linkPanel.hidden=true;linkInput.value='';restore()});
+      linkInput.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();applyLink()}if(e.key==='Escape'){e.preventDefault();e.stopPropagation();linkPanel.hidden=true;linkInput.value='';restore()}});
       editor.addEventListener('input',sync);
       editor.addEventListener('blur',sync);
       editor.addEventListener('keyup',remember);
