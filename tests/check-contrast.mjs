@@ -17,6 +17,11 @@ function ratio(foreground, background) {
 }
 
 const pairs = [
+  ['hero schedule text','#f5f1e6','#153d2a'],
+  ['hero schedule label','#d1e0d2','#153d2a'],
+  ['hero schedule icon','#e6cd87','#153d2a'],
+  ['news text over worst-case photo scrim','#e0e9db','#16291d'],
+  ['news metadata over worst-case photo scrim','#e6cd87','#16291d'],
   ['light text / surface','#0a100c','#fafaf5'],
   ['light soft text / surface','#354239','#fafaf5'],
   ['light faint text / surface','#5f6d64','#fafaf5'],

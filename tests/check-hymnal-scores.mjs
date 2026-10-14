@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {readViewerSource} from './viewer-source.mjs';
 import fs from 'node:fs';
 import {JSDOM} from 'jsdom';
 
@@ -86,7 +87,7 @@ const retry=setup(async number=>{if(++attempts===1)throw new Error('Koneksi terp
 await retry.ready;select(retry,1);await flush();assert.match(retry.root.textContent,/Koneksi terputus/);
 retry.root.querySelector('[data-score-retry]').click();await flush();assert.ok(retry.root.querySelector('#scores-song-title'));
 retry.window.GalileaHymnalScores.destroy();retry.dom.window.close();
-const index=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const index=readViewerSource();
 assert.match(index, /'hymnal-scores': renderHymnalScores/);
 assert.match(index, /state.route === 'hymnal-scores'\) loadHymnalScores/);
 assert.match(index,/\['hymnal-scores','file','Lagu Sion \(Partiture\)'/);

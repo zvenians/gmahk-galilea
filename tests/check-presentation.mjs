@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
+import {readViewerSource} from './viewer-source.mjs';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {JSDOM} from 'jsdom';
 
-const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const html=readViewerSource();
 const dom=new JSDOM(html,{url:'https://gmahk-galilea.vercel.app'});
 const {document}=dom.window;
 const $=selector=>document.querySelector(selector);

@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {readViewerSource} from './viewer-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import vm from 'node:vm';
@@ -11,7 +12,7 @@ const read = file => fs.readFileSync(path.join(root, file), 'utf8');
 
 const websiteCode = read('apps-script-backend/Website.gs');
 const adminCode = read('apps-script-backend/Admin.gs');
-const indexHtml = read('index.html');
+const indexHtml = readViewerSource();
 
 function extractFunction(name) {
   const start = indexHtml.indexOf('function ' + name + '(');

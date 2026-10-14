@@ -1,8 +1,9 @@
 import assert from 'node:assert/strict';
+import {readViewerSource} from './viewer-source.mjs';
 import fs from 'node:fs';
 import vm from 'node:vm';
 
-const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const html=readViewerSource();
 const cacheSource=html.slice(html.indexOf('      const WORSHIP_CACHE_TTL'),html.indexOf('      const VIEWER_LANGUAGES'));
 const sourceFunction=name=>{
   const start=html.search(new RegExp('      (?:async )?function '+name+'\\('));

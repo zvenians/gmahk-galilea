@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {readViewerSource} from './viewer-source.mjs';
 import fs from 'node:fs';
 import path from 'node:path';
 import {fileURLToPath} from 'node:url';
@@ -6,7 +7,7 @@ import {fileURLToPath} from 'node:url';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(here, '..');
 const source = fs.readFileSync(path.join(root, 'apps-script-backend/VercelApi.gs'), 'utf8');
-const viewer = fs.readFileSync(path.join(root, 'index.html'), 'utf8');
+const viewer = readViewerSource();
 
 assert.match(
   source,

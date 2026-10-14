@@ -1,4 +1,5 @@
 import assert from 'node:assert/strict';
+import {readViewerSource} from './viewer-source.mjs';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {JSDOM} from 'jsdom';
@@ -21,7 +22,7 @@ let aborted=false;
 await assert.rejects(callAppsScript('https://script.google.com/macros/s/test/exec',{method:'getWebsiteData'},{timeoutMs:15,fetcher:async(url,options)=>({status:200,text:()=>new Promise((_,reject)=>options.signal.addEventListener('abort',()=>{aborted=true;reject(new DOMException('timeout','AbortError'));}))})}));
 assert.equal(aborted,true,'Timeout covers the body, not just response headers');
 
-const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const html=readViewerSource();
 const syncCode=html.slice(html.indexOf('      let websiteSyncPromise='),html.indexOf('      async function boot()'));
 let clock=2000000000000,open=false,revision='1',dataCalls=0,renders=0,fail=false;
 class Clock extends Date {static now(){return clock;}}

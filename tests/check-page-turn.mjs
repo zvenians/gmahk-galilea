@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
+import {readViewerSource} from './viewer-source.mjs';
 import fs from 'node:fs';
 import vm from 'node:vm';
 import {JSDOM} from 'jsdom';
 
-const html=fs.readFileSync(new URL('../index.html',import.meta.url),'utf8');
+const html=readViewerSource();
 const source=fs.readFileSync(new URL('../page-turn.js',import.meta.url),'utf8');
 new vm.Script(source);
 assert.match(html,/page-turn\.css/);assert.match(html,/page-turn\.js/);
