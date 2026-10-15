@@ -1,3 +1,7 @@
+import {createHash} from 'node:crypto';
+
+const contentRevision = activity => createHash('sha256').update(JSON.stringify(activity)).digest('hex').slice(0,16);
+
 export async function GET(request) {
   const url = new URL(request.url);
   const id = url.searchParams.get('id');
@@ -30,7 +34,7 @@ export async function GET(request) {
             const firstMediaImage = activity.media && activity.media.find(m => m.mimeType.startsWith('image/')) ? activity.media.find(m => m.mimeType.startsWith('image/')).url : null;
             const cover = activity.coverUrl || firstMediaImage || (activity.photos && activity.photos[0]);
             if (cover) {
-              image = baseUrl + '/api/news-og?id=' + encodeURIComponent(id);
+              image = baseUrl + '/api/news-og?id=' + encodeURIComponent(id) + '&v=' + contentRevision(activity);
             }
           }
         }
@@ -77,7 +81,7 @@ export async function GET(request) {
     status: 200,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
-      'Cache-Control': 'public, s-maxage=60, stale-while-revalidate=300'
+      'Cache-Control': 'public, max-age=0, s-maxage=0, must-revalidate'
     }
   });
 }

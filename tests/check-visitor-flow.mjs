@@ -188,7 +188,7 @@ try {
     if (!navigator.serviceWorker.controller) await new Promise(resolve=>navigator.serviceWorker.addEventListener('controllerchange',resolve,{once:true}));
   });
   const shell = await offlinePage.evaluate(async()=>{
-    const cache=await caches.open('galilea-v43-immersive');
+    const cache=await caches.open('galilea-v45-palettes');
     return (await cache.keys()).map(request=>new URL(request.url).pathname);
   });
   assert.ok(shell.includes('/viewer.js') && shell.includes('/viewer.css'),'New modules are available offline');

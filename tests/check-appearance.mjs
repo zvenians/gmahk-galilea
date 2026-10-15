@@ -1,0 +1,180 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import {createServer} from 'node:http';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import vm from 'node:vm';
+import {chromium} from 'playwright';
+import {visitorFixture,hymnalFixture} from './visitor-fixture.mjs';
+
+const root=fileURLToPath(new URL('../',import.meta.url));
+const source=fs.readFileSync(path.join(root,'viewer.js'),'utf8');
+const start=source.indexOf('      function welcomeContent(');
+const sandbox=vm.createContext({Intl,Date});
+vm.runInContext(source.slice(start,source.indexOf('\n      function ',start+1)),sandbox);
+for(const [date,title,label] of [
+  ['2026-10-16T15:59:59Z','Selamat Datang','GMAHK Galilea Balikpapan'],
+  ['2026-10-16T16:00:00Z','Selamat Hari Sabat','Ibadah Sabat'],
+  ['2026-10-17T15:59:59Z','Selamat Hari Sabat','Ibadah Sabat'],
+  ['2026-10-17T16:00:00Z','Selamat Datang','GMAHK Galilea Balikpapan'],
+  ['2026-10-14T09:59:59Z','Selamat Datang','GMAHK Galilea Balikpapan'],
+  ['2026-10-14T10:00:00Z','Selamat Datang','Ibadah Rabu Malam'],
+  ['2026-10-15T10:00:00Z','Selamat Datang','GMAHK Galilea Balikpapan']
+]){
+  const content=sandbox.welcomeContent(new Date(date));
+  assert.equal(content.title,title,date);assert.equal(content.label,label,date);
+}
+console.log('PASS: Sabbath and Wednesday 18:00 boundaries use WITA.');
+
+const types={'.html':'text/html','.js':'application/javascript','.css':'text/css','.webp':'image/webp','.png':'image/png'};
+const server=createServer((req,res)=>{
+  const pathname=new URL(req.url,'http://localhost').pathname;
+  const file=path.resolve(root,'.'+(pathname==='/'?'/index.html':pathname));
+  if(!file.startsWith(root)||!fs.existsSync(file)||!fs.statSync(file).isFile()){res.writeHead(404).end();return;}
+  res.setHeader('Content-Type',types[path.extname(file)]||'application/octet-stream');res.end(fs.readFileSync(file));
+});
+await new Promise(resolve=>server.listen(0,'127.0.0.1',resolve));
+const base='http://127.0.0.1:'+server.address().port;
+const browser=await chromium.launch({headless:true,args:['--no-sandbox'],executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE});
+const context=await browser.newContext({viewport:{width:1440,height:1000},serviceWorkers:'block'});
+const page=await context.newPage();
+const errors=[];page.on('pageerror',error=>errors.push(error.message));
+const fixture=visitorFixture(3);
+fixture.activities.forEach(item=>item.coverUrl='/assets/presentation/schedule.webp');
+await page.route('**/*',async route=>{
+  const url=new URL(route.request().url());
+  if(url.pathname==='/api/gas'){
+    const {method,args}=route.request().postDataJSON();
+    const responses={getWebsiteData:fixture,getDailyDevotional:{format:'text',requestedDate:args[0],title:'Renungan uji',contentHtml:'<p>Teks uji</p>'},getBibleBooks:[{id:'GEN',name:'Kejadian',chapters:50,testament:'PL',order:1}],getBibleChapter:{book:'Kejadian',chapter:1,verses:[{number:1,text:'Teks ayat untuk pengujian tampilan.'}]}};
+    return route.fulfill({json:{ok:true,data:responses[method]||{}}});
+  }
+  if(url.hostname==='raw.githubusercontent.com')return route.fulfill({json:hymnalFixture});
+  if(url.origin!==base)return route.fulfill({body:'',contentType:'text/html'});
+  return route.continue();
+});
+const palettes=['green','red','navy','brown','purple','teal','slate'];
+const screenshotDir=process.env.APPEARANCE_SCREENSHOTS||'/tmp/galilea-appearance';
+fs.mkdirSync(screenshotDir,{recursive:true});
+async function loaded(){await page.locator('#app h1').waitFor();await page.locator('#loader').waitFor({state:'hidden'});}
+async function settings(){await page.locator('[data-open="settings"]:visible').first().click();}
+async function welcome(){
+  await page.locator('#mobile-toggle').click();
+  await page.locator('#mobile-panel [data-present-welcome]').click();
+  await page.locator('#presentation-dialog').waitFor({state:'visible'});
+}
+function luminance(rgb){const values=rgb.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});return values[0]*.2126+values[1]*.7152+values[2]*.0722;}
+function contrast(a,b){const x=luminance(a),y=luminance(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
+try{
+  await page.goto(base);await loaded();
+  const navColors=new Set();
+  for(const palette of palettes){
+    await settings();await page.locator('[data-palette-value="'+palette+'"]').click();
+    assert.equal(await page.locator('[data-palette-value="'+palette+'"]').getAttribute('aria-pressed'),'true');
+    for(const mode of ['light','dark']){
+      await page.locator('[data-theme-value="'+mode+'"]').click();
+      await page.waitForTimeout(350);
+      const colors=await page.evaluate(()=>({
+        text:getComputedStyle(document.body).color,bg:getComputedStyle(document.documentElement).backgroundColor,
+        nav:getComputedStyle(document.querySelector('.header-row')).backgroundColor,
+        control:getComputedStyle(document.querySelector('.palette-choice.active')).color,
+        controlBg:getComputedStyle(document.querySelector('.palette-choice.active')).backgroundColor
+      }));
+      assert.ok(contrast(colors.text,colors.bg)>=4.5,palette+' '+mode+' body contrast '+JSON.stringify(colors));
+      assert.ok(contrast(colors.control,colors.controlBg)>=4.5,palette+' '+mode+' selected control contrast');
+      navColors.add(colors.nav);
+    }
+    await page.keyboard.press('Escape');
+  }
+  assert.equal(navColors.size,7,'All navbar palettes are distinct');
+  await page.reload();await loaded();assert.equal(await page.locator('html').getAttribute('data-palette'),'slate');
+  assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
+  console.log('PASS: seven palettes, both modes, contrast, selected state, persistence.');
+  for(const width of [320,390,768,1440]){
+    await page.setViewportSize({width,height:900});
+    await settings();await page.locator('[data-palette-value="navy"]').click();
+    await page.waitForTimeout(350);
+    await page.screenshot({path:path.join(screenshotDir,'settings-'+width+'.png')});
+    await page.keyboard.press('Escape');
+    for(const route of ['home','today','schedule','bible','hymnal','activities','announcements','services','church','gallery']){
+      await page.goto(base+'/#'+route);await loaded();
+      assert.equal(await page.locator('html').getAttribute('data-palette'),'navy');
+      assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),route+' overflow '+width);
+    }
+    await page.goto(base);await loaded();
+    const photos=await page.locator('.activity-film-media').evaluateAll(nodes=>nodes.map(node=>{
+      const box=node.getBoundingClientRect(),copy=node.parentElement.querySelector('.activity-film-copy').getBoundingClientRect();
+      return {height:box.height,bottom:box.bottom,copyTop:copy.top,loaded:node.querySelector('img')?.naturalWidth>0};
+    }));
+    assert.ok(photos.length>0);photos.forEach(photo=>{assert.ok(photo.height>=175);assert.ok(photo.bottom<=photo.copyTop+1,'Caption must not cover photo');});
+    await page.setViewportSize({width:Math.min(width,768),height:900});
+    await welcome();
+    for(const palette of palettes){
+      await page.locator('#presentation-palette').selectOption(palette);
+      for(const light of [true,false]){
+        const isLight=await page.locator('#presentation-shell').evaluate(node=>node.classList.contains('is-light'));
+        if(isLight!==light)await page.locator('[data-presentation-theme]').click();
+        const colors=await page.evaluate(()=>({text:getComputedStyle(document.querySelector('.welcome-screen h2')).color,bg:getComputedStyle(document.querySelector('#presentation-frame')).backgroundColor}));
+        assert.ok(contrast(colors.text,colors.bg)>=7,palette+' fullscreen contrast');
+      }
+    }
+    await page.locator('#presentation-palette').selectOption('brown');
+    await page.locator('#presentation-palette').focus();
+    await page.waitForTimeout(4200);
+    assert.equal(await page.locator('#presentation-palette').evaluate(node=>document.activeElement===node),true,'Auto-hide must not steal focus');
+    const bounds=await page.locator('.welcome-screen').boundingBox();
+    assert.ok(bounds.x>=0&&bounds.x+bounds.width<=Math.min(width,768)+1,'Welcome fits screen');
+    if(width<=600){
+      const footer=await page.locator('.presentation-footer').boundingBox();
+      const controls=await page.locator('.presentation-controls').boundingBox();
+      assert.ok(footer.y+footer.height<=controls.y,'Mobile controls do not cover copyright');
+    }
+    await page.screenshot({path:path.join(screenshotDir,'welcome-'+width+'.png')});
+    await page.locator('[data-presentation-close]').click();
+    assert.equal(await page.locator('#presentation-dialog').isVisible(),false);
+  }
+  await page.setViewportSize({width:1440,height:900});
+  for(const kind of ['song','bible']){
+    await page.goto(base+'/#'+(kind==='song'?'hymnal':'bible'));await loaded();
+    if(kind==='song'){
+      await page.locator('[data-song="1"]').click();
+    }else{
+      await page.locator('#bible-book-trigger').click();
+      await page.locator('[data-pick-book="GEN"]').first().click();
+      await page.locator('#bible-chapter').selectOption('1');
+      await page.locator('#bible-verse').fill('1');
+      await page.locator('#bible-open').click();
+    }
+    await page.locator('[data-present-'+kind+']').click();
+    await page.locator('#presentation-palette').selectOption('red');
+    await page.locator('[data-presentation-projector]').click();
+    for(const mode of ['light','dark']){
+      const isLight=await page.locator('#presentation-shell').evaluate(node=>node.classList.contains('is-light'));
+      if(isLight!==(mode==='light'))await page.locator('[data-presentation-theme]').click();
+      await page.waitForTimeout(400);
+      assert.ok((await page.locator('.presentation-copy').textContent()).length>0);
+      const bounds=await page.locator('.presentation-copy').boundingBox();
+      const frame=await page.locator('#presentation-frame').boundingBox();
+      assert.ok(bounds.x>=frame.x&&bounds.y>=frame.y&&bounds.y+bounds.height<=frame.y+frame.height,'Readable '+kind+' '+mode);
+      await page.screenshot({path:path.join(screenshotDir,kind+'-'+mode+'.png')});
+    }
+    await page.locator('[data-presentation-close]').click();
+    if(await page.locator('#reader-dialog').isVisible())await page.keyboard.press('Escape');
+  }
+  await page.goto(base);await loaded();await page.setViewportSize({width:390,height:900});
+  await page.clock.install({time:new Date('2026-10-16T15:59:55Z')});
+  await welcome();
+  assert.equal(await page.locator('.welcome-screen h2').textContent(),'Selamat Datang');
+  await page.clock.fastForward(16000);
+  assert.equal(await page.locator('.welcome-screen h2').textContent(),'Selamat Hari Sabat','Open welcome updates at Saturday midnight WITA');
+  await page.locator('[data-presentation-projector]').click();
+  await page.screenshot({path:path.join(screenshotDir,'welcome-sabbath.png')});
+  await page.locator('[data-presentation-close]').click();
+  await settings();await page.locator('[data-reset-palette]').click();
+  assert.equal(await page.locator('html').getAttribute('data-palette'),'green');
+  await page.locator('[data-theme-value="system"]').click();
+  await page.emulateMedia({colorScheme:'dark'});
+  await page.waitForFunction(()=>document.documentElement.dataset.theme==='dark');
+  console.log('PASS: song/Bible fullscreen, projector, live Sabbath rollover, reset, system mode.');
+  assert.deepEqual(errors,[]);
+  console.log('PASS: themed routes at four widths; visible news photos; fullscreen palettes, contrast, keyboard focus and exit.');
+}finally{await browser.close();await new Promise(resolve=>server.close(resolve));}

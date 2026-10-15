@@ -43,6 +43,11 @@
       });
 
       const APP_URL = window.location.origin;
+      const PALETTES = [
+        ['green','Hijau Galilea','#39714c'],['red','Merah','#9a3a4f'],
+        ['navy','Biru tua','#2c5d94'],['brown','Coklat','#886046'],
+        ['purple','Ungu','#715191'],['teal','Teal','#287b7b'],['slate','Abu-abu','#586574']
+      ];
       const ROUTES = ['home','today','church','aboutsite','leaders','schedule','bulletin','sabbath','bible','hymnal','hymnal-scores','favorites','visitor','activities','announcements','gallery','services','faq','contact'];
       const MOBILE_GROUPS = [
         {label:'Akses cepat',items:[
@@ -52,7 +57,7 @@
           ['church','church','Gereja','Tentang jemaat'],['leaders','users','Pengurus','Pelayan gereja'],['announcements','bell','Agenda dan Pengumuman','Informasi ibadah mendatang'],['activities','calendar','Berita Jemaat','Kegiatan yang sudah berlangsung'],['gallery','image','Galeri','Dokumentasi'],['aboutsite','info','Tentang Website','Cerita desain dan tujuan']
         ]},
         {label:'Materi Ibadah',items:[
-          ['bulletin','file','Warta Digital','Susunan ibadah & kabar'],['sabbath','book','Sekolah Sabat','Pelajaran mingguan'],['hymnal-scores','file','Lagu Sion (Partiture)','Lirik & PDF jemaat'],['favorites','star','Tersimpan','Favorit & terakhir dibaca']
+          ['welcome','church','Layar Sambutan','Sambutan sesuai hari'],['bulletin','file','Warta Digital','Susunan ibadah & kabar'],['sabbath','book','Sekolah Sabat','Pelajaran mingguan'],['hymnal-scores','file','Lagu Sion (Partiture)','Lirik & PDF jemaat'],['favorites','star','Tersimpan','Favorit & terakhir dibaca']
         ]},
         {label:'Pelayanan',items:[
           ['visitor','map','Panduan Pengunjung','Untuk kunjungan pertama'],['services','heart','Layanan Jemaat','Kirim permohonan'],['contact','phone','Kontak','Alamat & WhatsApp'],['faq','help','FAQ','Bantuan website']
@@ -100,6 +105,7 @@
       let presentationWakeLock = null;
       let presentationPointer = null;
       let presentationResizeObserver = null;
+      let presentationWelcomeTimer = 0;
 
       const $ = (selector, context) => (context || document).querySelector(selector);
       const $$ = (selector, context) => Array.from((context || document).querySelectorAll(selector));
@@ -584,6 +590,8 @@
         const selectedTheme = safeStorage.get('galilea:theme','system') || 'system';
         const selectedFont = safeStorage.get('galilea:font','normal') || 'normal';
         const selectedMotion = safeStorage.get('galilea:motion','') || (matchMedia('(prefers-reduced-motion: reduce)').matches ? 'reduced' : 'full');
+        buildPaletteControls();
+        applyPalette(safeStorage.get('galilea:palette','green'));
         applyTheme(selectedTheme);
         applyFont(selectedFont);
         applyMotion(selectedMotion);
@@ -592,15 +600,51 @@
         });
       }
       function applyTheme(value) {
+        value = ['light','dark','system'].includes(value) ? value : 'system';
         const theme = value === 'system' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : value;
         document.documentElement.dataset.theme = theme;
         document.documentElement.style.colorScheme = theme;
-        const themeColor = document.querySelector('meta[name="theme-color"]');
-        if (themeColor) themeColor.content = theme === 'dark' ? '#06170e' : '#174b31';
+        updateThemeColor();
         safeStorage.set('galilea:theme', value);
+        safeStorage.set('galilea:presentation-theme', theme);
         $('#theme-button').innerHTML = icon(theme === 'dark' ? 'sun' : 'moon');
         $('#theme-button').setAttribute('aria-label', theme === 'dark' ? 'Gunakan mode terang' : 'Gunakan mode gelap');
-        $$('[data-theme-value]').forEach(button => button.classList.toggle('active', button.dataset.themeValue === value));
+        $$('[data-theme-value]').forEach(button => {
+          const active = button.dataset.themeValue === value;
+          button.classList.toggle('active',active);
+          button.setAttribute('aria-pressed',String(active));
+        });
+        if (state.presentation) state.presentation.theme = theme;
+        if ($('#presentation-dialog')?.open) { window.GalileaPageTurn?.cancel(); syncPresentationState(); schedulePresentationFit(); }
+      }
+      function buildPaletteControls() {
+        const template = $('#appearance-settings-template');
+        if (template && !$('#palette-options')) $('#settings-dialog .settings-grid').prepend(template.content.cloneNode(true));
+        if (!$('#presentation-palette')) $('.presentation-controls').insertAdjacentHTML('afterbegin','<label class="presentation-palette-label"><span class="sr-only">Warna layar</span><select id="presentation-palette" aria-label="Warna layar"></select></label>');
+        const choices = $('#palette-options');
+        if (choices) choices.innerHTML = PALETTES.map(([id,label,color]) =>
+          '<button type="button" class="palette-choice" data-palette-value="'+id+'" aria-pressed="false"><span class="palette-dot" style="--swatch:'+color+'" aria-hidden="true"></span><span>'+label+'</span><span class="palette-check" aria-hidden="true">'+icon('check')+'</span></button>').join('');
+        const select = $('#presentation-palette');
+        if (select) select.innerHTML = PALETTES.map(([id,label]) => '<option value="'+id+'">'+label+'</option>').join('');
+      }
+      function updateThemeColor() {
+        const meta = document.querySelector('meta[name="theme-color"]');
+        if (meta) meta.content = getComputedStyle(document.documentElement).getPropertyValue('--tone-800').trim() || '#123821';
+      }
+      function applyPalette(value, announce) {
+        const selected = PALETTES.find(([id]) => id === value) || PALETTES[0];
+        document.documentElement.dataset.palette = selected[0];
+        safeStorage.set('galilea:palette',selected[0]);
+        $$('[data-palette-value]').forEach(button => {
+          const active = button.dataset.paletteValue === selected[0];
+          button.classList.toggle('active',active);
+          button.setAttribute('aria-pressed',String(active));
+        });
+        if ($('#presentation-palette')) $('#presentation-palette').value = selected[0];
+        if ($('#palette-status')) $('#palette-status').textContent = selected[1]+' aktif di semua halaman dan layar ibadah.';
+        window.GalileaPageTurn?.cancel();
+        updateThemeColor();
+        if (announce && $('#presentation-dialog')?.open) announcePresentation('Warna '+selected[1]+' aktif');
       }
       function applyFont(value) {
         document.documentElement.dataset.font = ['normal','large','xlarge'].includes(value) ? value : 'normal';
@@ -666,7 +710,7 @@
       function buildMobileNav() {
         const groups = MOBILE_GROUPS.map((group,index) => {
           const titleId = 'mobile-group-' + index;
-          const items = group.items.map(item => '<button type="button" data-route="' + attr(item[0]) + '"><span class="mobile-nav-icon">' + icon(item[1]) + '</span><span class="mobile-nav-copy"><strong>' + esc(item[2]) + '</strong></span></button>').join('');
+          const items = group.items.map(item => '<button type="button" '+(item[0] === 'welcome' ? 'data-present-welcome' : 'data-route="'+attr(item[0])+'"')+'><span class="mobile-nav-icon">' + icon(item[1]) + '</span><span class="mobile-nav-copy"><strong>' + esc(item[2]) + '</strong></span></button>').join('');
           return '<section class="mobile-nav-group" aria-labelledby="' + titleId + '"><h2 class="mobile-nav-title" id="' + titleId + '">' + esc(group.label) + '</h2><div class="mobile-nav-grid">' + items + '</div></section>';
         }).join('');
         const tools = '<section class="mobile-nav-group mobile-nav-tools" aria-labelledby="mobile-group-tools"><h2 class="mobile-nav-title" id="mobile-group-tools">Alat</h2><div class="mobile-nav-grid"><button type="button" data-open="search"><span class="mobile-nav-icon">' + icon('search') + '</span><span class="mobile-nav-copy"><strong>Cari</strong></span></button><button type="button" data-open="settings"><span class="mobile-nav-icon">' + icon('access') + '</span><span class="mobile-nav-copy"><strong>Tampilan</strong></span></button></div></section>';
@@ -674,7 +718,7 @@
         const desktop = $('#desktop-menu-groups');
         if (desktop) desktop.innerHTML = MOBILE_GROUPS.slice(1).map(group =>
           '<span class="nav-drop"><button type="button" data-nav-toggle aria-expanded="false">'+esc(group.label)+icon('down')+'</button><span class="nav-drop-menu">'+group.items.map(item =>
-            '<button type="button" data-route="'+attr(item[0])+'">'+icon(item[1])+esc(item[2])+'</button>').join('')+'</span></span>').join('');
+            '<button type="button" '+(item[0] === 'welcome' ? 'data-present-welcome' : 'data-route="'+attr(item[0])+'"')+'>'+icon(item[1])+esc(item[2])+'</button>').join('')+'</span></span>').join('');
         scheduleTranslation();
       }
 
@@ -1638,12 +1682,40 @@
       }
 
       function clampPresentationScale(value,type=state.presentation&&state.presentation.type){return Math.max(/^(song|bible)$/.test(type||'')?.35:.7,Math.min(1.35,Number(value)||1));}
-      function presentationScaleKey(type){return 'galilea:presentation-scale:'+(type==='bible'?'bible':type==='announcement'?'announcement':type==='schedule'?'schedule':type==='operator'?'operator':type==='screencheck'?'screencheck':'song');}
+      function presentationScaleKey(type){return 'galilea:presentation-scale:'+(type==='welcome'?'welcome':type==='bible'?'bible':type==='announcement'?'announcement':type==='schedule'?'schedule':type==='operator'?'operator':type==='screencheck'?'screencheck':'song');}
       function storedPresentationScale(type){return /^(song|bible)$/.test(type)?1.35:clampPresentationScale(safeStorage.get(presentationScaleKey(type),'1'),type);}
       function storedPresentationTheme(){
-        const saved=safeStorage.get('galilea:presentation-theme','');
-        if(saved==='light'||saved==='dark')return saved;
         return document.documentElement.dataset.theme==='light'?'light':'dark';
+      }
+      function welcomeContent(now = new Date()) {
+        const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB',{
+          timeZone:'Asia/Makassar',weekday:'short',year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',hourCycle:'h23'
+        }).formatToParts(now).map(part => [part.type,part.value]));
+        const sabbath = parts.weekday === 'Sat';
+        const wednesdayEvening = parts.weekday === 'Wed' && Number(parts.hour) >= 18;
+        return {
+          key:parts.year+parts.month+parts.day+(wednesdayEvening?'evening':''),
+          title:sabbath?'Selamat Hari Sabat':'Selamat Datang',
+          subtitle:'Selamat berbakti di Jemaat Galilea.',
+          label:sabbath?'Ibadah Sabat':wednesdayEvening?'Ibadah Rabu Malam':'GMAHK Galilea Balikpapan',
+          dateLabel:new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Makassar',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(now)
+        };
+      }
+      function openWelcomePresentation() {
+        closeMobile();
+        $$('.nav-drop.open').forEach(drop => { drop.classList.remove('open'); drop.querySelector('[data-nav-toggle]')?.setAttribute('aria-expanded','false'); });
+        launchPresentation({type:'welcome',index:0,scale:storedPresentationScale('welcome'),fittedScale:1,item:welcomeContent(),blackout:false,
+          projector:safeStorage.get('galilea:presentation-projector','0')==='1',theme:storedPresentationTheme()});
+        window.clearInterval(presentationWelcomeTimer);
+        presentationWelcomeTimer = window.setInterval(refreshWelcomePresentation,15000);
+      }
+      function refreshWelcomePresentation() {
+        if (!$('#presentation-dialog')?.open || state.presentation.type !== 'welcome') return;
+        const content = welcomeContent();
+        if (content.key === state.presentation.item?.key) return;
+        state.presentation.item = content;
+        renderPresentation();
+        schedulePresentationFit();
       }
       function announcePresentation(message){const status=$('#presentation-a11y-status');if(status)status.textContent=message||'';}
       function syncPresentationState(){
@@ -1667,7 +1739,7 @@
         if(!dialog.open||autoHide===false)return;
         presentationControlsTimer=window.setTimeout(()=>{
           const controls=$('.presentation-controls');
-          if(controls&&controls.contains(document.activeElement)&&document.activeElement.blur)document.activeElement.blur();
+          if(controls&&controls.contains(document.activeElement))return;
           shell.classList.add('presentation-controls-hidden');
         },4000);
       }
@@ -1898,6 +1970,15 @@
         const view=state.presentation,stage=$('#presentation-stage'),title=$('#presentation-title'),kicker=$('#presentation-kicker'),counter=$('#presentation-counter'),shell=$('#presentation-shell');
         if(!view||!stage||!title||!kicker||!counter||!shell)return;
         shell.style.setProperty('--present-scale',String(clampPresentationScale(view.scale)));
+        if(view.type==='welcome'){
+          const content=view.item||welcomeContent();
+          view.index=0;setPresentationOrnament('welcome',content,0);
+          kicker.textContent=content.label;title.textContent='Layar Sambutan';
+          stage.innerHTML='<article class="welcome-screen"><p class="welcome-date">'+esc(content.dateLabel)+'</p><h2>'+esc(content.title)+'</h2><p class="welcome-message">'+esc(content.subtitle)+'</p></article>';
+          counter.textContent='Sambutan';setPresentationNavigationLabels('Sambutan');
+          $('[data-presentation-prev]').disabled=true;$('[data-presentation-next]').disabled=true;
+          finishPresentationRender();return;
+        }
         if(view.type==='operator'){
           const slides=Array.isArray(view.item)?view.item:[];if(!slides.length)return;
           view.index=Math.max(0,Math.min(slides.length-1,Number(view.index)||0));const slide=slides[view.index];setPresentationOrnament(slide.kind,slide,view.index);
@@ -2001,7 +2082,7 @@
       }
       function togglePresentationTheme(){
         window.GalileaPageTurn?.cancel();
-        const view=state.presentation;if(!view||!view.type)return;view.theme=view.theme==='light'?'dark':'light';safeStorage.set('galilea:presentation-theme',view.theme);
+        const view=state.presentation;if(!view||!view.type)return;applyTheme(view.theme==='light'?'dark':'light');
         syncPresentationState();schedulePresentationFit();showPresentationControls(true);announcePresentation(view.theme==='light'?'Mode terang aktif':'Mode gelap aktif');
       }
       function togglePresentationProjector(){
@@ -2021,6 +2102,7 @@
       }
       function cleanupPresentation(){
         window.GalileaPageTurn?.cancel();
+        window.clearInterval(presentationWelcomeTimer);presentationWelcomeTimer=0;
         window.clearTimeout(presentationControlsTimer);window.clearTimeout(presentationFitTimer);window.clearTimeout(presentationTransitionTimer);window.cancelAnimationFrame(presentationFitFrame);presentationPointer=null;
         const shell=$('#presentation-shell');if(shell){shell.classList.remove('presentation-controls-hidden','presentation-enter-next','presentation-enter-prev','is-blackout','is-light');delete shell.dataset.fit;delete shell.dataset.presentationType;delete shell.dataset.presentationKind;}
         releasePresentationWakeLock();
@@ -2967,6 +3049,10 @@
       function updateNetworkStatus(){const box=$('#network-status');if(box)box.classList.toggle('show',navigator.onLine===false);updatePresentationNetworkStatus();}
 
       function handleClick(event) {
+        if (event.target.closest('[data-present-welcome]')) return openWelcomePresentation();
+        const paletteButton = event.target.closest('[data-palette-value]');
+        if (paletteButton) return applyPalette(paletteButton.dataset.paletteValue,true);
+        if (event.target.closest('[data-reset-palette]')) return applyPalette('green',true);
         const navToggle = event.target.closest('[data-nav-toggle]');
         if (navToggle) {
           const drop = navToggle.closest('.nav-drop');
@@ -3088,6 +3174,7 @@
       document.addEventListener('keydown',event=>{
         const dialog=$('#presentation-dialog');if(!dialog||!dialog.open)return;
         showPresentationControls(true);
+        if(event.target.closest?.('select,input,textarea,button') && event.key!=='Escape')return;
         if(event.key==='ArrowLeft'||event.key==='PageUp'){event.preventDefault();movePresentation(-1);}
         else if(event.key==='ArrowRight'||event.key==='PageDown'||event.key===' '){event.preventDefault();movePresentation(event.shiftKey?-1:1);}
         else if(event.key==='+'||event.key==='='){event.preventDefault();resizePresentation(.1);}
@@ -3311,6 +3398,8 @@
         }
       });
       $('#theme-options').addEventListener('click',event => { const button=event.target.closest('[data-theme-value]'); if(button) applyTheme(button.dataset.themeValue); });
+      document.addEventListener('change',event => { if(event.target.id==='presentation-palette'){ applyPalette(event.target.value,true); showPresentationControls(true); } });
+      document.addEventListener('visibilitychange',() => { if (!document.hidden) refreshWelcomePresentation(); });
       $('#font-options').addEventListener('click',event => { const button=event.target.closest('[data-font-value]'); if(button) applyFont(button.dataset.fontValue); });
       $('#motion-options').addEventListener('click',event => { const button=event.target.closest('[data-motion-value]'); if(button) applyMotion(button.dataset.motionValue); });
       $('#language-select').addEventListener('change',event => setLanguage(event.target.value));

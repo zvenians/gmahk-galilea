@@ -83,7 +83,8 @@ export async function GET(req) {
         },
         {
           width: 1200,
-          height: 630
+          height: 630,
+          headers: {'Cache-Control':'public, max-age=0, s-maxage=0, must-revalidate'}
         }
       );
     }
@@ -134,7 +135,7 @@ export async function GET(req) {
         width: 1200,
         height: 630,
         headers: {
-          'Cache-Control': 'public, max-age=3600, s-maxage=86400, stale-while-revalidate=604800'
+          'Cache-Control': 'public, max-age=0, s-maxage=0, must-revalidate'
         }
       }
     );

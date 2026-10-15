@@ -98,7 +98,19 @@ Jika kosong, halaman memberi penjelasan dan tombol untuk menghubungi pengurus. F
 
 Repository menggunakan integrasi Git dengan Vercel. Verifikasi commit yang diterbitkan dan URL produksi setelah perubahan masuk ke cabang produksi.
 
-Saat mengubah `viewer.js`, `viewer.css`, atau `visitor-ui.css`, perbarui versi URL pada `index.html` dan daftar `SHELL` di `sw.js`, lalu naikkan versi `CACHE`. Versi yang sama pada HTML dan service worker mencegah aset yang tertinggal saat reload atau offline.
+Saat mengubah `viewer.js`, `viewer.css`, `visitor-ui.css`, atau `appearance.css`, perbarui versi URL pada `index.html` dan daftar `SHELL` di `sw.js`, lalu naikkan versi `CACHE`. Versi yang sama pada HTML dan service worker mencegah aset yang tertinggal saat reload atau offline.
+
+Vercel menjalankan `npm run build`. Build menyiapkan aset publik di `public-dist` dan gambar preview 1200 × 630. Hash HTML, CSS, JavaScript, dan aset menentukan URL gambar pada metadata OG, Twitter, dan schema. Warna gambar berasal dari palet resmi pada `appearance.css`; perubahan desain menghasilkan URL baru otomatis. Endpoint preview lama serta metadata berita wajib melakukan revalidasi. Preview berita memiliki versi berdasarkan isi berita, termasuk URL foto dan tanggal pembaruan. Aplikasi berbagi tetap mengendalikan cache preview yang sudah mereka simpan; website tidak dapat memaksa WhatsApp menghapus cache lama.
+
+Jalankan `npm run build && node tests/check-social-preview.mjs` untuk memeriksa hasil build dan metadata. Jangan menyimpan hasil `public-dist` ke Git.
+
+## Warna dan Layar Sambutan
+
+Buka Menu → Alat → Tampilan untuk memilih hijau, merah, biru tua, coklat, ungu, teal, atau abu-abu. Mode Terang, Gelap, dan Sistem berlaku untuk semua palet. Pilihan tersimpan di perangkat, termasuk saat berpindah halaman atau membuka layar ibadah. Kontrol warna dan mode di fullscreen juga mengubah tampilan website.
+
+Menu → Materi Ibadah → Layar Sambutan membuka kerangka fullscreen yang sama dengan Alkitab dan Lagu Sion. Berdasarkan waktu Balikpapan (WITA), Sabtu pukul 00.00 sampai sebelum Minggu 00.00 menampilkan “Selamat Hari Sabat”. Hari lain menampilkan “Selamat Datang”, termasuk Rabu mulai pukul 18.00. Semua sambutan disertai “Selamat berbakti di Jemaat Galilea.” Layar terbuka memeriksa pergantian hari setiap 15 detik dan ketika tab kembali aktif. Menu dapat dipakai dengan data tersimpan saat offline.
+
+`npm run check:appearance` menguji tujuh palet, kedua mode, penyimpanan pilihan, kontras, ukuran layar, foto berita, pembaca fullscreen, proyektor, serta batas waktu sambutan. Pengujian ini membutuhkan Chromium seperti `check:visitor`.
 
 Perubahan di `apps-script-backend/` memerlukan rilis Apps Script tersendiri. Push Git tidak mengganti deployment Apps Script yang aktif.
 

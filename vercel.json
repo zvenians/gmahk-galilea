@@ -3,7 +3,12 @@
   "regions": ["sin1"],
   "cleanUrls": true,
   "trailingSlash": false,
+  "buildCommand": "npm run build",
+  "outputDirectory": "public-dist",
   "functions": {
+    "api/og.js": {
+      "includeFiles": "{appearance.css,assets/logo-galilea-icon-192.png}"
+    },
     "api/admin.js": {
       "maxDuration": 60,
       "includeFiles": "apps-script-backend/Admins.html"
@@ -82,7 +87,7 @@
       "source": "/api/og",
       "headers": [
         {"key": "Content-Type", "value": "image/png"},
-        {"key": "Cache-Control", "value": "public, max-age=31536000, immutable"}
+        {"key": "Cache-Control", "value": "public, max-age=0, s-maxage=0, must-revalidate"}
       ]
     }
   ]

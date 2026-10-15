@@ -2,5 +2,6 @@
 .env
 .env.local
 node_modules
+public-dist
 .DS_Store
 *.log
