@@ -7,7 +7,7 @@
   "outputDirectory": "public-dist",
   "functions": {
     "api/og.js": {
-      "includeFiles": "{appearance.css,assets/logo-galilea-icon-192.png}"
+      "includeFiles": "public-dist/assets/social/current.png"
     },
     "api/admin.js": {
       "maxDuration": 60,

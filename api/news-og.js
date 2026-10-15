@@ -84,7 +84,7 @@ export async function GET(req) {
         {
           width: 1200,
           height: 630,
-          headers: {'Cache-Control':'public, max-age=0, s-maxage=0, must-revalidate'}
+          headers: {'cache-control':'public, max-age=0, s-maxage=0, must-revalidate'}
         }
       );
     }
@@ -135,7 +135,7 @@ export async function GET(req) {
         width: 1200,
         height: 630,
         headers: {
-          'Cache-Control': 'public, max-age=0, s-maxage=0, must-revalidate'
+          'cache-control': 'public, max-age=0, s-maxage=0, must-revalidate'
         }
       }
     );

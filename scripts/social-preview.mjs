@@ -37,5 +37,5 @@ export async function sitePreview() {
       element('div',{display:'flex',fontSize:27,color:tone(100)},'Jadwal ibadah · Alkitab · Lagu Sion · Berita jemaat')
     ]),
     element('div',{display:'flex',fontSize:20,color:tone(300),borderTop:'1px solid '+tone(600),paddingTop:22},'gmahk-galilea.vercel.app')
-  ]),{width:1200,height:630,headers:{'Cache-Control':'public, max-age=0, s-maxage=0, must-revalidate'}});
+  ]),{width:1200,height:630,headers:{'cache-control':'public, max-age=0, s-maxage=0, must-revalidate'}});
 }

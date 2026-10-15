@@ -9,6 +9,8 @@
 - Menu Layar Sambutan memakai dialog presentasi, kontrol ukuran teks, proyektor, fullscreen, dan mekanisme keluar yang sudah tersedia. Aturan waktu memakai `Asia/Makassar`.
 - Sambutan Sabat berlaku Sabtu 00.00 sampai sebelum Minggu 00.00 WITA. Rabu mulai 18.00 dan hari lainnya memakai Selamat Datang. Peralihan saat layar tetap terbuka diuji melewati tengah malam WITA.
 - Build membuat PNG preview dan mengubah metadata hasil build menggunakan hash desain. Warna preview membaca palet resmi CSS. Metadata berita memberi versi gambar berdasarkan konten berita. Tidak ada cache setahun pada endpoint preview.
+- Pemeriksaan produksi menemukan respons kosong dari adapter streaming endpoint preview lama. Endpoint tersebut diperbaiki untuk mengirim PNG hasil build sebagai buffer dengan panjang respons yang eksplisit; GET, HEAD, dan metode yang ditolak diuji.
+- Preview berita asli menghasilkan PNG yang valid. Header cache renderer dinormalisasi menjadi huruf kecil agar mengganti default `immutable`, bukan menambahkan kebijakan cache yang bertentangan.
 - Tema pribadi tersimpan pada perangkat; preview tautan umum mengikuti desain resmi yang diterbitkan. Cache aplikasi penerima tidak dapat dipaksa diperbarui oleh website.
 
 ## Pengujian yang dijalankan
