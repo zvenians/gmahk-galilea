@@ -46,7 +46,9 @@
       const PALETTES = [
         ['green','Hijau Galilea','#39714c'],['red','Merah','#9a3a4f'],
         ['navy','Biru tua','#2c5d94'],['brown','Coklat','#886046'],
-        ['purple','Ungu','#715191'],['teal','Teal','#287b7b'],['slate','Abu-abu','#586574']
+        ['purple','Ungu','#715191'],['teal','Teal','#287b7b'],['slate','Abu-abu','#586574'],
+        ['pink','Pink','#a43970'],['orange','Oranye','#9c4b21'],['amber','Emas','#80651c'],
+        ['olive','Zaitun','#5a6a32'],['sky','Biru langit','#28627f'],['indigo','Nila','#474d94']
       ];
       const ROUTES = ['home','today','church','aboutsite','leaders','schedule','bulletin','sabbath','bible','hymnal','hymnal-scores','favorites','visitor','activities','announcements','gallery','services','faq','contact'];
       const MOBILE_GROUPS = [
@@ -99,6 +101,8 @@
       };
 
       let presentationControlsTimer = 0;
+      let presentationKeyboardControls = false;
+      let presentationPaletteOpen = false;
       let presentationFitFrame = 0;
       let presentationFitTimer = 0;
       let presentationTransitionTimer = 0;
@@ -999,7 +1003,7 @@
         const missions = String(site.mission || '').split(/\n+/).filter(Boolean);
         const image = safeUrl(site.church_image_url);
         return pageHead('Tentang Galilea', site.about_title || site.church_name, site.about_text) +
-          '<section class="section"><div class="shell"><div class="grid grid-2"><article class="card card-pad"><span class="chip brand">Sejak ' + esc(site.church_established || '') + '</span><h2 style="margin-top:26px">Perjalanan Jemaat Galilea.</h2><p class="lead">' + esc(site.church_history || '') + '</p></article><article class="card" style="min-height:430px;background:linear-gradient(145deg,#233b2b,#789072)">' + (image ? '<img src="' + attr(image) + '" alt="Gereja Galilea" style="width:100%;height:100%;object-fit:cover">' : '<div style="height:100%;display:grid;place-items:center;color:#fff">' + icon('church') + '<strong>GMAHK Galilea Balikpapan</strong></div>') + '</article></div></div></section>' +
+          '<section class="section"><div class="shell"><div class="grid grid-2"><article class="card card-pad"><span class="chip brand">Sejak ' + esc(site.church_established || '') + '</span><h2 style="margin-top:26px">Perjalanan Jemaat Galilea.</h2><p class="lead">' + esc(site.church_history || '') + '</p></article><article class="card" style="min-height:430px;background:linear-gradient(145deg,var(--tone-800),var(--tone-600))">' + (image ? '<img src="' + attr(image) + '" alt="Gereja Galilea" style="width:100%;height:100%;object-fit:cover">' : '<div style="height:100%;display:grid;place-items:center;color:var(--tone-50)">' + icon('church') + '<strong>GMAHK Galilea Balikpapan</strong></div>') + '</article></div></div></section>' +
           '<section class="section"><div class="shell"><div class="grid grid-2"><article class="card card-pad"><p class="eyebrow">Visi</p><p class="quote">' + esc(site.vision || '') + '</p></article><article class="card card-pad"><p class="eyebrow">Misi</p><ul class="prose-list">' + missions.map(item => '<li>' + icon('check') + '<span>' + esc(item) + '</span></li>').join('') + '</ul></article></div></div></section>' +
           '<section class="section"><div class="shell"><button class="btn long-action primary" type="button" data-route="contact"><span>Alamat, jadwal ibadah, dan kontak gereja</span>' + icon('arrow') + '</button></div></section>';
       }
@@ -1697,6 +1701,7 @@
           key:parts.year+parts.month+parts.day+(wednesdayEvening?'evening':''),
           title:sabbath?'Selamat Hari Sabat':'Selamat Datang',
           subtitle:'Selamat berbakti di Jemaat Galilea.',
+          reminder:'Mohon senyapkan ponsel dan perangkat elektronik selama ibadah.',
           label:sabbath?'Ibadah Sabat':wednesdayEvening?'Ibadah Rabu Malam':'GMAHK Galilea Balikpapan',
           dateLabel:new Intl.DateTimeFormat('id-ID',{timeZone:'Asia/Makassar',weekday:'long',day:'numeric',month:'long',year:'numeric'}).format(now)
         };
@@ -1739,7 +1744,10 @@
         if(!dialog.open||autoHide===false)return;
         presentationControlsTimer=window.setTimeout(()=>{
           const controls=$('.presentation-controls');
-          if(controls&&controls.contains(document.activeElement))return;
+          const paletteOpen=window.CSS?.supports('selector(select:open)') ? $('#presentation-palette')?.matches(':open') : presentationPaletteOpen;
+          if(paletteOpen){showPresentationControls(true);return;}
+          if(presentationKeyboardControls && controls?.contains(document.activeElement))return;
+          if(controls?.contains(document.activeElement))document.activeElement.blur();
           shell.classList.add('presentation-controls-hidden');
         },4000);
       }
@@ -1974,7 +1982,7 @@
           const content=view.item||welcomeContent();
           view.index=0;setPresentationOrnament('welcome',content,0);
           kicker.textContent=content.label;title.textContent='Layar Sambutan';
-          stage.innerHTML='<article class="welcome-screen"><p class="welcome-date">'+esc(content.dateLabel)+'</p><h2>'+esc(content.title)+'</h2><p class="welcome-message">'+esc(content.subtitle)+'</p></article>';
+          stage.innerHTML='<article class="welcome-screen"><p class="welcome-date">'+esc(content.dateLabel)+'</p><h2><em>Selamat</em> <span>'+esc(content.title.replace(/^Selamat /,''))+'</span></h2><p class="welcome-message">Selamat berbakti di <strong>Jemaat Galilea.</strong></p><p class="welcome-reminder">'+esc(content.reminder)+'</p></article>';
           counter.textContent='Sambutan';setPresentationNavigationLabels('Sambutan');
           $('[data-presentation-prev]').disabled=true;$('[data-presentation-next]').disabled=true;
           finishPresentationRender();return;
@@ -2101,6 +2109,7 @@
         if(elapsed<900&&Math.abs(dx)>=56&&Math.abs(dx)>Math.abs(dy)*1.2)movePresentation(dx<0?1:-1);
       }
       function cleanupPresentation(){
+        presentationKeyboardControls=false;presentationPaletteOpen=false;
         window.GalileaPageTurn?.cancel();
         window.clearInterval(presentationWelcomeTimer);presentationWelcomeTimer=0;
         window.clearTimeout(presentationControlsTimer);window.clearTimeout(presentationFitTimer);window.clearTimeout(presentationTransitionTimer);window.cancelAnimationFrame(presentationFitFrame);presentationPointer=null;
@@ -3173,6 +3182,11 @@
 
       document.addEventListener('keydown',event=>{
         const dialog=$('#presentation-dialog');if(!dialog||!dialog.open)return;
+        presentationKeyboardControls=true;
+        if(event.target.id==='presentation-palette'){
+          if(event.key==='Escape' && presentationPaletteOpen){presentationPaletteOpen=false;showPresentationControls(true);event.stopImmediatePropagation();return;}
+          if(event.key===' ' || event.key==='Enter' || (event.altKey && event.key==='ArrowDown'))presentationPaletteOpen=true;
+        }
         showPresentationControls(true);
         if(event.target.closest?.('select,input,textarea,button') && event.key!=='Escape')return;
         if(event.key==='ArrowLeft'||event.key==='PageUp'){event.preventDefault();movePresentation(-1);}
@@ -3398,7 +3412,7 @@
         }
       });
       $('#theme-options').addEventListener('click',event => { const button=event.target.closest('[data-theme-value]'); if(button) applyTheme(button.dataset.themeValue); });
-      document.addEventListener('change',event => { if(event.target.id==='presentation-palette'){ applyPalette(event.target.value,true); showPresentationControls(true); } });
+      document.addEventListener('change',event => { if(event.target.id==='presentation-palette'){ presentationPaletteOpen=false;applyPalette(event.target.value,true); showPresentationControls(true); } });
       document.addEventListener('visibilitychange',() => { if (!document.hidden) refreshWelcomePresentation(); });
       $('#font-options').addEventListener('click',event => { const button=event.target.closest('[data-font-value]'); if(button) applyFont(button.dataset.fontValue); });
       $('#motion-options').addEventListener('click',event => { const button=event.target.closest('[data-motion-value]'); if(button) applyMotion(button.dataset.motionValue); });
@@ -3407,6 +3421,9 @@
       $('#install-app').addEventListener('click',openInstallHelp);
       const presentationShellElement=$('#presentation-shell');
       if(presentationShellElement){
+        presentationShellElement.addEventListener('pointerdown',event=>{presentationKeyboardControls=false;presentationPaletteOpen=event.target.id==='presentation-palette';showPresentationControls(true);},{passive:true});
+        presentationShellElement.addEventListener('focusin',()=>showPresentationControls(true));
+        presentationShellElement.addEventListener('focusout',event=>{if(event.target.id==='presentation-palette')presentationPaletteOpen=false;showPresentationControls(true);});
         presentationShellElement.addEventListener('pointerdown',handlePresentationPointerDown,{passive:true});
         presentationShellElement.addEventListener('pointerup',handlePresentationPointerUp,{passive:true});
         presentationShellElement.addEventListener('pointercancel',()=>{presentationPointer=null;},{passive:true});

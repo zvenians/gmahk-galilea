@@ -65,7 +65,7 @@ assert.match(index, /galilea:presentation-scale:/);
 assert.match(index, /data-presentation-projector/);
 assert.match(index, /is-projector/);
 assert.match(index, /is-projector \.presentation-main\{position:absolute;inset:0;height:auto/);
-assert.match(index, /controls\.contains\(document\.activeElement\)\)return/,'Presentation controls keep keyboard focus');
+assert.match(index, /presentationKeyboardControls && controls\?\.contains\(document\.activeElement\)/,'Presentation controls keep keyboard focus');
 assert.match(index, /data-presentation-theme/);
 assert.match(index, /galilea:presentation-theme/);
 assert.match(index, /function togglePresentationTheme\(\)/);

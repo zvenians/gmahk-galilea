@@ -1,5 +1,5 @@
-const CACHE='galilea-v45-palettes';
-const SHELL=['/','/index.html','/viewer.css?v=37-immersive','/viewer.js?v=39-palettes','/visitor-ui.css?v=38-thumbnails','/appearance.css?v=39-palettes','/hymnal-scores.js?v=34-pdf4','/hymnal-scores.css?v=34-pdf4','/schedule-clock.js?v=32-wita','/vendor/page-flip-2.0.7.js?v=24-fold','/page-turn.css?v=31-pixel','/page-turn.js?v=31-pixel','/manifest.webmanifest','/assets/logo-galilea-light.webp','/assets/logo-galilea-dark.webp','/assets/logo-galilea-icon-192.png','/assets/presentation/schedule.webp','/assets/presentation/bible.webp','/assets/presentation/hymnal.webp'];
+const CACHE='galilea-v46-welcome';
+const SHELL=['/','/index.html','/viewer.css?v=37-immersive','/viewer.js?v=40-welcome','/visitor-ui.css?v=38-thumbnails','/appearance.css?v=40-welcome','/hymnal-scores.js?v=34-pdf4','/hymnal-scores.css?v=34-pdf4','/schedule-clock.js?v=32-wita','/vendor/page-flip-2.0.7.js?v=24-fold','/page-turn.css?v=31-pixel','/page-turn.js?v=31-pixel','/manifest.webmanifest','/assets/logo-galilea-light.webp','/assets/logo-galilea-dark.webp','/assets/logo-galilea-icon-192.png','/assets/presentation/schedule.webp','/assets/presentation/bible.webp','/assets/presentation/hymnal.webp'];
 self.addEventListener('install', event => {
   event.waitUntil(caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting()));
 });

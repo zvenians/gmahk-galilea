@@ -1,5 +1,36 @@
 # Verifikasi warna, sambutan, dan thumbnail
 
+## Pembaruan 15 Oktober 2026
+
+Cakupan setelah `1318bad`: tipografi sambutan, pengingat perangkat, kontrol fullscreen, dan konsistensi palet. Seluruh 133 file terlacak masih tersedia saat pemeriksaan awal; perubahan pengunjung dan thumbnail sebelumnya dipertahankan.
+
+- Sambutan memakai serif Georgia dengan kata pembuka miring, judul utama, nama jemaat, tanggal, dan pengingat: “Mohon senyapkan ponsel dan perangkat elektronik selama ibadah.” Pengingat berlaku setiap hari dan tetap terlihat ketika kontrol menghilang.
+- Palet bertambah menjadi 13: hijau, merah, biru tua, coklat, ungu, teal, abu-abu, pink, oranye, emas, zaitun, biru langit, dan nila. Setiap palet memiliki mode terang dan gelap.
+- Pemilih warna fullscreen memakai tulisan tanpa kotak latar. Kontrol menghilang setelah 4 detik tanpa interaksi pointer, muncul kembali ketika disentuh/digerakkan, dan mempertahankan fokus pengguna keyboard. Pemilih native yang masih terbuka tidak disembunyikan.
+- Warna tetap pada overlay pembaca Lagu Sion, kutipan beranda, label menu, footer, kartu gereja, dan panel presentasi diganti dengan token palet. Kartu terang di dalam bagian gelap memiliki warna teks sendiri agar tetap terbaca.
+- Bingkai sambutan 16:9 menggunakan ukuran relatif terhadap bingkai, termasuk pratinjau proyektor pada ponsel. Judul dan pengingat tidak keluar dari bingkai.
+
+Pengujian `check:appearance` lulus untuk 13 palet × 2 mode, persistensi, reset, Sistem, kontras, empat lebar layar (320/390/768/1440), pembaca Lagu Sion, Alkitab, auto-hide pointer, fokus keyboard, pergantian Sabat WITA, serta batas teks proyektor ponsel. Audit permukaan pada 19 menu dan footer tidak menemukan latar hijau lama ketika biru tua aktif. Warna logo, identitas layanan WhatsApp, dan contoh warna identitas pada halaman Tentang Website dipertahankan.
+
+`npm run check` dan `check:visitor` lulus selama pengerjaan; alur pengunjung mencakup 100 kombinasi halaman/mode/lebar, formulir, pencarian, dan offline. Setelah perbaikan akhir, build, pemeriksaan preview sosial, proyek, dan presentasi kembali lulus. Preview tautan memakai versi desain `0cc31cb2339af514`. Cache aplikasi penerima tautan tetap di luar kendali website.
+
+### Delivery Gate tambahan
+
+Gate sebelumnya tetap berlaku pada bagian yang tidak diubah. Arah tetap ENERGY 2 / RHYTHM 2 / MOTION 2, dengan fokus pada keterbacaan saat ibadah.
+
+| Item terkait | Hasil pemeriksaan pada perubahan ini |
+|---|---|
+| R-03, R-06, R-14 | PASS: hierarki serif sambutan, tata letak ponsel, desktop, dan bingkai proyektor diperiksa setelah render |
+| R-10, R-11 | PASS: pemilih warna fullscreen transparan; area sentuh dan penanda fokus tetap tersedia |
+| R-15, R-16 | PASS: pengingat perangkat memakai bahasa langsung dan sopan untuk seluruh hari |
+| R-19, R-32 | PASS: kontrol pointer otomatis menghilang; navigasi keyboard mempertahankan fokus; pengingat tetap tampil |
+| R-21, R-25, R-29, R-34 | PASS: 13 skala warna, kontras teks/kontrol ≥ 4,5:1, judul sambutan ≥ 7:1, mode terang/gelap/Sistem diuji |
+| R-26, R-27, R-35 | PASS: perubahan palet, mode, proyektor, keluar layar, persistensi, dan regresi pengunjung dijalankan di browser |
+| R-33 | PASS: sumber UI diubah melalui patch; script build hanya menghasilkan aset publik |
+| Liveliness, C-1–C-5 | PASS: hierarki sambutan menjadi fokus; warna dan kontrol memiliki fungsi; tidak menambah konten pengisi; data uji tidak diterbitkan |
+
+---
+
 14 Oktober 2026. Cakupan: perubahan setelah commit `5ea6545`, tanpa mengulang perbaikan pengunjung yang sudah diterbitkan.
 
 ## Hasil

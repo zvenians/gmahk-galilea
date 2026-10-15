@@ -19,10 +19,13 @@ for(const [date,title,label] of [
   ['2026-10-17T16:00:00Z','Selamat Datang','GMAHK Galilea Balikpapan'],
   ['2026-10-14T09:59:59Z','Selamat Datang','GMAHK Galilea Balikpapan'],
   ['2026-10-14T10:00:00Z','Selamat Datang','Ibadah Rabu Malam'],
+  ['2026-10-12T10:00:00Z','Selamat Datang','GMAHK Galilea Balikpapan'],
+  ['2026-10-13T10:00:00Z','Selamat Datang','GMAHK Galilea Balikpapan'],
   ['2026-10-15T10:00:00Z','Selamat Datang','GMAHK Galilea Balikpapan']
 ]){
   const content=sandbox.welcomeContent(new Date(date));
   assert.equal(content.title,title,date);assert.equal(content.label,label,date);
+  assert.match(content.reminder,/senyapkan ponsel dan perangkat elektronik selama ibadah/,date);
 }
 console.log('PASS: Sabbath and Wednesday 18:00 boundaries use WITA.');
 
@@ -52,14 +55,19 @@ await page.route('**/*',async route=>{
   if(url.origin!==base)return route.fulfill({body:'',contentType:'text/html'});
   return route.continue();
 });
-const palettes=['green','red','navy','brown','purple','teal','slate'];
+const palettes=['green','red','navy','brown','purple','teal','slate','pink','orange','amber','olive','sky','indigo'];
 const screenshotDir=process.env.APPEARANCE_SCREENSHOTS||'/tmp/galilea-appearance';
 fs.mkdirSync(screenshotDir,{recursive:true});
 async function loaded(){await page.locator('#app h1').waitFor();await page.locator('#loader').waitFor({state:'hidden'});}
 async function settings(){await page.locator('[data-open="settings"]:visible').first().click();}
 async function welcome(){
-  await page.locator('#mobile-toggle').click();
-  await page.locator('#mobile-panel [data-present-welcome]').click();
+  if(await page.locator('#mobile-toggle').isVisible()){
+    await page.locator('#mobile-toggle').click();
+    await page.locator('#mobile-panel [data-present-welcome]').click();
+  }else{
+    await page.locator('[data-nav-toggle]').filter({hasText:'Materi Ibadah'}).click();
+    await page.locator('#desktop-menu-groups [data-present-welcome]').click();
+  }
   await page.locator('#presentation-dialog').waitFor({state:'visible'});
 }
 function luminance(rgb){const values=rgb.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});return values[0]*.2126+values[1]*.7152+values[2]*.0722;}
@@ -72,7 +80,8 @@ try{
     assert.equal(await page.locator('[data-palette-value="'+palette+'"]').getAttribute('aria-pressed'),'true');
     for(const mode of ['light','dark']){
       await page.locator('[data-theme-value="'+mode+'"]').click();
-      await page.waitForTimeout(350);
+      await page.waitForFunction(()=>getComputedStyle(document.body).color===getComputedStyle(document.querySelector('.palette-choice.active')).color,null,{timeout:3000});
+      await page.waitForTimeout(450);
       const colors=await page.evaluate(()=>({
         text:getComputedStyle(document.body).color,bg:getComputedStyle(document.documentElement).backgroundColor,
         nav:getComputedStyle(document.querySelector('.header-row')).backgroundColor,
@@ -85,20 +94,60 @@ try{
     }
     await page.keyboard.press('Escape');
   }
-  assert.equal(navColors.size,7,'All navbar palettes are distinct');
-  await page.reload();await loaded();assert.equal(await page.locator('html').getAttribute('data-palette'),'slate');
+  assert.equal(navColors.size,palettes.length,'All navbar palettes are distinct');
+  await page.reload();await loaded();assert.equal(await page.locator('html').getAttribute('data-palette'),'indigo');
   assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
-  console.log('PASS: seven palettes, both modes, contrast, selected state, persistence.');
+  console.log('PASS: thirteen palettes including pink, both modes, contrast, selected state, persistence.');
+  for(const mode of ['light','dark']){
+    await settings();await page.locator('[data-palette-value="pink"]').click();
+    await page.locator('[data-theme-value="'+mode+'"]').click();await page.keyboard.press('Escape');
+    await page.goto(base);await loaded();await page.waitForLoadState('networkidle');
+    const loader=page.locator('.faith-interlude .faith-loader');
+    const colors=await loader.evaluate(node=>({text:getComputedStyle(node.querySelector('strong')).color,bg:getComputedStyle(node).backgroundColor}));
+    assert.ok(contrast(colors.text,colors.bg)>=4.5,'Nested welcome card contrast '+mode);
+    await page.addStyleTag({content:'#app, #app * {content-visibility:visible!important}'});
+    await page.locator('.faith-interlude').evaluate(node=>node.scrollIntoView({behavior:'instant'}));
+    await page.mouse.wheel(0,await page.locator('.faith-interlude').evaluate(node=>node.getBoundingClientRect().top-130));
+    await page.waitForTimeout(500);
+    await page.mouse.wheel(0,await page.locator('.faith-interlude').evaluate(node=>node.getBoundingClientRect().top-130));
+    await page.waitForTimeout(250);
+    await page.screenshot({path:path.join(screenshotDir,'home-pink-'+mode+'.png')});
+    await page.goto(base+'/#hymnal');await loaded();await page.locator('[data-song="1"]').click();
+    const hero=page.locator('#reader-dialog .song-reader-hero');
+    const style=await hero.evaluate(node=>({text:getComputedStyle(node.querySelector('h2')).color,bg:getComputedStyle(node).getPropertyValue('--surface'),gradient:getComputedStyle(node).backgroundImage}));
+    assert.ok(!style.gradient.includes('rgb(7, 28, 16)'),'Song reader drops old green gradient');
+    assert.equal(await hero.evaluate(node=>getComputedStyle(node,'::before').display),'none','Old dark green overlay must not obscure light mode');
+    await hero.screenshot({path:path.join(screenshotDir,'song-reader-pink-'+mode+'.png')});
+    await page.keyboard.press('Escape');
+  }
   for(const width of [320,390,768,1440]){
     await page.setViewportSize({width,height:900});
     await settings();await page.locator('[data-palette-value="navy"]').click();
     await page.waitForTimeout(350);
     await page.screenshot({path:path.join(screenshotDir,'settings-'+width+'.png')});
     await page.keyboard.press('Escape');
-    for(const route of ['home','today','schedule','bible','hymnal','activities','announcements','services','church','gallery']){
+    for(const route of ['home','today','schedule','bible','hymnal','activities','announcements','services','church','gallery',...(width===1440?['aboutsite','leaders','bulletin','sabbath','hymnal-scores','favorites','visitor','faq','contact']:[])]){
       await page.goto(base+'/#'+route);await loaded();
       assert.equal(await page.locator('html').getAttribute('data-palette'),'navy');
       assert.ok(await page.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),route+' overflow '+width);
+      if(width===1440){
+        await page.addStyleTag({content:'#app, #app *, .site-footer {content-visibility:visible!important}'});
+        const leaks=await page.locator('body').evaluate(root=>{
+          const results=[];
+          for(const node of root.querySelectorAll('#app *, .site-footer, .site-footer *')){
+            if(!node.getBoundingClientRect().height||node.closest('.palette-swatch,.btn.whatsapp'))continue;
+            for(const pseudo of [null,'::before','::after']){
+              const style=getComputedStyle(node,pseudo);
+              if(pseudo&&(style.content==='none'||style.display==='none'))continue;
+              const value=style.backgroundColor+' '+style.backgroundImage;
+              const stale=[...value.matchAll(/rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?\)/g)].some(m=>+m[2]>+m[1]*1.18&&+m[2]>+m[3]*1.1&&m[4]!=='0');
+              if(stale)results.push(node.tagName+'.'+node.getAttribute('class')+' '+pseudo+' '+value);
+            }
+          }
+          return results;
+        });
+        assert.deepEqual(leaks,[],route+' has no stale green surfaces');
+      }
     }
     await page.goto(base);await loaded();
     const photos=await page.locator('.activity-film-media').evaluateAll(nodes=>nodes.map(node=>{
@@ -106,8 +155,11 @@ try{
       return {height:box.height,bottom:box.bottom,copyTop:copy.top,loaded:node.querySelector('img')?.naturalWidth>0};
     }));
     assert.ok(photos.length>0);photos.forEach(photo=>{assert.ok(photo.height>=175);assert.ok(photo.bottom<=photo.copyTop+1,'Caption must not cover photo');});
-    await page.setViewportSize({width:Math.min(width,768),height:900});
+    await page.setViewportSize({width,height:900});
     await welcome();
+    assert.match(await page.locator('.welcome-reminder').textContent(),/senyapkan ponsel/);
+    assert.match(await page.locator('.welcome-screen h2').evaluate(node=>getComputedStyle(node).fontFamily),/Georgia/);
+    assert.equal(await page.locator('#presentation-palette').evaluate(node=>getComputedStyle(node).backgroundColor),'rgba(0, 0, 0, 0)','Fullscreen palette has no background box');
     for(const palette of palettes){
       await page.locator('#presentation-palette').selectOption(palette);
       for(const light of [true,false]){
@@ -118,11 +170,17 @@ try{
       }
     }
     await page.locator('#presentation-palette').selectOption('brown');
+    await page.locator('[data-presentation-larger]').click();
+    await page.waitForTimeout(4500);
+    assert.equal(await page.locator('.presentation-controls').evaluate(node=>getComputedStyle(node).opacity),'0','Pointer-focused controls hide even when hovered');
+    assert.equal(await page.locator('.welcome-reminder').isVisible(),true,'Reminder remains after controls disappear');
+    await page.mouse.move(20,200);
     await page.locator('#presentation-palette').focus();
+    await page.keyboard.press('Tab');
     await page.waitForTimeout(4200);
-    assert.equal(await page.locator('#presentation-palette').evaluate(node=>document.activeElement===node),true,'Auto-hide must not steal focus');
+    assert.equal(await page.locator('.presentation-controls').evaluate(node=>node.contains(document.activeElement)&&getComputedStyle(node).opacity==='1'),true,'Auto-hide preserves keyboard focus');
     const bounds=await page.locator('.welcome-screen').boundingBox();
-    assert.ok(bounds.x>=0&&bounds.x+bounds.width<=Math.min(width,768)+1,'Welcome fits screen');
+    assert.ok(bounds.x>=0&&bounds.x+bounds.width<=width+1,'Welcome fits screen');
     if(width<=600){
       const footer=await page.locator('.presentation-footer').boundingBox();
       const controls=await page.locator('.presentation-controls').boundingBox();
@@ -166,7 +224,14 @@ try{
   assert.equal(await page.locator('.welcome-screen h2').textContent(),'Selamat Datang');
   await page.clock.fastForward(16000);
   assert.equal(await page.locator('.welcome-screen h2').textContent(),'Selamat Hari Sabat','Open welcome updates at Saturday midnight WITA');
+  await page.mouse.move(20,200);
   await page.locator('[data-presentation-projector]').click();
+  await page.waitForTimeout(400);
+  const welcomeFrame=await page.locator('#presentation-frame').boundingBox();
+  for(const selector of ['.welcome-screen h2','.welcome-reminder']){
+    const box=await page.locator(selector).boundingBox();
+    assert.ok(box.y>=welcomeFrame.y&&box.y+box.height<=welcomeFrame.y+welcomeFrame.height,selector+' fits mobile projector frame');
+  }
   await page.screenshot({path:path.join(screenshotDir,'welcome-sabbath.png')});
   await page.locator('[data-presentation-close]').click();
   await settings();await page.locator('[data-reset-palette]').click();
