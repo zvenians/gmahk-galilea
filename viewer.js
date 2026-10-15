@@ -102,7 +102,6 @@
 
       let presentationControlsTimer = 0;
       let presentationKeyboardControls = false;
-      let presentationPaletteOpen = false;
       let presentationFitFrame = 0;
       let presentationFitTimer = 0;
       let presentationTransitionTimer = 0;
@@ -624,12 +623,14 @@
       function buildPaletteControls() {
         const template = $('#appearance-settings-template');
         if (template && !$('#palette-options')) $('#settings-dialog .settings-grid').prepend(template.content.cloneNode(true));
-        if (!$('#presentation-palette')) $('.presentation-controls').insertAdjacentHTML('afterbegin','<label class="presentation-palette-label"><span class="sr-only">Warna layar</span><select id="presentation-palette" aria-label="Warna layar"></select></label>');
+        if (!$('#presentation-palette')) {
+          $('.presentation-controls').insertAdjacentHTML('afterbegin','<button type="button" id="presentation-palette" aria-label="Pilih warna layar" aria-expanded="false" popovertarget="presentation-palette-menu"></button><div id="presentation-palette-menu" popover="auto" role="group" aria-label="Warna layar"><p>Pilih warna layar</p><div class="palette-options"></div></div>');
+          $('#presentation-palette-menu').addEventListener('toggle',event=>{ $('#presentation-palette').setAttribute('aria-expanded',String(event.newState==='open'));showPresentationControls(true); });
+        }
         const choices = $('#palette-options');
         if (choices) choices.innerHTML = PALETTES.map(([id,label,color]) =>
           '<button type="button" class="palette-choice" data-palette-value="'+id+'" aria-pressed="false"><span class="palette-dot" style="--swatch:'+color+'" aria-hidden="true"></span><span>'+label+'</span><span class="palette-check" aria-hidden="true">'+icon('check')+'</span></button>').join('');
-        const select = $('#presentation-palette');
-        if (select) select.innerHTML = PALETTES.map(([id,label]) => '<option value="'+id+'">'+label+'</option>').join('');
+        $('#presentation-palette-menu .palette-options').innerHTML=PALETTES.map(([id,label,color])=>'<button type="button" class="palette-choice" data-screen-palette="'+id+'" aria-pressed="false"><span class="palette-dot" style="--swatch:'+color+'" aria-hidden="true"></span><span>'+label+'</span><span class="palette-check" aria-hidden="true">'+icon('check')+'</span></button>').join('');
       }
       function updateThemeColor() {
         const meta = document.querySelector('meta[name="theme-color"]');
@@ -639,12 +640,12 @@
         const selected = PALETTES.find(([id]) => id === value) || PALETTES[0];
         document.documentElement.dataset.palette = selected[0];
         safeStorage.set('galilea:palette',selected[0]);
-        $$('[data-palette-value]').forEach(button => {
-          const active = button.dataset.paletteValue === selected[0];
+        $$('[data-palette-value],[data-screen-palette]').forEach(button => {
+          const active = (button.dataset.paletteValue || button.dataset.screenPalette) === selected[0];
           button.classList.toggle('active',active);
           button.setAttribute('aria-pressed',String(active));
         });
-        if ($('#presentation-palette')) $('#presentation-palette').value = selected[0];
+        if ($('#presentation-palette')) $('#presentation-palette').innerHTML=esc(selected[1])+icon('down');
         if ($('#palette-status')) $('#palette-status').textContent = selected[1]+' aktif di semua halaman dan layar ibadah.';
         window.GalileaPageTurn?.cancel();
         updateThemeColor();
@@ -737,6 +738,8 @@
         document.body.classList.toggle('mobile-menu-open',active);
         if (active) panel.scrollTop = 0;
         else if (panel.contains(document.activeElement)) toggle.focus({preventScroll:true});
+        panel.inert=!active;
+        panel.setAttribute('aria-hidden',String(!active));
       }
 
       function closeMobile() {
@@ -1744,7 +1747,7 @@
         if(!dialog.open||autoHide===false)return;
         presentationControlsTimer=window.setTimeout(()=>{
           const controls=$('.presentation-controls');
-          const paletteOpen=window.CSS?.supports('selector(select:open)') ? $('#presentation-palette')?.matches(':open') : presentationPaletteOpen;
+          const paletteOpen=$('#presentation-palette-menu')?.matches(':popover-open');
           if(paletteOpen){showPresentationControls(true);return;}
           if(presentationKeyboardControls && controls?.contains(document.activeElement))return;
           if(controls?.contains(document.activeElement))document.activeElement.blur();
@@ -1982,7 +1985,7 @@
           const content=view.item||welcomeContent();
           view.index=0;setPresentationOrnament('welcome',content,0);
           kicker.textContent=content.label;title.textContent='Layar Sambutan';
-          stage.innerHTML='<article class="welcome-screen"><p class="welcome-date">'+esc(content.dateLabel)+'</p><h2><em>Selamat</em> <span>'+esc(content.title.replace(/^Selamat /,''))+'</span></h2><p class="welcome-message">Selamat berbakti di <strong>Jemaat Galilea.</strong></p><p class="welcome-reminder">'+esc(content.reminder)+'</p></article>';
+          stage.innerHTML='<article class="welcome-screen"><p class="welcome-date">'+esc(content.dateLabel)+'</p><h2><em>Selamat</em> <span>'+esc(content.title.replace(/^Selamat /,''))+'</span></h2><p class="welcome-message"><span>Selamat berbakti di</span><strong>Jemaat Galilea</strong></p><p class="welcome-reminder">'+esc(content.reminder)+'</p></article>';
           counter.textContent='Sambutan';setPresentationNavigationLabels('Sambutan');
           $('[data-presentation-prev]').disabled=true;$('[data-presentation-next]').disabled=true;
           finishPresentationRender();return;
@@ -2109,7 +2112,8 @@
         if(elapsed<900&&Math.abs(dx)>=56&&Math.abs(dx)>Math.abs(dy)*1.2)movePresentation(dx<0?1:-1);
       }
       function cleanupPresentation(){
-        presentationKeyboardControls=false;presentationPaletteOpen=false;
+        presentationKeyboardControls=false;
+        $('#presentation-palette-menu')?.hidePopover();
         window.GalileaPageTurn?.cancel();
         window.clearInterval(presentationWelcomeTimer);presentationWelcomeTimer=0;
         window.clearTimeout(presentationControlsTimer);window.clearTimeout(presentationFitTimer);window.clearTimeout(presentationTransitionTimer);window.cancelAnimationFrame(presentationFitFrame);presentationPointer=null;
@@ -3058,6 +3062,8 @@
       function updateNetworkStatus(){const box=$('#network-status');if(box)box.classList.toggle('show',navigator.onLine===false);updatePresentationNetworkStatus();}
 
       function handleClick(event) {
+        const screenPalette=event.target.closest('[data-screen-palette]');
+        if(screenPalette){applyPalette(screenPalette.dataset.screenPalette,true);$('#presentation-palette-menu').hidePopover();$('#presentation-palette').focus({preventScroll:true});showPresentationControls(true);return;}
         if (event.target.closest('[data-present-welcome]')) return openWelcomePresentation();
         const paletteButton = event.target.closest('[data-palette-value]');
         if (paletteButton) return applyPalette(paletteButton.dataset.paletteValue,true);
@@ -3183,10 +3189,7 @@
       document.addEventListener('keydown',event=>{
         const dialog=$('#presentation-dialog');if(!dialog||!dialog.open)return;
         presentationKeyboardControls=true;
-        if(event.target.id==='presentation-palette'){
-          if(event.key==='Escape' && presentationPaletteOpen){presentationPaletteOpen=false;showPresentationControls(true);event.stopImmediatePropagation();return;}
-          if(event.key===' ' || event.key==='Enter' || (event.altKey && event.key==='ArrowDown'))presentationPaletteOpen=true;
-        }
+        if(event.key==='Escape' && $('#presentation-palette-menu')?.matches(':popover-open')){event.preventDefault();event.stopImmediatePropagation();$('#presentation-palette-menu').hidePopover();$('#presentation-palette').focus({preventScroll:true});showPresentationControls(true);return;}
         showPresentationControls(true);
         if(event.target.closest?.('select,input,textarea,button') && event.key!=='Escape')return;
         if(event.key==='ArrowLeft'||event.key==='PageUp'){event.preventDefault();movePresentation(-1);}
@@ -3412,7 +3415,6 @@
         }
       });
       $('#theme-options').addEventListener('click',event => { const button=event.target.closest('[data-theme-value]'); if(button) applyTheme(button.dataset.themeValue); });
-      document.addEventListener('change',event => { if(event.target.id==='presentation-palette'){ presentationPaletteOpen=false;applyPalette(event.target.value,true); showPresentationControls(true); } });
       document.addEventListener('visibilitychange',() => { if (!document.hidden) refreshWelcomePresentation(); });
       $('#font-options').addEventListener('click',event => { const button=event.target.closest('[data-font-value]'); if(button) applyFont(button.dataset.fontValue); });
       $('#motion-options').addEventListener('click',event => { const button=event.target.closest('[data-motion-value]'); if(button) applyMotion(button.dataset.motionValue); });
@@ -3421,9 +3423,9 @@
       $('#install-app').addEventListener('click',openInstallHelp);
       const presentationShellElement=$('#presentation-shell');
       if(presentationShellElement){
-        presentationShellElement.addEventListener('pointerdown',event=>{presentationKeyboardControls=false;presentationPaletteOpen=event.target.id==='presentation-palette';showPresentationControls(true);},{passive:true});
+        presentationShellElement.addEventListener('pointerdown',()=>{presentationKeyboardControls=false;showPresentationControls(true);},{passive:true});
         presentationShellElement.addEventListener('focusin',()=>showPresentationControls(true));
-        presentationShellElement.addEventListener('focusout',event=>{if(event.target.id==='presentation-palette')presentationPaletteOpen=false;showPresentationControls(true);});
+        presentationShellElement.addEventListener('focusout',()=>showPresentationControls(true));
         presentationShellElement.addEventListener('pointerdown',handlePresentationPointerDown,{passive:true});
         presentationShellElement.addEventListener('pointerup',handlePresentationPointerUp,{passive:true});
         presentationShellElement.addEventListener('pointercancel',()=>{presentationPointer=null;},{passive:true});

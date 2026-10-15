@@ -68,7 +68,7 @@
   <link rel="stylesheet" href="/page-turn.css?v=31-pixel">
   <link rel="stylesheet" href="/hymnal-scores.css?v=34-pdf4">
   <link rel="stylesheet" href="/visitor-ui.css?v=38-thumbnails">
-  <link rel="stylesheet" href="/appearance.css?v=40-welcome">
+  <link rel="stylesheet" href="/appearance.css?v=41-nav">
 </head>
 <body>
   <svg class="sr-only" aria-hidden="true">
@@ -128,6 +128,7 @@
   </div>
 
   <header class="site-header">
+    <div class="navigation-surface">
     <div class="shell header-row">
       <button class="brand" type="button" data-route="home" aria-label="Buka Beranda">
         <span class="brand-mark" aria-hidden="true"><span id="header-logo-fallback" class="theme-logo-pair"><img class="logo-light" src="/assets/logo-galilea-light.webp" alt=""><img class="logo-dark" src="/assets/logo-galilea-dark.webp" alt=""></span></span>
@@ -148,8 +149,9 @@
         <button class="icon-button mobile-toggle" id="mobile-toggle" type="button" aria-label="Buka menu" aria-expanded="false" translate="no"><span class="menu-label">MENU</span><svg class="icon mobile-menu-glyph" aria-hidden="true"><use href="#i-menu"></use></svg><svg class="icon mobile-close-glyph" aria-hidden="true"><use href="#i-close"></use></svg></button>
       </div>
     </div>
+      <aside class="mobile-panel" id="mobile-panel" aria-label="Menu navigasi" aria-hidden="true" inert><nav class="mobile-nav" id="mobile-nav"></nav></aside>
+    </div>
   </header>
-  <aside class="mobile-panel" id="mobile-panel" aria-label="Menu seluler"><nav class="mobile-nav" id="mobile-nav"></nav></aside>
 
   <noscript><style>#loader{display:none!important}</style></noscript>
   <main id="main" tabindex="-1"><div id="app" class="view"><section class="section"><div class="shell"><h1>GMAHK Galilea Balikpapan</h1><p>Website resmi jemaat untuk jadwal ibadah, Agenda dan Pengumuman, Sekolah Sabat, Alkitab, Lagu Sion, warta digital, dan informasi pelayanan di Balikpapan.</p><p>Alamat: Jl. Mulawarman Gg. Sumber Rejeki RT.15 No.11, Balikpapan, Kalimantan Timur.</p><noscript><p>Aktifkan JavaScript untuk membuka seluruh fitur website.</p></noscript></div></section></div></main>
@@ -201,7 +203,7 @@
 
   <script src="/schedule-clock.js?v=32-wita" defer></script>
   <script src="/hymnal-scores.js?v=34-pdf4" defer></script>
-  <script src="/viewer.js?v=40-welcome" defer></script>
+  <script src="/viewer.js?v=41-nav" defer></script>
   <script src="/vendor/page-flip-2.0.7.js?v=24-fold" defer></script>
   <script src="/page-turn.js?v=31-pixel" defer></script>
 </body>

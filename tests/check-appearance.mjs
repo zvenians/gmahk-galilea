@@ -60,9 +60,16 @@ const screenshotDir=process.env.APPEARANCE_SCREENSHOTS||'/tmp/galilea-appearance
 fs.mkdirSync(screenshotDir,{recursive:true});
 async function loaded(){await page.locator('#app h1').waitFor();await page.locator('#loader').waitFor({state:'hidden'});}
 async function settings(){await page.locator('[data-open="settings"]:visible').first().click();}
+async function screenPalette(value){await page.mouse.move(15,150);await page.locator('#presentation-palette').click();await page.locator('[data-screen-palette="'+value+'"]').click();}
 async function welcome(){
   if(await page.locator('#mobile-toggle').isVisible()){
     await page.locator('#mobile-toggle').click();
+    await page.waitForTimeout(420);
+    const row=await page.locator('.header-row').boundingBox(),panel=await page.locator('#mobile-panel').boundingBox();
+    assert.ok(Math.abs(panel.y-row.y-row.height)<2,'Expanded menu meets navbar without a gap');
+    assert.ok(Math.abs(panel.x-row.x)<2&&Math.abs(panel.width-row.width)<2,'Menu shares navbar width');
+    assert.equal(await page.locator('#mobile-panel').evaluate(node=>node.inert),false);
+    await page.screenshot({path:path.join(screenshotDir,'expanded-menu-'+page.viewportSize().width+'.png')});
     await page.locator('#mobile-panel [data-present-welcome]').click();
   }else{
     await page.locator('[data-nav-toggle]').filter({hasText:'Materi Ibadah'}).click();
@@ -80,13 +87,13 @@ try{
     assert.equal(await page.locator('[data-palette-value="'+palette+'"]').getAttribute('aria-pressed'),'true');
     for(const mode of ['light','dark']){
       await page.locator('[data-theme-value="'+mode+'"]').click();
-      await page.waitForFunction(()=>getComputedStyle(document.body).color===getComputedStyle(document.querySelector('.palette-choice.active')).color,null,{timeout:3000});
+      await page.waitForFunction(()=>getComputedStyle(document.body).color===getComputedStyle(document.querySelector('#settings-dialog .palette-choice.active')).color,null,{timeout:3000});
       await page.waitForTimeout(450);
       const colors=await page.evaluate(()=>({
         text:getComputedStyle(document.body).color,bg:getComputedStyle(document.documentElement).backgroundColor,
         nav:getComputedStyle(document.querySelector('.header-row')).backgroundColor,
-        control:getComputedStyle(document.querySelector('.palette-choice.active')).color,
-        controlBg:getComputedStyle(document.querySelector('.palette-choice.active')).backgroundColor
+        control:getComputedStyle(document.querySelector('#settings-dialog .palette-choice.active')).color,
+        controlBg:getComputedStyle(document.querySelector('#settings-dialog .palette-choice.active')).backgroundColor
       }));
       assert.ok(contrast(colors.text,colors.bg)>=4.5,palette+' '+mode+' body contrast '+JSON.stringify(colors));
       assert.ok(contrast(colors.control,colors.controlBg)>=4.5,palette+' '+mode+' selected control contrast');
@@ -157,11 +164,16 @@ try{
     assert.ok(photos.length>0);photos.forEach(photo=>{assert.ok(photo.height>=175);assert.ok(photo.bottom<=photo.copyTop+1,'Caption must not cover photo');});
     await page.setViewportSize({width,height:900});
     await welcome();
+    await page.locator('#presentation-palette').click();
+    await page.screenshot({path:path.join(screenshotDir,'palette-grid-'+width+'.png')});
+    await page.keyboard.press('Escape');
+    assert.equal(await page.locator('#presentation-dialog').isVisible(),true,'Escape closes color options before fullscreen');
     assert.match(await page.locator('.welcome-reminder').textContent(),/senyapkan ponsel/);
     assert.match(await page.locator('.welcome-screen h2').evaluate(node=>getComputedStyle(node).fontFamily),/Georgia/);
+    assert.ok(await page.evaluate(()=>parseFloat(getComputedStyle(document.querySelector('.welcome-message strong')).fontSize)>parseFloat(getComputedStyle(document.querySelector('.welcome-screen h2')).fontSize)),'Jemaat Galilea leads the typography');
     assert.equal(await page.locator('#presentation-palette').evaluate(node=>getComputedStyle(node).backgroundColor),'rgba(0, 0, 0, 0)','Fullscreen palette has no background box');
     for(const palette of palettes){
-      await page.locator('#presentation-palette').selectOption(palette);
+      await screenPalette(palette);
       for(const light of [true,false]){
         const isLight=await page.locator('#presentation-shell').evaluate(node=>node.classList.contains('is-light'));
         if(isLight!==light)await page.locator('[data-presentation-theme]').click();
@@ -169,7 +181,7 @@ try{
         assert.ok(contrast(colors.text,colors.bg)>=7,palette+' fullscreen contrast');
       }
     }
-    await page.locator('#presentation-palette').selectOption('brown');
+    await screenPalette('brown');
     await page.locator('[data-presentation-larger]').click();
     await page.waitForTimeout(4500);
     assert.equal(await page.locator('.presentation-controls').evaluate(node=>getComputedStyle(node).opacity),'0','Pointer-focused controls hide even when hovered');
@@ -203,7 +215,7 @@ try{
       await page.locator('#bible-open').click();
     }
     await page.locator('[data-present-'+kind+']').click();
-    await page.locator('#presentation-palette').selectOption('red');
+    await screenPalette('red');
     await page.locator('[data-presentation-projector]').click();
     for(const mode of ['light','dark']){
       const isLight=await page.locator('#presentation-shell').evaluate(node=>node.classList.contains('is-light'));
@@ -218,6 +230,24 @@ try{
     await page.locator('[data-presentation-close]').click();
     if(await page.locator('#reader-dialog').isVisible())await page.keyboard.press('Escape');
   }
+  await page.goto(base+'/#schedule');await loaded();
+  await page.locator('[data-present-schedule-summary]').first().click();await screenPalette('brown');
+  for(let slide=0;slide<20;slide++){
+    for(const mode of ['light','dark']){
+      const light=await page.locator('#presentation-shell').evaluate(node=>node.classList.contains('is-light'));
+      if(light!==(mode==='light'))await page.locator('[data-presentation-theme]').click();
+      await page.waitForTimeout(400);
+      const leaks=await page.locator('#presentation-stage').evaluate(root=>[...root.querySelectorAll('*')].flatMap(node=>{
+        const style=getComputedStyle(node),value=style.backgroundColor+' '+style.backgroundImage;
+        return [...value.matchAll(/rgba?\((\d+), (\d+), (\d+)(?:, ([\d.]+))?\)/g)].filter(m=>+m[2]>+m[1]*1.18&&+m[2]>+m[3]*1.1&&m[4]!=='0').map(()=>node.className);
+      }));
+      assert.deepEqual(leaks,[],'Schedule slide '+slide+' '+mode+' has no fixed green panel');
+      if(await page.locator('.presentation-reminder-copy').count())await page.screenshot({path:path.join(screenshotDir,'reminder-'+mode+'.png')});
+    }
+    if(await page.locator('[data-presentation-next]').isDisabled())break;
+    await page.locator('[data-presentation-next]').click();
+  }
+  await page.locator('[data-presentation-close]').click();
   await page.goto(base);await loaded();await page.setViewportSize({width:390,height:900});
   await page.clock.install({time:new Date('2026-10-16T15:59:55Z')});
   await welcome();

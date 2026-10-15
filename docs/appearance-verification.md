@@ -1,5 +1,18 @@
 # Verifikasi warna, sambutan, dan thumbnail
 
+## Revisi navbar dan sambutan, 15 Oktober 2026
+
+Cakupan setelah `1bbb9b7`: menu menyatu dengan navbar, kisi pilihan warna, penekanan nama jemaat, dan panel fullscreen yang masih hijau.
+
+- Menu sekarang berada dalam satu bingkai navbar dan membuka ke bawah. Lebar dan tepinya sama dengan baris navbar; isi menu dapat digulir tanpa melepas bingkai. Menu tertutup memakai `inert` dan `aria-hidden`, dan animasi menghormati preferensi kurangi gerakan.
+- Pengaturan dan pemilih fullscreen menampilkan 13 kartu palet dengan contoh nuansa gelap, utama, dan terang. Pemilih fullscreen tetap diawali tombol tulisan tanpa latar. Escape menutup pilihan warna terlebih dahulu, lalu fullscreen pada penekanan berikutnya.
+- Sambutan memakai satu baris salam, pengantar kecil, dan nama **Jemaat Galilea** dalam serif tebal dengan ukuran terbesar. Tata letak ponsel, desktop, dan proyektor tetap diuji.
+- Panel Pengingat Ibadah, informasi koneksi, bidang jadwal, dan hitung mundur memakai token warna layar. Semua slide ringkasan jadwal diperiksa dalam coklat terang dan gelap; tidak ada latar hijau tetap yang tersisa pada panel tersebut.
+
+Hasil: `check:appearance`, `check:visitor` (100 kombinasi), pemeriksaan proyek/presentasi, build, dan preview sosial lulus. Pemeriksaan tambahan memverifikasi pertemuan tepi navbar/menu, popover warna, Escape, dan seluruh slide jadwal. Tampilan menu desktop/ponsel, kisi warna, sambutan, serta panel pengingat dirender dan diperiksa. Versi preview desain: `601a961d7d4c5a66`.
+
+Delivery Gate untuk cakupan revisi: R-03/R-06/R-14 PASS (hierarki dan empat lebar); R-10/R-11/R-29 PASS (kartu palet konsisten); R-19/R-32 PASS (gerakan terbatas, fokus dan Escape); R-21/R-25/R-34 PASS (terang/gelap dan kontras); R-26/R-27/R-35 PASS (alur dijalankan di browser); R-33 PASS (perubahan sumber melalui patch). ENERGY 2 / RHYTHM 2 / MOTION 2 tetap; nama jemaat menjadi fokus sambutan. Gate sebelumnya berlaku untuk bagian yang tidak berubah.
+
 ## Pembaruan 15 Oktober 2026
 
 Cakupan setelah `1318bad`: tipografi sambutan, pengingat perangkat, kontrol fullscreen, dan konsistensi palet. Seluruh 133 file terlacak masih tersedia saat pemeriksaan awal; perubahan pengunjung dan thumbnail sebelumnya dipertahankan.
