@@ -7,6 +7,7 @@
   "scripts": {
     "build": "node scripts/build-site.mjs",
     "check:appearance": "node tests/check-appearance.mjs",
+    "check:sabbath": "node tests/check-sabbath-presentation.mjs",
     "dev": "vercel dev",
     "check:visitor": "node tests/check-visitor-flow.mjs",
     "check:scores": "node tests/check-hymnal-scores.mjs",

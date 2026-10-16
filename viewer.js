@@ -1689,7 +1689,7 @@
       }
 
       function clampPresentationScale(value,type=state.presentation&&state.presentation.type){return Math.max(/^(song|bible)$/.test(type||'')?.35:.7,Math.min(1.35,Number(value)||1));}
-      function presentationScaleKey(type){return 'galilea:presentation-scale:'+(type==='welcome'?'welcome':type==='bible'?'bible':type==='announcement'?'announcement':type==='schedule'?'schedule':type==='operator'?'operator':type==='screencheck'?'screencheck':'song');}
+      function presentationScaleKey(type){return 'galilea:presentation-scale:'+(type==='sabbath'?'sabbath':type==='welcome'?'welcome':type==='bible'?'bible':type==='announcement'?'announcement':type==='schedule'?'schedule':type==='operator'?'operator':type==='screencheck'?'screencheck':'song');}
       function storedPresentationScale(type){return /^(song|bible)$/.test(type)?1.35:clampPresentationScale(safeStorage.get(presentationScaleKey(type),'1'),type);}
       function storedPresentationTheme(){
         return document.documentElement.dataset.theme==='light'?'light':'dark';
@@ -1758,6 +1758,13 @@
         const dialog=$('#presentation-dialog'),shell=$('#presentation-shell'),stage=$('#presentation-stage'),view=state.presentation;
         if(!dialog||!dialog.open||!shell||!stage||!view||!view.type)return;
         layoutPresentationFrame();
+        if(view.type==='sabbath'){
+          window.GalileaSabbathPresentation.layout(view,stage);
+          renderSabbathPresentation();
+          $('[data-presentation-smaller]').disabled=view.scale<=.7001;
+          $('[data-presentation-larger]').disabled=view.scale>=1.3499;
+          return;
+        }
         const textSlide=/^(song|bible)$/.test(shell.dataset.presentationKind||'');
         if(textSlide&&shell.classList.contains('page-turn-active')&&view.textFontSize>0){
           stage.querySelectorAll('.presentation-copy').forEach(copy=>copy.style.setProperty('font-size',view.textFontSize+'px','important'));
@@ -1877,7 +1884,7 @@
       }
       function setPresentationOrnament(kind,context,index){
         const shell=$('#presentation-shell'),use=$('#presentation-context-art-use'),site=state.data&&state.data.site||{};
-        const baseMap={overview:'church',agenda:'calendar',bible:'book',scripture:'book',song:'music','song-reference':'music',service:'users',announcement:'bell',reminder:'church',connection:'heart',closing:'church'};
+        const baseMap={overview:'church',agenda:'calendar',sabbath:'book',bible:'book',scripture:'book',song:'music','song-reference':'music',service:'users',announcement:'bell',reminder:'church',connection:'heart',closing:'church'};
         const allowed=['church','calendar','book','music','users','bell','heart'];
         const disabled=/^(?:TIDAK|NO|OFF|FALSE|0)$/i.test(String(site.presentation_ornaments_enabled||'YA').trim());
         const strength=String(site.presentation_ornament_strength||'JELAS').trim().toUpperCase();
@@ -1912,6 +1919,38 @@
         document.body.style.overflow='hidden';
         renderPresentation();if(!dialog.open)dialog.showModal();shell.tabIndex=-1;shell.focus({preventScroll:true});syncPresentationState();fitPresentationText();showPresentationControls(true);schedulePresentationFit();requestPresentationWakeLock();
         if(shell.requestFullscreen&&!document.fullscreenElement)shell.requestFullscreen().then(schedulePresentationFit).catch(()=>{});
+      }
+      function openSabbathPresentation(){
+        const lesson=state.async.currentLesson;
+        if(!lesson?.days?.length)return toast('Buka pelajaran terlebih dahulu.');
+        const presenter=window.GalileaSabbathPresentation;
+        if(!presenter)return toast('Mode layar belum termuat. Silakan muat ulang halaman.');
+        $('#presentation-sabbath-day').dataset.lesson='';
+        launchPresentation({type:'sabbath',index:0,scale:storedPresentationScale('sabbath'),
+          item:presenter.create(lesson,cleanHtml),blackout:false,
+          projector:safeStorage.get('galilea:presentation-projector','0')==='1',theme:storedPresentationTheme()});
+        document.fonts?.ready.then(()=>{if(state.presentation?.type==='sabbath'&&$('#presentation-dialog').open){state.presentation.item.layoutKey='';schedulePresentationFit();}});
+      }
+      function renderSabbathPresentation(){
+        const view=state.presentation,stage=$('#presentation-stage');
+        const {page,total}=window.GalileaSabbathPresentation.render(view,stage);
+        const lesson=view.item.lesson;
+        setPresentationOrnament('sabbath',lesson,view.index);
+        $('#presentation-kicker').textContent='SEKOLAH SABAT · PELAJARAN '+lesson.number;
+        $('#presentation-title').textContent=lesson.title;
+        $('#presentation-counter').textContent=(view.index+1)+' / '+total;
+        $('#presentation-counter').setAttribute('aria-label','Slide '+(view.index+1)+' dari '+total);
+        setPresentationNavigationLabels('Slide');
+        $('[data-presentation-prev]').disabled=view.index===0;
+        $('[data-presentation-next]').disabled=view.index>=total-1;
+        const select=$('#presentation-sabbath-day');
+        if(select){
+          if(select.dataset.lesson!==lesson.title || select.options.length!==lesson.days.length+1){
+            select.innerHTML='<option value="-1">Pembuka</option>'+lesson.days.map((day,index)=>'<option value="'+index+'">'+esc(day.dateLabel||day.title)+'</option>').join('');
+            select.dataset.lesson=lesson.title;
+          }
+          select.value=String(page.dayIndex);
+        }
       }
       function openPresentation(type){
         if(type==='bible'&&!state.bibleReader)return toast('Pilih ayat Alkitab terlebih dahulu.');
@@ -1981,6 +2020,7 @@
         const view=state.presentation,stage=$('#presentation-stage'),title=$('#presentation-title'),kicker=$('#presentation-kicker'),counter=$('#presentation-counter'),shell=$('#presentation-shell');
         if(!view||!stage||!title||!kicker||!counter||!shell)return;
         shell.style.setProperty('--present-scale',String(clampPresentationScale(view.scale)));
+        if(view.type==='sabbath'){renderSabbathPresentation();finishPresentationRender();return;}
         if(view.type==='welcome'){
           const content=view.item||welcomeContent();
           view.index=0;setPresentationOrnament('welcome',content,0);
@@ -2088,6 +2128,7 @@
         window.GalileaPageTurn?.cancel();
         const view=state.presentation;if(!view||!view.type)return;
         view.scale=clampPresentationScale(Number(view.scale||1)+delta);safeStorage.set(presentationScaleKey(view.type),view.scale.toFixed(2));
+        if(view.type==='sabbath')$('#presentation-shell').style.setProperty('--present-scale',String(view.scale));
         fitPresentationText();showPresentationControls(true);
         announcePresentation(view.scale>=1.35&&/^(song|bible)$/.test($('#presentation-shell').dataset.presentationKind||'')?'Ukuran maksimum yang muat di atas copyright':'Ukuran teks '+Math.round(view.scale*100)+' persen');
       }
@@ -2641,6 +2682,7 @@
         } catch (error) { toast(error.message); }
       }
       async function openLesson(id) {
+        state.async.currentLesson=null;
         openReader('Menyiapkan pelajaran',loadingBox('Membuka pelajaran minggu ini','Mengambil bacaan harian dan menandai bagian hari ini…'));
         try {
           const data = await fetchLessonData(id);
@@ -2650,7 +2692,7 @@
           $('#reader-title').textContent = 'Pelajaran ' + data.number + ' · ' + data.title;
           const activeIndex = Math.max(0,data.days.findIndex(day => day.isToday));
           const labels = data.days.map((day,index) => '<button class="chip ' + (day.isToday ? 'today-marker' : '') + '" type="button" data-day-jump="day-' + index + '">' + (day.isToday ? 'HARI INI · ' : '') + esc(day.dateLabel || day.title) + '</button>').join('');
-          $('#reader-body').innerHTML = '<div class="v18-reader-tools">'+favoriteButton(savedItem)+'</div><span class="chip brand">PELAJARAN ' + esc(data.number) + '</span><h2 style="margin-top:20px">' + esc(data.title) + '</h2><p class="lead">' + esc(data.dateLabel) + '</p><div class="download-bar"><div><strong>Simpan untuk dibaca kapan saja</strong><span>Unduhan berupa halaman bacaan rapi yang dapat dibuka dan dicetak.</span></div><button class="btn primary" type="button" data-download-current-lesson>' + icon('download') + 'Unduh pelajaran</button></div><div class="day-labels" aria-label="Pilih hari bacaan">' + labels + '</div><div class="faq-list">' + data.days.map((day,index) => '<details class="faq lesson-day" id="day-' + index + '" ' + (index === activeIndex ? 'open' : '') + '><summary><span><small class="chip ' + (day.isToday ? 'today-marker' : '') + '">' + (day.isToday ? 'HARI INI' : day.isPast ? 'SUDAH DIBACA' : 'MENDATANG') + '</small><strong style="display:block;margin-top:10px">' + esc(day.dateLabel || '') + ' · ' + esc(day.title) + '</strong></span>' + icon('plus') + '</summary><div class="faq-answer reader-content">' + cleanHtml(day.bibleHtml) + cleanHtml(day.contentHtml) + '</div></details>').join('') + '</div><p class="small faint" style="margin-top:26px">Sumber materi: ' + esc(data.source) + '</p>';
+          $('#reader-body').innerHTML = '<div class="v18-reader-tools"><div class="v18-reader-tools-main">'+favoriteButton(savedItem)+'<button class="btn primary present-button" type="button" data-present-sabbath>'+icon('external')+'Mode layar</button></div></div><span class="chip brand">PELAJARAN ' + esc(data.number) + '</span><h2 style="margin-top:20px">' + esc(data.title) + '</h2><p class="lead">' + esc(data.dateLabel) + '</p><div class="download-bar"><div><strong>Simpan untuk dibaca kapan saja</strong><span>Unduhan berupa halaman bacaan rapi yang dapat dibuka dan dicetak.</span></div><button class="btn primary" type="button" data-download-current-lesson>' + icon('download') + 'Unduh pelajaran</button></div><div class="day-labels" aria-label="Pilih hari bacaan">' + labels + '</div><div class="faq-list">' + data.days.map((day,index) => '<details class="faq lesson-day" id="day-' + index + '" ' + (index === activeIndex ? 'open' : '') + '><summary><span><small class="chip ' + (day.isToday ? 'today-marker' : '') + '">' + (day.isToday ? 'HARI INI' : day.isPast ? 'SUDAH DIBACA' : 'MENDATANG') + '</small><strong style="display:block;margin-top:10px">' + esc(day.dateLabel || '') + ' · ' + esc(day.title) + '</strong></span>' + icon('plus') + '</summary><div class="faq-answer reader-content">' + cleanHtml(day.bibleHtml) + cleanHtml(day.contentHtml) + '</div></details>').join('') + '</div><p class="small faint" style="margin-top:26px">Sumber materi: ' + esc(data.source) + '</p>';
         } catch (error) { $('#reader-body').innerHTML = errorBox(error.message); }
       }
       async function openResource(type, id) {
@@ -3140,6 +3182,7 @@
         if (song) return openSong(song.dataset.song);
         if (event.target.closest('[data-theme-song]')) return openThemeSong();
         if (event.target.closest('[data-present-bible]')) return openPresentation('bible');
+        if (event.target.closest('[data-present-sabbath]')) return openSabbathPresentation();
         if (event.target.closest('[data-present-song]')) return openPresentation('song');
         if (event.target.closest('[data-presentation-prev]')) return movePresentation(-1);
         if (event.target.closest('[data-presentation-next]')) return movePresentation(1);
@@ -3185,6 +3228,15 @@
         if (event.target.closest('[data-read-devotional]') && state.async.devotional) return openDevotional(state.async.devotional);
         if (event.target.closest('[data-read-personal]') && state.async.personal) return openReader(state.async.personal.title,'<div class="reader-content">' + state.async.personal.contentHtml + '</div>');
       }
+
+      document.addEventListener('change',event=>{
+        if(event.target.id!=='presentation-sabbath-day'||state.presentation?.type!=='sabbath')return;
+        const view=state.presentation,day=Number(event.target.value);
+        const index=view.item.pages.findIndex(page=>page.dayIndex===day);
+        if(index<0)return;
+        view.index=index;renderPresentation();fitPresentationText();
+        announcePresentation(day<0?'Pembuka':view.item.lesson.days[day].title);
+      });
 
       document.addEventListener('keydown',event=>{
         const dialog=$('#presentation-dialog');if(!dialog||!dialog.open)return;
