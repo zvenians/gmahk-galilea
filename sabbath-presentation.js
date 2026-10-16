@@ -79,25 +79,56 @@
     return wrapper.outerHTML;
   }
 
-  function create(lesson, sanitize) {
-    return {
-      lesson,
-      days:lesson.days.map(day => ({...day, blocks:readingBlocks(sanitize(day.bibleHtml || '') + sanitize(day.contentHtml || ''))})),
-      pages:[], layoutKey:''
-    };
+  function create(lesson, sanitize, mode = 'summary') {
+    const days = lesson.days.map(day => {
+      const fullBlocks = readingBlocks(sanitize(day.bibleHtml || '') + sanitize(day.contentHtml || ''));
+      const content = readingBlocks(sanitize(day.contentHtml || ''));
+      const bible = readingBlocks(sanitize(day.bibleHtml || ''));
+      const outline = globalThis.GalileaSabbathSummary.summarize({
+        title:day.title,
+        paragraphs:content.map(block => ({text:block.element.textContent, emphasized:Boolean(block.element.querySelector('strong,b'))})),
+        bibleText:bible.map(block => block.element.textContent).join(' ')
+      });
+      const summaryBlocks = [];
+      const add = (section, html) => readingBlocks(html).forEach(block => {
+        block.section = section;
+        if (section === 'points') block.element.firstElementChild?.classList.add('ss-point');
+        summaryBlocks.push(block);
+      });
+      outline.points.forEach(point => add('points','<p>'+escape(point)+'</p>'));
+      if (outline.summary) add('summary','<p>'+escape(outline.summary)+'</p>');
+      outline.references.forEach(reference => add('references','<p>'+escape(reference)+'</p>'));
+      if (outline.discussion) add('discussion','<p>'+escape(outline.discussion)+'</p>');
+      if (!outline.points.length && !outline.summary) {
+        const text=outline.hasContent?'Poin ringkas belum tersedia untuk bacaan ini. Pilih Bacaan lengkap untuk membaca materinya.':'Isi bacaan hari ini belum tersedia.';
+        summaryBlocks.unshift(...readingBlocks('<p>'+text+'</p>').map(block => ({...block,section:'empty'})));
+      }
+      return {...day, outline, fullBlocks, summaryBlocks, blocks:mode === 'full' ? fullBlocks : summaryBlocks};
+    });
+    return {lesson, days, mode, pages:[], layoutKey:''};
+  }
+
+  function setMode(view, mode) {
+    if (!['summary','full'].includes(mode) || view.item.mode === mode) return;
+    view.pendingDay = view.item.pages[view.index]?.dayIndex ?? -1;
+    view.item.mode = mode;
+    view.item.days.forEach(day => { day.blocks = mode === 'full' ? day.fullBlocks : day.summaryBlocks; });
+    view.item.layoutKey = '';
   }
 
   function markup(model, page) {
     if (page.dayIndex < 0) return '<article class="ss-page ss-cover"><small>PELAJARAN ' + escape(model.lesson.number) + '</small><h2>' + escape(model.lesson.title) + '</h2><p>' + escape(model.lesson.dateLabel) + '</p><small>' + escape(model.lesson.source) + '</small></article>';
     const day = model.days[page.dayIndex];
-    return '<article class="ss-page"><header><small>' + escape(day.dateLabel) + '</small><h2>' + escape(day.title) + '</h2></header><div class="ss-reading">' + page.html + '</div></article>';
+    const labels = {points:'Poin penting', summary:'Inti pelajaran', references:'Ayat pendukung', discussion:'Diskusi', empty:'Materi'};
+    const sectionLabel = model.mode === 'summary' ? labels[page.section] || 'Ringkasan' : 'Bacaan lengkap';
+    return '<article class="ss-page ss-section-' + escape(page.section || 'reading') + '"><header><small>' + escape(day.dateLabel) + ' · ' + escape(sectionLabel) + '</small><h2>' + escape(day.title) + '</h2></header><div class="ss-reading">' + page.html + '</div></article>';
   }
 
   function layout(view, stage) {
     const model = view.item;
     const width = stage.clientWidth, height = stage.clientHeight;
     if (!width || !height) return;
-    const key = [width, height, view.scale, document.fonts?.status].join(':');
+    const key = [width, height, view.scale, model.mode, document.fonts?.status].join(':');
     if (model.layoutKey === key) return;
     const previous = model.pages[view.index];
     const pages = [{dayIndex:-1, html:''}];
@@ -114,9 +145,11 @@
         };
         const push = () => {
           if (current.html) pages.push(current);
-          current = {dayIndex, html:'', block:0, offset:0};
+          current = {dayIndex, html:'', block:0, offset:0, section:current.section};
         };
         day.blocks.forEach((block, blockIndex) => {
+          if (current.html && current.section !== block.section) push();
+          current.section = block.section;
           let offset = 0;
           const total = block.words.length;
           if (!total) {
@@ -153,7 +186,10 @@
     } finally { measure.remove(); }
     model.pages = pages;
     model.layoutKey = key;
-    if (previous && previous.dayIndex >= 0) {
+    if (view.pendingDay !== undefined) {
+      view.index = Math.max(0,pages.findIndex(page => page.dayIndex === view.pendingDay));
+      delete view.pendingDay;
+    } else if (previous && previous.dayIndex >= 0) {
       const candidates = pages.map((page, index) => ({...page, index})).filter(page => page.dayIndex === previous.dayIndex && (page.block < previous.block || (page.block === previous.block && page.offset <= previous.offset)));
       view.index = candidates.at(-1)?.index || 0;
     }
@@ -167,5 +203,5 @@
     return {page, total:pages.length};
   }
 
-  window.GalileaSabbathPresentation = {create, layout, render};
+  window.GalileaSabbathPresentation = {create, setMode, layout, render};
 })();

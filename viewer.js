@@ -1920,14 +1920,14 @@
         renderPresentation();if(!dialog.open)dialog.showModal();shell.tabIndex=-1;shell.focus({preventScroll:true});syncPresentationState();fitPresentationText();showPresentationControls(true);schedulePresentationFit();requestPresentationWakeLock();
         if(shell.requestFullscreen&&!document.fullscreenElement)shell.requestFullscreen().then(schedulePresentationFit).catch(()=>{});
       }
-      function openSabbathPresentation(){
+      function openSabbathPresentation(mode='summary'){
         const lesson=state.async.currentLesson;
         if(!lesson?.days?.length)return toast('Buka pelajaran terlebih dahulu.');
         const presenter=window.GalileaSabbathPresentation;
-        if(!presenter)return toast('Mode layar belum termuat. Silakan muat ulang halaman.');
+        if(!presenter||!window.GalileaSabbathSummary)return toast('Mode layar belum termuat. Silakan muat ulang halaman.');
         $('#presentation-sabbath-day').dataset.lesson='';
         launchPresentation({type:'sabbath',index:0,scale:storedPresentationScale('sabbath'),
-          item:presenter.create(lesson,cleanHtml),blackout:false,
+          item:presenter.create(lesson,cleanHtml,mode==='full'?'full':'summary'),blackout:false,
           projector:safeStorage.get('galilea:presentation-projector','0')==='1',theme:storedPresentationTheme()});
         document.fonts?.ready.then(()=>{if(state.presentation?.type==='sabbath'&&$('#presentation-dialog').open){state.presentation.item.layoutKey='';schedulePresentationFit();}});
       }
@@ -1935,6 +1935,7 @@
         const view=state.presentation,stage=$('#presentation-stage');
         const {page,total}=window.GalileaSabbathPresentation.render(view,stage);
         const lesson=view.item.lesson;
+        $('#presentation-sabbath-mode').value=view.item.mode;
         setPresentationOrnament('sabbath',lesson,view.index);
         $('#presentation-kicker').textContent='SEKOLAH SABAT · PELAJARAN '+lesson.number;
         $('#presentation-title').textContent=lesson.title;
@@ -2692,7 +2693,7 @@
           $('#reader-title').textContent = 'Pelajaran ' + data.number + ' · ' + data.title;
           const activeIndex = Math.max(0,data.days.findIndex(day => day.isToday));
           const labels = data.days.map((day,index) => '<button class="chip ' + (day.isToday ? 'today-marker' : '') + '" type="button" data-day-jump="day-' + index + '">' + (day.isToday ? 'HARI INI · ' : '') + esc(day.dateLabel || day.title) + '</button>').join('');
-          $('#reader-body').innerHTML = '<div class="v18-reader-tools"><div class="v18-reader-tools-main">'+favoriteButton(savedItem)+'<button class="btn primary present-button" type="button" data-present-sabbath>'+icon('external')+'Mode layar</button></div></div><span class="chip brand">PELAJARAN ' + esc(data.number) + '</span><h2 style="margin-top:20px">' + esc(data.title) + '</h2><p class="lead">' + esc(data.dateLabel) + '</p><div class="download-bar"><div><strong>Simpan untuk dibaca kapan saja</strong><span>Unduhan berupa halaman bacaan rapi yang dapat dibuka dan dicetak.</span></div><button class="btn primary" type="button" data-download-current-lesson>' + icon('download') + 'Unduh pelajaran</button></div><div class="day-labels" aria-label="Pilih hari bacaan">' + labels + '</div><div class="faq-list">' + data.days.map((day,index) => '<details class="faq lesson-day" id="day-' + index + '" ' + (index === activeIndex ? 'open' : '') + '><summary><span><small class="chip ' + (day.isToday ? 'today-marker' : '') + '">' + (day.isToday ? 'HARI INI' : day.isPast ? 'SUDAH DIBACA' : 'MENDATANG') + '</small><strong style="display:block;margin-top:10px">' + esc(day.dateLabel || '') + ' · ' + esc(day.title) + '</strong></span>' + icon('plus') + '</summary><div class="faq-answer reader-content">' + cleanHtml(day.bibleHtml) + cleanHtml(day.contentHtml) + '</div></details>').join('') + '</div><p class="small faint" style="margin-top:26px">Sumber materi: ' + esc(data.source) + '</p>';
+          $('#reader-body').innerHTML = '<div class="v18-reader-tools"><div class="v18-reader-tools-main">'+favoriteButton(savedItem)+'<button class="btn primary present-button" type="button" data-present-sabbath="summary">'+icon('external')+'Ringkasan presentasi</button><button class="btn present-button" type="button" data-present-sabbath="full">Layar bacaan lengkap</button></div></div><span class="chip brand">PELAJARAN ' + esc(data.number) + '</span><h2 style="margin-top:20px">' + esc(data.title) + '</h2><p class="lead">' + esc(data.dateLabel) + '</p><div class="download-bar"><div><strong>Simpan untuk dibaca kapan saja</strong><span>Unduhan berupa halaman bacaan rapi yang dapat dibuka dan dicetak.</span></div><button class="btn primary" type="button" data-download-current-lesson>' + icon('download') + 'Unduh pelajaran</button></div><div class="day-labels" aria-label="Pilih hari bacaan">' + labels + '</div><div class="faq-list">' + data.days.map((day,index) => '<details class="faq lesson-day" id="day-' + index + '" ' + (index === activeIndex ? 'open' : '') + '><summary><span><small class="chip ' + (day.isToday ? 'today-marker' : '') + '">' + (day.isToday ? 'HARI INI' : day.isPast ? 'SUDAH DIBACA' : 'MENDATANG') + '</small><strong style="display:block;margin-top:10px">' + esc(day.dateLabel || '') + ' · ' + esc(day.title) + '</strong></span>' + icon('plus') + '</summary><div class="faq-answer reader-content">' + cleanHtml(day.bibleHtml) + cleanHtml(day.contentHtml) + '</div></details>').join('') + '</div><p class="small faint" style="margin-top:26px">Sumber materi: ' + esc(data.source) + '</p>';
         } catch (error) { $('#reader-body').innerHTML = errorBox(error.message); }
       }
       async function openResource(type, id) {
@@ -3182,7 +3183,7 @@
         if (song) return openSong(song.dataset.song);
         if (event.target.closest('[data-theme-song]')) return openThemeSong();
         if (event.target.closest('[data-present-bible]')) return openPresentation('bible');
-        if (event.target.closest('[data-present-sabbath]')) return openSabbathPresentation();
+        if (event.target.closest('[data-present-sabbath]')) return openSabbathPresentation(event.target.closest('[data-present-sabbath]').dataset.presentSabbath);
         if (event.target.closest('[data-present-song]')) return openPresentation('song');
         if (event.target.closest('[data-presentation-prev]')) return movePresentation(-1);
         if (event.target.closest('[data-presentation-next]')) return movePresentation(1);
@@ -3230,7 +3231,14 @@
       }
 
       document.addEventListener('change',event=>{
-        if(event.target.id!=='presentation-sabbath-day'||state.presentation?.type!=='sabbath')return;
+        if(state.presentation?.type!=='sabbath')return;
+        if(event.target.id==='presentation-sabbath-mode'){
+          window.GalileaSabbathPresentation.setMode(state.presentation,event.target.value);
+          fitPresentationText();showPresentationControls(true);
+          announcePresentation(event.target.value==='full'?'Bacaan lengkap':'Ringkasan presentasi');
+          return;
+        }
+        if(event.target.id!=='presentation-sabbath-day')return;
         const view=state.presentation,day=Number(event.target.value);
         const index=view.item.pages.findIndex(page=>page.dayIndex===day);
         if(index<0)return;
