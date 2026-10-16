@@ -44,11 +44,11 @@
 
       const APP_URL = window.location.origin;
       const PALETTES = [
-        ['green','Hijau Galilea','#39714c'],['red','Merah','#9a3a4f'],
-        ['navy','Biru tua','#2c5d94'],['brown','Coklat','#886046'],
-        ['purple','Ungu','#715191'],['teal','Teal','#287b7b'],['slate','Abu-abu','#586574'],
-        ['pink','Pink','#a43970'],['orange','Oranye','#9c4b21'],['amber','Emas','#80651c'],
-        ['olive','Zaitun','#5a6a32'],['sky','Biru langit','#28627f'],['indigo','Nila','#474d94']
+        ['green','Galilea Green','#39714c'],['red','Red','#9a3a4f'],
+        ['navy','Navy','#2c5d94'],['brown','Brown','#886046'],
+        ['purple','Purple','#715191'],['teal','Teal','#287b7b'],['slate','Slate','#586574'],
+        ['pink','Pink','#a43970'],['orange','Orange','#9c4b21'],['amber','Gold','#80651c'],
+        ['olive','Olive','#5a6a32'],['sky','Sky Blue','#28627f'],['indigo','Indigo','#474d94']
       ];
       const ROUTES = ['home','today','church','aboutsite','leaders','schedule','bulletin','sabbath','bible','hymnal','hymnal-scores','favorites','visitor','activities','announcements','gallery','services','faq','contact'];
       const MOBILE_GROUPS = [
@@ -624,13 +624,56 @@
         const template = $('#appearance-settings-template');
         if (template && !$('#palette-options')) $('#settings-dialog .settings-grid').prepend(template.content.cloneNode(true));
         if (!$('#presentation-palette')) {
-          $('.presentation-controls').insertAdjacentHTML('afterbegin','<button type="button" id="presentation-palette" aria-label="Pilih warna layar" aria-expanded="false" popovertarget="presentation-palette-menu"></button><div id="presentation-palette-menu" popover="auto" role="group" aria-label="Warna layar"><p>Pilih warna layar</p><div class="palette-options"></div></div>');
-          $('#presentation-palette-menu').addEventListener('toggle',event=>{ $('#presentation-palette').setAttribute('aria-expanded',String(event.newState==='open'));showPresentationControls(true); });
+          $('.presentation-controls').insertAdjacentHTML('afterbegin','<button type="button" class="palette-trigger" id="presentation-palette" aria-label="Pilih warna layar" aria-expanded="false" aria-controls="presentation-palette-menu" popovertarget="presentation-palette-menu"></button><div class="palette-menu" id="presentation-palette-menu" popover="auto" role="group" aria-label="Warna layar"><p>Pilih warna layar</p><div class="palette-options"></div></div>');
         }
         const choices = $('#palette-options');
         if (choices) choices.innerHTML = PALETTES.map(([id,label,color]) =>
-          '<button type="button" class="palette-choice" data-palette-value="'+id+'" aria-pressed="false"><span class="palette-dot" style="--swatch:'+color+'" aria-hidden="true"></span><span>'+label+'</span><span class="palette-check" aria-hidden="true">'+icon('check')+'</span></button>').join('');
-        $('#presentation-palette-menu .palette-options').innerHTML=PALETTES.map(([id,label,color])=>'<button type="button" class="palette-choice" data-screen-palette="'+id+'" aria-pressed="false"><span class="palette-dot" style="--swatch:'+color+'" aria-hidden="true"></span><span>'+label+'</span><span class="palette-check" aria-hidden="true">'+icon('check')+'</span></button>').join('');
+          '<button type="button" class="palette-choice" data-palette-value="'+id+'" aria-pressed="false"><span class="palette-dot" style="--swatch:'+color+'" aria-hidden="true"></span><span lang="en" translate="no">'+label+'</span><span class="palette-check" aria-hidden="true">'+icon('check')+'</span></button>').join('');
+        $('#presentation-palette-menu .palette-options').innerHTML=PALETTES.map(([id,label,color])=>'<button type="button" class="palette-choice" data-screen-palette="'+id+'" aria-pressed="false"><span class="palette-dot" style="--swatch:'+color+'" aria-hidden="true"></span><span lang="en" translate="no">'+label+'</span><span class="palette-check" aria-hidden="true">'+icon('check')+'</span></button>').join('');
+        $$('.palette-menu').forEach(menu => {
+          const trigger = $('[popovertarget="'+menu.id+'"]');
+          menu.addEventListener('toggle',event => {
+            const open = event.newState === 'open';
+            trigger.setAttribute('aria-expanded',String(open));
+            if (open) {
+              positionPaletteMenu(menu);
+              menu.querySelector('.palette-choice.active')?.focus({preventScroll:true});
+            }
+            if ($('#presentation-dialog')?.open) showPresentationControls(true);
+          });
+          menu.addEventListener('keydown',event => {
+            const buttons = [...menu.querySelectorAll('.palette-choice')];
+            const index = buttons.indexOf(document.activeElement);
+            const offsets = {ArrowRight:1,ArrowLeft:-1,ArrowDown:2,ArrowUp:-2};
+            if (!(event.key in offsets) && !['Home','End'].includes(event.key)) return;
+            event.preventDefault();event.stopPropagation();
+            const next = event.key === 'Home' ? 0 : event.key === 'End' ? buttons.length-1 : (index+offsets[event.key]+buttons.length)%buttons.length;
+            buttons[next].focus();
+          });
+        });
+        window.addEventListener('resize',positionOpenPaletteMenus,{passive:true});
+        document.addEventListener('scroll',event => {
+          if (!event.target.closest?.('.palette-menu')) positionOpenPaletteMenus();
+        },{capture:true,passive:true});
+        document.addEventListener('fullscreenchange',positionOpenPaletteMenus);
+      }
+      function positionPaletteMenu(menu) {
+        const trigger = $('[popovertarget="'+menu.id+'"]');
+        const bounds = trigger.getBoundingClientRect();
+        const gap = 10, edge = 12;
+        const above = bounds.top-gap-edge, below = innerHeight-bounds.bottom-gap-edge;
+        menu.style.maxHeight = Math.max(44,Math.max(above,below))+'px';
+        const height = menu.offsetHeight, width = menu.offsetWidth;
+        const top = below >= height || below >= above ? bounds.bottom+gap : bounds.top-gap-height;
+        menu.style.top = Math.max(edge,Math.min(top,innerHeight-height-edge))+'px';
+        menu.style.left = Math.max(edge,Math.min(bounds.left,innerWidth-width-edge))+'px';
+      }
+      function positionOpenPaletteMenus() {
+        $$('.palette-menu:popover-open').forEach(positionPaletteMenu);
+      }
+      function closePaletteMenu(menu) {
+        menu.hidePopover();
+        $('[popovertarget="'+menu.id+'"]')?.focus({preventScroll:true});
       }
       function updateThemeColor() {
         const meta = document.querySelector('meta[name="theme-color"]');
@@ -645,7 +688,10 @@
           button.classList.toggle('active',active);
           button.setAttribute('aria-pressed',String(active));
         });
-        if ($('#presentation-palette')) $('#presentation-palette').innerHTML=esc(selected[1])+icon('down');
+        $$('.palette-trigger').forEach(trigger => {
+          trigger.innerHTML='<span class="palette-dot" style="--swatch:'+selected[2]+'" aria-hidden="true"></span><span lang="en" translate="no">'+esc(selected[1])+'</span>'+icon('down');
+          trigger.setAttribute('aria-label','Pilih warna: '+selected[1]);
+        });
         if ($('#palette-status')) $('#palette-status').textContent = selected[1]+' aktif di semua halaman dan layar ibadah.';
         window.GalileaPageTurn?.cancel();
         updateThemeColor();
@@ -3109,7 +3155,7 @@
         if(screenPalette){applyPalette(screenPalette.dataset.screenPalette,true);$('#presentation-palette-menu').hidePopover();$('#presentation-palette').focus({preventScroll:true});showPresentationControls(true);return;}
         if (event.target.closest('[data-present-welcome]')) return openWelcomePresentation();
         const paletteButton = event.target.closest('[data-palette-value]');
-        if (paletteButton) return applyPalette(paletteButton.dataset.paletteValue,true);
+        if (paletteButton) { applyPalette(paletteButton.dataset.paletteValue,true);closePaletteMenu($('#settings-palette-menu'));return; }
         if (event.target.closest('[data-reset-palette]')) return applyPalette('green',true);
         const navToggle = event.target.closest('[data-nav-toggle]');
         if (navToggle) {
@@ -3247,9 +3293,12 @@
       });
 
       document.addEventListener('keydown',event=>{
+        const paletteMenu = $('.palette-menu:popover-open');
+        if (event.key === 'Escape' && paletteMenu) {
+          event.preventDefault();event.stopImmediatePropagation();closePaletteMenu(paletteMenu);return;
+        }
         const dialog=$('#presentation-dialog');if(!dialog||!dialog.open)return;
         presentationKeyboardControls=true;
-        if(event.key==='Escape' && $('#presentation-palette-menu')?.matches(':popover-open')){event.preventDefault();event.stopImmediatePropagation();$('#presentation-palette-menu').hidePopover();$('#presentation-palette').focus({preventScroll:true});showPresentationControls(true);return;}
         showPresentationControls(true);
         if(event.target.closest?.('select,input,textarea,button') && event.key!=='Escape')return;
         if(event.key==='ArrowLeft'||event.key==='PageUp'){event.preventDefault();movePresentation(-1);}

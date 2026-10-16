@@ -53,8 +53,10 @@ jobs:
       - name: Install browser for Sabbath presentation checks
         run: npx playwright install --with-deps chromium
 
-      - name: Verify Sabbath presentation in browser
-        run: npm run check:sabbath
+      - name: Verify worship presentation and palette in browser
+        run: |
+          npm run check:sabbath
+          node tests/check-appearance.mjs --palette-only
 
   deploy:
     name: Apps Script Auto-Sync
