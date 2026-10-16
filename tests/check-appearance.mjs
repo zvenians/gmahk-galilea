@@ -64,6 +64,7 @@ async function choosePalette(value){await page.locator('#settings-palette').clic
 async function screenPalette(value){await page.mouse.move(15,150);await page.locator('#presentation-palette').click();await page.locator('[data-screen-palette="'+value+'"]').click();}
 async function verifyPaletteMenu(id){
   const menu=page.locator('#'+id);
+  await menu.waitFor({state:'visible'});
   await page.waitForTimeout(220);
   const box=await menu.boundingBox(),viewport=page.viewportSize();
   assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=viewport.width+1&&box.y+box.height<=viewport.height+1,'Palette stays within viewport');
@@ -90,6 +91,8 @@ async function welcome(){
     await page.locator('#desktop-menu-groups [data-present-welcome]').click();
   }
   await page.locator('#presentation-dialog').waitFor({state:'visible'});
+  await page.waitForFunction(()=>document.fullscreenElement?.id==='presentation-shell');
+  await page.evaluate(()=>new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve))));
 }
 function luminance(rgb){const values=rgb.match(/[\d.]+/g).slice(0,3).map(Number).map(v=>{v/=255;return v<=.04045?v/12.92:((v+.055)/1.055)**2.4;});return values[0]*.2126+values[1]*.7152+values[2]*.0722;}
 function contrast(a,b){const x=luminance(a),y=luminance(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
@@ -117,6 +120,7 @@ try{
     for(const viewport of [{width:320,height:640},{width:844,height:390},{width:1440,height:900}]){
       await page.setViewportSize(viewport);
       for(const theme of ['light','dark']){
+        console.log('Palette viewport:',viewport.width,viewport.height,theme);
         await settings();await page.locator('[data-theme-value="'+theme+'"]').click();
         await page.locator('#settings-palette').click();await verifyPaletteMenu('settings-palette-menu');
         await page.screenshot({path:path.join(screenshotDir,'palette-settings-'+viewport.width+'-'+theme+'.png')});
@@ -127,6 +131,8 @@ try{
         await verifyPaletteMenu('presentation-palette-menu');
         await page.screenshot({path:path.join(screenshotDir,'palette-screen-'+viewport.width+'-'+theme+'.png')});
         await page.keyboard.press('Escape');await page.keyboard.press('Escape');
+        await page.locator('#presentation-dialog').waitFor({state:'hidden'});
+        await page.waitForFunction(()=>!document.fullscreenElement);
       }
     }
     await settings();await page.locator('[data-motion-value="reduced"]').click();
