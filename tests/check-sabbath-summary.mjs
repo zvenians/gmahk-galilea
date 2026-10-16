@@ -43,6 +43,8 @@ assert.equal(one.points.length,1,'Short source is not padded with invented point
 assert.equal(one.summary,'');
 const negation=summarize({title:'Nabi yang setia',paragraphs:['Nabi yang setia tidak mengubah kebenaran Allah untuk menyenangkan raja.']});
 assert.match(negation.points[0],/tidak mengubah/,'Negation must survive');
+const parenthetical=summarize({title:'Iman',paragraphs:['Iman menguatkan umat Allah (bukan berarti tanpa kesulitan; Yak. 1:3) dalam menghadapi pencobaan setiap hari.']});
+assert.match(parenthetical.points[0],/bukan berarti tanpa kesulitan/,'Meaningful parenthetical qualifications survive');
 const quotation=summarize({title:'Nabi',paragraphs:['"Aku tidak mengutus mereka, tidak memerintahkan mereka dan tidak berfirman kepada mereka."']});
 assert.equal(quotation.points.length,0,'A first-person quotation must not be recast as the narrator');
 assert.equal(summarize({paragraphs:['Untuk mengetahui lebih lanjut, kunjungi https://example.com/pelajaran.']}).points.length,0);

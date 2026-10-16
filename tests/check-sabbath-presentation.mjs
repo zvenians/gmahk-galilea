@@ -129,6 +129,15 @@ try {
   await page.screenshot({path:'/tmp/galilea-sabbath-mobile.png'});
   await page.setViewportSize({width:844,height:390});
   fits(await fit(),'Mobile landscape');await verifyPages();
+  await wake();await page.locator('#presentation-sabbath-mode').selectOption('summary');
+  await page.locator('#presentation-sabbath-day').selectOption('3');
+  fits(await fit(),'Mobile landscape key points');await verifyPages();
+  await page.setViewportSize({width:390,height:844});
+  fits(await fit(),'Mobile portrait key points');await verifyPages();
+  await page.evaluate(()=>document.querySelector('#presentation-shell').focus());
+  for(let step=0;step<20&&!await page.locator('.ss-section-summary').count();step++)await page.keyboard.press('ArrowRight');
+  fits(await fit(),'Mobile portrait core summary');
+  assert.match(await page.locator('.ss-reading').textContent(),/fungsi inti/);
   await page.setViewportSize({width:1440,height:900});
   await fit();
   await page.evaluate(()=>document.querySelector('#presentation-shell').focus());

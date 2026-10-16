@@ -28,7 +28,7 @@
 
   function displaySentence(text) {
     // Rujukan dipindahkan ke slide ayat; isi kalimat tetap utuh.
-    return normalize(text.replace(/\([^)]*\)/g, value => references(value).length ? '' : value)
+    return normalize(text.replace(/\([^)]*\)/g, value => references(value).length && !value.slice(1,-1).replace(referencePattern, '').replace(/[\s;,]+/g, '') ? '' : value)
       .replace(/\s+([,.!?;:])/g, '$1'));
   }
 
