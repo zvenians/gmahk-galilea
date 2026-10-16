@@ -20,7 +20,8 @@ const fixture=visitorFixture(1);
 const lesson={number:3,id:'03',title:'Bertumbuh dalam Iman dan Pengharapan',dateLabel:'10–16 Oktober 2026',source:'Materi uji',days:[
   {dateLabel:'Minggu, 11 Oktober',title:'Pengharapan yang Menguatkan',bibleHtml:'<p><strong>Roma 15:13</strong> · Ayat untuk direnungkan.</p>',contentHtml:'<p>'+Array.from({length:900},(_,i)=>'kata'+i).join(' ')+'</p><blockquote>Iman bertumbuh melalui doa dan pelayanan.</blockquote><ol><li>Renungkan firman.</li><li>Bagikan pengharapan.</li></ol>'},
   {dateLabel:'Senin, 12 Oktober',title:'Hidup dalam Kasih',bibleHtml:'',contentHtml:'<h3>Pertanyaan diskusi</h3><p>Bagaimana kita menunjukkan <strong>kasih</strong> kepada sesama?</p>'},
-  {dateLabel:'Selasa, 13 Oktober',title:'Bacaan belum terbit',bibleHtml:'',contentHtml:''}
+  {dateLabel:'Selasa, 13 Oktober',title:'Bacaan belum terbit',bibleHtml:'',contentHtml:''},
+  {"dateLabel":"Rabu, 14 Oktober","title":"Fungsi Para Nabi","bibleHtml":"","contentHtml":"<p>Ruang pertemuan itu memiliki beberapa kursi kayu yang disusun pada pagi hari.</p><p>Para nabi berinteraksi dengan raja-raja dalam situasi yang menyenangkan maupun tidak menyenangkan.</p><p>Salah satu fungsi inti para nabi adalah membantu memimpin raja-raja yang tidak setia kembali kepada ketaatan pada hukum Allah.</p><p>Para nabi juga berinteraksi dengan para imam. Musa seorang nabi Allah, mengurapi Harun dan anak-anaknya sebagai imam-imam Israel yang pertama (Im. 8: 10-13).</p><p>Para nabi adalah guru bagi rakyat (2 Taw. 34:12). Mereka menyampaikan berbagai pekabaran dari Allah kepada para imam, raja, dan bangsa itu (Yer. 5:31; Yeh. 22:26).</p><p>Bagaimana kita dapat mengikuti firman Allah dalam kehidupan sehari-hari?</p>"}
 ]};
 const browser=await chromium.launch({headless:true,args:['--no-sandbox','--disable-gpu'],executablePath:process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE});
 const context=await browser.newContext({viewport:{width:1440,height:900},serviceWorkers:'block'});
@@ -69,18 +70,34 @@ try {
   await page.goto(base+'/#sabbath');
   await page.locator('#loader').waitFor({state:'hidden'});
   await page.locator('[data-lesson-id="03"]').first().click();
-  await page.locator('[data-present-sabbath]').waitFor();
+  await page.locator('[data-present-sabbath="summary"]').waitFor();
   await page.evaluate(()=>{
     const create=window.GalileaSabbathPresentation.create;
     window.GalileaSabbathPresentation.create=(...args)=>(window.ssTestModel=create(...args));
     const layout=window.GalileaSabbathPresentation.layout;
     window.GalileaSabbathPresentation.layout=(view,stage)=>{window.ssTestView=view;return layout(view,stage);};
   });
-  await page.locator('[data-present-sabbath]').click();
+  await page.locator('[data-present-sabbath="summary"]').click();
   await page.locator('#presentation-dialog[open]').waitFor();
   fits(await fit(),'Desktop cover');
   assert.ok(await page.evaluate(()=>Boolean(document.fullscreenElement)),'Native fullscreen opens');
+  assert.equal(await page.locator('#presentation-sabbath-mode').inputValue(),'summary');
+  await page.locator('#presentation-sabbath-day').selectOption('3');
+  fits(await fit(),'Daily key points');
+  assert.ok(await page.locator('.ss-point').count()>=2);
+  const dailySections=await page.evaluate(()=>window.ssTestModel.pages.filter(item=>item.dayIndex===3).map(item=>item.section));
+  for(const section of ['points','summary','references','discussion'])assert.ok(dailySections.includes(section));
+  await page.evaluate(()=>document.querySelector('#presentation-shell').focus());
+  for(let step=0;step<8&&!await page.locator('.ss-section-summary').count();step++)await page.keyboard.press('ArrowRight');
+  fits(await fit(),'Daily core summary');
+  assert.match(await page.locator('.ss-reading').textContent(),/fungsi inti/);
+  await wake();await page.locator('#presentation-sabbath-mode').selectOption('full');
+  await fit();
+  assert.equal(await page.locator('#presentation-sabbath-day').inputValue(),'3','Mode switch keeps day');
+  await page.locator('#presentation-sabbath-day').selectOption('-1');
+  await fit();
   await verifyPages();
+  await page.evaluate(()=>document.querySelector('#presentation-shell').focus());
   await page.keyboard.press('ArrowRight');
   fits(await fit(),'Desktop reading');
   const originalCount=await page.evaluate(()=>window.ssTestModel.pages.length);
@@ -117,7 +134,7 @@ try {
   await page.evaluate(()=>document.querySelector('#presentation-shell').focus());
   await page.keyboard.press('Escape');
   assert.ok(await page.locator('#reader-dialog').evaluate(node=>node.open),'Return to reading');
-  await page.locator('[data-present-sabbath]').click();await fit();
+  await page.locator('[data-present-sabbath="summary"]').click();await fit();
   assert.equal(detailCalls,1,'Fullscreen reuses loaded lesson');
   const pageBounds=await page.evaluate(()=>{
     const view=window.ssTestView,stage=document.querySelector('#presentation-stage');
@@ -136,7 +153,7 @@ try {
   assert.ok(await page.locator('#presentation-shell').evaluate(node=>node.classList.contains('presentation-controls-hidden')),'Controls hide automatically');
   await page.keyboard.press('Escape');
   await page.evaluate(()=>{document.querySelector('#presentation-shell').requestFullscreen=()=>Promise.reject(new Error('Fullscreen unavailable'));});
-  await page.locator('[data-present-sabbath]').click();
+  await page.locator('[data-present-sabbath="summary"]').click();
   fits(await fit(),'Fullscreen fallback');
   assert.ok(await page.locator('#presentation-dialog').evaluate(node=>node.open),'Presentation still opens when native fullscreen is unavailable');
   assert.deepEqual(errors,[],'No browser errors');

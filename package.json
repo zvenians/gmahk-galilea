@@ -5,14 +5,15 @@
   "type": "module",
   "description": "Viewer Vercel GMAHK Galilea Balikpapan dengan backend Google Apps Script.",
   "scripts": {
-    "build": "node scripts/build-site.mjs",
+    "build": "npm run check:sabbath-summary && node scripts/build-site.mjs",
     "check:appearance": "node tests/check-appearance.mjs",
     "check:sabbath": "node tests/check-sabbath-presentation.mjs",
     "dev": "vercel dev",
     "check:visitor": "node tests/check-visitor-flow.mjs",
     "check:scores": "node tests/check-hymnal-scores.mjs",
     "check:admin-ui": "node tests/check-admin-editor.mjs && node tests/check-admin-interactions.mjs",
-    "check": "npm run check:admin-ui && node tests/check-hymnal-scores.mjs && node tests/check-admin-viewer-sync.mjs && node tests/check-news.mjs && node tests/check-admin-media.mjs && node tests/check-admin-control-center.mjs && node tests/check-activities-viewer.mjs && node tests/check-project.mjs && node tests/check-presentation.mjs && node tests/check-page-turn.mjs && node tests/check-worship-cache.mjs && node tests/check-schedule-clock.mjs && node tests/check-schedule-sheet.mjs && node tests/check-contrast.mjs && node tests/check-banners.mjs && node tests/check-production-runtime.mjs"
+    "check": "npm run check:admin-ui && node tests/check-hymnal-scores.mjs && node tests/check-admin-viewer-sync.mjs && node tests/check-news.mjs && node tests/check-admin-media.mjs && node tests/check-admin-control-center.mjs && node tests/check-activities-viewer.mjs && node tests/check-project.mjs && node tests/check-presentation.mjs && node tests/check-page-turn.mjs && node tests/check-worship-cache.mjs && node tests/check-schedule-clock.mjs && node tests/check-schedule-sheet.mjs && node tests/check-contrast.mjs && node tests/check-banners.mjs && node tests/check-production-runtime.mjs",
+    "check:sabbath-summary": "node tests/check-sabbath-summary.mjs"
   },
   "engines": {
     "node": ">=20"
