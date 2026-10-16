@@ -60,7 +60,21 @@ const screenshotDir=process.env.APPEARANCE_SCREENSHOTS||'/tmp/galilea-appearance
 fs.mkdirSync(screenshotDir,{recursive:true});
 async function loaded(){await page.locator('#app h1').waitFor();await page.locator('#loader').waitFor({state:'hidden'});}
 async function settings(){await page.locator('[data-open="settings"]:visible').first().click();}
+async function choosePalette(value){await page.locator('#settings-palette').click();await page.locator('[data-palette-value="'+value+'"]').click();}
 async function screenPalette(value){await page.mouse.move(15,150);await page.locator('#presentation-palette').click();await page.locator('[data-screen-palette="'+value+'"]').click();}
+async function verifyPaletteMenu(id){
+  const menu=page.locator('#'+id);
+  await page.waitForTimeout(220);
+  const box=await menu.boundingBox(),viewport=page.viewportSize();
+  assert.ok(box.x>=0&&box.y>=0&&box.x+box.width<=viewport.width+1&&box.y+box.height<=viewport.height+1,'Palette stays within viewport');
+  const sizes=await menu.locator('.palette-choice').evaluateAll(nodes=>nodes.map(node=>({width:node.clientWidth,height:node.clientHeight})));
+  sizes.forEach(size=>assert.ok(size.width>=44&&size.height>=44,'Touch target size'));
+  const columns=await menu.locator('.palette-options').evaluate(node=>getComputedStyle(node).gridTemplateColumns.split(' ').length);
+  assert.equal(columns,2,'Two compact columns');
+  const labels=await menu.locator('.palette-choice [lang="en"]').evaluateAll(nodes=>nodes.map(node=>node.getBoundingClientRect().left));
+  labels.forEach((left,index)=>assert.ok(Math.abs(left-labels[index%2])<1,'Color names align within each column'));
+  assert.equal(await menu.evaluate(node=>node.scrollWidth<=node.clientWidth),true,'No horizontal overflow');
+}
 async function welcome(){
   if(await page.locator('#mobile-toggle').isVisible()){
     await page.locator('#mobile-toggle').click();
@@ -81,9 +95,49 @@ function luminance(rgb){const values=rgb.match(/[\d.]+/g).slice(0,3).map(Number)
 function contrast(a,b){const x=luminance(a),y=luminance(b);return(Math.max(x,y)+.05)/(Math.min(x,y)+.05);}
 try{
   await page.goto(base);await loaded();
+  await settings();
+  assert.equal(await page.locator('#settings-palette-menu').isVisible(),false,'Settings starts with a collapsed picker');
+  await page.locator('#settings-palette').focus();await page.keyboard.press('Enter');
+  await verifyPaletteMenu('settings-palette-menu');
+  const labels=await page.locator('#palette-options [lang="en"]').allTextContents();
+  assert.deepEqual(labels,['Galilea Green','Red','Navy','Brown','Purple','Teal','Slate','Pink','Orange','Gold','Olive','Sky Blue','Indigo']);
+  await page.keyboard.press('End');await page.keyboard.press('Enter');
+  assert.equal(await page.locator('html').getAttribute('data-palette'),'indigo');
+  await page.locator('#settings-palette-menu').waitFor({state:'hidden'});
+  assert.equal(await page.locator('#settings-palette-menu').isVisible(),false,'Selecting closes the menu');
+  assert.equal(await page.evaluate(()=>document.activeElement.id),'settings-palette');
+  await page.keyboard.press('Enter');await page.keyboard.press('Escape');
+  assert.equal(await page.locator('#settings-dialog').isVisible(),true,'Escape closes palette before settings');
+  await page.locator('#settings-palette').click();
+  await page.locator('#palette-heading').click();
+  await page.locator('#settings-palette-menu').waitFor({state:'hidden'});
+  assert.equal(await page.locator('#settings-palette-menu').isVisible(),false,'Click outside dismisses palette');
+  await page.keyboard.press('Escape');
+  if(process.argv.includes('--palette-only')){
+    for(const viewport of [{width:320,height:640},{width:844,height:390},{width:1440,height:900}]){
+      await page.setViewportSize(viewport);
+      for(const theme of ['light','dark']){
+        await settings();await page.locator('[data-theme-value="'+theme+'"]').click();
+        await page.locator('#settings-palette').click();await verifyPaletteMenu('settings-palette-menu');
+        await page.screenshot({path:path.join(screenshotDir,'palette-settings-'+viewport.width+'-'+theme+'.png')});
+        await page.keyboard.press('End');await page.keyboard.press('Enter');
+        await page.locator('#settings-palette-menu').waitFor({state:'hidden'});
+        await page.keyboard.press('Escape');
+        await welcome();await page.locator('#presentation-palette').click();
+        await verifyPaletteMenu('presentation-palette-menu');
+        await page.screenshot({path:path.join(screenshotDir,'palette-screen-'+viewport.width+'-'+theme+'.png')});
+        await page.keyboard.press('Escape');await page.keyboard.press('Escape');
+      }
+    }
+    await settings();await page.locator('[data-motion-value="reduced"]').click();
+    await page.locator('#settings-palette').click();
+    assert.ok(await page.locator('#settings-palette-menu').evaluate(node=>getComputedStyle(node).transitionDuration.split(',').every(value=>parseFloat(value)<=.001)),'Reduced motion removes visible transition');
+    assert.deepEqual(errors,[]);
+    console.log('PASS: palette alignment, portrait/landscape bounds, both themes, keyboard, dismiss, English names and reduced motion.');
+  }else{
   const navColors=new Set();
   for(const palette of palettes){
-    await settings();await page.locator('[data-palette-value="'+palette+'"]').click();
+    await settings();await choosePalette(palette);
     assert.equal(await page.locator('[data-palette-value="'+palette+'"]').getAttribute('aria-pressed'),'true');
     for(const mode of ['light','dark']){
       await page.locator('[data-theme-value="'+mode+'"]').click();
@@ -106,7 +160,7 @@ try{
   assert.equal(await page.locator('html').getAttribute('data-theme'),'dark');
   console.log('PASS: thirteen palettes including pink, both modes, contrast, selected state, persistence.');
   for(const mode of ['light','dark']){
-    await settings();await page.locator('[data-palette-value="pink"]').click();
+    await settings();await choosePalette('pink');
     await page.locator('[data-theme-value="'+mode+'"]').click();await page.keyboard.press('Escape');
     await page.goto(base);await loaded();await page.waitForLoadState('networkidle');
     const loader=page.locator('.faith-interlude .faith-loader');
@@ -129,7 +183,7 @@ try{
   }
   for(const width of [320,390,768,1440]){
     await page.setViewportSize({width,height:900});
-    await settings();await page.locator('[data-palette-value="navy"]').click();
+    await settings();await choosePalette('navy');
     await page.waitForTimeout(350);
     await page.screenshot({path:path.join(screenshotDir,'settings-'+width+'.png')});
     await page.keyboard.press('Escape');
@@ -163,8 +217,13 @@ try{
     }));
     assert.ok(photos.length>0);photos.forEach(photo=>{assert.ok(photo.height>=175);assert.ok(photo.bottom<=photo.copyTop+1,'Caption must not cover photo');});
     await page.setViewportSize({width,height:900});
+    await settings();await page.locator('#settings-palette').click();
+    await verifyPaletteMenu('settings-palette-menu');
+    await page.screenshot({path:path.join(screenshotDir,'settings-palette-'+width+'.png')});
+    await page.keyboard.press('Escape');await page.keyboard.press('Escape');
     await welcome();
     await page.locator('#presentation-palette').click();
+    await verifyPaletteMenu('presentation-palette-menu');
     await page.screenshot({path:path.join(screenshotDir,'palette-grid-'+width+'.png')});
     await page.keyboard.press('Escape');
     assert.equal(await page.locator('#presentation-dialog').isVisible(),true,'Escape closes color options before fullscreen');
@@ -272,4 +331,5 @@ try{
   console.log('PASS: song/Bible fullscreen, projector, live Sabbath rollover, reset, system mode.');
   assert.deepEqual(errors,[]);
   console.log('PASS: themed routes at four widths; visible news photos; fullscreen palettes, contrast, keyboard focus and exit.');
+  }
 }finally{await browser.close();await new Promise(resolve=>server.close(resolve));}
