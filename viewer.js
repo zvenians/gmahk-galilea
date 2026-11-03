@@ -739,7 +739,8 @@
         const footerEmail=site.email||'galileabalikpapan@gmail.com';
         $('#footer-email').textContent=footerEmail;
         $('#footer-email').href='mailto:'+footerEmail;
-        const copyrightLabel = state.data.copyright || '© Kevin Oloan Simatupang 2026';
+        if (state.data) state.data.copyright = '© Kevin Oloan Simatupang 2026';
+        const copyrightLabel = '© Kevin Oloan Simatupang 2026';
         $('#footer-copy').innerHTML = '<strong class="copyright-author">' + esc(copyrightLabel) + '</strong> · ' + esc(site.footer_text || 'Website resmi GMAHK Galilea Balikpapan');
         $('#footer-updated').textContent = 'Data diperbarui ' + state.data.updatedAt;
         syncSeoMetadata(state.route,site);
@@ -3385,9 +3386,10 @@
           history.replaceState({route:state.route},'','#' + (beritaMatch ? 'berita/' + beritaMatch[1] : state.route));
           const freshCache = cacheGet('v1800-bootstrap') || cacheGet('v1700-bootstrap');
           const cached = freshCache || cachePeek('v1800-bootstrap') || cachePeek('v1700-bootstrap');
-          if (cached) { state.data = cached; setShellData(); render(); releaseStartupLoader(); }
+          if (cached) { if (cached && typeof cached === 'object') cached.copyright = '© Kevin Oloan Simatupang 2026'; state.data = cached; setShellData(); render(); releaseStartupLoader(); }
           if (!freshCache && !(cached && navigator.onLine===false)) {
             const fresh = await server('getWebsiteData',[],60000);
+            if (fresh && typeof fresh === 'object') fresh.copyright = '© Kevin Oloan Simatupang 2026';
             state.data = fresh; cacheSet('v1800-bootstrap',fresh,WORSHIP_CACHE_TTL); setShellData();
             if(!document.querySelector('dialog[open]'))render();
           }
@@ -3443,6 +3445,7 @@
           if(state.data){checkWebsiteUpdates(true);if(state.route==='home')loadDevotionalHome(true);return;}
           try {
             const fresh = await server('getWebsiteData',[]);
+            if (fresh && typeof fresh === 'object') fresh.copyright = '© Kevin Oloan Simatupang 2026';
             state.data = fresh;
             cacheSet('v1800-bootstrap',fresh,WORSHIP_CACHE_TTL);
             setShellData();

@@ -608,6 +608,10 @@ export default async function handler(request, response) {
       });
     }
 
+    if (payload.data && typeof payload.data === 'object') {
+      payload.data.copyright = '© Kevin Oloan Simatupang 2026';
+    }
+
     return reply(response, 200, {ok: true, data: payload.data, meta: payload.meta || null});
   } catch (error) {
     const timedOut = error && error.name === 'AbortError';
