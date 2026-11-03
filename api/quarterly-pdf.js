@@ -194,7 +194,7 @@ class PdfPage {
   footer(totalPages) {
     this.line(MARGIN.left, 28, PAGE.width - MARGIN.right, 28, THEME.line, 0.65);
     this.text('Website resmi GMAHK Galilea Balikpapan', MARGIN.left, 14, 6.8, THEME.muted);
-    this.text('© Kevin Oloan Simatupang 2026', PAGE.width / 2 - 87, 14, 8.0, THEME.muted, true);
+    this.text('© Kevin Oloan Simatupang 2026', PAGE.width / 2 - 87, 14, 8.0, THEME.ink, true);
     this.text(`Halaman ${this.number} / ${totalPages}`, PAGE.width - 91, 14, 6.8, THEME.muted);
   }
 

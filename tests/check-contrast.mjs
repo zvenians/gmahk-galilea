@@ -39,7 +39,12 @@ const pairs = [
   ['presenter light announcement copy','#294b37','#cadcc9'],
   ['presenter light controls','#12351f','#f8faf4'],
   ['presenter light active control','#ffffff','#1d5030'],
-  ['WhatsApp button','#ffffff','#147c43']
+  ['WhatsApp button','#ffffff','#147c43'],
+  ['footer copyright / dark ground','#ffffff','#04140b'],
+  ['presenter dark copyright','#ffffff','#0a2c19'],
+  ['presenter light copyright','#07150d','#cadcc9'],
+  ['reading doc light copyright','#14341f','#f8faf5'],
+  ['reading doc dark copyright','#ffffff','#0b160f']
 ];
 
 for (const [label,foreground,background] of pairs) {

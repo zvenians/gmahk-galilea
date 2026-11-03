@@ -92,6 +92,8 @@ html[data-palette] .site-footer { background:var(--tone-900)!important; }
 html[data-palette] :is(.hero,.film-hero,.page-head,.word-stage,.faith-interlude,.site-footer) :is(.eyebrow,.link-arrow,a:not(.btn)) { color:var(--tone-300)!important; }
 html[data-palette] .site-footer :is(.footer-brand-lockup span,.footer-visit-row>.icon,.footer-visit-row small) { color:var(--tone-300); }
 html[data-palette] .site-footer :is(address,.footer-tools button,.footer-link) { color:var(--tone-100)!important; }
+html[data-palette] .site-footer .footer-bottom #footer-copy { color:var(--tone-100)!important; }
+html[data-palette] .site-footer .footer-bottom .copyright-author { color:var(--tone-50)!important; }
 html[data-palette] .word-stage .devotional-cinema { background:color-mix(in srgb,var(--tone-900) 85%,transparent)!important; }
 html[data-palette] .about-logo-card { background:linear-gradient(150deg,var(--tone-900),var(--tone-800))!important; }
 html[data-palette] .developer-signature { background:var(--tone-100)!important; color:var(--tone-900); }
@@ -169,6 +171,8 @@ html[data-palette] #presentation-shell .presentation-frame::before { background-
 html[data-palette] #presentation-shell .presentation-frame::after { background:none!important; }
 html[data-palette] #presentation-shell :is(.presentation-title,.presentation-copy,.presentation-brand,.presentation-stage h2,.presentation-stage h3,.presentation-stage strong,.presentation-stage dd,.presentation-stage li) { color:var(--screen-text)!important; text-shadow:none!important; }
 html[data-palette] #presentation-shell :is(.presentation-kicker,.presentation-verse-label,.presentation-brand small,.presentation-footer,.presentation-stage p,.presentation-stage small,.presentation-stage dt,.presentation-stage span) { color:var(--screen-muted)!important; }
+html[data-palette] #presentation-shell .presentation-footer :is(strong,.presentation-copy-text) { color:var(--screen-text)!important; font-weight:800!important; }
+html[data-palette] #presentation-shell .presentation-footer .copyright-mark { color:var(--screen-text)!important; border-color:var(--screen-muted)!important; }
 html[data-palette] #presentation-shell :is(.presentation-art,.presentation-context-art) { color:var(--screen-accent); }
 html[data-palette] #presentation-shell :is(.presentation-schedule-overview-copy,.presentation-schedule-board,.presentation-schedule-sidebar,.presentation-operator-aside,.presentation-operator-panel,.presentation-operator-field,.presentation-connect-card,.presentation-reminder-aside) { color:var(--screen-text)!important; background:var(--screen-raised)!important; border-color:var(--screen-accent)!important; }
 html[data-palette] #presentation-shell :is(.presentation-schedule,.presentation-operator-hero,.presentation-operator-fields,.presentation-operator-service-title,.presentation-screencheck,.presentation-screencheck-card,.presentation-announcement-priority,.presentation-refrain,.presentation-refrain-tag) { color:var(--screen-text)!important; background:var(--screen-raised)!important; border-color:var(--screen-accent)!important; }
