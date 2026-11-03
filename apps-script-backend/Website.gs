@@ -394,7 +394,7 @@ function getWebsiteData(options) {
     leaders: gwReadLeaders_(spreadsheet, settings),
     faq: gwReadFaq_(spreadsheet),
     system: gwReadPublicHealth_(spreadsheet),
-    copyright: '© Sekretaris Jemaat Galilea ' + Utilities.formatDate(now, GW.TIMEZONE, 'yyyy')
+    copyright: '© Kevin Oloan Simatupang ' + Utilities.formatDate(now, GW.TIMEZONE, 'yyyy')
   };
 
   gwCachePut_(cache, cacheKey, payload, GW.CACHE_SECONDS);
@@ -2447,7 +2447,7 @@ function getBibleBook(bookId) {
   return {
     book: book.name, bookId: book.id, chapters: chapters,
     source: 'Alkitab Terjemahan Baru (TB) · dataset neocarles/alkitab-tb', sourceUrl: GW.SOURCES.bible,
-    watermark: 'Diunduh melalui Website Galilea', copyright: '© Sekretaris Galilea 2026'
+    watermark: 'Diunduh melalui Website Galilea', copyright: '© Kevin Oloan Simatupang 2026'
   };
 }
 
@@ -2564,9 +2564,9 @@ function gwBuildHymnalPdf_() {
 
 function gwPdfDocumentHtml_(title, body) {
   return '<!doctype html><html><head><meta charset="utf-8"><style>' +
-    '@page{size:A4;margin:18mm 16mm 21mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#172019;font-size:10pt;line-height:1.52}h1{font-size:25pt;color:#214b36;margin:0 0 8mm}h2{font-size:17pt;color:#315d45;margin:10mm 0 4mm;page-break-after:avoid}h3{font-size:11pt;margin:5mm 0 2mm;page-break-after:avoid}article{page-break-inside:avoid;margin-bottom:6mm}table{width:100%;border-collapse:collapse}th,td{padding:2.2mm;border-bottom:1px solid #d8e1d8;text-align:left;vertical-align:top}th{width:36%;color:#526157}sup{color:#52705c;font-weight:700}.lead,.source{color:#647169}.song{page-break-inside:avoid}.watermark{position:fixed;right:0;bottom:-10mm;color:#78877e;font-size:7pt}.copyright{position:fixed;left:0;bottom:-10mm;color:#78877e;font-size:7pt}</style></head><body>' +
+    '@page{size:A4;margin:18mm 16mm 21mm}*{box-sizing:border-box}body{font-family:Arial,sans-serif;color:#172019;font-size:10pt;line-height:1.52}h1{font-size:25pt;color:#214b36;margin:0 0 8mm}h2{font-size:17pt;color:#315d45;margin:10mm 0 4mm;page-break-after:avoid}h3{font-size:11pt;margin:5mm 0 2mm;page-break-after:avoid}article{page-break-inside:avoid;margin-bottom:6mm}table{width:100%;border-collapse:collapse}th,td{padding:2.2mm;border-bottom:1px solid #d8e1d8;text-align:left;vertical-align:top}th{width:36%;color:#526157}sup{color:#52705c;font-weight:700}.lead,.source{color:#647169}.song{page-break-inside:avoid}.watermark{position:fixed;right:0;bottom:-10mm;color:#78877e;font-size:7pt}.copyright{position:fixed;left:0;bottom:-10mm;color:#78877e;font-size:8.5pt;font-weight:700}</style></head><body>' +
     '<h1>' + gwEscapeHtml_(title) + '</h1>' + body +
-    '<div class="watermark">Diunduh melalui Website Galilea</div><div class="copyright">© Sekretaris Galilea 2026</div></body></html>';
+    '<div class="watermark">Diunduh melalui Website Galilea</div><div class="copyright">© Kevin Oloan Simatupang 2026</div></body></html>';
 }
 
 function gwHtmlPdfBlob_(html, filename) {

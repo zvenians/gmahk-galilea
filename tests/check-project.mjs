@@ -44,7 +44,7 @@ assert.match(index, /Jelajahi ruang digital Galilea/);
 assert.match(index, /htmlToShareText/);
 assert.match(index, /const fullReading = htmlToShareText\(item\.contentHtml\)/);
 assert.match(index, /id="presentation-dialog"/);
-assert.match(index, /Sekretaris Galilea 2026/);
+assert.match(index, /Kevin Oloan Simatupang 2026/);
 assert.match(index, /Website GMAHK Galilea/);
 assert.match(index, /hymnal-toolbar/);
 assert.match(index, /presentation-refrain\{[^}]*clamp\(1\.8rem,3\.6vw,4\.8rem\)/);

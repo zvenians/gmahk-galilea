@@ -565,7 +565,7 @@
         return String(value || 'bacaan-galilea').normalize('NFD').replace(/[\u0300-\u036f]/g,'').replace(/[^a-zA-Z0-9_-]+/g,'-').replace(/^-+|-+$/g,'').slice(0,90) || 'bacaan-galilea';
       }
       function readingDocument(title, subtitle, body, source) {
-        return '<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + esc(title) + '</title><style>body{max-width:860px;margin:0 auto;padding:48px 24px;color:#172119;background:#f8faf5;font:17px/1.8 system-ui,-apple-system,Segoe UI,sans-serif}header{padding:32px;border-radius:24px;color:#f5f8f1;background:linear-gradient(135deg,#163323,#78936e)}h1{margin:8px 0;font-size:clamp(34px,7vw,64px);line-height:1.02}h2{margin-top:42px;color:#244c35}h3{margin-top:30px}.meta{opacity:.78}.day{margin:22px 0;padding:25px;border:1px solid #d7e1d3;border-radius:20px;background:#fff}.source{margin-top:38px;padding-top:18px;border-top:1px solid #d7e1d3;color:#617064;font-size:13px}a{color:#285b3d}img{max-width:100%;height:auto}@media print{body{padding:0;background:#fff}.day{break-inside:avoid}}</style></head><body><header><small>GMAHK GALILEA BALIKPAPAN</small><h1>' + esc(title) + '</h1><div class="meta">' + esc(subtitle || '') + '</div></header><main>' + body + '</main><p class="source">Sumber: ' + esc(source || 'Materi rohani yang terhubung pada Website Galilea') + '<br>Diunduh melalui Website Gereja Galilea · © Kevin Oloan Simatupang 2026</p></body></html>';
+        return '<!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>' + esc(title) + '</title><style>body{max-width:860px;margin:0 auto;padding:48px 24px;color:#172119;background:#f8faf5;font:17px/1.8 system-ui,-apple-system,Segoe UI,sans-serif}header{padding:32px;border-radius:24px;color:#f5f8f1;background:linear-gradient(135deg,#163323,#78936e)}h1{margin:8px 0;font-size:clamp(34px,7vw,64px);line-height:1.02}h2{margin-top:42px;color:#244c35}h3{margin-top:30px}.meta{opacity:.78}.day{margin:22px 0;padding:25px;border:1px solid #d7e1d3;border-radius:20px;background:#fff}.source{margin-top:38px;padding-top:18px;border-top:1px solid #d7e1d3;color:#617064;font-size:13px}.source .doc-copyright{font-weight:800;font-size:14.5px;color:#243628}a{color:#285b3d}img{max-width:100%;height:auto}@media print{body{padding:0;background:#fff}.day{break-inside:avoid}}</style></head><body><header><small>GMAHK GALILEA BALIKPAPAN</small><h1>' + esc(title) + '</h1><div class="meta">' + esc(subtitle || '') + '</div></header><main>' + body + '</main><p class="source">Sumber: ' + esc(source || 'Materi rohani yang terhubung pada Website Galilea') + '<br>Diunduh melalui Website Gereja Galilea · <strong class="doc-copyright">© Kevin Oloan Simatupang 2026</strong></p></body></html>';
       }
       function downloadHtmlReading(title, subtitle, body, source) {
         const blob = new Blob([readingDocument(title,subtitle,body,source)],{type:'text/html;charset=utf-8'});
@@ -739,7 +739,8 @@
         const footerEmail=site.email||'galileabalikpapan@gmail.com';
         $('#footer-email').textContent=footerEmail;
         $('#footer-email').href='mailto:'+footerEmail;
-        $('#footer-copy').textContent = state.data.copyright + ' · ' + (site.footer_text || 'Website resmi GMAHK Galilea Balikpapan');
+        const copyrightLabel = state.data.copyright || '© Kevin Oloan Simatupang 2026';
+        $('#footer-copy').innerHTML = '<strong class="copyright-author">' + esc(copyrightLabel) + '</strong> · ' + esc(site.footer_text || 'Website resmi GMAHK Galilea Balikpapan');
         $('#footer-updated').textContent = 'Data diperbarui ' + state.data.updatedAt;
         syncSeoMetadata(state.route,site);
         startAnalytics(site.analytics_id);
@@ -1647,7 +1648,7 @@
           const safeBook = String(data && data.book || 'Kitab');
           const chapters = Array.isArray(data && data.chapters) ? data.chapters : [];
           if (!chapters.length) throw new Error('Isi kitab belum tersedia untuk diunduh.');
-          const body = chapters.map((chapter,index)=>'<section class="day"><h2>' + esc(safeBook) + ' ' + esc(chapter && chapter.number != null ? chapter.number : index + 1) + '</h2><p>' + (Array.isArray(chapter && chapter.verses) ? chapter.verses : []).map((verse,verseIndex)=>'<sup>' + esc(verse && verse.number != null ? verse.number : verseIndex + 1) + '</sup> ' + esc(verse && verse.text != null ? verse.text : '')).join(' ') + '</p></section>').join('') + '<p class="source">Diunduh melalui Website Galilea · © Kevin Oloan Simatupang 2026</p>';
+          const body = chapters.map((chapter,index)=>'<section class="day"><h2>' + esc(safeBook) + ' ' + esc(chapter && chapter.number != null ? chapter.number : index + 1) + '</h2><p>' + (Array.isArray(chapter && chapter.verses) ? chapter.verses : []).map((verse,verseIndex)=>'<sup>' + esc(verse && verse.number != null ? verse.number : verseIndex + 1) + '</sup> ' + esc(verse && verse.text != null ? verse.text : '')).join(' ') + '</p></section>').join('') + '<p class="source">Diunduh melalui Website Galilea · <strong class="doc-copyright">© Kevin Oloan Simatupang 2026</strong></p>';
           downloadHtmlReading(safeBook + ' · Alkitab Terjemahan Baru (TB)','Seluruh pasal',body,String(data && data.source || 'Alkitab Terjemahan Baru (TB) — LAI'));
         } catch(error) { toast(error.message); }
       }
@@ -2918,7 +2919,7 @@
         ctx.strokeStyle = 'rgba(255,255,255,.14)'; ctx.beginPath(); ctx.moveTo(64,1234); ctx.lineTo(1018,1234); ctx.stroke();
         ctx.fillStyle = '#e4cf98'; ctx.beginPath(); ctx.arc(75,1270,6,0,Math.PI*2); ctx.fill();
         ctx.fillStyle = 'rgba(255,255,255,.82)'; ctx.font = '650 20px Arial'; ctx.fillText('Periksa pembaruan terbaru melalui Website Gereja Galilea.',94,1277);
-        ctx.fillStyle = 'rgba(255,255,255,.46)'; ctx.font = '500 16px Arial'; ctx.fillText('Diunduh melalui Website Gereja Galilea · © Kevin Oloan Simatupang 2026',64,1314);
+        ctx.fillStyle = 'rgba(255,255,255,.75)'; ctx.font = '700 18px Arial'; ctx.fillText('Diunduh melalui Website Gereja Galilea · © Kevin Oloan Simatupang 2026',64,1314);
         ctx.fillStyle = '#e4cf98'; ctx.font = '800 16px Arial'; ctx.textAlign = 'right'; ctx.fillText('BERIBADAH · BERTUMBUH · MELAYANI',1018,1314); ctx.textAlign = 'left';
         const link = document.createElement('a');
         link.download = 'Jadwal-Galilea-' + payload.record.isoDate + '.png';
@@ -2947,7 +2948,7 @@
         ctx.fillStyle='#fff';ctx.font='750 64px Arial';drawCanvasText(ctx,payload.query,64,158,900,70);
         ctx.fillStyle='rgba(255,255,255,.65)';ctx.font='500 21px Arial';ctx.fillText(payload.count+' pelayanan ditemukan · '+payload.updatedAt,64,244);
         items.forEach((item,index)=>{const y=300+index*rowHeight;canvasRoundRect(ctx,58,y,964,rowHeight-18,24);ctx.fillStyle='rgba(5,20,12,.44)';ctx.fill();ctx.strokeStyle='rgba(255,255,255,.12)';ctx.stroke();ctx.fillStyle='#dfc68d';ctx.font='800 17px Arial';ctx.fillText(String(item.sectionTitle).toUpperCase(),88,y+40);ctx.fillStyle='#fff';ctx.font='700 29px Arial';ctx.fillText(item.dateLabel,88,y+78);ctx.fillStyle='rgba(255,255,255,.72)';ctx.font='600 19px Arial';ctx.fillText(String(item.time).replace(':','.')+' WITA',88,y+110);const roles=(item.roles||[]).map(role=>role.label+': '+role.value).join(' · ');ctx.font='600 19px Arial';drawCanvasText(ctx,roles,470,y+52,500,26)});
-        ctx.fillStyle='rgba(255,255,255,.54)';ctx.font='500 16px Arial';ctx.fillText('Diunduh melalui Website Gereja Galilea · © Kevin Oloan Simatupang 2026',64,height-30);
+        ctx.fillStyle='rgba(255,255,255,.82)';ctx.font='700 18px Arial';ctx.fillText('Diunduh melalui Website Gereja Galilea · © Kevin Oloan Simatupang 2026',64,height-30);
         const link=document.createElement('a');link.download='Jadwal-'+safeFileName(payload.query)+'-Galilea.png';link.href=canvas.toDataURL('image/png');link.click();
       }
 

@@ -62,7 +62,7 @@ function pageCommands(items,pageIndex,pageCount,data,generatedLabel){
   c.push('q',rgb(COLOR.green),'48 51 499 1 re f','Q');
   c.push(...textCommand(`Diunduh dari website resmi GMAHK Galilea Balikpapan pada ${generatedLabel}`,48,34,7.1,COLOR.soft,false));
   c.push(...textCommand(`gmahk-galilea.vercel.app  |  Halaman ${pageIndex+1} dari ${pageCount}`,48,20,7.1,COLOR.soft,false));
-  c.push(...textCommand('(c) Sekretaris Galilea 2026',426,20,7.1,COLOR.soft,true));
+  c.push(...textCommand('(c) Kevin Oloan Simatupang 2026',390,20,8.2,COLOR.soft,true));
   return c;
 }
 function buildPdf(data){

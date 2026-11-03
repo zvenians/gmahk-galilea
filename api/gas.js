@@ -393,7 +393,7 @@ async function getBibleBookDirect(bookId) {
     source: BIBLE_SOURCE_LABEL,
     sourceUrl: BIBLE_SOURCE_URL,
     watermark: 'Diunduh melalui Website Galilea',
-    copyright: '© Sekretaris Galilea 2026'
+    copyright: '© Kevin Oloan Simatupang 2026'
   };
 }
 
