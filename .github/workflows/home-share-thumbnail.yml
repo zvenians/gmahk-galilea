@@ -58,5 +58,5 @@ jobs:
           fi
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git commit -m "chore(social): refresh current Home screenshot [skip ci]"
+          git commit -m "chore(social): refresh current Home screenshot"
           git push origin "HEAD:${GITHUB_REF_NAME}"
