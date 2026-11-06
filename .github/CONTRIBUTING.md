@@ -1,26 +1,24 @@
-﻿# Contributing Guidelines
+# Panduan kontribusi
 
-Thank you for your interest in improving the **GMAHK Galilea Web Portal**.
+## Prinsip kerja
+- Lakukan perubahan kecil dengan alasan dan lingkup yang jelas.
+- Gunakan struktur HTML semantik, CSS konsisten, serta JavaScript yang mudah ditelusuri.
+- Utamakan keterbacaan, akses keyboard, fokus yang terlihat, kontras, dan tampilan ponsel.
+- Hormati preferensi pengurangan gerakan dan pastikan halaman tetap dapat digunakan tanpa animasi.
+- Sediakan keadaan memuat, kosong, gagal, dan berhasil untuk alur yang relevan.
+- Jangan menambahkan konten jemaat, statistik, gambar, atau klaim yang belum terverifikasi.
+- Jangan memasukkan data pribadi jemaat, kredensial, maupun kunci API ke Git.
 
-## Development Workflow
+## Pemeriksaan
+Gunakan Node.js versi 20 atau lebih baru.
 
-1. **Fork or Branch:** Create a dedicated feature branch from `main` (e.g., `feat/song-search-shortcut` or `fix/hymn-layout`).
-2. **Local Verification:**
-   Before pushing changes, run the project verification and contrast checks:
-   ``bash
-   npm run check
-   ``
-   Ensure that:
-   - All 20 API viewer proxy endpoints resolve correctly.
-   - HTML syntax is valid.
-   - All light and dark theme color tokens pass WCAG 2.1 AA contrast ratios (minimum 4.5:1).
-3. **Commit Standards:**
-   Use [Conventional Commits](https://www.conventionalcommits.org/) for clean history:
-   - `feat: add new feature`
-   - `fix: resolve an issue`
-   - `docs: update documentation`
-   - `ci: update workflow configurations`
-4. **Pull Requests:**
-   - Submit your pull request targeting the `main` branch.
-   - Provide a clear summary of changes and verification evidence in the pull request description.
-   - Automated GitHub Actions CI must pass before merging.
+```sh
+npm ci
+npm run check
+npm run build
+```
+
+Untuk perubahan tampilan pengunjung, jalankan juga `npm run check:visitor` setelah memasang Chromium Playwright. Periksa tampilan pada layar kecil, navigasi keyboard, dan mode gerakan dikurangi. Jelaskan pemeriksaan yang tidak dapat dilakukan.
+
+## Review dan rilis
+Gunakan branch terpisah dan pull request. Sertakan perubahan, dampak terhadap halaman pengunjung/admin, bukti pemeriksaan, dan risiko. Perubahan cache pada `viewer.js` atau CSS perlu mengikuti aturan versi di README. Rilis Apps Script dan Vercel adalah proses yang terpisah; jangan menganggap push kode otomatis memperbarui keduanya.
