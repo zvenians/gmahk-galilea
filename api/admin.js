@@ -322,8 +322,8 @@ export default async function handler(request, response) {
       response.setHeader('X-Galilea-Admin-Deployment', deploymentId.slice(0, 12) + '...');
       return response.redirect(307, target.toString());
     } catch (err) {
-      console.error('[api/admin] resolveAdminUrl failed:', err.message);
-      return response.status(503).send('Konfigurasi Admin belum siap: ' + err.message);
+      console.error('[api/admin] Konfigurasi Admin tidak tersedia:', err?.name || 'Error');
+      return response.status(503).send('Konfigurasi Admin belum siap. Hubungi pengelola website.');
     }
   }
 
