@@ -1,0 +1,62 @@
+name: Refresh Home share thumbnail
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - feat/live-home-thumbnail-20261106
+    paths:
+      - scripts/capture-home-thumbnail.mjs
+      - .github/workflows/home-share-thumbnail.yml
+
+permissions:
+  contents: write
+
+concurrency:
+  group: home-thumbnail-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  capture:
+    if: github.repository == 'zvenians/gmahk-galilea'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout the branch
+        uses: actions/checkout@v5
+        with:
+          persist-credentials: true
+
+      - name: Set up Node
+        uses: actions/setup-node@v5
+        with:
+          node-version: 24
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      - name: Capture real homepage screenshot
+        run: node scripts/capture-home-thumbnail.mjs
+
+      - name: Verify generated site and social image
+        run: |
+          npm run build
+          node tests/check-social-preview.mjs
+
+      - name: Commit only a visibly changed screenshot
+        run: |
+          git add assets/social/home-latest.png
+          if git diff --cached --quiet; then
+            echo "Homepage thumbnail is already current."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "chore(social): refresh current Home screenshot"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
