@@ -109,15 +109,13 @@ async function callGoogleAppsScript(method, args) {
     });
     
     const text = await upstream.text();
-    console.log('[APPS_SCRIPT_RES]', method, text.slice(0, 200));
-    
     if (!upstream.ok) {
-      return { ok: false, error: 'Server merespons dengan status ' + upstream.status + ': ' + text.slice(0, 100) };
+      return { ok: false, error: 'Backend Apps Script merespons dengan HTTP ' + upstream.status + '.' };
     }
     
     const contentType = upstream.headers.get('content-type') || '';
     if (contentType.includes('text/html')) {
-      return { ok: false, error: 'Respons backend Apps Script bukan JSON (kemungkinan crash): ' + text.slice(0, 160) };
+      return { ok: false, error: 'Respons backend Apps Script tidak sesuai format JSON.' };
     }
     
     try {
@@ -126,7 +124,7 @@ async function callGoogleAppsScript(method, args) {
       return { ok: false, error: 'Gagal membaca response backend sebagai JSON.' };
     }
   } catch (err) {
-    return { ok: false, error: err && err.message ? err.message : String(err) };
+    return { ok: false, error: 'Tidak dapat menghubungi backend Apps Script.' };
   } finally {
     clearTimeout(timer);
   }
@@ -324,8 +322,8 @@ export default async function handler(request, response) {
       response.setHeader('X-Galilea-Admin-Deployment', deploymentId.slice(0, 12) + '...');
       return response.redirect(307, target.toString());
     } catch (err) {
-      console.error('[api/admin] resolveAdminUrl failed:', err.message);
-      return response.status(503).send('Konfigurasi Admin belum siap: ' + err.message);
+      console.error('[api/admin] Konfigurasi Admin tidak tersedia:', err?.name || 'Error');
+      return response.status(503).send('Konfigurasi Admin belum siap. Hubungi pengelola website.');
     }
   }
 
@@ -401,10 +399,10 @@ export default async function handler(request, response) {
         error: (upstreamResult && upstreamResult.error) ? 'Apps Script Error: ' + upstreamResult.error : 'Operasi ' + method + ' belum dapat diselesaikan oleh backend Apps Script.'
       });
     } catch (err) {
-      console.error('[api/admin] Error processing method ' + method + ':', err);
+      console.error('[api/admin] Gagal memproses permintaan:', err?.name || 'Error');
       return reply(response, 500, {
         ok: false,
-        error: 'Gangguan server admin: ' + (err && err.message ? err.message : String(err))
+        error: 'Gangguan server admin. Silakan coba kembali.'
       });
     }
   }

@@ -70,7 +70,7 @@ Gate sebelumnya tetap berlaku pada bagian yang tidak diubah. Arah tetap ENERGY 2
 
 Chromium pengujian dipilih melalui `PLAYWRIGHT_CHROMIUM_EXECUTABLE`. Fixture hanya digunakan pada pengujian otomatis; data uji tidak diterbitkan ke halaman website.
 
-## Delivery Gate antislop
+## Pemeriksaan kualitas
 
 Arah mengikuti halaman jemaat yang sudah ada: foto tetap menjadi bukti kegiatan, pilihan warna memberi kendali pengguna, dan sambutan menjadi fokus tunggal layar ibadah. ENERGY 2 / RHYTHM 2 / MOTION 2. Lingkup gate ini hanya bagian yang ditambah atau diubah.
 

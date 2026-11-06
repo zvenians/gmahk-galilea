@@ -39,7 +39,7 @@ Pengujian ukuran menggunakan halaman verifikasi viewport bawaan proyek, bukan me
 
 ![Tampilan beranda setelah penerbitan](visitor-ui-proof.jpg)
 
-## Delivery Gate antislop
+## Pemeriksaan kualitas
 
 Status berlaku untuk perubahan dalam lingkup di atas, bukan penulisan ulang isi yang diterbitkan jemaat atau seluruh sistem lama.
 

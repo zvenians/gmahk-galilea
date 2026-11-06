@@ -1,124 +1,167 @@
 # GMAHK Galilea
 
-Website jemaat Galilea di Balikpapan untuk melihat jadwal pelayanan, membaca materi ibadah, mengikuti berita jemaat, dan menghubungi pengurus.
+**A congregation website and worship companion for GMAHK Galilea, Balikpapan, Indonesia.**
 
-[Buka website](https://gmahk-galilea.vercel.app/) · [Portal pengurus](https://gmahk-galilea.vercel.app/admin)
+Schedules, worship materials, congregation news, and presentation tools in one browser-based experience. Public content is displayed through a Vercel-hosted viewer; authorized editors maintain records through Google Apps Script and Google Sheets.
 
-## Fitur
+[Visit website](https://gmahk-galilea.vercel.app/) · [Administration entry](https://gmahk-galilea.vercel.app/admin) · [Digital archive](https://drive-galilea.vercel.app/)
 
-- Jadwal terdekat, pembagian petugas, kalender, poster, dan PDF triwulan.
-- Pusat ibadah serta mode layar untuk Alkitab, Lagu Sion, jadwal, dan pengumuman.
-- Renungan pagi, pelajaran Sekolah Sabat, berita misi, dan bacaan persembahan.
-- Berita jemaat dengan foto, video, audio, unduhan, dan tombol berbagi.
-- Reels Instagram dengan tautan ke profil saat video tidak tersedia.
-- Panduan kunjungan, kontak, dan permohonan pelayanan dengan pilihan privasi.
-- Pencarian yang membuka berita atau pengumuman yang dipilih.
-- Tema terang/gelap, pengaturan ukuran teks, gerakan, dan bahasa.
-- Favorit serta cache bacaan di perangkat. Ketersediaan offline bergantung pada data yang sudah berhasil disimpan.
+[![CI](https://github.com/zvenians/gmahk-galilea/actions/workflows/ci.yml/badge.svg)](https://github.com/zvenians/gmahk-galilea/actions/workflows/ci.yml)
 
-## Cara kerja
+---
 
-Viewer memakai HTML, CSS, dan JavaScript biasa. Vercel menjalankan endpoint pada direktori `api/`; Google Apps Script mengambil data dari Google Sheets dan menjalankan pengelolaan konten.
+## Why this exists
 
-`GET /admin` mengarahkan pengurus ke deployment Apps Script yang memakai autentikasi Google. Operasi dengan nama `admin*` melalui `POST /api/admin` ditolak dengan HTTP 403. Pengaturan peran dan privasi berada di backend Apps Script.
+A weekly church service involves more than a calendar entry. Members need to know when they serve, visitors need clear information, presenters need readable material on large screens, and content editors need a way to publish corrections without editing frontend code.
 
-Paket 525 Lagu Sion disimpan dengan masa cache tiga jam. Video siaran dan renungan memiliki kebijakan pembaruan tersendiri. Bagian video tambahan di beranda baru meminta data ketika dibuka; Reels memakai alur integrasi yang sudah ada.
+This project separates the public reading experience from content administration. It provides predictable navigation for the congregation while keeping editing workflows in the Apps Script environment.
 
-## Struktur proyek
+## What the site provides
 
-| Lokasi | Isi |
-|---|---|
-| `index.html` | Struktur halaman, metadata, navigasi, dan dialog |
-| `viewer.css` | Gaya dasar viewer, pembaca, dan presentasi |
-| `visitor-ui.css` | Gaya pengunjung, kontrol, dan layout responsif |
-| `viewer.js` | Navigasi, render halaman, pencarian, dan interaksi viewer |
-| `schedule-clock.js` | Penghitungan ulang jadwal berdasarkan waktu WITA |
-| `hymnal-scores.js` / `.css` | Pencarian lirik dan PDF partitur |
-| `page-turn.js` / `.css` | Transisi halaman dalam presentasi |
-| `sw.js` | Cache halaman dan aset untuk penggunaan offline |
-| `api/` | Endpoint Vercel untuk proxy, media, PDF, dan metadata berita |
-| `apps-script-backend/` | Sumber backend dan portal pengurus Apps Script |
-| `tests/` | Pemeriksaan integrasi, perilaku, dan browser |
-| `docs/` | Catatan verifikasi serta panduan operasional |
+| Area | Visitor-facing behavior |
+| --- | --- |
+| **Worship schedules** | Upcoming services, duty assignments, calendar views, quarterly PDFs, and locally calculated WITA schedule state |
+| **Worship readers** | Bible, Lagu Sion hymns and scores, announcement materials, and full-screen presentation controls |
+| **Congregation news** | Articles with supporting media, searchable content, and share links |
+| **Devotional resources** | Morning devotionals, Sabbath School resources, mission news, and offering readings |
+| **Visit and service information** | Directions, congregation contacts, and service request information with privacy choices |
+| **Personal preferences** | Light/dark appearance, configurable colors, reading size, motion preferences, favorites, and locally cached materials |
 
-## Menjalankan dan memeriksa
+Offline access depends on resources previously cached by the device. Live data, external media, and administrative actions still require a working connection.
 
-Gunakan Node.js 20 atau lebih baru.
+## System design
+
+```mermaid
+flowchart LR
+    Visitor["Member / visitor"] --> Viewer["Vercel-hosted viewer"]
+    Viewer --> Proxy["Serverless routes · api/"]
+    Proxy --> Bridge["Apps Script API bridge"]
+    Bridge --> Sheets[("Google Sheets · content")]
+
+    Editor["Authorized editor"] --> Admin["Apps Script admin portal"]
+    Admin --> Sheets
+    Viewer --> Cache["Service worker · local cache"]
+```
+
+- **Public frontend:** semantic HTML, CSS, and vanilla JavaScript; the main viewer is assembled from `index.html`, `viewer.js`, and specialized reader and presentation modules.
+- **Serverless routes:** Vercel functions under `api/` mediate backend requests and generate image, bulletin, PDF, and article metadata responses.
+- **Content backend:** Google Apps Script implements the public data bridge and administration logic; Google Sheets stores editable church records.
+- **Admin isolation:** `GET /admin` redirects to the configured Apps Script administration deployment. Requests beginning with `admin` are rejected on the public `POST /api/admin` route.
+- **Local behavior:** `sw.js` caches the application shell; scheduled presentation and welcome text uses Balikpapan time (`Asia/Makassar`, UTC+8).
+
+These boundaries are implemented in source and covered by tests, but they are not a substitute for reviewing a live Apps Script deployment's permissions.
+
+## Repository map
+
+```text
+.
+├── index.html                     Main page and metadata
+├── viewer.js / viewer.css         Page rendering and reading experience
+├── visitor-ui.css                 Visitor interaction and responsive layout
+├── appearance.css                 Appearance palettes and presentation themes
+├── schedule-clock.js              WITA-aware schedule updates
+├── hymnal-scores.js / .css        Hymn lyrics and score handling
+├── sabbath-presentation.js / .css Worship presentation layouts
+├── page-turn.js / .css            Reader page transitions
+├── sw.js                          Service worker and offline cache
+├── api/                           Vercel serverless endpoints
+├── apps-script-backend/           Apps Script administration and API bridge
+├── scripts/                       Site build and preview generation
+├── tests/                         Integration and browser verification
+├── docs/                          Operations and verification notes
+├── .env.example                   Server-side configuration template
+└── vercel.json                    Routes, functions, headers, build output
+```
+
+### Notable routes
+
+| Route | Purpose |
+| --- | --- |
+| `/` | Public congregation viewer |
+| `/admin` | Redirect into the authenticated Apps Script portal |
+| `/api/gas` | Allowlisted public backend operations |
+| `/berita/:id` | Article-specific share metadata |
+| `/api/quarterly-pdf` | Quarterly schedule document handling |
+| `/api/news-og` | Article preview image generation |
+
+## Local development
+
+**Requirements:** Node.js 20 or newer, npm, and optionally the Vercel CLI for serverless routing.
 
 ```bash
+git clone https://github.com/zvenians/gmahk-galilea.git
+cd gmahk-galilea
 npm ci
 npm run check
+npm run build
 ```
 
-`npm run check` memeriksa admin, media, sinkronisasi, jadwal, pembaca, cache, warna kontrol, serta endpoint admin produksi. Pemeriksaan endpoint produksi memerlukan koneksi internet.
-
-Pengujian browser memakai data uji dan server lokal sementara; tidak mengirim permohonan pelayanan ke gereja.
-
-```bash
-npx playwright install chromium
-npm run check:visitor
-```
-
-Untuk menjalankan seluruh endpoint secara lokal, hubungkan proyek Vercel yang sesuai dan jalankan:
+A static local server can preview the viewer files. For `api/` handlers use the local Vercel runtime, with your **own authorized** environment configuration:
 
 ```bash
 npx vercel dev
 ```
 
-Pratinjau HTML/CSS saja dapat memakai server statis. Endpoint `api/` tetap memerlukan runtime Vercel.
+Neither a static server nor a local build creates or configures the church's Google Sheets and Apps Script backends.
 
-## Konfigurasi
+### Browser checks
 
-Variabel berikut hanya berada di server:
+```bash
+npx playwright install chromium
+npm run check:visitor
+npm run check:appearance
+```
 
-| Variabel | Kegunaan |
-|---|---|
-| `GALILEA_APPS_SCRIPT_API_URL` | URL deployment API publik Apps Script |
-| `GALILEA_APPS_SCRIPT_ADMIN_URL` | URL deployment portal pengurus Apps Script |
-| `GALILEA_API_SECRET` | Rahasia komunikasi server dengan dispatcher Apps Script |
+The visitor and appearance checks use browser fixtures. Check real device interaction and actual live data separately before releasing a user-facing change.
 
-Gunakan URL deployment yang berakhir `/exec`. Jangan memasukkan rahasia ke viewer, dokumentasi, atau repository.
+## Configuration
 
-Identitas, jadwal, berita, dan sebagian besar konten dikelola melalui pengurus dan Google Sheets. Perubahan data tidak memerlukan deployment ulang viewer.
+Copy the variable names from [`.env.example`](.env.example) into your local or Vercel configuration, without committing credentials.
 
-Panduan kunjungan mendukung informasi tambahan dari sheet **Website Setting**. Tambahkan baris dengan kolom `Bagian`, `Kunci`, `Isi Website`, dan `Petunjuk` sesuai struktur sheet. Isi hanya dengan informasi yang telah dikonfirmasi pengurus.
+| Environment variable | Usage | Scope |
+| --- | --- | --- |
+| `GALILEA_APPS_SCRIPT_API_URL` | Public Apps Script API deployment URL | Server |
+| `GALILEA_APPS_SCRIPT_ADMIN_URL` | Authenticated admin deployment URL | Server |
+| `GALILEA_API_SECRET` | Shared request secret for the API bridge | Server secret |
 
-| Kunci opsional | Isi |
-|---|---|
-| `visitor_entrance_photo_url` | URL foto pintu masuk gereja yang sebenarnya |
-| `visitor_parking` | Petunjuk masuk dan posisi parkir |
-| `visitor_sabbath_classes` | Kelas Sekolah Sabat dan tempat berkumpul |
-| `visitor_children` | Kelas anak dan fasilitas keluarga |
-| `visitor_accessibility` | Kondisi akses kursi roda dan bantuan yang tersedia |
-| `service_response_time` | Perkiraan waktu balasan yang telah disepakati tim pelayanan |
+Use deployed Apps Script URLs ending in `/exec`. Do not expose the shared secret through browser code, error messages, logs, screenshots, or documentation. The API bridge and the Vercel environment must be configured consistently.
 
-Jika kosong, halaman memberi penjelasan dan tombol untuk menghubungi pengurus. Foto `church_image_url` digunakan sebagai foto gereja bila foto pintu masuk belum disediakan.
+Content editors may update schedules, news, visitor details, and service information through their authorized workflows. Such content changes should not require rebuilding the public viewer.
 
-## Deployment dan cache
+## Verification
 
-Repository menggunakan integrasi Git dengan Vercel. Verifikasi commit yang diterbitkan dan URL produksi setelah perubahan masuk ke cabang produksi.
+The repository defines these scripts in `package.json`:
 
-Saat mengubah `viewer.js`, `viewer.css`, `visitor-ui.css`, atau `appearance.css`, perbarui versi URL pada `index.html` dan daftar `SHELL` di `sw.js`, lalu naikkan versi `CACHE`. Versi yang sama pada HTML dan service worker mencegah aset yang tertinggal saat reload atau offline.
+| Command | What it checks |
+| --- | --- |
+| `npm run check` | Viewer/admin integration, schedules, hymns, news, caching, contrast, proxies, and sensitive logging |
+| `npm run check:visitor` | Chromium visitor flows and responsive interactions |
+| `npm run check:appearance` | Palette and appearance behavior |
+| `npm run check:sabbath` | Sabbath presentation behavior |
+| `npm run build` | Sabbath-summary prerequisite and public output generation |
 
-Vercel menjalankan `npm run build`. Build menyiapkan aset publik di `public-dist` dan gambar preview 1200 × 630. Hash HTML, CSS, JavaScript, dan aset menentukan URL gambar pada metadata OG, Twitter, dan schema. Warna gambar berasal dari palet resmi pada `appearance.css`; perubahan desain menghasilkan URL baru otomatis. Endpoint preview lama serta metadata berita wajib melakukan revalidasi. Preview berita memiliki versi berdasarkan isi berita, termasuk URL foto dan tanggal pembaruan. Aplikasi berbagi tetap mengendalikan cache preview yang sudah mereka simpan; website tidak dapat memaksa WhatsApp menghapus cache lama.
+The CI workflow is in [`.github/workflows/ci.yml`](.github/workflows/ci.yml). Successful repository checks do not imply that a new Apps Script version has been published.
 
-Jalankan `npm run build && node tests/check-social-preview.mjs` untuk memeriksa hasil build dan metadata. Jangan menyimpan hasil `public-dist` ke Git.
+## Release and cache notes
 
-## Warna dan Layar Sambutan
+The Vercel build creates `public-dist/`; it is generated output, not source to commit. Changes to visitor styles or scripts may require synchronized asset version references in `index.html` and the service worker's cache manifest. Test both online reloads and cached/offline states.
 
-Buka Menu → Alat → Tampilan untuk memilih hijau, merah, biru tua, coklat, ungu, teal, atau abu-abu. Mode Terang, Gelap, dan Sistem berlaku untuk semua palet. Pilihan tersimpan di perangkat, termasuk saat berpindah halaman atau membuka layar ibadah. Kontrol warna dan mode di fullscreen juga mengubah tampilan website.
+The share preview system generates site/article-specific Open Graph assets. Messaging platforms may continue using previously cached previews even after the site updates.
 
-Menu → Materi Ibadah → Layar Sambutan membuka kerangka fullscreen yang sama dengan Alkitab dan Lagu Sion. Berdasarkan waktu Balikpapan (WITA), Sabtu pukul 00.00 sampai sebelum Minggu 00.00 menampilkan “Selamat Hari Sabat”. Hari lain menampilkan “Selamat Datang”, termasuk Rabu mulai pukul 18.00. Semua sambutan disertai “Selamat berbakti di Jemaat Galilea.” Layar terbuka memeriksa pergantian hari setiap 15 detik dan ketika tab kembali aktif. Menu dapat dipakai dengan data tersimpan saat offline.
+Changes in `apps-script-backend/` require a **separate Apps Script release**. Merging to GitHub alone does not replace an Apps Script deployment. Production deployment should follow explicit review and approval.
 
-`npm run check:appearance` menguji tujuh palet, kedua mode, penyimpanan pilihan, kontras, ukuran layar, foto berita, pembaca fullscreen, proyektor, serta batas waktu sambutan. Pengujian ini membutuhkan Chromium seperti `check:visitor`.
+## Documentation
 
-Perubahan di `apps-script-backend/` memerlukan rilis Apps Script tersendiri. Push Git tidak mengganti deployment Apps Script yang aktif.
+- [Visitor improvements verification](docs/visitor-improvements-verification.md)
+- [Schedule source verification](docs/schedule-source-verification.md)
+- [Hymn score verification](docs/hymnal-scores-verification.md)
+- [Vercel setup guide](docs/PANDUAN_PASANG_VERCEL.md) — operational guide in Indonesian
+- [Contribution guidelines](.github/CONTRIBUTING.md)
 
-## Catatan pengujian
+## Data and responsibility
 
-- [Verifikasi pembaruan pengunjung](docs/visitor-improvements-verification.md)
-- [Verifikasi jadwal](docs/schedule-source-verification.md)
-- [Verifikasi partitur](docs/hymnal-scores-verification.md)
-- [Panduan pemasangan Vercel](docs/PANDUAN_PASANG_VERCEL.md)
+Congregation content may contain personal and pastoral information. Verify accuracy with authorized church staff, keep credentials outside version control, avoid production data in test fixtures, and preserve the distinctions between publicly readable material and restricted administration.
 
-Dokumen rilis lama tetap tersimpan di `docs/` untuk referensi versi sebelumnya.
+---
+
+**Maintained for GMAHK Galilea Balikpapan.** Developed in the [@zvenians](https://github.com/zvenians) project workspace.
