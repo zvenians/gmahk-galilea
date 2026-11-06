@@ -15,15 +15,28 @@ try {
     timezoneId:'Asia/Makassar',
     serviceWorkers:'block'
   });
-  await page.goto(home,{waitUntil:'domcontentloaded',timeout:45000});
-  // Do not publish the loader, an error screen, or partially rendered content.
-  await page.waitForFunction(() => {
-    const loader=document.getElementById('loader');
-    const app=document.getElementById('app');
-    return !!app && (!loader || loader.classList.contains('hidden')) &&
-      !app.querySelector('[data-startup-loading]') &&
-      (app.textContent||'').trim().length>100;
-  },null,{timeout:45000});
+  const errors=[];
+  page.on('pageerror',error=>errors.push('JS: '+error.message));
+  page.on('response',response=>{
+    if(response.status()>=400 && new URL(response.url()).origin===new URL(home).origin)
+      errors.push('HTTP '+response.status()+': '+response.url());
+  });
+  // Only the hydrated Home view contains .film-hero. The server-provided
+  // fallback paragraph must NEVER be captured as the social thumbnail.
+  let homeReady=false;
+  for(let attempt=1;attempt<=2;attempt++){
+    await page.goto(home,{waitUntil:'domcontentloaded',timeout:45000});
+    try{
+      await page.locator('#app .film-hero').waitFor({state:'visible',timeout:25000});
+      homeReady=true;
+      break;
+    }catch(error){
+      const partial=await page.locator('#app').innerText().catch(()=>'(unavailable)');
+      console.warn('Home did not hydrate on attempt '+attempt+': '+partial.slice(0,240));
+      if(attempt===2) throw new Error('Cannot capture real Home; preserving previous thumbnail. '+errors.slice(-5).join(' | '));
+    }
+  }
+  if(!homeReady)throw new Error('Cannot capture Home view.');
   const text=await page.locator('#app').innerText();
   if (/informasi jemaat belum terhubung|coba muat ulang|terjadi kesalahan/i.test(text)) {
     throw new Error('Home rendered an error message; keeping the previous thumbnail.');
