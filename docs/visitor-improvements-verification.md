@@ -63,7 +63,7 @@ Pratinjau memakai data publik dari website. Foto berita diambil dari URL yang di
 | Mode offline | PASS: service worker menyimpan CSS/JS terpisah; reload dan pembukaan berita tersimpan berfungsi |
 | Console browser | PASS: tidak ada exception pada alur yang diuji |
 
-## Delivery gate antislop
+## Pemeriksaan kualitas
 
 Gate ini mencatat perubahan dalam rilis ini. Isi bacaan dan konten yang dikelola pengurus tetap mengikuti sumbernya.
 
