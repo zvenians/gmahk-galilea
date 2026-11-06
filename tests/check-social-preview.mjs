@@ -11,6 +11,10 @@ assert.equal(manifest.revision,previewRevision(),'Built metadata uses the curren
 const html=fs.readFileSync(new URL('public-dist/index.html',root),'utf8');
 assert.equal((html.match(new RegExp(manifest.imagePath,'g'))||[]).length,4,'OG, Twitter and schema share the versioned image');
 const png=fs.readFileSync(new URL('public-dist'+manifest.imagePath,root));
+const screenshotPath=new URL('../assets/social/home-latest.png',import.meta.url);
+if(fs.existsSync(screenshotPath)){
+  assert.deepEqual(png,fs.readFileSync(screenshotPath),'Social image must be the actual Home browser screenshot');
+}
 assert.equal(png.subarray(1,4).toString(),'PNG');assert.equal(png.readUInt32BE(16),1200);assert.equal(png.readUInt32BE(20),630);
 for(const method of ['GET','HEAD','POST']){
   const result={headers:{},setHeader(key,value){this.headers[key]=value;},status(code){this.code=code;return this;},end(body){this.body=body;return this;}};
