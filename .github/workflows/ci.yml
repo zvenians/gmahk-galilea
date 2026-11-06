@@ -47,6 +47,7 @@ jobs:
       - name: Run project verification & contrast checks
         run: |
           node tests/check-backend-release.mjs
+          node --test tests/check-apps-script-version-capacity.test.mjs
           npm run check
           npm run check:sabbath-summary
 
@@ -107,6 +108,11 @@ jobs:
             exit 1
           fi
           clasp status
+
+      - name: Guard Apps Script version quota before any remote writes
+        run: |
+          set -euo pipefail
+          clasp list-versions | node scripts/check-apps-script-version-capacity.mjs
 
       - name: Push and Deploy Admin Portal (USER_ACCESSING)
         run: |

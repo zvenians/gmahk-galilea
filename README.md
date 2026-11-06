@@ -150,6 +150,12 @@ The share preview system generates site/article-specific Open Graph assets. Mess
 
 Changes in `apps-script-backend/` require a **separate Apps Script release**. Merging to GitHub alone does not replace an Apps Script deployment. Production deployment should follow explicit review and approval.
 
+### Apps Script version capacity and recovery
+
+Google Apps Script projects have a limit of 200 immutable versions. This workflow creates **two** versions when deploying a backend change (one for Admin and one for Public API). It now checks for at least two free slots **before** running `clasp push`; if the quota is full, no remote source is overwritten by that run. Never delete versions automatically: old versions can be required by deployed applications.
+
+If the release reports insufficient version capacity, open the authorized Apps Script project, choose **Project History → Bulk delete versions**, and delete only unused historical versions (not versions referenced by active deployments). Once at least two slots are available, open **GitHub Actions → CI → Run workflow**, select `main`, and set `deploy_backend` to `true`. Verify both Admin and Public API deployments complete; a successful Vercel build alone does not publish Apps Script.
+
 ## Documentation
 
 - [Visitor improvements verification](docs/visitor-improvements-verification.md)
