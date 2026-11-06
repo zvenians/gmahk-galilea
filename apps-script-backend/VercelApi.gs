@@ -197,7 +197,9 @@ function galileaVercelJson_(payload) {
 
 /**
  * Jalankan satu kali dari editor Apps Script.
- * Secret akan muncul di Execution log dan harus disalin ke Vercel.
+ * Jalankan hanya dari editor Apps Script yang memiliki akses resmi.
+ * Salin nilai hasil fungsi langsung ke pengaturan rahasia Vercel;
+ * jangan simpan nilai tersebut di log, screenshot, atau repository.
  * Jika sudah pernah dibuat, fungsi ini mengembalikan secret yang sama.
  */
 function generateGalileaVercelSecret() {
@@ -207,7 +209,6 @@ function generateGalileaVercelSecret() {
     secret = (Utilities.getUuid() + Utilities.getUuid()).replace(/-/g, '');
     properties.setProperty(GALILEA_VERCEL_API.SECRET_PROPERTY, secret);
   }
-  console.log('GALILEA_API_SECRET=' + secret);
   return secret;
 }
 
