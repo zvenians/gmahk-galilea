@@ -44,6 +44,11 @@ jobs:
       - name: Capture real homepage screenshot
         run: node scripts/capture-home-thumbnail.mjs
 
+      - name: Verify generated site and social image
+        run: |
+          npm run build
+          node tests/check-social-preview.mjs
+
       - name: Commit only a visibly changed screenshot
         run: |
           git add assets/social/home-latest.png
