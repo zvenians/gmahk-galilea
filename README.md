@@ -162,6 +162,7 @@ If the release reports insufficient version capacity, open the authorized Apps S
 - [Schedule source verification](docs/schedule-source-verification.md)
 - [Hymn score verification](docs/hymnal-scores-verification.md)
 - [Vercel setup guide](docs/PANDUAN_PASANG_VERCEL.md) — operational guide in Indonesian
+- [News and sharing implementation notes](docs/releases/news-sharing-2026.md) — historical release record
 - [Contribution guidelines](.github/CONTRIBUTING.md)
 
 ## Data and responsibility
