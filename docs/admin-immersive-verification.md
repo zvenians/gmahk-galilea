@@ -107,6 +107,6 @@ Each result applies to the changed admin UI and editor controls, not an audit of
 
 ## Background asset provenance
 
-Built-in image generation, referenced approved Galilea mockup. Final asset: `assets/admin-valley.webp`.
+Source: project-specific illustrative background based on the approved Galilea visual reference. Asset: `assets/admin-valley.webp`.
 
-Prompt: Background-only, wide 16:9 painterly realistic serene green valley, misty distant hills, warm gentle morning sunlight, foliage at top corners, stone footpath at bottom, small white Christian chapel with modest cross at right middle distance; quiet central space for the interface. Reference is mood/composition only. No interface, text, typography, panels, buttons, logos, watermark, or people.
+Art direction: 16:9 green valley landscape with distant mist, warm morning light, upper-edge foliage, a stone path, and a small chapel toward the right side. The center stays quiet enough for administrative controls. The visual reference governs atmosphere rather than interface layout; the background does not contain embedded controls or text.
