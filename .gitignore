@@ -5,3 +5,16 @@ node_modules
 public-dist
 .DS_Store
 *.log
+
+# local build output and caches
+dist/
+build/
+coverage/
+.cache/
+.turbo/
+*.tsbuildinfo
+*.tmp
+*.bak
+Thumbs.db
+.env.*
+!.env.example
